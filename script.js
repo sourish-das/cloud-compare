@@ -1,47 +1,25 @@
 
-// ------------------------------
-// UI Options (edit here as needed)
-// ------------------------------
-const META = {
-  regions: [
-    { value: "ap-south-1", label: "AWS Mumbai / Azure Central India" },
-    { value: "us-east-1",  label: "AWS N. Virginia / Azure East US" }
-  ],
+const API_BASE = "https://cloud-compare.sourishdas0.workers.dev";
+
+const FALLBACK_META = {
   os:   [{ value: "Linux" }, { value: "Windows" }],
   vcpu: [1, 2, 4, 8, 16],
   ram:  [1, 2, 4, 8, 16, 32]
 };
 
-// Map the shared "region" selection to each provider's region id
-const REGION_MAP = {
-  "ap-south-1": { aws: "ap-south-1", azure: "centralindia" },
-  "us-east-1":  { aws: "us-east-1",  azure: "eastus" }
-};
-
-// Choose a reasonable shape purely by vCPU (you can refine with RAM if you like)
-function pickAzureSku(vcpu) {
-  if (vcpu <= 2) return "Standard_B2ms";
-  if (vcpu <= 4) return "Standard_D4s_v5";
-  return "Standard_D8s_v5";
-}
-function pickAwsInstance(vcpu) {
-  if (vcpu <= 2) return "t3.small";
-  if (vcpu <= 4) return "t3.medium";
-  return "m6a.xlarge";
-}
-
-// Helpers
-const fmt = n => (n == null || isNaN(n)) ? "-" : `$${n.toFixed(4)}`;
-const monthly = priceHr => (priceHr == null || isNaN(priceHr)) ? null : (priceHr * 730);
-
-// Initialize dropdowns
-document.addEventListener("DOMContentLoaded", () => {
-  fillSelect("region", META.regions.map(x => ({ value: x.value, text: x.label })));
-  fillSelect("os",     META.os.map(x => ({ value: x.value, text: x.value })));
-  fillSelect("cpu",    META.vcpu.map(v => ({ value: v, text: v })));
-  fillSelect("ram",    META.ram.map(v => ({ value: v, text: v })));
-
-  setSelectValue("region", "ap-south-1");
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const r = await fetch(`${API_BASE}/meta`, { mode: "cors" });
+    const j = r.ok ? await r.json() : { meta: FALLBACK_META };
+    const meta = j.meta || FALLBACK_META;
+    fillSelect("os",   meta.os.map(x => ({ value: x.value, text: x.value })));
+    fillSelect("cpu",  meta.vcpu.map(v => ({ value: v, text: v })));
+    fillSelect("ram",  meta.ram.map(v => ({ value: v, text: v })));
+  } catch {
+    fillSelect("os",   FALLBACK_META.os.map(x => ({ value: x.value, text: x.value })));
+    fillSelect("cpu",  FALLBACK_META.vcpu.map(v => ({ value: v, text: v })));
+    fillSelect("ram",  FALLBACK_META.ram.map(v => ({ value: v, text: v })));
+  }
   setSelectValue("os", "Linux");
   setSelectValue("cpu", "2");
   setSelectValue("ram", "4");
@@ -62,6 +40,8 @@ function setSelectValue(id, value) {
   const match = Array.from(el.options).find(o => o.value == value);
   if (match) el.value = value;
 }
+function fmt(n)      { return (n == null || isNaN(n)) ? "-" : `$${Number(n).toFixed(4)}`; }
+function monthly(ph) { return (ph == null || isNaN(ph)) ? null : ph * 730; }
 
 function setStatus(msg, level="info") {
   const el = document.getElementById("status");
@@ -73,94 +53,45 @@ function setStatus(msg, level="info") {
 async function compare() {
   const btn = document.getElementById("compareBtn");
   btn.disabled = true;
-  setStatus("Fetching prices…");
+  setStatus("Fetching live prices…");
 
-  const regionKey = document.getElementById("region").value;
-  const os       = document.getElementById("os").value.toLowerCase(); // linux|windows
-  const vcpu     = Number(document.getElementById("cpu").value);
-  const ram      = Number(document.getElementById("ram").value);
-  const mapping  = REGION_MAP[regionKey];
+  const os   = document.getElementById("os").value;
+  const vcpu = Number(document.getElementById("cpu").value);
+  const ram  = Number(document.getElementById("ram").value);
 
-  // Pick shapes
-  const azureSku    = pickAzureSku(vcpu);
-  const awsInstance = pickAwsInstance(vcpu);
-
-  // Reset UI placeholders
-  document.getElementById("awsInstance").innerText = "Instance: loading…";
-  document.getElementById("azInstance").innerText  = "VM Size: loading…";
-  document.getElementById("awsPrice").innerText    = "Price/hr: -";
-  document.getElementById("azPrice").innerText     = "Price/hr: -";
-  document.getElementById("awsMonthly").innerText  = "≈ Monthly: -";
-  document.getElementById("azMonthly").innerText   = "≈ Monthly: -";
-
+  const url = `${API_BASE}/?os=${encodeURIComponent(os)}&vcpu=${vcpu}&ram=${ram}`;
   try {
-    // ---------------- Azure Retail Prices (public) ----------------
-    // Docs: https://learn.microsoft.com/azure/cost-management-billing/retail-prices/retail-prices
-    const osFilter = (os === "windows")
-      ? " and contains(productName,'Windows')"
-      : " and not contains(productName,'Windows')";
+    resetCards();
 
-    // We look for "Virtual Machines", region, SKU, and PAYG (Consumption)
-    const azUrl =
-      `https://prices.azure.com/api/retail/prices?$filter=` +
-      `serviceName eq 'Virtual Machines'` +
-      ` and armRegionName eq '${mapping.azure}'` +
-      ` and skuName eq '${azureSku}'` +
-      ` and priceType eq 'Consumption'${osFilter}`;
+    const r = await fetch(url, { mode: "cors" });
+    if (!r.ok) throw new Error(`API ${r.status}`);
+    const j = await r.json();
 
-    const azResp = await fetch(azUrl);
-    if (!azResp.ok) throw new Error(`Azure API ${azResp.status}`);
-    const azJson = await azResp.json();
-
-    // Items can include several meters; prefer an hourly meter
-    const azItem   = (azJson.Items || []).find(x => (x.unitOfMeasure || "").toLowerCase().includes("hour"));
-    const azPrice  = azItem ? Number(azItem.retailPrice) : null;
-    const azMonth  = monthly(azPrice);
-
-    // ---------------- AWS EC2 Price List (public) ----------------
-    // Docs: https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/using-ppslong.html
-    // Bulk regional file (large JSON)
-    const awsUrl  = `https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/current/${mapping.aws}/index.json`;
-    const awsResp = await fetch(awsUrl);
-    if (!awsResp.ok) throw new Error(`AWS Price JSON ${awsResp.status}`);
-    const awsJson = await awsResp.json();
-
-    // Find the product by attributes
-    const candidates = Object.values(awsJson.products || {}).filter(p => {
-      const a = p.attributes || {};
-      return a.instanceType === awsInstance &&
-             (a.operatingSystem || "").toLowerCase() === os &&
-             a.tenancy === "Shared" &&
-             a.preInstalledSw === "NA" &&
-             a.capacitystatus === "Used";  // On-Demand
-    });
-
-    let awsPrice = null;
-    if (candidates.length) {
-      const sku   = candidates[0].sku;
-      const terms = awsJson.terms?.OnDemand?.[sku];
-      const term  = terms && Object.values(terms)[0];
-      const dim   = term && Object.values(term.priceDimensions || {})[0];
-      awsPrice = dim ? Number(dim.pricePerUnit?.USD || 0) : null;
-    }
-    const awsMonth = monthly(awsPrice);
-
-    // ---------------- Update UI ----------------
     // AWS
-    document.getElementById("awsInstance").innerText = `Instance: ${awsInstance}`;
-    document.getElementById("awsCpu").innerText      = `vCPU: ${vcpu}`;
-    document.getElementById("awsRam").innerText      = `RAM: ${ram} GB`;
-    document.getElementById("awsPrice").innerText    = `Price/hr: ${fmt(awsPrice)}`;
-    document.getElementById("awsMonthly").innerText  = `≈ Monthly: ${fmt(awsMonth)}`;
+    if (j.data?.aws?.error) {
+      document.getElementById("awsInstance").innerText = `Error: ${j.data.aws.error}`;
+    } else {
+      const a = j.data.aws;
+      document.getElementById("awsInstance").innerText = `Instance: ${a.instance} (${j.regionsUsed.aws})`;
+      document.getElementById("awsCpu").innerText      = `vCPU: ${a.vcpu}`;
+      document.getElementById("awsRam").innerText      = `RAM: ${a.ram} GB`;
+      document.getElementById("awsPrice").innerText    = `Price/hr: ${fmt(a.pricePerHourUSD)}`;
+      document.getElementById("awsMonthly").innerText  = `≈ Monthly: ${fmt(monthly(a.pricePerHourUSD))}`;
+    }
 
     // Azure
-    document.getElementById("azInstance").innerText  = `VM Size: ${azureSku}`;
-    document.getElementById("azCpu").innerText       = `vCPU: ${vcpu}`;
-    document.getElementById("azRam").innerText       = `RAM: ${ram} GB`;
-    document.getElementById("azPrice").innerText     = `Price/hr: ${fmt(azPrice)}`;
-    document.getElementById("azMonthly").innerText   = `≈ Monthly: ${fmt(azMonth)}`;
+    if (j.data?.azure?.error) {
+      document.getElementById("azInstance").innerText = `Error: ${j.data.azure.error}`;
+    } else {
+      const z = j.data.azure;
+      document.getElementById("azInstance").innerText = `VM Size: ${z.instance} (${j.regionsUsed.azure})`;
+      document.getElementById("azCpu").innerText      = `vCPU: ${z.vcpu}`;
+      document.getElementById("azRam").innerText      = `RAM: ${z.ram} GB`;
+      document.getElementById("azPrice").innerText    = `Price/hr: ${fmt(z.pricePerHourUSD)}`;
+      document.getElementById("azMonthly").innerText  = `≈ Monthly: ${fmt(monthly(z.pricePerHourUSD))}`;
+    }
 
-    setStatus("Done ✓", "info");
+    setStatus("Live comparison complete ✓");
   } catch (err) {
     console.error(err);
     setStatus(`Error: ${err.message}`, "error");
@@ -168,4 +99,17 @@ async function compare() {
   } finally {
     btn.disabled = false;
   }
+}
+
+function resetCards() {
+  document.getElementById("awsInstance").innerText = "Instance: …";
+  document.getElementById("awsCpu").innerText      = "vCPU: …";
+  document.getElementById("awsRam").innerText      = "RAM: …";
+  document.getElementById("awsPrice").innerText    = "Price/hr: -";
+  document.getElementById("awsMonthly").innerText  = "≈ Monthly: -";
+  document.getElementById("azInstance").innerText  = "VM Size: …";
+  document.getElementById("azCpu").innerText       = "vCPU: …";
+  document.getElementById("azRam").innerText       = "RAM: …";
+  document.getElementById("azPrice").innerText     = "Price/hr: -";
+  document.getElementById("azMonthly").innerText   = "≈ Monthly: -";
 }
