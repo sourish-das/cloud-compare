@@ -1,28 +1,29 @@
 
-const WORKER_BASE = "https://<your-worker>.workers.dev"; // <-- replace
+<script>
+const WORKER_BASE = "https://cloud-compare.sourishdas0.workers.dev";  // your Worker URL
 
 document.addEventListener("DOMContentLoaded", init);
 
 async function init() {
   try {
-    // 1) Load dynamic options from /meta
-    const metaResp = await fetch(`${WORKER_BASE}/meta`, { method: "GET" });
+    // Load dynamic options from /meta
+    const metaResp = await fetch(`${WORKER_BASE}/meta`);
     const { meta } = await metaResp.json();
 
-    // 2) Populate selects
+    // Populate selects
     fillSelect("region", meta.regions.map(x => ({ value: x.value, text: x.label })));
     fillSelect("os",     meta.os.map(x => ({ value: x.value, text: x.value })));
     fillSelect("cpu",    meta.vcpu.map(v => ({ value: v, text: v })));
     fillSelect("ram",    meta.ram.map(v => ({ value: v, text: v })));
 
-    // 3) (optional) set sensible defaults
+    // Defaults
     setSelectValue("region", "ap-south-1");
     setSelectValue("os", "Linux");
     setSelectValue("cpu", "2");
     setSelectValue("ram", "4");
   } catch (e) {
-    console.error("Failed to load meta:", e);
-    alert("Could not load options from the API. Check your Worker URL/CORS.");
+    console.error("Meta load failed", e);
+    alert("Could not load options from API. Check Worker URL/CORS.");
   }
 }
 
@@ -48,7 +49,7 @@ async function compare() {
   const vcpu   = document.getElementById("cpu").value;
   const ram    = document.getElementById("ram").value;
 
-  // Show a quick loading state
+  // Loading state
   document.getElementById("awsInstance").innerText = "Instance: loading...";
   document.getElementById("azInstance").innerText  = "VM Size: loading...";
   document.getElementById("awsPrice").innerText    = "Price/hr: -";
@@ -59,7 +60,7 @@ async function compare() {
     const resp = await fetch(url);
     const { data } = await resp.json();
 
-    // AWS
+    // AWS panel
     if (!data.aws.error) {
       document.getElementById("awsInstance").innerText = `Instance: ${data.aws.instance}`;
       document.getElementById("awsCpu").innerText      = `vCPU: ${data.aws.vcpu}`;
@@ -69,7 +70,7 @@ async function compare() {
       document.getElementById("awsInstance").innerText = `Instance: (error) ${data.aws.error}`;
     }
 
-    // Azure
+    // Azure panel
     if (!data.azure.error) {
       document.getElementById("azInstance").innerText = `VM Size: ${data.azure.instance}`;
       document.getElementById("azCpu").innerText      = `vCPU: ${data.azure.vcpu}`;
@@ -78,9 +79,9 @@ async function compare() {
     } else {
       document.getElementById("azInstance").innerText = `VM Size: (error) ${data.azure.error}`;
     }
-
   } catch (e) {
     console.error(e);
     alert("Could not reach the comparison API.");
   }
 }
+</script>
