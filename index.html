@@ -1,30 +1,32 @@
 
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Cloud VM Comparison (AWS vs Azure)</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="utf-8"/>
+  <title>Cloud Price Compare (AWS vs Azure)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  ./style.css
 </head>
 <body>
-  <h2>Cloud VM Comparison Tool (AWS vs Azure)</h2>
+  <h2>Live Cloud Price Compare</h2>
 
   <div class="filters">
     <div class="row">
-      <label for="region">Region:</label>
-      <select id="region"></select>
-
-      <label for="os">OS:</label>
-      <select id="os"></select>
-
-      <label for="cpu">vCPU:</label>
-      <select id="cpu"></select>
-
-      <label for="ram">RAM (GB):</label>
-      <select id="ram"></select>
-
-      <button id="compareBtn" onclick="compare()">Compare</button>
+      <div>
+        <label for="os">OS</label>
+        <select id="os"></select>
+      </div>
+      <div>
+        <label for="cpu">vCPU</label>
+        <select id="cpu"></select>
+      </div>
+      <div>
+        <label for="ram">RAM (GiB)</label>
+        <select id="ram"></select>
+      </div>
+      <div>
+        <button id="compareBtn" onclick="compare()">Compare</button>
+      </div>
     </div>
     <div id="status" class="status">Ready</div>
   </div>
@@ -32,23 +34,23 @@
   <div class="results">
     <div class="panel">
       <h3>AWS EC2</h3>
-      <p id="awsInstance">Instance: -</p>
-      <p id="awsCpu">vCPU: -</p>
-      <p id="awsRam">RAM: -</p>
-      <p id="awsPrice">Price/hr: -</p>
-      <p id="awsMonthly">≈ Monthly: -</p>
+      <p id="awsInstance">Instance: –</p>
+      <p id="awsCpu">vCPU: –</p>
+      <p id="awsRam">RAM: –</p>
+      <p id="awsPrice">Price/hr: –</p>
+      <p id="awsMonthly">≈ Monthly: –</p>
     </div>
 
     <div class="panel">
       <h3>Azure VM</h3>
-      <p id="azInstance">VM Size: -</p>
-      <p id="azCpu">vCPU: -</p>
-      <p id="azRam">RAM: -</p>
-      <p id="azPrice">Price/hr: -</p>
-      <p id="azMonthly">≈ Monthly: -</p>
+      <p id="azInstance">VM Size: –</p>
+      <p id="azCpu">vCPU: –</p>
+      <p id="azRam">RAM: –</p>
+      <p id="azPrice">Price/hr: –</p>
+      <p id="azMonthly">≈ Monthly: –</p>
     </div>
   </div>
 
-  <script src="script.js"></script>
+  ./script.js</script>
 </body>
 </html>
