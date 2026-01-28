@@ -1,1 +1,31 @@
+name: Update Cloud Prices
 
+on:
+  schedule:
+    - cron: "0 */6 * * *"    # Every 6 hours
+  workflow_dispatch:         # Allow manual run
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Set up Node
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+
+    - name: Install node-fetch
+      run: npm install node-fetch@2
+
+    - name: Fetch AWS & Azure prices
+      run: node scripts/fetch-prices.js
+
+    - name: Commit changes
+      uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        commit_message: "Auto-update cloud prices"
+        file_pattern: data/prices.json
