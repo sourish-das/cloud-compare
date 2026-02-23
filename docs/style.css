@@ -39,14 +39,14 @@ h2 {
 .filters .row {
   display:grid;
   grid-template-columns:
-    1.4fr   /* OS */
-    0.8fr   /* vCPU */
-    1fr     /* RAM */
-    1.1fr   /* Storage GB */
-    1.2fr   /* Storage Type */
-    auto;   /* Compare button */
+    1.4fr
+    0.8fr
+    1fr
+    1.1fr
+    1.2fr
+    auto;
   gap:12px;
-  align-items:end;
+  align-items:end; /* critical for baseline alignment */
 }
 
 /* Each input column */
@@ -56,29 +56,39 @@ h2 {
   width:100%;
 }
 
-/* Labels */
+/* ======================================================
+   LABEL NORMALIZATION ✅
+   ====================================================== */
 label,
 .label-with-info {
   font-weight:600;
-  margin-bottom:4px;
   display:inline-flex;
   align-items:center;
   gap:6px;
-  line-height:1.1;
+  line-height:1;
+  margin-bottom:6px; /* consistent spacing */
 }
 
-/* Selects stretch to fill grid cell ✅ */
+/* ======================================================
+   INPUT + BUTTON NORMALIZATION ✅
+   ====================================================== */
+.filters select,
+.filters button {
+  height:40px;
+  line-height:40px;      /* forces same visual height */
+  padding:0 10px;
+}
+
+/* Selects stretch fully */
 select {
   width:100%;
-  padding:8px 10px;
   border:1px solid #ccc;
   border-radius:6px;
   background:#fff;
-  height:40px;
-  min-width:0; /* CRITICAL: allows shrinking/stretching */
+  min-width:0;
 }
 
-/* Compare button stays compact */
+/* Compare button */
 button {
   padding:0 16px;
   border-radius:6px;
@@ -86,7 +96,6 @@ button {
   color:#fff;
   border:none;
   cursor:pointer;
-  height:40px;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -160,18 +169,15 @@ button:disabled {
 }
 
 /* ======================================================
-   TOOLTIP STYLES (UNCHANGED)
+   TOOLTIP STYLES — FIXED “i” BADGE ✅
    ====================================================== */
-.label-with-info {
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-}
-
 .info-badge {
   width:18px;
   height:18px;
   min-width:18px;
+  min-height:18px;
+  line-height:18px;     /* ✅ prevents oval stretching */
+  padding:0;
   border-radius:50%;
   border:1.5px solid #1d4ed8;
   color:#1d4ed8;
