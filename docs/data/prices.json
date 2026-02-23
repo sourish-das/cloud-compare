@@ -42356,5 +42356,25 @@
       "arch": "x86",
       "source": "composed"
     }
-  ]
+  ],
+  "oci": {
+    "linux": {
+      "amd_e4": {
+        "shape": "VM.Standard.E4.Flex",
+        "architecture": "x86",
+        "ocpu_per_hour": 0.025,
+        "ram_gb_per_hour": 0.0015
+      },
+      "ampere_a1": {
+        "shape": "VM.Standard.A1.Flex",
+        "architecture": "arm",
+        "ocpu_per_hour": 0.01,
+        "ram_gb_per_hour": 0.0015
+      }
+    },
+    "windows": {
+      "license_per_vcpu_hour": 0.046,
+      "note": "Modeled as Windows Server license uplift over Linux compute; ARM is not supported for Windows"
+    }
+  }
 }
