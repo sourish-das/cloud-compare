@@ -1,8 +1,8 @@
 name: Fetch OCI Prices
 
 permissions:
-  contents: read        # provider does not commit; orchestrator/debug mode will
-  id-token: write       # kept for parity with GCP (safe even if OCI fetcher doesn't use it)
+  contents: read
+  id-token: write
 
 on:
   workflow_call:
@@ -42,47 +42,44 @@ jobs:
       - name: Show config (debug)
         run: |
           echo "Region:   $OCI_REGION"
-          echo "Currency: $OCI_CURRENCY"
           echo "Node:     $(node -v)"
         env:
           OCI_REGION: "us-ashburn-1"
-          OCI_CURRENCY: "USD"
 
-      # Pre-flight: create output dir (match GCP pattern)
       - name: Pre-flight checks
         shell: bash
         env:
           OCI_REGION: "us-ashburn-1"
-          OCI_CURRENCY: "USD"
         run: |
           set -euo pipefail
           echo "== Pre-flight =="
-          echo "Region:   ${OCI_REGION}"
-          echo "Currency: ${OCI_CURRENCY}"
+          echo "Region: ${OCI_REGION}"
           mkdir -p docs/data/oci
 
-      # Run fetcher (write directly to docs/data/oci)
-      - name: Fetch OCI prices (FULL mode)
+      # ✅ NEW: enforce pricing-source-first contract
+      - name: Validate OCI pricing source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s scripts/providers/oci.pricing-source.json
+          jq '.linux.amd_e4 and .linux.ampere_a1 and .windows and .storage.block_volume_gb_month' \
+            scripts/providers/oci.pricing-source.json > /dev/null
+          echo "OCI pricing source validated ✅"
+
+      # ✅ Generate prices from source
+      - name: Generate OCI prices from pricing source
         run: node scripts/providers/oci.fetch.js
         env:
           OCI_REGION: "us-ashburn-1"
-          OCI_CURRENCY: "USD"
           OUTPUT_PATH: "docs/data/oci/oci.prices.json"
 
-      # Validate output (docs/data/oci)
       - name: Validate output
         shell: bash
         run: |
           set -euo pipefail
           test -s docs/data/oci/oci.prices.json
-          echo "Output size (bytes):"
-          wc -c docs/data/oci/oci.prices.json
-          echo "Top-level keys:"
-          jq 'keys' docs/data/oci/oci.prices.json | sed 's/^/  /' || true
-          echo "Storage block:"
-          jq '.storage' docs/data/oci/oci.prices.json || true
+          jq 'keys' docs/data/oci/oci.prices.json
 
-      # Upload artifact (docs/data/oci)
       - name: Upload OCI pricing JSON (artifact)
         uses: actions/upload-artifact@v4
         with:
@@ -91,10 +88,6 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-      # =========================================
-      # OPTIONAL DEBUG PUBLISH — mirrors GCP behavior
-      # Only runs if vars.DEBUG_PUBLISH == 'true'
-      # =========================================
       - name: Debug snapshot (optional)
         if: ${{ vars.DEBUG_PUBLISH == 'true' }}
         shell: bash
