@@ -1,80 +1,113 @@
 name: Fetch OCI Prices
 
+permissions:
+  contents: read        # provider does not commit; orchestrator/debug mode will
+  id-token: write       # kept for parity with GCP (safe even if OCI fetcher doesn't use it)
+
 on:
   workflow_call:
     outputs:
       run_id:
         description: "Run ID of this reusable workflow execution"
         value: ${{ github.run_id }}
-  workflow_dispatch:
-  schedule:
-    - cron: "35 2 * * *"  # daily at 02:35 UTC
+  workflow_dispatch: {}
+
+concurrency:
+  group: provider-oci
+  cancel-in-progress: true
 
 jobs:
   fetch-oci:
     runs-on: ubuntu-latest
-    env:
-      OCI_REGION: us-ashburn-1     # change if you want a different default
-      NODE_OPTIONS: --no-deprecation
+    timeout-minutes: 30
+
     steps:
-      - name: Checkout
+      - name: Checkout repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Setup Node
+      - name: Set up Node (LTS)
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: "20"
 
-      - name: Ensure jq (for debug)
+      - name: Ensure jq (for quick validation)
         run: |
           if ! command -v jq >/dev/null 2>&1; then
             sudo apt-get update -y
             sudo apt-get install -y jq
           fi
 
-      - name: Show config
+      - name: Show config (debug)
         run: |
-          echo "Region:  $OCI_REGION"
-          echo "Node:    $(node -v)"
+          echo "Region:   $OCI_REGION"
+          echo "Currency: $OCI_CURRENCY"
+          echo "Node:     $(node -v)"
+        env:
+          OCI_REGION: "us-ashburn-1"
+          OCI_CURRENCY: "USD"
 
-      - name: Run OCI fetcher
+      # Pre-flight: create output dir (match GCP pattern)
+      - name: Pre-flight checks
+        shell: bash
+        env:
+          OCI_REGION: "us-ashburn-1"
+          OCI_CURRENCY: "USD"
+        run: |
+          set -euo pipefail
+          echo "== Pre-flight =="
+          echo "Region:   ${OCI_REGION}"
+          echo "Currency: ${OCI_CURRENCY}"
+          mkdir -p docs/data/oci
+
+      # Run fetcher (write directly to docs/data/oci)
+      - name: Fetch OCI prices (FULL mode)
         run: node scripts/providers/oci.fetch.js
+        env:
+          OCI_REGION: "us-ashburn-1"
+          OCI_CURRENCY: "USD"
+          OUTPUT_PATH: "docs/data/oci/oci.prices.json"
 
-      - name: Inspect output
+      # Validate output (docs/data/oci)
+      - name: Validate output
+        shell: bash
         run: |
-          test -s data/oci/oci.prices.json
+          set -euo pipefail
+          test -s docs/data/oci/oci.prices.json
           echo "Output size (bytes):"
-          wc -c data/oci/oci.prices.json
+          wc -c docs/data/oci/oci.prices.json
           echo "Top-level keys:"
-          jq 'keys' data/oci/oci.prices.json | sed 's/^/  /' || true
+          jq 'keys' docs/data/oci/oci.prices.json | sed 's/^/  /' || true
           echo "Storage block:"
-          jq '.storage' data/oci/oci.prices.json || true
+          jq '.storage' docs/data/oci/oci.prices.json || true
 
-      - name: Upload OCI artifact
+      # Upload artifact (docs/data/oci)
+      - name: Upload OCI pricing JSON (artifact)
         uses: actions/upload-artifact@v4
         with:
           name: oci-prices
-          path: data/oci/oci.prices.json
+          path: docs/data/oci/oci.prices.json
+          if-no-files-found: error
           retention-days: 7
 
-      # Optional: publish to docs/ for your site (debug mode)
-      - name: Publish (debug)
-        if: ${{ always() }}
+      # =========================================
+      # OPTIONAL DEBUG PUBLISH — mirrors GCP behavior
+      # Only runs if vars.DEBUG_PUBLISH == 'true'
+      # =========================================
+      - name: Debug snapshot (optional)
+        if: ${{ vars.DEBUG_PUBLISH == 'true' }}
+        shell: bash
         run: |
           set -euo pipefail
-          # Ensure target folders
-          mkdir -p docs/data/oci
           mkdir -p docs/data/oci/_debug
-
-          # Keep existing behavior: publish main file to docs/data/oci
-          cp -f data/oci/oci.prices.json docs/data/oci/oci.prices.json
-
-          # Also write a snapshot to a safe _debug path (avoids copy-to-self when paths change)
           cp -f docs/data/oci/oci.prices.json docs/data/oci/_debug/oci.prices.json
 
-          # Commit only the main file (unchanged behavior)
+      - name: Commit debug provider files (optional)
+        if: ${{ vars.DEBUG_PUBLISH == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch origin main
