@@ -2,7 +2,6 @@ name: Fetch OCI Prices
 
 permissions:
   contents: read        # provider must NOT push
-  id-token: write       # parity with GCP (safe, unused)
 
 on:
   workflow_call:
