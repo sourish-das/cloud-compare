@@ -2,7 +2,7 @@ name: Update All Cloud Prices
 
 permissions:
   contents: write
-  actions: read     # <-- allow reading artifacts from other runs (child reusable workflows)
+  actions: read   # allow reading artifacts from child reusable workflows
 
 on:
   workflow_dispatch: {}
@@ -14,7 +14,9 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # ------------------------------------------------------------
   # 1) Azure
+  # ------------------------------------------------------------
   azure:
     uses: ./.github/workflows/update-azure.yml
     permissions:
@@ -22,7 +24,9 @@ jobs:
       id-token: write
     secrets: inherit
 
+  # ------------------------------------------------------------
   # 2) AWS
+  # ------------------------------------------------------------
   aws:
     needs: azure
     uses: ./.github/workflows/update-aws.yml
@@ -30,7 +34,9 @@ jobs:
       contents: read
     secrets: inherit
 
+  # ------------------------------------------------------------
   # 3) GCP
+  # ------------------------------------------------------------
   gcp:
     needs: aws
     uses: ./.github/workflows/update-gcp.yml
@@ -39,13 +45,25 @@ jobs:
       id-token: write
     secrets: inherit
 
-  # 4) Aggregate (produce FLAT docs/data/prices.json)
+  # ------------------------------------------------------------
+  # 4) OCI
+  # ------------------------------------------------------------
+  oci:
+    needs: gcp
+    uses: ./.github/workflows/update-oci.yml
+    permissions:
+      contents: read
+    secrets: inherit
+
+  # ------------------------------------------------------------
+  # 5) Aggregate & Commit
+  # ------------------------------------------------------------
   aggregate:
-    needs: [azure, aws, gcp]   # <-- we need outputs from all three provider jobs
+    needs: [azure, aws, gcp, oci]
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      actions: read            # <-- ensure this job can read artifacts from child runs
+      actions: read
 
     steps:
       - name: Checkout repo
@@ -66,7 +84,9 @@ jobs:
             sudo apt-get install -y jq
           fi
 
-      # --- Download artifacts from provider jobs (use child run-ids) ---
+      # ------------------------------------------------------------
+      # Download provider artifacts
+      # ------------------------------------------------------------
       - name: Download Azure artifact
         uses: actions/download-artifact@v4
         with:
@@ -88,48 +108,60 @@ jobs:
           path: _artifacts/gcp
           run-id: ${{ needs.gcp.outputs.run_id }}
 
+      - name: Download OCI artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: oci-prices
+          path: _artifacts/oci
+          run-id: ${{ needs.oci.outputs.run_id }}
+
       - name: List downloaded artifacts
         run: |
-          echo "== AZURE ==" && find _artifacts/azure -type f -maxdepth 6 -print || true
-          echo "== AWS =="   && find _artifacts/aws   -type f -maxdepth 6 -print || true
-          echo "== GCP =="   && find _artifacts/gcp   -type f -maxdepth 6 -print || true
+          echo "== AZURE ==" && find _artifacts/azure -type f -print || true
+          echo "== AWS =="   && find _artifacts/aws   -type f -print || true
+          echo "== GCP =="   && find _artifacts/gcp   -type f -print || true
+          echo "== OCI =="   && find _artifacts/oci   -type f -print || true
 
-      # --- Validate we have files ---
+      # ------------------------------------------------------------
+      # Validate provider JSONs
+      # ------------------------------------------------------------
       - name: Validate provider JSONs
         shell: bash
         run: |
           set -euo pipefail
-          AZ_SRC=$(find _artifacts/azure -type f -name '*.json' -print -quit || true)
-          AW_SRC=$(find _artifacts/aws   -type f -name '*.json' -print -quit || true)
-          GC_SRC=$(find _artifacts/gcp   -type f -name '*.json' -print -quit || true)
 
-          echo "AZ_SRC=$AZ_SRC"
-          echo "AW_SRC=$AW_SRC"
-          echo "GC_SRC=$GC_SRC"
+          AZ_SRC=$(find _artifacts/azure -name '*.json' -print -quit || true)
+          AW_SRC=$(find _artifacts/aws   -name '*.json' -print -quit || true)
+          GC_SRC=$(find _artifacts/gcp   -name '*.json' -print -quit || true)
+          OC_SRC=$(find _artifacts/oci   -name '*.json' -print -quit || true)
 
-          [[ -n "$AZ_SRC" && -s "$AZ_SRC" ]] || { echo "::error::Azure JSON missing/empty"; exit 1; }
-          [[ -n "$AW_SRC" && -s "$AW_SRC" ]] || { echo "::error::AWS JSON missing/empty"; exit 1; }
-          [[ -n "$GC_SRC" && -s "$GC_SRC" ]] || { echo "::error::GCP JSON missing/empty"; exit 1; }
+          [[ -n "$AZ_SRC" && -s "$AZ_SRC" ]] || { echo "::error::Azure JSON missing"; exit 1; }
+          [[ -n "$AW_SRC" && -s "$AW_SRC" ]] || { echo "::error::AWS JSON missing"; exit 1; }
+          [[ -n "$GC_SRC" && -s "$GC_SRC" ]] || { echo "::error::GCP JSON missing"; exit 1; }
+          [[ -n "$OC_SRC" && -s "$OC_SRC" ]] || { echo "::error::OCI JSON missing"; exit 1; }
 
-          echo "Azure keys:" && jq 'keys' "$AZ_SRC" | head -n 30 || true
-          echo "AWS keys:"   && jq 'keys' "$AW_SRC" | head -n 30 || true
-          echo "GCP keys:"   && jq 'keys' "$GC_SRC" | head -n 30 || true
+          echo "AZ_SRC=$AZ_SRC" >> $GITHUB_ENV
+          echo "AW_SRC=$AW_SRC" >> $GITHUB_ENV
+          echo "GC_SRC=$GC_SRC" >> $GITHUB_ENV
+          echo "OC_SRC=$OC_SRC" >> $GITHUB_ENV
 
-          echo "AZ_SRC=$AZ_SRC" >> "$GITHUB_ENV"
-          echo "AW_SRC=$AW_SRC" >> "$GITHUB_ENV"
-          echo "GC_SRC=$GC_SRC" >> "$GITHUB_ENV"
-
-      # --- Stage provider outputs into site folder ---
+      # ------------------------------------------------------------
+      # Stage provider outputs
+      # ------------------------------------------------------------
       - name: Stage provider outputs
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p docs/data/azure docs/data/aws docs/data/gcp
+          mkdir -p docs/data/{azure,aws,gcp,oci}
+
           cp -f "$AZ_SRC" docs/data/azure/azure.prices.json
           cp -f "$AW_SRC" docs/data/aws/aws.prices.json
           cp -f "$GC_SRC" docs/data/gcp/gcp.prices.json
+          cp -f "$OC_SRC" docs/data/oci/oci.prices.json
 
-      # --- FLAT MERGE (no timestamps inside prices.json) ---
+      # ------------------------------------------------------------
+      # FLAT merge
+      # ------------------------------------------------------------
       - name: Merge into docs/data/prices.json (FLAT)
         shell: bash
         run: |
@@ -137,19 +169,23 @@ jobs:
           jq -n \
             --slurpfile az docs/data/azure/azure.prices.json \
             --slurpfile aw docs/data/aws/aws.prices.json \
-            --slurpfile gc docs/data/gcp/gcp.prices.json '
+            --slurpfile gc docs/data/gcp/gcp.prices.json \
+            --slurpfile oc docs/data/oci/oci.prices.json '
             {
               meta: {
-                os:   (($az[0].meta.os + $aw[0].meta.os + $gc[0].meta.os) | unique),
-                vcpu: (($az[0].meta.vcpu + $aw[0].meta.vcpu + $gc[0].meta.vcpu) | unique | sort),
-                ram:  (($az[0].meta.ram  + $aw[0].meta.ram  + $gc[0].meta.ram ) | unique | sort)
+                os:   (($az[0].meta.os + $aw[0].meta.os + $gc[0].meta.os + $oc[0].meta.os) | unique),
+                vcpu: (($az[0].meta.vcpu + $aw[0].meta.vcpu + $gc[0].meta.vcpu + $oc[0].meta.vcpu) | unique | sort),
+                ram:  (($az[0].meta.ram  + $aw[0].meta.ram  + $gc[0].meta.ram  + $oc[0].meta.ram ) | unique | sort)
               },
               azure: $az[0].compute,
               aws:   $aw[0].compute,
-              gcp:   $gc[0].compute
+              gcp:   $gc[0].compute,
+              oci:   $oc[0].compute
             }' > docs/data/prices.json
 
-      # --- Enforce FLAT shape (hard fail if wrapped) ---
+      # ------------------------------------------------------------
+      # Enforce FLAT shape
+      # ------------------------------------------------------------
       - name: Enforce FLAT shape
         shell: bash
         run: |
@@ -157,43 +193,27 @@ jobs:
           jq -e '
             (.azure|type=="array") and
             (.aws|type=="array") and
-            (.gcp|type=="array")
+            (.gcp|type=="array") and
+            (.oci|type=="array")
           ' docs/data/prices.json >/dev/null || {
             echo "::error::docs/data/prices.json is NOT FLAT"
-            head -n 60 docs/data/prices.json || true
             exit 1
           }
 
-      # --- buildInfo.json (freshness only; forces a diff every run) ---
+      # ------------------------------------------------------------
+      # buildInfo.json (forces diff)
+      # ------------------------------------------------------------
       - name: Write buildInfo.json
         shell: bash
         run: |
           set -euo pipefail
-          printf '%s\n' '{' > docs/data/buildInfo.json
-          printf '  "generatedAt": "%s"\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> docs/data/buildInfo.json
-          printf '%s\n' '}' >> docs/data/buildInfo.json
+          printf '{\n  "generatedAt": "%s"\n}\n' \
+            "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            > docs/data/buildInfo.json
 
-      # --- Diagnostics (SAFE: cannot fail) ---
-      - name: Diagnostics (safe)
-        shell: bash
-        run: |
-          set -euo pipefail
-          echo "Keys:"
-          jq 'keys' docs/data/prices.json || true
-
-          echo "Types:"
-          jq '{azure:(.azure|type), aws:(.aws|type), gcp:(.gcp|type)}' docs/data/prices.json || true
-
-          echo "Counts:"
-          jq '
-            [
-              (try ((.azure // []) | length) catch 0),
-              (try ((.aws   // []) | length) catch 0),
-              (try ((.gcp   // []) | length) catch 0)
-            ]
-          ' docs/data/prices.json || true
-
-      # --- Commit (ALWAYS; buildInfo timestamp guarantees a diff) ---
+      # ------------------------------------------------------------
+      # Commit
+      # ------------------------------------------------------------
       - name: Commit merged cloud prices
         shell: bash
         run: |
@@ -204,9 +224,10 @@ jobs:
           git add -f docs/data/azure/azure.prices.json
           git add -f docs/data/aws/aws.prices.json
           git add -f docs/data/gcp/gcp.prices.json
+          git add -f docs/data/oci/oci.prices.json
           git add -f docs/data/prices.json
           git add -f docs/data/buildInfo.json
 
           TS=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-          git commit -m "Auto-update ALL cloud prices (${TS})" || echo "Nothing to commit (unexpected)"
+          git commit -m "Auto-update ALL cloud prices (AWS/Azure/GCP/OCI) ${TS}" || echo "No changes to commit"
           git push
