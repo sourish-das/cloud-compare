@@ -2,7 +2,7 @@
 
 import {
   fmt, monthly, sumSafe, fillSelect, setSelectValue, safeSetText,
-  appendToText, setStatus, resetCards, nearestCeil, sizeToAzureSku,
+  appendToText, setStatus, resetCards,
   HRS_PER_MONTH,
   getAwsStorageMonthlyFromCfg,
   getAzureStorageSkuAndMonthlyFromCfg,
@@ -34,7 +34,7 @@ async function loadBuildInfo() {
 }
 
 /* ============================================================
-   FAMILY FILTERS (AWS, Azure, GCP, OCI)
+   FAMILY FILTERS
 ============================================================ */
 function showFamilyFilters() {
   ["awsFamilyWrap", "azFamilyWrap", "gcpFamilyWrap", "ociFamilyWrap"].forEach(id => {
@@ -88,20 +88,18 @@ function findBestGcp(list, vcpu, ram, os, family) {
       bestScore = score;
     }
   }
-
   return best;
 }
 
 /* ============================================================
-   MAIN compare() — AWS + Azure + GCP + OCI
+   MAIN compare()
 ============================================================ */
 export async function compare(resetFamilies = false) {
   const btn = document.getElementById("compareBtn");
   if (btn) btn.disabled = true;
   setStatus("Fetching local prices…");
 
-  // ✅ Reset family dropdowns on request
-  // AWS/Azure/GCP: Auto is ""  |  OCI: Auto is "auto"
+  // Reset family dropdowns on request
   if (resetFamilies) {
     const awsEl = document.getElementById("awsFamily");
     if (awsEl) awsEl.value = "";
@@ -113,7 +111,7 @@ export async function compare(resetFamilies = false) {
     if (gcpEl) gcpEl.value = "";
 
     const ociEl = document.getElementById("ociFamily");
-    if (ociEl) ociEl.value = "auto";   // ✅ important fix
+    if (ociEl) ociEl.value = "auto";  // ✅ keep Auto, not empty
   }
 
   const os           = document.getElementById("os")?.value || "Linux";
@@ -132,6 +130,7 @@ export async function compare(resetFamilies = false) {
 
     const data = await loadPricesAndMeta();
 
+    // Footer: freshness + row counts
     try {
       const info = await loadBuildInfo();
       const counts = {
@@ -141,61 +140,45 @@ export async function compare(resetFamilies = false) {
         oc: (data.oci   ? 1 : 0)
       };
       const when = info?.generatedAt || '—';
-      safeSetText(
-        "dataInfo",
-        `Data: ${when} · Rows — Azure: ${counts.az}, AWS: ${counts.aw}, GCP: ${counts.gc}, OCI: ${counts.oc}`
-      );
+      safeSetText("dataInfo", `Data: ${when} · Rows — Azure: ${counts.az}, AWS: ${counts.aw}, GCP: ${counts.gc}, OCI: ${counts.oc}`);
     } catch { /* non-fatal */ }
 
     /* ---------- AWS ---------- */
     let awsCard;
     try {
       const a = findBestAws(data.aws || [], vcpu, ram, os, familyAws);
-      awsCard = a ? {
-        instance: a.instance, vcpu: a.vcpu, ram: a.ram,
-        pricePerHourUSD: a.pricePerHourUSD, region: a.region
-      } : null;
+      awsCard = a ? { instance: a.instance, vcpu: a.vcpu, ram: a.ram, pricePerHourUSD: a.pricePerHourUSD, region: a.region } : null;
     } catch (e) { awsCard = { error: e.message }; }
 
     /* ---------- Azure ---------- */
     let azCard;
     try {
       const z = findBestAzure(data.azure || [], vcpu, ram, os, familyAz);
-      azCard = z ? {
-        instance: z.instance, vcpu: z.vcpu ?? vcpu, ram: z.ram ?? ram,
-        pricePerHourUSD: z.pricePerHourUSD, region: z.region, os
-      } : null;
+      azCard = z ? { instance: z.instance, vcpu: z.vcpu ?? vcpu, ram: z.ram ?? ram, pricePerHourUSD: z.pricePerHourUSD, region: z.region, os } : null;
     } catch (e) { azCard = { error: e.message }; }
 
     /* ---------- GCP ---------- */
     let gcpCard;
     try {
       const g = findBestGcp(data.gcp || [], vcpu, ram, os, familyGcp);
-      gcpCard = g ? {
-        instance: g.instance, vcpu: g.vcpu, ram: g.ram,
-        pricePerHourUSD: g.pricePerHourUSD, region: g.region
-      } : null;
+      gcpCard = g ? { instance: g.instance, vcpu: g.vcpu, ram: g.ram, pricePerHourUSD: g.pricePerHourUSD, region: g.region } : null;
     } catch (e) { gcpCard = { error: e.message }; }
 
     /* ---------- OCI ---------- */
     let ociCard;
     try {
       const o = findBestOci(data.oci, vcpu, ram, os, familyOci);
-      ociCard = o ? {
-        instance: o.instance,
-        vcpu: o.vcpu,
-        ram: o.ram,
-        pricePerHourUSD: o.pricePerHourUSD,
-        region: STORAGE_CFG?.oci?.region || "—"
-      } : null;
+      ociCard = o ? { instance: o.instance, vcpu: o.vcpu, ram: o.ram, pricePerHourUSD: o.pricePerHourUSD, region: (STORAGE_CFG?.oci?.region || "—") } : null;
     } catch (e) { ociCard = { error: e.message }; }
 
+    /* ---------- Storage labels ---------- */
     const selLabel = `${storageAmtGB} GB ${storageType.toUpperCase()}`;
     safeSetText("awsStorageSel", `Storage: ${selLabel}`);
     safeSetText("azStorageSel",  `Storage: ${selLabel}`);
     safeSetText("gcpStorageSel", `Storage: ${selLabel}`);
     safeSetText("ociStorageSel", `Storage: ${selLabel}`);
 
+    /* ---------- Storage costs ---------- */
     const awsStorageMonthly = getAwsStorageMonthly(storageType, storageAmtGB);
     const awsStorageHr      = awsStorageMonthly != null ? awsStorageMonthly / HRS_PER_MONTH : null;
 
@@ -209,9 +192,114 @@ export async function compare(resetFamilies = false) {
     const ociStorageMonthly = getOciStorageMonthlyFromCfg(storageAmtGB, STORAGE_CFG.oci);
     const ociStorageHr      = ociStorageMonthly != null ? ociStorageMonthly / HRS_PER_MONTH : null;
 
-    /* RENDER AWS/AZ/GCP/OCI unchanged... */
+    /* ============================================================
+       RENDER AWS
+    ============================================================= */
+    if (!awsCard || awsCard.error) {
+      const el = document.getElementById("awsInstance");
+      if (el) el.innerHTML = `<strong>Recommended Instance:</strong> Error: ${awsCard?.error ?? "No match"}`;
+    } else {
+      const el = document.getElementById("awsInstance");
+      if (el) el.innerHTML = `<strong>Recommended Instance:</strong> ${awsCard.instance} (${awsCard.region})`;
+      safeSetText("awsCpu",     `vCPU: ${awsCard.vcpu}`);
+      safeSetText("awsRam",     `RAM: ${awsCard.ram} GB`);
+      safeSetText("awsPrice",   `Price/hr: ${fmt(awsCard.pricePerHourUSD)}`);
+      safeSetText("awsMonthly", `≈ Monthly: ${fmt(monthly(awsCard.pricePerHourUSD))}`);
+    }
 
-    // (Keep rest of your render and totals logic exactly as you already have.)
+    /* ============================================================
+       RENDER AZURE
+    ============================================================= */
+    if (!azCard || azCard.error) {
+      const el = document.getElementById("azInstance");
+      if (el) el.innerHTML = `<strong>Recommended VM Size:</strong> Error: ${azCard?.error ?? "No match"}`;
+    } else {
+      const el = document.getElementById("azInstance");
+      if (el) el.innerHTML = `<strong>Recommended VM Size:</strong> ${azCard.instance} (${azCard.region})`;
+      safeSetText("azCpu",     `vCPU: ${azCard.vcpu}`);
+      safeSetText("azRam",     `RAM: ${azCard.ram} GB`);
+      safeSetText("azPrice",   `Price/hr: ${fmt(azCard.pricePerHourUSD)}`);
+      safeSetText("azMonthly", `≈ Monthly: ${fmt(monthly(azCard.pricePerHourUSD))}`);
+    }
+
+    /* ============================================================
+       RENDER GCP
+    ============================================================= */
+    if (!gcpCard || gcpCard.error) {
+      const el = document.getElementById("gcpInstance");
+      if (el) el.innerHTML = `<strong>Recommended Machine:</strong> Error: ${gcpCard?.error ?? "No match"}`;
+    } else {
+      const el = document.getElementById("gcpInstance");
+      if (el) el.innerHTML = `<strong>Recommended Machine:</strong> ${gcpCard.instance} (${gcpCard.region})`;
+      safeSetText("gcpCpu",     `vCPU: ${gcpCard.vcpu}`);
+      safeSetText("gcpRam",     `RAM: ${gcpCard.ram} GB`);
+      safeSetText("gcpPrice",   `Price/hr: ${fmt(gcpCard.pricePerHourUSD)}`);
+      safeSetText("gcpMonthly", `≈ Monthly: ${fmt(monthly(gcpCard.pricePerHourUSD))}`);
+    }
+
+    /* ============================================================
+       RENDER OCI
+    ============================================================= */
+    if (!ociCard || ociCard.error) {
+      const el = document.getElementById("ociInstance");
+      if (el) el.innerHTML = `<strong>Recommended Machine:</strong> Error: ${ociCard?.error ?? "No match"}`;
+    } else {
+      const el = document.getElementById("ociInstance");
+      if (el) el.innerHTML = `<strong>Recommended Machine:</strong> ${ociCard.instance} (${ociCard.region})`;
+      safeSetText("ociCpu",     `vCPU: ${ociCard.vcpu}`);
+      safeSetText("ociRam",     `RAM: ${ociCard.ram} GB`);
+      safeSetText("ociPrice",   `Price/hr: ${fmt(ociCard.pricePerHourUSD)}`);
+      safeSetText("ociMonthly", `≈ Monthly: ${fmt(monthly(ociCard.pricePerHourUSD))}`);
+    }
+
+    /* ============================================================
+       STORAGE COST RENDER
+    ============================================================= */
+    safeSetText("awsStoragePriceHr", fmt(awsStorageHr));
+    safeSetText("awsStorageMonthly", fmt(awsStorageMonthly));
+
+    safeSetText("azStoragePriceHr", fmt(azStorageHr));
+    safeSetText("azStorageMonthly", fmt(azStorageMonthly));
+
+    safeSetText("gcpStoragePriceHr", fmt(gcpStorageHr));
+    safeSetText("gcpStorageMonthly", fmt(gcpStorageMonthly));
+
+    safeSetText("ociStoragePriceHr", fmt(ociStorageHr));
+    safeSetText("ociStorageMonthly", fmt(ociStorageMonthly));
+
+    if (azDiskSku) {
+      const extra = (azDiskGB && azDiskGB !== storageAmtGB)
+        ? ` (billed as ${azDiskGB} GB ${storageType.toUpperCase()}, ${azDiskSku})`
+        : ` (${azDiskSku})`;
+      appendToText("azStorageSel", extra);
+    }
+
+    /* ============================================================
+       TOTAL COSTS
+    ============================================================= */
+    const awsTotalHr  = sumSafe(awsCard?.pricePerHourUSD,  awsStorageHr);
+    const awsTotalMon = sumSafe(monthly(awsCard?.pricePerHourUSD), awsStorageMonthly);
+
+    const azTotalHr  = sumSafe(azCard?.pricePerHourUSD,  azStorageHr);
+    const azTotalMon = sumSafe(monthly(azCard?.pricePerHourUSD), azStorageMonthly);
+
+    const gcpTotalHr  = sumSafe(gcpCard?.pricePerHourUSD, gcpStorageHr);
+    const gcpTotalMon = sumSafe(monthly(gcpCard?.pricePerHourUSD), gcpStorageMonthly);
+
+    const ociTotalHr  = sumSafe(ociCard?.pricePerHourUSD, ociStorageHr);
+    const ociTotalMon = sumSafe(monthly(ociCard?.pricePerHourUSD), ociStorageMonthly);
+
+    safeSetText("awsTotalHr",      fmt(awsTotalHr));
+    safeSetText("awsTotalMonthly", fmt(awsTotalMon));
+
+    safeSetText("azTotalHr",       fmt(azTotalHr));
+    safeSetText("azTotalMonthly",  fmt(azTotalMon));
+
+    safeSetText("gcpTotalHr",      fmt(gcpTotalHr));
+    safeSetText("gcpTotalMonthly", fmt(gcpTotalMon));
+
+    safeSetText("ociTotalHr",      fmt(ociTotalHr));
+    safeSetText("ociTotalMonthly", fmt(ociTotalMon));
 
     showFamilyFilters();
     setStatus("Comparison complete ✓");
@@ -226,6 +314,9 @@ export async function compare(resetFamilies = false) {
 
 window.compare = compare;
 
+/* ============================================================
+   BOOTSTRAP
+============================================================ */
 document.addEventListener("DOMContentLoaded", () => {
   fillSelect("os",   [{ value: "Linux", text: "Linux" }, { value: "Windows", text: "Windows" }]);
   fillSelect("cpu",  [1, 2, 4, 8, 16].map(v => ({ value: v, text: v })));
