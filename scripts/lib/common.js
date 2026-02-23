@@ -42,13 +42,49 @@ function dedupeCheapestByKey(list, keyFn) {
 }
 
 /**
- * Guard: skip write if provider list is empty.
+ * Guard: skip write if output is empty/invalid.
+ *
+ * Supports two calling styles (backward compatible):
+ *  1) warnAndSkipWriteOnEmpty("aws", rowsArray)
+ *  2) warnAndSkipWriteOnEmpty(outputObject, outputPath)  // OCI style
+ *
+ * Returns true if caller SHOULD SKIP writing.
  */
-function warnAndSkipWriteOnEmpty(provider, list) {
-  if (!Array.isArray(list) || list.length === 0) {
-    console.warn(`⚠️ FAILOVER: ${provider} list is empty. Skipping write to keep last-known-good file.`);
+function warnAndSkipWriteOnEmpty(arg1, arg2) {
+  // Style (1): provider name + list
+  if (typeof arg1 === "string") {
+    const provider = arg1;
+    const list = arg2;
+
+    if (!Array.isArray(list) || list.length === 0) {
+      console.warn(
+        `⚠️ FAILOVER: ${provider} list is empty. Skipping write to keep last-known-good file.`
+      );
+      return true;
+    }
+    return false;
+  }
+
+  // Style (2): output object + output path (OCI fetcher)
+  const outObj = arg1;
+  const outPath = arg2;
+
+  if (!outObj || typeof outObj !== "object") {
+    console.warn(
+      `⚠️ FAILOVER: Output object is invalid. Skipping write${outPath ? ` for ${outPath}` : ""}.`
+    );
     return true;
   }
+
+  // A lightweight sanity check: ensure it's not an empty object
+  const keys = Object.keys(outObj);
+  if (keys.length === 0) {
+    console.warn(
+      `⚠️ FAILOVER: Output object has no keys. Skipping write${outPath ? ` to ${outPath}` : ""}.`
+    );
+    return true;
+  }
+
   return false;
 }
 
