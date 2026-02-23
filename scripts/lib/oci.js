@@ -1,118 +1,139 @@
 // scripts/lib/oci.js
 "use strict";
 
-/** Region (OCI identifiers like us-ashburn-1). Workflow should pass OCI_REGION. */
+const fs = require("fs");
+const path = require("path");
+
 const OCI_REGION = process.env.OCI_REGION || "us-ashburn-1";
 
-/** Public pricing JSON endpoints (override via env if needed) */
-const OCI_BLOCK_PRICING_URL =
-  process.env.OCI_BLOCK_PRICING_URL ||
-  "https://docs.oracle.com/en-us/iaas/pricing/block-volume.json";
+// Price source lives with provider scripts (data, not logic)
+const SRC_PATH =
+  process.env.OCI_PRICING_SOURCE ||
+  path.join(__dirname, "..", "providers", "oci.pricing-source.json");
 
-const OCI_COMPUTE_PRICING_URL =
-  process.env.OCI_COMPUTE_PRICING_URL ||
-  "https://docs.oracle.com/en-us/iaas/pricing/compute.json";
-
-/** 1 OCPU = 2 vCPUs (normalization helper) */
-function ocpuToVcpu(ocpus) {
-  const n = Number(ocpus);
-  if (!Number.isFinite(n)) return undefined;
-  return n * 2;
+function loadSource() {
+  const raw = fs.readFileSync(SRC_PATH, "utf-8");
+  return JSON.parse(raw);
 }
 
-/** Fetch OCI Block Volume pricing JSON (public) */
-async function fetchOciBlockVolumePricing() {
-  const r = await fetch(OCI_BLOCK_PRICING_URL, { method: "GET" });
-  if (!r.ok) {
-    const txt = await r.text().catch(() => "");
-    throw new Error(`[OCI] block-volume pricing HTTP ${r.status} ${txt}`);
-  }
-  return await r.json();
+// Normalization helpers
+function vcpuToOcpu_x86(vcpu) {
+  // x86: 1 OCPU = 2 vCPUs
+  const n = Number(vcpu);
+  if (!Number.isFinite(n) || n <= 0) return 0;
+  return n / 2;
+}
+function vcpuToOcpu_arm(vcpu) {
+  // A1 is effectively 1:1 in practice for our tool model
+  const n = Number(vcpu);
+  if (!Number.isFinite(n) || n <= 0) return 0;
+  return n;
 }
 
-/**
- * Extract SSD (Balanced) & HDD (Standard) $/GB-month for a region.
- * Returns { ssd, hdd } or throws if not found.
- */
-function pickStoragePricesForRegion(blockJson, region) {
-  if (!blockJson || typeof blockJson !== "object" || !blockJson.regions) {
-    throw new Error("[OCI] block-volume pricing JSON is missing 'regions'.");
-  }
-  const reg = blockJson.regions[region];
-  if (!reg) {
-    const known = Object.keys(blockJson.regions || {}).slice(0, 6);
-    throw new Error(
-      `[OCI] Region '${region}' not in block-volume pricing. Known sample: ${known.join(", ")} ...`
-    );
-  }
-
-  // Common keys seen in OCI pricing feeds:
-  //  - BlockVolume.Balanced.storage → SSD-equivalent (Balanced)
-  //  - BlockVolume.Standard.storage → HDD-equivalent (Standard)
-  const balanced = reg["BlockVolume.Balanced"] || reg["balanced"] || reg["BALANCED"];
-  const standard = reg["BlockVolume.Standard"] || reg["standard"] || reg["STANDARD"];
-
-  const ssd = Number(balanced?.storage);
-  const hdd = Number(standard?.storage);
-
-  if (!Number.isFinite(ssd) || !Number.isFinite(hdd)) {
-    const dump = JSON.stringify(reg, null, 2).slice(0, 400);
-    throw new Error(
-      `[OCI] Could not resolve Balanced/Standard storage prices in '${region}'. Region entry:\n${dump}`
-    );
-  }
-  return { ssd, hdd };
+function storageHourly(blockVolumeGbMonth, storageGb) {
+  const gbm = Number(blockVolumeGbMonth);
+  const sgb = Number(storageGb);
+  if (!Number.isFinite(gbm) || !Number.isFinite(sgb)) return 0;
+  // same convention as other tools: 730 hours/month
+  return (gbm * sgb) / 730;
 }
 
-/* ---------- Placeholders for Step 2 (Compute) ---------- */
-
-/**
- * Minimal signer stub for OCI REST (wire later for authenticated endpoints).
- * Storage is public; compute integration may require signing depending on approach.
- */
-async function signedFetch(url, opts = {}) {
-  // In Step 2 we'll sign requests to call /20160918/shapes, etc.
-  // For now, fail loudly if someone calls it by mistake.
-  throw new Error(
-    "[OCI] signedFetch called but not implemented. Compute integration is not enabled yet."
-  );
+function familyRam(vcpu, family) {
+  const n = Number(vcpu);
+  if (!Number.isFinite(n) || n <= 0) return 0;
+  switch (String(family || "").toLowerCase()) {
+    case "compute":
+      return n * 2;
+    case "memory":
+      return n * 8;
+    case "general":
+    default:
+      return n * 4;
+  }
 }
 
 /**
- * Shape classification helper.
- *
- * Notes:
- * - Do NOT treat "E*" (e.g., VM.Standard.E4.Flex) as compute. E-series is generally "general".
- * - "HighCPU" shapes are compute-leaning.
- * - "DenseIO" is often memory/storage-heavy and best categorized as memory.
- * - Fallback: high RAM per OCPU => memory.
+ * Recommend cheapest OCI option for given inputs (on-demand, list)
+ * Policy:
+ *  - Only VM.Standard.*.Flex
+ *  - Auto(Linux): try Ampere A1 first, else AMD E4
+ *  - Windows: AMD E4 only (no ARM)
  */
-function classifyOciShape(shapeName, ocpus, memoryGb) {
-  if (!shapeName) return null;
+function recommendOci({ os, vcpu, ramGb, family, storageGb }) {
+  const src = loadSource();
 
-  const name = String(shapeName);
-  const o = Number(ocpus || 0);
-  const m = Number(memoryGb || 0);
-  const ratio = o > 0 ? (m / o) : NaN;
+  const OS = String(os || "Linux");
+  const isWindows = OS.toLowerCase() === "windows";
 
-  // Strong signals first
-  if (/DenseIO/i.test(name)) return "memory";
-  if (/HighCPU/i.test(name)) return "compute";
+  // If RAM not explicitly provided, derive from family like your GUI
+  const desiredRam =
+    Number.isFinite(Number(ramGb)) && Number(ramGb) > 0
+      ? Number(ramGb)
+      : familyRam(vcpu, family);
 
-  // Ratio-based fallback (tunable)
-  if (Number.isFinite(ratio) && ratio >= 8) return "memory";
+  const candidates = [];
 
-  return "general";
+  // Candidate builder
+  function addCandidate({ arch, key, shapeLabel, ocpuRate, memRate }) {
+    const ocpu =
+      arch === "arm" ? vcpuToOcpu_arm(vcpu) : vcpuToOcpu_x86(vcpu);
+
+    const licenseUplift =
+      isWindows ? Number(src.windows.license_per_vcpu_hour || 0) : 0;
+
+    // license uplift modeled per vCPU-hour for Windows
+    const cpuCost = (ocpu * ocpuRate) + (Number(vcpu) * licenseUplift);
+    const memCost = desiredRam * memRate;
+
+    const blockGbMonth = Number(src.storage.block_volume_gb_month);
+    const storCost = storageHourly(blockGbMonth, storageGb);
+
+    const totalPerHour = cpuCost + memCost + storCost;
+
+    candidates.push({
+      provider: "oci",
+      shape: shapeLabel,
+      arch,
+      os: OS,
+      vcpu: Number(vcpu),
+      ramGb: desiredRam,
+      storageGb: Number(storageGb) || 0,
+      pricePerHour: totalPerHour
+    });
+  }
+
+  // Auto: allow ARM first only for Linux
+  if (!isWindows && String(family || "").toLowerCase() === "auto") {
+    const a1 = src.linux.ampere_a1;
+    addCandidate({
+      arch: "arm",
+      key: "ampere_a1",
+      shapeLabel: a1.shape,
+      ocpuRate: Number(a1.ocpu_per_hour),
+      memRate: Number(a1.ram_gb_per_hour)
+    });
+  }
+
+  // AMD E4 always available
+  const e4 = src.linux.amd_e4;
+  addCandidate({
+    arch: "x86",
+    key: "amd_e4",
+    shapeLabel: e4.shape,
+    ocpuRate: Number(e4.ocpu_per_hour),
+    memRate: Number(e4.ram_gb_per_hour)
+  });
+
+  // Pick cheapest
+  candidates.sort((a, b) => a.pricePerHour - b.pricePerHour);
+  return { best: candidates[0], candidates };
 }
 
 module.exports = {
   OCI_REGION,
-  OCI_BLOCK_PRICING_URL,
-  OCI_COMPUTE_PRICING_URL,
-  fetchOciBlockVolumePricing,
-  pickStoragePricesForRegion,
-  ocpuToVcpu,
-  classifyOciShape,
-  signedFetch
+  recommendOci,
+  vcpuToOcpu_x86,
+  vcpuToOcpu_arm,
+  familyRam,
+  storageHourly
 };
-``
