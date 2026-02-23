@@ -2,6 +2,7 @@
 // Node 18+ (global fetch)
 
 const path = require("path");
+const fs = require("fs");
 const {
   atomicWrite,
   warnAndSkipWriteOnEmpty,
@@ -15,7 +16,10 @@ const {
   pickStoragePricesForRegion
 } = require("../lib/oci");
 
-const OUT = path.join("data", "oci", "oci.prices.json");
+// Align with GCP: allow workflow to control output location
+const OUT = process.env.OUTPUT_PATH
+  ? process.env.OUTPUT_PATH
+  : path.join("docs", "data", "oci", "oci.prices.json");
 
 async function fetchOciPrices() {
   logStart("[OCI] Fetching pricing (storage first)…");
@@ -47,6 +51,13 @@ async function main() {
     compute: [],
     storage: json.storage
   };
+
+  // Ensure output directory exists (important when writing to docs/)
+  fs.mkdirSync(path.dirname(OUT), { recursive: true });
+
+  // If you want a safety guard like GCP: don't write empty/invalid payloads
+  // (keeps behavior robust if upstream fetch returns unexpected data)
+  warnAndSkipWriteOnEmpty(out, OUT);
 
   atomicWrite(OUT, out);
   console.log(`✅ Wrote ${OUT}`);
