@@ -1,8 +1,9 @@
 // scripts/providers/oci.fetch.js
-// Node 18+ (global fetch)
+// Node 18+ (no network required)
 
 const path = require("path");
 const fs = require("fs");
+
 const {
   atomicWrite,
   warnAndSkipWriteOnEmpty,
@@ -10,57 +11,47 @@ const {
   logDone
 } = require("../lib/common");
 
-const {
-  OCI_REGION,
-  fetchOciBlockVolumePricing,
-  pickStoragePricesForRegion
-} = require("../lib/oci");
-
-// Align with GCP: allow workflow to control output location
+const OCI_REGION = process.env.OCI_REGION || "us-ashburn-1";
 const OUT = process.env.OUTPUT_PATH
   ? process.env.OUTPUT_PATH
   : path.join("docs", "data", "oci", "oci.prices.json");
 
-async function fetchOciPrices() {
-  logStart("[OCI] Fetching pricing (storage first)…");
+const SRC_PATH = path.join(__dirname, "oci.pricing-source.json");
 
-  // 1) Storage (public JSON; no auth needed)
-  const blockJson = await fetchOciBlockVolumePricing();
-  const { ssd, hdd } = pickStoragePricesForRegion(blockJson, OCI_REGION);
-
-  logDone("[OCI] Pricing file loaded");
-  return {
-    storage: {
-      region: OCI_REGION,
-      ssd_per_gb_month: ssd,
-      hdd_per_gb_month: hdd
-    }
-  };
+function loadPricingSource() {
+  const raw = fs.readFileSync(SRC_PATH, "utf-8");
+  return JSON.parse(raw);
 }
 
 async function main() {
-  const json = await fetchOciPrices();
+  logStart("[OCI] Building pricing from local source…");
 
-  // For now, compute is empty (we will append real rows in Step 3).
+  const src = loadPricingSource();
+
   const out = {
     meta: {
+      provider: "oci",
+      region: OCI_REGION,
+      currency: src?.meta?.currency || "USD",
       os: ["Linux", "Windows"],
-      vcpu: [],
-      ram: []
+      source: "scripts/providers/oci.pricing-source.json"
     },
-    compute: [],
-    storage: json.storage
+    // Keep raw primitives – lib/oci.js and UI can compute totals consistently
+    compute: {
+      linux: src.linux,
+      windows: src.windows
+    },
+    storage: {
+      region: OCI_REGION,
+      block_volume_gb_month: src.storage.block_volume_gb_month
+    }
   };
 
-  // Ensure output directory exists (important when writing to docs/)
   fs.mkdirSync(path.dirname(OUT), { recursive: true });
-
-  // If you want a safety guard like GCP: don't write empty/invalid payloads
-  // (keeps behavior robust if upstream fetch returns unexpected data)
   warnAndSkipWriteOnEmpty(out, OUT);
-
   atomicWrite(OUT, out);
-  console.log(`✅ Wrote ${OUT}`);
+
+  logDone(`[OCI] ✅ Wrote ${OUT}`);
 }
 
 main().catch(e => {
