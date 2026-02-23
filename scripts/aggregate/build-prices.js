@@ -1,10 +1,6 @@
 /* scripts/aggregate/build-prices.js
- * Merge provider JSONs (AWS/Azure/GCP) into a FLAT prices.json:
- *   { meta, azure:[], aws:[], gcp:[], generatedAt }
- *
- * Usage (local):
- *   node scripts/aggregate/build-prices.js
- *   node scripts/aggregate/build-prices.js --out docs/data/prices.json
+ * Merge provider JSONs (AWS/Azure/GCP/OCI) into a FLAT prices.json:
+ *   { meta, azure:[], aws:[], gcp:[], oci:[], generatedAt }
  */
 
 const fs = require("fs");
@@ -15,8 +11,9 @@ const BASE = path.resolve(__dirname, "..", "..");
 const AWS_FILE   = path.join(BASE, "data", "aws",   "aws.prices.json");
 const AZURE_FILE = path.join(BASE, "data", "azure", "azure.prices.json");
 const GCP_FILE   = path.join(BASE, "data", "gcp",   "gcp.prices.json");
+const OCI_FILE   = path.join(BASE, "data", "oci",   "oci.prices.json");
 
-// --out <file> (optional) → defaults to data/prices.json
+// --out <file> (optional)
 const ARG_OUT_IDX = process.argv.indexOf("--out");
 const OUTPUT_FILE = ARG_OUT_IDX > -1 && process.argv[ARG_OUT_IDX + 1]
   ? path.resolve(process.argv[ARG_OUT_IDX + 1])
@@ -66,9 +63,7 @@ function ensureDirFor(filePath) {
 }
 
 function asComputeArray(providerObj) {
-  // Provider files your fetchers write: { meta:{...}, compute:[...] }
-  const arr = Array.isArray(providerObj?.compute) ? providerObj.compute : [];
-  return arr;
+  return Array.isArray(providerObj?.compute) ? providerObj.compute : [];
 }
 
 function summarize(label, obj) {
@@ -89,8 +84,9 @@ function summarize(label, obj) {
   const aws   = loadJSON(AWS_FILE,   { required: false });
   const azure = loadJSON(AZURE_FILE, { required: false });
   const gcp   = loadJSON(GCP_FILE,   { required: false });
+  const oci   = loadJSON(OCI_FILE,   { required: false });
 
-  if (!aws && !azure && !gcp) {
+  if (!aws && !azure && !gcp && !oci) {
     console.error("❌ No provider files found; aborting.");
     process.exit(1);
   }
@@ -99,26 +95,28 @@ function summarize(label, obj) {
   summarize("AWS",   aws);
   summarize("Azure", azure);
   summarize("GCP",   gcp);
+  summarize("OCI",   oci);
 
-  // Merge meta from whichever providers are present
+  // Merge meta
   let meta = { os: [], vcpu: [], ram: [] };
   if (aws?.meta)   meta = mergeMeta(meta, aws.meta);
   if (azure?.meta) meta = mergeMeta(meta, azure.meta);
   if (gcp?.meta)   meta = mergeMeta(meta, gcp.meta);
+  if (oci?.meta)   meta = mergeMeta(meta, oci.meta);
 
-  // Flat arrays
   const flat = {
     meta,
     azure: asComputeArray(azure),
     aws:   asComputeArray(aws),
     gcp:   asComputeArray(gcp),
+    oci:   asComputeArray(oci),
     generatedAt: new Date().toISOString()
   };
 
-  // Warn if any array is empty (helps catch accidental empties)
   if (flat.aws.length === 0)   console.warn("⚠ AWS compute array is empty");
   if (flat.azure.length === 0) console.warn("⚠ Azure compute array is empty");
   if (flat.gcp.length === 0)   console.warn("⚠ GCP compute array is empty");
+  if (flat.oci.length === 0)   console.warn("⚠ OCI compute array is empty");
 
   ensureDirFor(OUTPUT_FILE);
   fs.writeFileSync(OUTPUT_FILE, JSON.stringify(flat, null, 2), "utf8");
