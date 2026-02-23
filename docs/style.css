@@ -24,35 +24,42 @@ h2 {
 }
 
 /* ======================================================
-   FILTER BAR
+   FILTER BAR — FULL WIDTH, PROPORTIONAL INPUTS ✅
    ====================================================== */
 .filters { 
   background:var(--panel); 
   margin:0 auto 20px; 
   padding:16px; 
-  max-width:1200px;           /* ⬅ widened to align with 4 cards */
+  max-width:1200px;
   border-radius:8px; 
   box-shadow:var(--shadow); 
 }
 
-/* ✅ KEEP FILTERS ON ONE LINE */
-.filters .row { 
-  display:flex; 
-  flex-wrap:nowrap;           /* ⬅ key fix */
-  gap:12px; 
-  align-items:flex-end;
+/* ✅ GRID-BASED INPUT LAYOUT */
+.filters .row {
+  display:grid;
+  grid-template-columns:
+    1.4fr   /* OS */
+    0.8fr   /* vCPU */
+    1fr     /* RAM */
+    1.1fr   /* Storage GB */
+    1.2fr   /* Storage Type */
+    auto;   /* Compare button */
+  gap:12px;
+  align-items:end;
 }
 
-/* Each filter column */
+/* Each input column */
 .filters .row > div {
   display:flex;
   flex-direction:column;
+  width:100%;
 }
 
 /* Labels */
 label,
 .label-with-info {
-  font-weight:600; 
+  font-weight:600;
   margin-bottom:4px;
   display:inline-flex;
   align-items:center;
@@ -60,35 +67,29 @@ label,
   line-height:1.1;
 }
 
-/* Selects */
-select { 
-  padding:8px 10px; 
-  border:1px solid #ccc; 
-  border-radius:6px; 
-  background:#fff; 
+/* Selects stretch to fill grid cell ✅ */
+select {
+  width:100%;
+  padding:8px 10px;
+  border:1px solid #ccc;
+  border-radius:6px;
+  background:#fff;
   height:40px;
-  min-width:110px;            /* ⬅ tightened */
+  min-width:0; /* CRITICAL: allows shrinking/stretching */
 }
 
-/* Individual width tuning */
-#os { min-width:120px; }
-#cpu { min-width:90px; }
-#ram { min-width:110px; }
-#storageAmt { min-width:90px; }
-#storageType { min-width:110px; }
-
-/* Compare button */
-button { 
-  padding:0 16px; 
-  border-radius:6px; 
-  background:var(--primary); 
-  color:#fff; 
-  border:none; 
-  cursor:pointer; 
+/* Compare button stays compact */
+button {
+  padding:0 16px;
+  border-radius:6px;
+  background:var(--primary);
+  color:#fff;
+  border:none;
+  cursor:pointer;
   height:40px;
-  display:flex; 
-  align-items:center; 
-  justify-content:center; 
+  display:flex;
+  align-items:center;
+  justify-content:center;
   white-space:nowrap;
 }
 
@@ -104,37 +105,27 @@ button:disabled {
 }
 
 /* ======================================================
-   RESULTS GRID — ✅ FORCE 4 COLUMNS
+   RESULTS GRID — 4 COLUMNS
    ====================================================== */
 .results {
   display:grid;
-  grid-template-columns: repeat(4, 1fr);  /* ⬅ MAIN FIX */
+  grid-template-columns: repeat(4, 1fr);
   gap:16px;
-  max-width:1200px;                        /* ⬅ match filter width */
+  max-width:1200px;
   margin:0 auto 40px;
 }
 
-/* Provider panels */
 .panel {
   background:var(--panel);
-  padding:14px;                            /* ⬅ slightly tighter */
+  padding:14px;
   border-radius:8px;
   box-shadow:var(--shadow);
 }
 
-.panel h3 {
-  margin:0 0 10px;
-}
+.panel h3 { margin:0 0 10px; }
+.panel p { margin:6px 0; }
+.panel p.muted { color: var(--muted); }
 
-.panel p {
-  margin:6px 0;
-}
-
-.panel p.muted {
-  color: var(--muted);
-}
-
-/* Key-value rows */
 .split {
   display:flex;
   justify-content:space-between;
@@ -143,20 +134,11 @@ button:disabled {
   margin:5px 0;
 }
 
-.split .label {
-  color:#444;
-}
+.split .label { color:#444; }
 
-.total .label {
-  font-weight:700;
-}
+.total .label { font-weight:700; }
+.total span:last-child { font-weight:700; color:var(--total); }
 
-.total span:last-child {
-  font-weight:700;
-  color:var(--total);
-}
-
-/* Divider */
 .divider {
   border:0;
   border-top:1px dashed #e5e7eb;
@@ -178,7 +160,7 @@ button:disabled {
 }
 
 /* ======================================================
-   TOOLTIP STYLES (unchanged)
+   TOOLTIP STYLES (UNCHANGED)
    ====================================================== */
 .label-with-info {
   display:inline-flex;
@@ -218,9 +200,7 @@ button:disabled {
   display:none;
 }
 
-.info-pop[aria-hidden="false"] {
-  display:block;
-}
+.info-pop[aria-hidden="false"] { display:block; }
 
 .info-pop__arrow {
   position:absolute;
@@ -236,15 +216,18 @@ button:disabled {
    RESPONSIVE SAFETY
    ====================================================== */
 @media (max-width: 1100px) {
+  .filters .row {
+    grid-template-columns: repeat(3, 1fr);
+  }
   .results {
     grid-template-columns: repeat(2, 1fr);
-  }
-  .filters .row {
-    flex-wrap:wrap;
   }
 }
 
 @media (max-width: 640px) {
+  .filters .row {
+    grid-template-columns: 1fr;
+  }
   .results {
     grid-template-columns: 1fr;
   }
