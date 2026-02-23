@@ -1,9 +1,7 @@
 // scripts/lib/oci.js
 "use strict";
 
-const crypto = require("crypto");
-
-/** Region (matches OCI's identifiers like us-ashburn-1) */
+/** Region (OCI identifiers like us-ashburn-1). Workflow should pass OCI_REGION. */
 const OCI_REGION = process.env.OCI_REGION || "us-ashburn-1";
 
 /** Public pricing JSON endpoints (override via env if needed) */
@@ -15,7 +13,7 @@ const OCI_COMPUTE_PRICING_URL =
   process.env.OCI_COMPUTE_PRICING_URL ||
   "https://docs.oracle.com/en-us/iaas/pricing/compute.json";
 
-/** 1 OCPU = 2 vCPUs (for later compute normalization) */
+/** 1 OCPU = 2 vCPUs (normalization helper) */
 function ocpuToVcpu(ocpus) {
   const n = Number(ocpus);
   if (!Number.isFinite(n)) return undefined;
@@ -43,7 +41,9 @@ function pickStoragePricesForRegion(blockJson, region) {
   const reg = blockJson.regions[region];
   if (!reg) {
     const known = Object.keys(blockJson.regions || {}).slice(0, 6);
-    throw new Error(`[OCI] Region '${region}' not in block-volume pricing. Known sample: ${known.join(", ")} ...`);
+    throw new Error(
+      `[OCI] Region '${region}' not in block-volume pricing. Known sample: ${known.join(", ")} ...`
+    );
   }
 
   // Common keys seen in OCI pricing feeds:
@@ -57,7 +57,9 @@ function pickStoragePricesForRegion(blockJson, region) {
 
   if (!Number.isFinite(ssd) || !Number.isFinite(hdd)) {
     const dump = JSON.stringify(reg, null, 2).slice(0, 400);
-    throw new Error(`[OCI] Could not resolve Balanced/Standard storage prices in '${region}'. Region entry:\n${dump}`);
+    throw new Error(
+      `[OCI] Could not resolve Balanced/Standard storage prices in '${region}'. Region entry:\n${dump}`
+    );
   }
   return { ssd, hdd };
 }
@@ -65,29 +67,41 @@ function pickStoragePricesForRegion(blockJson, region) {
 /* ---------- Placeholders for Step 2 (Compute) ---------- */
 
 /**
- * Minimal signer stub for OCI REST (we'll wire this in Step 2).
- * For now we keep it here so imports don't change later.
+ * Minimal signer stub for OCI REST (wire later for authenticated endpoints).
+ * Storage is public; compute integration may require signing depending on approach.
  */
 async function signedFetch(url, opts = {}) {
   // In Step 2 we'll sign requests to call /20160918/shapes, etc.
-  // For storage we don't need signing, so just throw if used.
-  throw new Error("[OCI] signedFetch is not implemented yet (we'll add it when we integrate compute).");
+  // For now, fail loudly if someone calls it by mistake.
+  throw new Error(
+    "[OCI] signedFetch called but not implemented. Compute integration is not enabled yet."
+  );
 }
 
 /**
- * Simple classification stub for OCI shapes (we'll use this in Step 2):
- *  - DenseIO ⇒ memory
- *  - E* family / high-cpu shapes ⇒ compute
- *  - High RAM per OCPU ⇒ memory
- *  - otherwise ⇒ general
+ * Shape classification helper.
+ *
+ * Notes:
+ * - Do NOT treat "E*" (e.g., VM.Standard.E4.Flex) as compute. E-series is generally "general".
+ * - "HighCPU" shapes are compute-leaning.
+ * - "DenseIO" is often memory/storage-heavy and best categorized as memory.
+ * - Fallback: high RAM per OCPU => memory.
  */
 function classifyOciShape(shapeName, ocpus, memoryGb) {
   if (!shapeName) return null;
+
   const name = String(shapeName);
-  const ratio = Number(memoryGb) / Number(ocpus || 1);
+  const o = Number(ocpus || 0);
+  const m = Number(memoryGb || 0);
+  const ratio = o > 0 ? (m / o) : NaN;
+
+  // Strong signals first
   if (/DenseIO/i.test(name)) return "memory";
-  if (/\.E\d/i.test(name)) return "compute";
+  if (/HighCPU/i.test(name)) return "compute";
+
+  // Ratio-based fallback (tunable)
   if (Number.isFinite(ratio) && ratio >= 8) return "memory";
+
   return "general";
 }
 
@@ -99,5 +113,6 @@ module.exports = {
   pickStoragePricesForRegion,
   ocpuToVcpu,
   classifyOciShape,
-  signedFetch // will be used in Step 2
+  signedFetch
 };
+``
