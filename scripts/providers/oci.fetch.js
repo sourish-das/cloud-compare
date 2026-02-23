@@ -23,10 +23,24 @@ function loadPricingSource() {
   return JSON.parse(raw);
 }
 
+function assert(condition, message) {
+  if (!condition) throw new Error(`[OCI] ${message}`);
+}
+
 async function main() {
   logStart("[OCI] Building pricing from local source…");
 
   const src = loadPricingSource();
+
+  // ---- validation
+  assert(src.linux, "Missing 'linux' section");
+  assert(src.linux.amd_e4, "Missing 'linux.amd_e4'");
+  assert(src.linux.ampere_a1, "Missing 'linux.ampere_a1'");
+  assert(src.windows, "Missing 'windows' section");
+  assert(
+    typeof src.storage?.block_volume_gb_month === "number",
+    "Missing or invalid 'storage.block_volume_gb_month'"
+  );
 
   const out = {
     meta: {
@@ -34,9 +48,9 @@ async function main() {
       region: OCI_REGION,
       currency: src?.meta?.currency || "USD",
       os: ["Linux", "Windows"],
-      source: "scripts/providers/oci.pricing-source.json"
+      source: src?.meta?.source || "scripts/providers/oci.pricing-source.json",
+      last_verified: src?.meta?.last_verified || null
     },
-    // Keep raw primitives – lib/oci.js and UI can compute totals consistently
     compute: {
       linux: src.linux,
       windows: src.windows
