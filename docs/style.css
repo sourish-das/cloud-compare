@@ -24,7 +24,7 @@ h2 {
 }
 
 /* ======================================================
-   FILTER BAR — CLEAN & SYMMETRICAL ✅
+   FILTER BAR — FINAL, STABLE ✅
    ====================================================== */
 .filters { 
   background:var(--panel); 
@@ -35,7 +35,7 @@ h2 {
   box-shadow:var(--shadow); 
 }
 
-/* ✅ Equal-width inputs + compact Compare */
+/* Equal-width inputs + compact Compare */
 .filters .row {
   display:grid;
   grid-template-columns: repeat(5, 1fr) auto;
@@ -43,7 +43,6 @@ h2 {
   align-items:end;
 }
 
-/* Each input column */
 .filters .row > div {
   display:flex;
   flex-direction:column;
@@ -65,7 +64,7 @@ label,
 }
 
 /* ======================================================
-   INPUTS & BUTTONS — SAME SIZE ✅
+   INPUTS & BUTTONS — CONSISTENT ✅
    ====================================================== */
 .filters select,
 .filters button {
@@ -73,7 +72,7 @@ label,
   padding:0 10px;
 }
 
-/* ✅ RESTORE NATIVE DROPDOWN ARROW */
+/* Restore native dropdown arrow */
 .filters select {
   width:100%;
   border:1px solid #ccc;
@@ -110,7 +109,7 @@ button:disabled {
 }
 
 /* ======================================================
-   RESULTS GRID — 4 COLUMNS
+   RESULTS GRID
    ====================================================== */
 .results {
   display:grid;
@@ -165,27 +164,30 @@ button:disabled {
 }
 
 /* ======================================================
-   INFO “i” BADGE — LABEL‑SIZED ✅
+   INFO “i” BADGE — FINAL SIZE ✅
    ====================================================== */
 .info-badge {
-  width:14px;
-  height:14px;
-  min-width:14px;
-  min-height:14px;
-  line-height:14px;
-  padding:0;
+  width:12px;
+  height:12px;
+  min-width:12px;
+  min-height:12px;
+  line-height:12px;
+
+  font-size:8px;
+  font-weight:600;
+
   border-radius:50%;
-  border:1.25px solid #1d4ed8;
+  border:1px solid #1d4ed8;
   color:#1d4ed8;
   background:#fff;
-  font-weight:700;
-  font-size:9px;
+
   display:inline-flex;
   align-items:center;
   justify-content:center;
   cursor:pointer;
 }
 
+/* Tooltip */
 .info-pop {
   position:absolute;
   margin-top:6px;
