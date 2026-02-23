@@ -24,7 +24,7 @@ h2 {
 }
 
 /* ======================================================
-   FILTER BAR — FINAL, STABLE ✅
+   FILTER BAR — STABLE
    ====================================================== */
 .filters { 
   background:var(--panel); 
@@ -35,7 +35,6 @@ h2 {
   box-shadow:var(--shadow); 
 }
 
-/* Equal-width inputs + compact Compare */
 .filters .row {
   display:grid;
   grid-template-columns: repeat(5, 1fr) auto;
@@ -64,7 +63,7 @@ label,
 }
 
 /* ======================================================
-   INPUTS & BUTTONS — CONSISTENT ✅
+   INPUTS & BUTTONS
    ====================================================== */
 .filters select,
 .filters button {
@@ -72,7 +71,6 @@ label,
   padding:0 10px;
 }
 
-/* Restore native dropdown arrow */
 .filters select {
   width:100%;
   border:1px solid #ccc;
@@ -83,7 +81,6 @@ label,
   -moz-appearance:menulist;
 }
 
-/* Compare button */
 button {
   padding:0 16px;
   border-radius:6px;
@@ -164,30 +161,45 @@ button:disabled {
 }
 
 /* ======================================================
-   INFO “i” BADGE — FINAL SIZE ✅
+   ✅ SINGLE SOURCE OF TRUTH — INFO BUTTON
+   Used by tooltips.js via .info-btn
    ====================================================== */
-.info-badge {
+.info-btn {
   width:12px;
   height:12px;
   min-width:12px;
   min-height:12px;
-  line-height:12px;
 
+  padding:0;
+  margin-left:4px;
+
+  line-height:12px;
   font-size:8px;
   font-weight:600;
 
   border-radius:50%;
-  border:1px solid #1d4ed8;
-  color:#1d4ed8;
+  border:1px solid #2563eb;
   background:#fff;
+  color:#2563eb;
 
   display:inline-flex;
   align-items:center;
   justify-content:center;
+
   cursor:pointer;
+  box-sizing:border-box;
 }
 
-/* Tooltip */
+.info-btn,
+.info-btn:focus,
+.info-btn:active {
+  outline:none;
+  box-shadow:none;
+}
+
+/* ======================================================
+   TOOLTIP PANEL
+   ====================================================== */
 .info-pop {
   position:absolute;
   margin-top:6px;
