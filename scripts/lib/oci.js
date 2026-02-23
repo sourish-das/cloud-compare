@@ -1,4 +1,3 @@
-// scripts/lib/oci.js
 "use strict";
 
 const fs = require("fs");
@@ -6,41 +5,48 @@ const path = require("path");
 
 const OCI_REGION = process.env.OCI_REGION || "us-ashburn-1";
 
-// Price source lives with provider scripts (data, not logic)
 const SRC_PATH =
   process.env.OCI_PRICING_SOURCE ||
   path.join(__dirname, "..", "providers", "oci.pricing-source.json");
 
-function loadSource() {
+// ---- Cache pricing source to avoid repeated FS reads
+let _cachedSource = null;
+let _cachedMtimeMs = null;
+
+function loadSourceCached() {
+  const stat = fs.statSync(SRC_PATH);
+  if (_cachedSource && _cachedMtimeMs === stat.mtimeMs) return _cachedSource;
+
   const raw = fs.readFileSync(SRC_PATH, "utf-8");
-  return JSON.parse(raw);
+  _cachedSource = JSON.parse(raw);
+  _cachedMtimeMs = stat.mtimeMs;
+  return _cachedSource;
 }
 
 // Normalization helpers
 function vcpuToOcpu_x86(vcpu) {
-  // x86: 1 OCPU = 2 vCPUs
   const n = Number(vcpu);
   if (!Number.isFinite(n) || n <= 0) return 0;
-  return n / 2;
+  return n / 2; // x86: 1 OCPU = 2 vCPUs
 }
+
 function vcpuToOcpu_arm(vcpu) {
-  // A1 is effectively 1:1 in practice for our tool model
   const n = Number(vcpu);
   if (!Number.isFinite(n) || n <= 0) return 0;
-  return n;
+  return n; // modeled as 1:1 for A1 in this tool
 }
 
 function storageHourly(blockVolumeGbMonth, storageGb) {
   const gbm = Number(blockVolumeGbMonth);
   const sgb = Number(storageGb);
-  if (!Number.isFinite(gbm) || !Number.isFinite(sgb)) return 0;
-  // same convention as other tools: 730 hours/month
+  if (!Number.isFinite(gbm) || !Number.isFinite(sgb) || sgb <= 0) return 0;
   return (gbm * sgb) / 730;
 }
 
 function familyRam(vcpu, family) {
   const n = Number(vcpu);
   if (!Number.isFinite(n) || n <= 0) return 0;
+
   switch (String(family || "").toLowerCase()) {
     case "compute":
       return n * 2;
@@ -53,78 +59,98 @@ function familyRam(vcpu, family) {
 }
 
 /**
- * Recommend cheapest OCI option for given inputs (on-demand, list)
+ * Recommend cheapest OCI option for given inputs (on-demand list).
  * Policy:
  *  - Only VM.Standard.*.Flex
  *  - Auto(Linux): try Ampere A1 first, else AMD E4
  *  - Windows: AMD E4 only (no ARM)
  */
 function recommendOci({ os, vcpu, ramGb, family, storageGb }) {
-  const src = loadSource();
+  const src = loadSourceCached();
 
   const OS = String(os || "Linux");
   const isWindows = OS.toLowerCase() === "windows";
+  const fam = String(family || "general").toLowerCase();
+
+  const vcpuN = Number(vcpu);
+  const storageN = Number(storageGb) || 0;
 
   // If RAM not explicitly provided, derive from family like your GUI
   const desiredRam =
     Number.isFinite(Number(ramGb)) && Number(ramGb) > 0
       ? Number(ramGb)
-      : familyRam(vcpu, family);
+      : (fam === "auto" ? familyRam(vcpuN, "general") : familyRam(vcpuN, fam));
 
   const candidates = [];
 
-  // Candidate builder
-  function addCandidate({ arch, key, shapeLabel, ocpuRate, memRate }) {
+  function safeNum(x, fallback = 0) {
+    const n = Number(x);
+    return Number.isFinite(n) ? n : fallback;
+  }
+
+  function addCandidate({ arch, shapeLabel, ocpuRate, memRate }) {
     const ocpu =
-      arch === "arm" ? vcpuToOcpu_arm(vcpu) : vcpuToOcpu_x86(vcpu);
+      arch === "arm" ? vcpuToOcpu_arm(vcpuN) : vcpuToOcpu_x86(vcpuN);
 
-    const licenseUplift =
-      isWindows ? Number(src.windows.license_per_vcpu_hour || 0) : 0;
+    const licenseUplift = isWindows
+      ? safeNum(src?.windows?.license_per_vcpu_hour, 0)
+      : 0;
 
-    // license uplift modeled per vCPU-hour for Windows
-    const cpuCost = (ocpu * ocpuRate) + (Number(vcpu) * licenseUplift);
-    const memCost = desiredRam * memRate;
+    const cpuRateN = safeNum(ocpuRate);
+    const memRateN = safeNum(memRate);
 
-    const blockGbMonth = Number(src.storage.block_volume_gb_month);
-    const storCost = storageHourly(blockGbMonth, storageGb);
+    // Breakdown
+    const cpuBase = ocpu * cpuRateN;
+    const windowsLicense = vcpuN * licenseUplift;
+    const memCost = desiredRam * memRateN;
 
-    const totalPerHour = cpuCost + memCost + storCost;
+    const blockGbMonth = safeNum(src?.storage?.block_volume_gb_month, 0);
+    const storCost = storageHourly(blockGbMonth, storageN);
+
+    const totalPerHour = cpuBase + windowsLicense + memCost + storCost;
 
     candidates.push({
       provider: "oci",
       shape: shapeLabel,
       arch,
       os: OS,
-      vcpu: Number(vcpu),
+      vcpu: vcpuN,
       ramGb: desiredRam,
-      storageGb: Number(storageGb) || 0,
-      pricePerHour: totalPerHour
+      storageGb: storageN,
+      pricePerHour: totalPerHour,
+      breakdown: {
+        cpu_base_per_hour: cpuBase,
+        windows_license_per_hour: windowsLicense,
+        memory_per_hour: memCost,
+        storage_per_hour: storCost
+      }
     });
   }
 
   // Auto: allow ARM first only for Linux
-  if (!isWindows && String(family || "").toLowerCase() === "auto") {
+  if (!isWindows && fam === "auto" && src?.linux?.ampere_a1) {
     const a1 = src.linux.ampere_a1;
     addCandidate({
       arch: "arm",
-      key: "ampere_a1",
       shapeLabel: a1.shape,
-      ocpuRate: Number(a1.ocpu_per_hour),
-      memRate: Number(a1.ram_gb_per_hour)
+      ocpuRate: a1.ocpu_per_hour,
+      memRate: a1.ram_gb_per_hour
     });
   }
 
-  // AMD E4 always available
+  // AMD E4 always available (must exist)
+  if (!src?.linux?.amd_e4) {
+    throw new Error("[OCI] Missing linux.amd_e4 in pricing source JSON.");
+  }
+
   const e4 = src.linux.amd_e4;
   addCandidate({
     arch: "x86",
-    key: "amd_e4",
     shapeLabel: e4.shape,
-    ocpuRate: Number(e4.ocpu_per_hour),
-    memRate: Number(e4.ram_gb_per_hour)
+    ocpuRate: e4.ocpu_per_hour,
+    memRate: e4.ram_gb_per_hour
   });
 
-  // Pick cheapest
   candidates.sort((a, b) => a.pricePerHour - b.pricePerHour);
   return { best: candidates[0], candidates };
 }
