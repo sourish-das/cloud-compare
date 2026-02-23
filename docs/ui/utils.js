@@ -5,12 +5,14 @@ export const HRS_PER_MONTH = 730;
 export function fmt(n) {
   return (n == null || isNaN(n)) ? "—" : `$${Number(n).toFixed(4)}`;
 }
+
 export function monthly(ph) {
   return (ph == null || isNaN(ph)) ? null : ph * HRS_PER_MONTH;
 }
+
 export function sumSafe(a, b) {
   const na = (a == null || isNaN(a)) ? 0 : Number(a);
-  const nb = (b == null || isNaN(b)) ? 0 : Number(b);
+  const nb = (b == null || isNaN(b)) ? 0 : Number(a == null || isNaN(b) ? 0 : b);
   if (a == null && b == null) return null;
   return na + nb;
 }
@@ -27,16 +29,19 @@ export function fillSelect(id, items) {
     el.appendChild(opt);
   }
 }
+
 export function setSelectValue(id, value) {
   const el = document.getElementById(id);
   if (!el) return;
   const match = Array.from(el.options).find(o => o.value == value);
   if (match) el.value = value;
 }
+
 export function safeSetText(id, text) {
   const el = document.getElementById(id);
   if (el) el.textContent = text;
 }
+
 export function appendToText(id, extra) {
   const el = document.getElementById(id);
   if (el) el.textContent = (el.textContent || "") + extra;
@@ -49,8 +54,9 @@ export function setStatus(msg, level = "info") {
   const warn = "var(--warn,#b45309)";
   const mut  = "var(--muted,#666)";
   el.textContent = msg;
-  el.style.color = (level === "error") ? err :
-                   (level === "warn")  ? warn : mut;
+  el.style.color =
+    (level === "error") ? err :
+    (level === "warn")  ? warn : mut;
 }
 
 /* ---------- Numeric helpers ---------- */
@@ -88,6 +94,7 @@ export function getAwsStorageMonthlyFromCfg(type, gb, awsCfg) {
 
 /**
  * Azure: using monthly lookup tables.
+ * Returns { sku, size, monthlyUSD, adjusted }
  */
 export function getAzureStorageSkuAndMonthlyFromCfg(type, gb, azCfg) {
   const t = (type || "hdd").toLowerCase();
@@ -115,48 +122,85 @@ export function getAzureStorageSkuAndMonthlyFromCfg(type, gb, azCfg) {
   return { sku, size, monthlyUSD, adjusted: (size != null && size !== gb) };
 }
 
-/* ---------- GCP storage pricing (NEW) ---------- */
+/* ---------- GCP storage pricing ---------- */
 /**
  * GCP PD-SSD and PD-Standard:
  * Simple per-GB rate, same as AWS model.
  */
 export function getGcpStorageMonthlyFromCfg(type, gb, gcpCfg) {
   if (!isFinite(gb) || gb <= 0) return null;
-
   const t = (type || "hdd").toLowerCase();
-
   if (t === "ssd") {
-    return gb * Number(gcpCfg?.ssd_per_gb_month ?? 0.17);  // PD-SSD
+    return gb * Number(gcpCfg?.ssd_per_gb_month ?? 0.17);
   }
-
-  // HDD (PD-Standard)
   return gb * Number(gcpCfg?.hdd_per_gb_month ?? 0.04);
 }
 
-/* ---------- Reset all UI fields ---------- */
+/* ---------- OCI storage pricing (NEW) ---------- */
+/**
+ * OCI Block Volume:
+ * - One base price (USD per GB-month)
+ * - Same base price for HDD/SSD UI selection
+ * - Performance via VPUs (not modeled here)
+ */
+export function getOciStorageMonthlyFromCfg(gb, ociCfg) {
+  if (!isFinite(gb) || gb <= 0) return null;
+  return gb * Number(ociCfg?.block_volume_gb_month ?? 0.0255);
+}
+
+/* ---------- Reset all UI fields (AWS + Azure + GCP + OCI) ---------- */
 export function resetCards() {
-  document.getElementById("awsInstance").innerHTML = `<strong>Recommended Instance:</strong> …`;
-  document.getElementById("azInstance").innerHTML  = `<strong>Recommended VM Size:</strong> …`;
+  // Helper so resetCards stays safe even if an element is missing
+  const safeSetHtml = (id, html) => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = html;
+  };
 
-  safeSetText("awsCpu",      "vCPU: …");
-  safeSetText("awsRam",      "RAM: …");
-  safeSetText("awsPrice",    "Price/hr: -");
-  safeSetText("awsMonthly",  "≈ Monthly: -");
+  // AWS
+  safeSetHtml("awsInstance", `<strong>Recommended Instance:</strong> …`);
+  safeSetText("awsCpu",     "vCPU: …");
+  safeSetText("awsRam",     "RAM: …");
+  safeSetText("awsPrice",   "Price/hr: —");
+  safeSetText("awsMonthly", "≈ Monthly: —");
+  safeSetText("awsStorageSel",     "Storage: —");
+  safeSetText("awsStoragePriceHr", "—");
+  safeSetText("awsStorageMonthly", "—");
+  safeSetText("awsTotalHr",        "—");
+  safeSetText("awsTotalMonthly",   "—");
 
-  safeSetText("azCpu",       "vCPU: …");
-  safeSetText("azRam",       "RAM: …");
-  safeSetText("azPrice",     "Price/hr: -");
-  safeSetText("azMonthly",   "≈ Monthly: -");
+  // Azure
+  safeSetHtml("azInstance", `<strong>Recommended VM Size:</strong> …`);
+  safeSetText("azCpu",     "vCPU: …");
+  safeSetText("azRam",     "RAM: …");
+  safeSetText("azPrice",   "Price/hr: —");
+  safeSetText("azMonthly", "≈ Monthly: —");
+  safeSetText("azStorageSel",     "Storage: —");
+  safeSetText("azStoragePriceHr", "—");
+  safeSetText("azStorageMonthly", "—");
+  safeSetText("azTotalHr",        "—");
+  safeSetText("azTotalMonthly",   "—");
 
-  safeSetText("awsStorageSel",      "Storage: —");
-  safeSetText("awsStoragePriceHr",  "—");
-  safeSetText("awsStorageMonthly",  "—");
-  safeSetText("awsTotalHr",         "—");
-  safeSetText("awsTotalMonthly",    "—");
+  // GCP
+  safeSetHtml("gcpInstance", `<strong>Recommended Machine:</strong> …`);
+  safeSetText("gcpCpu",     "vCPU: …");
+  safeSetText("gcpRam",     "RAM: …");
+  safeSetText("gcpPrice",   "Price/hr: —");
+  safeSetText("gcpMonthly", "≈ Monthly: —");
+  safeSetText("gcpStorageSel",     "Storage: —");
+  safeSetText("gcpStoragePriceHr", "—");
+  safeSetText("gcpStorageMonthly", "—");
+  safeSetText("gcpTotalHr",        "—");
+  safeSetText("gcpTotalMonthly",   "—");
 
-  safeSetText("azStorageSel",       "Storage: —");
-  safeSetText("azStoragePriceHr",   "—");
-  safeSetText("azStorageMonthly",   "—");
-  safeSetText("azTotalHr",          "—");
-  safeSetText("azTotalMonthly",     "—");
+  // OCI
+  safeSetHtml("ociInstance", `<strong>Recommended Machine:</strong> …`);
+  safeSetText("ociCpu",     "vCPU: …");
+  safeSetText("ociRam",     "RAM: …");
+  safeSetText("ociPrice",   "Price/hr: —");
+  safeSetText("ociMonthly", "≈ Monthly: —");
+  safeSetText("ociStorageSel",     "Storage: —");
+  safeSetText("ociStoragePriceHr", "—");
+  safeSetText("ociStorageMonthly", "—");
+  safeSetText("ociTotalHr",        "—");
+  safeSetText("ociTotalMonthly",   "—");
 }
