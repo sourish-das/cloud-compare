@@ -1,15 +1,8 @@
 {
   "meta": {
     "currency": "USD",
-    "source": "Oracle Cloud Infrastructure public price list (on-demand)",
-    "last_verified": "2026-02",
-    "notes": [
-      "Compute priced as OCPU/hr + Memory GB/hr for Flex shapes",
-      "x86: 1 OCPU = 2 vCPUs",
-      "ARM (Ampere A1) treated as 1 OCPU = 1 vCPU for this tool",
-      "Block Volume has a single base storage price; HDD/SSD UI maps to same base price",
-      "DenseIO and Optimized shapes are intentionally excluded for apple-to-apple comparison"
-    ]
+    "source": "Auto-synthesized from docs/data/oci/oci.prices.json",
+    "last_verified": "2026-02-24T10:11:54Z"
   },
   "linux": {
     "amd_e4": {
@@ -26,11 +19,9 @@
     }
   },
   "windows": {
-    "license_per_vcpu_hour": 0.046,
-    "note": "Modeled as Windows Server license uplift over Linux compute; ARM is not supported for Windows"
+    "license_per_vcpu_hour": 0.046
   },
   "storage": {
-    "block_volume_gb_month": 0.0255,
-    "note": "OCI Block Volume base price is identical for HDD and SSD; performance is controlled via VPUs and is not modeled here"
+    "block_volume_gb_month": 0.037
   }
 }

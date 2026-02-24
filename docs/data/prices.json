@@ -42370,11 +42370,22 @@
         "architecture": "arm",
         "ocpu_per_hour": 0.01,
         "ram_gb_per_hour": 0.0015
+      },
+      "intel_standard3": {
+        "shape": "VM.Standard3.Flex",
+        "architecture": "x86",
+        "ocpu_per_hour": 0.04,
+        "ram_gb_per_hour": 0.0015
+      },
+      "intel_optimized3": {
+        "shape": "VM.Optimized3.Flex",
+        "architecture": "x86",
+        "ocpu_per_hour": 0.054,
+        "ram_gb_per_hour": 0.0015
       }
     },
     "windows": {
-      "license_per_vcpu_hour": 0.046,
-      "note": "Modeled as Windows Server license uplift over Linux compute; ARM is not supported for Windows"
+      "license_per_vcpu_hour": 0.046
     }
   }
 }
