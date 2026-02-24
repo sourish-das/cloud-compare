@@ -250,18 +250,30 @@
     </div>
 
     <!-- ===========================
-         OCI PANEL (NEW)
+         OCI PANEL
     ============================ -->
     <div class="panel">
-      <h3>OCI Compute</h3>
+      <h3 class="inline-flex">
+        OCI Compute
+        <!-- Info button (opens modal/tooltip below) -->
+        <button
+          type="button"
+          class="info-btn"
+          id="ociInfoBtn"
+          aria-label="How OCI pricing works"
+          aria-expanded="false"
+          aria-controls="ociInfoTip"
+          title="How OCI pricing works">i</button>
+      </h3>
 
-      <div class="family-filter" id="ociFamilyWrap" style="display:none;">
-        <label for="ociFamily">Family</label>
-        <select id="ociFamily" aria-label="OCI family">
+      <!-- NEW: Processor selector (replaces 'Family') -->
+      <div class="family-filter" id="ociProcessorWrap" style="display:none;">
+        <label for="ociProcessor">Processor</label>
+        <select id="ociProcessor" aria-label="OCI processor">
           <option value="auto" selected>Auto (Recommended)</option>
-          <option value="general">General</option>
-          <option value="compute">Compute</option>
-          <option value="memory">Memory</option>
+          <option value="amd">AMD</option>
+          <option value="arm">Ampere</option>
+          <option value="intel">Intel</option>
         </select>
       </div>
 
@@ -291,6 +303,35 @@
       <div class="split total">
         <span class="label">≈ Total Monthly:</span>
         <span id="ociTotalMonthly">–</span>
+      </div>
+
+      <!-- OCI Info tooltip/modal content -->
+      <div class="info-pop info-pop--modal" id="ociInfoTip" role="dialog" aria-hidden="true">
+        <div class="info-pop__content">
+          <button class="info-pop__close" aria-label="Close">×</button>
+          <strong>OCI Compute — How Pricing Works</strong><br /><br />
+
+          <strong>• OCPU model</strong><br />
+          OCI prices compute using OCPUs.<br />
+          <em>x86 (AMD/Intel):</em> 1 OCPU = <strong>2 vCPUs</strong><br />
+          <em>Ampere ARM:</em> 1 OCPU = <strong>1 vCPU</strong><br /><br />
+
+          <strong>• Flex shape billing</strong><br />
+          OCI Flex shapes bill CPU and memory separately:<br />
+          <strong>Total Price = (OCPU/hr × rate) + (RAM GB/hr × rate)</strong><br />
+          This gives highly configurable instances.<br /><br />
+
+          <strong>• Processor selection</strong><br />
+          <em>Auto:</em> returns the <strong>cheapest</strong> instance across all processors<br />
+          <em>AMD:</em> selects the latest AMD E‑series generation (e.g., E6)<br />
+          <em>Ampere:</em> selects the latest ARM A‑series generation (e.g., A4)<br />
+          <em>Intel:</em> selects the latest Standard3/Optimized3 generation<br />
+          Then picks the <strong>cheapest shape</strong> within that generation.<br /><br />
+
+          <strong>• Windows note</strong><br />
+          Windows licensing is added per vCPU/hr.<br />
+          Windows <strong>does not run</strong> on Ampere shapes.
+        </div>
       </div>
     </div>
   </div>
