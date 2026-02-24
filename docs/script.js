@@ -166,9 +166,13 @@ export async function compare(resetFamilies = false) {
 
   // Enforce Windows ≠ Ampere (UI-side)
   if (String(os).toLowerCase() === "windows") {
-    const armOpt = ociProcEl?.querySelector('option value="arm"') || ociProcEl?.querySelector('option[value="arm"]');
+    // FIX: use a valid selector to avoid DOMException (SyntaxError)
+    const armOpt = ociProcEl?.querySelector('option[value="arm"]');
     if (armOpt) armOpt.disabled = true;
-    if (ociProcessor === "arm") { ociProcessor = "auto"; if (ociProcEl) ociProcEl.value = "auto"; }
+    if (ociProcessor === "arm") {
+      ociProcessor = "auto";
+      if (ociProcEl) ociProcEl.value = "auto";
+    }
   } else {
     const armOpt = ociProcEl?.querySelector('option[value="arm"]');
     if (armOpt) armOpt.disabled = false;
