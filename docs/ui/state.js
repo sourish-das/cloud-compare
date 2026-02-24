@@ -55,7 +55,7 @@ export async function loadPricesAndMeta() {
   let azure = [];
   let aws   = [];
   let gcp   = [];
-  let oci   = null;
+  let oci   = null;  // normalized compute block for OCI
   let meta  = {};
 
   const looksWrapped =
@@ -66,23 +66,35 @@ export async function loadPricesAndMeta() {
     !Array.isArray(raw.gcp);
 
   if (looksWrapped) {
-    // Older/alternate aggregator output
+    // Older/alternate aggregator output:
+    // { azure:{compute:[]}, aws:{compute:[]}, gcp:{compute:[]}, oci:{compute:{...}}? }
     azure = Array.isArray(raw.azure?.compute) ? raw.azure.compute : [];
     aws   = Array.isArray(raw.aws?.compute)   ? raw.aws.compute   : [];
     gcp   = Array.isArray(raw.gcp?.compute)   ? raw.gcp.compute   : [];
-    oci   = raw.oci ?? null;
+
+    // Normalize OCI to always return the compute block
+    // Accept either oci.compute (wrapped) or oci (already compute)
+    oci   = raw.oci?.compute ?? raw.oci ?? null;
+
     meta  = raw.meta || raw.azure?.meta || raw.aws?.meta || raw.gcp?.meta || {};
   } else {
-    // Preferred FLAT shape
+    // Preferred FLAT shape (produced by your orchestrator)
+    // { meta:{...}, azure:[], aws:[], gcp:[], oci:{...} }
     azure = Array.isArray(raw.azure) ? raw.azure : [];
     aws   = Array.isArray(raw.aws)   ? raw.aws   : [];
     gcp   = Array.isArray(raw.gcp)   ? raw.gcp   : [];
-    oci   = raw.oci ?? null;
+
+    // Same normalization here for safety
+    oci   = raw.oci?.compute ?? raw.oci ?? null;
+
     meta  = raw.meta || {};
   }
 
   // ---- Merge storage overrides safely (do not wipe defaults) ----
+  // Top-level storage block (extensible; not strictly required today)
   const incomingStorage = raw.storage || {};
+  // Also allow provider-scoped storage under raw.oci.storage if ever added
+  const ociScopedStorage = raw.oci?.storage || {};
 
   STORAGE_CFG = {
     aws: {
@@ -115,9 +127,10 @@ export async function loadPricesAndMeta() {
       )
     },
     oci: {
-      region: incomingStorage.oci?.region ?? STORAGE_CFG.oci.region,
+      // Prefer top-level incoming override; else allow raw.oci.storage; else keep default
+      region: (incomingStorage.oci?.region ?? ociScopedStorage.region) ?? STORAGE_CFG.oci.region,
       block_volume_gb_month: Number(
-        incomingStorage.oci?.block_volume_gb_month ?? STORAGE_CFG.oci.block_volume_gb_month
+        (incomingStorage.oci?.block_volume_gb_month ?? ociScopedStorage.block_volume_gb_month) ?? STORAGE_CFG.oci.block_volume_gb_month
       )
     }
   };
