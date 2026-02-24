@@ -30,12 +30,20 @@ function attachTooltip({
     const left = rect.left + scrollX;
     const top  = rect.bottom + scrollY + 6;
 
-    tip.style.position = "absolute";
-    tip.style.left = `${left}px`;
-    tip.style.top  = `${top}px`;
+    // If tip has a modal class, let CSS center it; else, anchor it
+    const isModal = tip.classList.contains("info-pop--modal");
+    if (!isModal) {
+      tip.style.position = "absolute";
+      tip.style.left = `${left}px`;
+      tip.style.top  = `${top}px`;
+    } else {
+      tip.style.left = "";
+      tip.style.top  = "";
+      tip.style.position = ""; // fall back to stylesheet rules (fixed/centered)
+    }
 
     const arrow = tip.querySelector(".info-pop__arrow");
-    if (arrow) {
+    if (arrow && !isModal) {
       const btnRect = btn.getBoundingClientRect();
       const offset = Math.max(10, Math.min(28, btnRect.left - rect.left));
       arrow.style.left = `${offset}px`;
@@ -63,17 +71,23 @@ function attachTooltip({
   }
 
   function outsideClose(e) {
-    if (
-      tip.contains(e.target) ||
-      btn.contains(e.target) ||
-      label.contains(e.target) ||
-      anchorEl.contains(e.target)
-    ) return;
+    if (tip.contains(e.target) || btn.contains(e.target) || label.contains(e.target) || anchorEl.contains(e.target)) {
+      return;
+    }
     closeTip();
   }
 
   function escClose(e) {
     if (e.key === "Escape") closeTip();
+  }
+
+  // Allow an inline "close" control inside the tooltip (×)
+  const closer = tip.querySelector(".info-pop__close");
+  if (closer) {
+    closer.addEventListener("click", (e) => {
+      e.stopPropagation();
+      closeTip();
+    });
   }
 
   btn.addEventListener("click", (e) => {
@@ -121,4 +135,30 @@ export function initOsTypeTooltip() {
     label,
     anchorEl: document.getElementById("os")
   });
+}
+
+/**
+ * NEW: OCI info tooltip / modal
+ * - Button:   #ociInfoBtn
+ * - Tooltip:  #ociInfoTip
+ * - Anchor:   prefer #ociProcessor (so tip appears near the select);
+ *             fallback to the OCI card title if the select is hidden.
+ */
+export function initOciTooltip() {
+  const btn  = document.getElementById("ociInfoBtn");
+  const tip  = document.getElementById("ociInfoTip");
+
+  // Prefer the processor select as the anchor; fallback to the OCI card heading
+  const anchorEl =
+    document.getElementById("ociProcessor") ||
+    document.querySelector('h3.inline-flex, h3:has(#ociInfoBtn)') ||
+    document.getElementById("ociInfoBtn");
+
+  // For labeling/accessible name, reuse the panel heading as "label"
+  const label =
+    document.querySelector('h3.inline-flex') ||
+    document.querySelector('h3:has(#ociInfoBtn)') ||
+    document.querySelector('h3');
+
+  attachTooltip({ btn, tip, label, anchorEl });
 }
