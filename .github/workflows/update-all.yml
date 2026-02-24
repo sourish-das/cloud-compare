@@ -183,9 +183,9 @@ jobs:
             --slurpfile oc docs/data/oci/oci.prices.json '
             {
               meta: {
-                os:   (($az[0].meta.os + $aw[0].meta.os + $gc[0].meta.os + $oc[0].meta.os) | unique),
-                vcpu: (($az[0].meta.vcpu + $aw[0].meta.vcpu + $gc[0].meta.vcpu + $oc[0].meta.vcpu) | unique | sort),
-                ram:  (($az[0].meta.ram  + $aw[0].meta.ram  + $gc[0].meta.ram  + $oc[0].meta.ram ) | unique | sort)
+                os:   (( ($az[0].meta.os   // []) + ($aw[0].meta.os   // []) + ($gc[0].meta.os   // []) + ($oc[0].meta.os   // []) ) | unique ),
+                vcpu: (( ($az[0].meta.vcpu // []) + ($aw[0].meta.vcpu // []) + ($gc[0].meta.vcpu // []) + ($oc[0].meta.vcpu // []) ) | unique | sort ),
+                ram:  (( ($az[0].meta.ram  // []) + ($aw[0].meta.ram  // []) + ($gc[0].meta.ram  // []) + ($oc[0].meta.ram  // []) ) | unique | sort )
               },
               azure: $az[0].compute,
               aws:   $aw[0].compute,
