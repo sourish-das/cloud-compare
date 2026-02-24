@@ -158,47 +158,16 @@ jobs:
           cp -f "$OC_SRC" docs/data/oci/oci.prices.json
 
       # --------------------------------------------------------
-      # NEW: Persist updated OCI pricing-source.json (Option A)
+      # OPTIONAL: quick OCI structure check (keeps parity with provider validation)
       # --------------------------------------------------------
-      - name: Persist updated OCI pricing-source.json
+      - name: OCI structure sanity (optional)
+        if: always()
         shell: bash
         run: |
           set -euo pipefail
-
-          echo "Rebuilding scripts/providers/oci.pricing-source.json from docs/data/oci/oci.prices.json..."
-
-          jq '{
-            meta: {
-              currency: "USD",
-              source: "Auto-synthesized from docs/data/oci/oci.prices.json",
-              last_verified: (now | todate)
-            },
-            linux: {
-              amd_e4: {
-                shape: "VM.Standard.E4.Flex",
-                architecture: "x86",
-                ocpu_per_hour: (.compute.linux.amd_e4.ocpu_per_hour),
-                ram_gb_per_hour: (.compute.linux.amd_e4.ram_gb_per_hour)
-              },
-              ampere_a1: {
-                shape: "VM.Standard.A1.Flex",
-                architecture: "arm",
-                ocpu_per_hour: (.compute.linux.ampere_a1.ocpu_per_hour),
-                ram_gb_per_hour: (.compute.linux.ampere_a1.ram_gb_per_hour)
-              }
-            },
-            windows: {
-              license_per_vcpu_hour: (.compute.windows.license_per_vcpu_hour)
-            },
-            storage: {
-              block_volume_gb_month: (.storage.block_volume_gb_month)
-            }
-          }' docs/data/oci/oci.prices.json > scripts/providers/oci.pricing-source.json
-
-          echo "Updated source file:"
-          cat scripts/providers/oci.pricing-source.json
-
-          git add -f scripts/providers/oci.pricing-source.json
+          jq -e '.compute.linux.amd | length > 0' docs/data/oci/oci.prices.json >/dev/null || echo "::warning::OCI linux.amd is empty"
+          jq -e '.compute.linux.arm | length > 0' docs/data/oci/oci.prices.json >/dev/null || echo "::warning::OCI linux.arm is empty"
+          # intel may be empty; do not fail
 
       # --------------------------------------------------------
       # Build FLAT docs/data/prices.json (no timestamps)
