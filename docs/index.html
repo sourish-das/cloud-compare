@@ -22,7 +22,7 @@
           OS
           <button
             type="button"
-            class="info-badge"  <!-- keep existing class; tooltips.js adds .info-btn -->
+            class="info-btn"
             id="osInfoBtn"
             aria-label="OS selection info"
             aria-expanded="false"
@@ -76,7 +76,7 @@
           Storage Type
           <button
             type="button"
-            class="info-badge"  <!-- keep existing; tooltips.js normalizes -->
+            class="info-btn"
             id="storageInfoBtn"
             aria-label="Storage comparison info"
             aria-expanded="false"
@@ -109,7 +109,8 @@
     </div>
 
     <div id="status" class="status">Ready</div>
-    <!-- >>> Footer line for freshness + row counts <<< -->
+
+    <!-- Footer: Build Timestamp + Row Counts -->
     <div id="dataInfo" class="muted" style="margin-top:4px;font-size:12px;">Loading…</div>
   </div>
 
@@ -117,11 +118,13 @@
        RESULTS SECTION (AWS + Azure + GCP + OCI)
   =================================================== -->
   <div class="results">
+
     <!-- ===========================
          AWS PANEL
     ============================ -->
     <div class="panel">
       <h3>AWS EC2</h3>
+
       <div class="family-filter" id="awsFamilyWrap" style="display:none;">
         <label for="awsFamily">Family</label>
         <select id="awsFamily" aria-label="AWS family">
@@ -131,12 +134,14 @@
           <option value="memory">Memory</option>
         </select>
       </div>
+
       <p id="awsInstance"><strong>Recommended Instance:</strong> –</p>
       <p id="awsCpu">vCPU: –</p>
       <p id="awsRam">RAM: –</p>
       <p class="muted" id="awsStorageSel">Storage: –</p>
       <p id="awsPrice">Price/hr: –</p>
       <p id="awsMonthly">≈ Monthly: –</p>
+
       <div class="split">
         <span class="label">Storage Price/hr:</span>
         <span id="awsStoragePriceHr">–</span>
@@ -145,7 +150,9 @@
         <span class="label">≈ Storage Monthly:</span>
         <span id="awsStorageMonthly">–</span>
       </div>
+
       <hr class="divider" />
+
       <div class="split total">
         <span class="label">Total Price/hr:</span>
         <span id="awsTotalHr">–</span>
@@ -161,6 +168,7 @@
     ============================ -->
     <div class="panel">
       <h3>Azure VM</h3>
+
       <div class="family-filter" id="azFamilyWrap" style="display:none;">
         <label for="azFamily">Family</label>
         <select id="azFamily" aria-label="Azure family">
@@ -170,12 +178,14 @@
           <option value="memory">Memory</option>
         </select>
       </div>
+
       <p id="azInstance"><strong>Recommended VM Size:</strong> –</p>
       <p id="azCpu">vCPU: –</p>
       <p id="azRam">RAM: –</p>
       <p class="muted" id="azStorageSel">Storage: –</p>
       <p id="azPrice">Price/hr: –</p>
       <p id="azMonthly">≈ Monthly: –</p>
+
       <div class="split">
         <span class="label">Storage Price/hr:</span>
         <span id="azStoragePriceHr">–</span>
@@ -184,7 +194,9 @@
         <span class="label">≈ Storage Monthly:</span>
         <span id="azStorageMonthly">–</span>
       </div>
+
       <hr class="divider" />
+
       <div class="split total">
         <span class="label">Total Price/hr:</span>
         <span id="azTotalHr">–</span>
@@ -200,6 +212,7 @@
     ============================ -->
     <div class="panel">
       <h3>GCP Compute Engine</h3>
+
       <div class="family-filter" id="gcpFamilyWrap" style="display:none;">
         <label for="gcpFamily">Family</label>
         <select id="gcpFamily" aria-label="GCP family">
@@ -209,12 +222,14 @@
           <option value="memory">Memory</option>
         </select>
       </div>
+
       <p id="gcpInstance"><strong>Recommended Machine:</strong> –</p>
       <p id="gcpCpu">vCPU: –</p>
       <p id="gcpRam">RAM: –</p>
       <p class="muted" id="gcpStorageSel">Storage: –</p>
       <p id="gcpPrice">Price/hr: –</p>
       <p id="gcpMonthly">≈ Monthly: –</p>
+
       <div class="split">
         <span class="label">Storage Price/hr:</span>
         <span id="gcpStoragePriceHr">–</span>
@@ -223,9 +238,11 @@
         <span class="label">≈ Storage Monthly:</span>
         <span id="gcpStorageMonthly">–</span>
       </div>
+
       <hr class="divider" />
+
       <div class="split total">
-        <span class="label">Total Price/hr:</span>
+        <spanpan>
         <span id="gcpTotalHr">–</span>
       </div>
       <div class="split total">
@@ -253,7 +270,6 @@
       <p id="ociInstance"><strong>Recommended Machine:</strong> –</p>
       <p id="ociCpu">vCPU: –</p>
       <p id="ociRam">RAM: –</p>
-
       <p class="muted" id="ociStorageSel">Storage: –</p>
 
       <p id="ociPrice">Price/hr: –</p>
@@ -282,6 +298,7 @@
   </div>
 
   <!-- IMPORTANT: load the coordinator as an ES module -->
-  <script type="module" src="./script.js"></script>
+  ./script.js</script>
+
 </body>
 </html>
