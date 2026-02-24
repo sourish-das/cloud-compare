@@ -1,7 +1,7 @@
 name: Fetch OCI Prices
 
 permissions:
-  contents: read        # provider must NOT push
+  contents: read        # provider does not commit; orchestrator will
 
 on:
   workflow_call:
@@ -22,15 +22,15 @@ jobs:
 
     steps:
       # ------------------------------------------------------------
-      # Checkout
+      # Checkout (read-only)
       # ------------------------------------------------------------
-      - name: Checkout repo
+      - name: Checkout repo (read-only)
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       # ------------------------------------------------------------
-      # Node setup
+      # Node setup (LTS)
       # ------------------------------------------------------------
       - name: Set up Node (LTS)
         uses: actions/setup-node@v4
@@ -38,7 +38,7 @@ jobs:
           node-version: "20"
 
       # ------------------------------------------------------------
-      # jq (validation)
+      # jq (for quick validation)
       # ------------------------------------------------------------
       - name: Ensure jq is available
         run: |
@@ -48,7 +48,7 @@ jobs:
           fi
 
       # ------------------------------------------------------------
-      # Pre-flight
+      # Pre-flight & output dir
       # ------------------------------------------------------------
       - name: Pre-flight checks
         shell: bash
@@ -61,35 +61,9 @@ jobs:
           mkdir -p docs/data/oci
 
       # ------------------------------------------------------------
-      # NEW: STEP 0 — Try pulling live OCI prices (never fail)
+      # Generate OCI prices (LIVE -> LAST-COMMIT -> DEFAULTS)
       # ------------------------------------------------------------
-      - name: Try to pull live OCI price list (Ashburn / USD)
-        run: node scripts/providers/oci.pull-live.js || true
-        env:
-          OCI_REGION: "us-ashburn-1"
-
-      # ------------------------------------------------------------
-      # STEP 1: Validate OCI pricing SOURCE
-      # ------------------------------------------------------------
-      - name: Validate OCI pricing source
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -s scripts/providers/oci.pricing-source.json
-
-          jq '
-            .linux.amd_e4 and
-            .linux.ampere_a1 and
-            .windows.license_per_vcpu_hour and
-            .storage.block_volume_gb_month
-          ' scripts/providers/oci.pricing-source.json > /dev/null
-
-          echo "✅ OCI pricing source validated"
-
-      # ------------------------------------------------------------
-      # STEP 2: Generate OCI prices FROM source
-      # ------------------------------------------------------------
-      - name: Generate OCI prices from pricing source
+      - name: Fetch OCI prices (live->fallback)
         run: node scripts/providers/oci.fetch.js
         env:
           OCI_REGION: "us-ashburn-1"
@@ -98,14 +72,19 @@ jobs:
       # ------------------------------------------------------------
       # Validate generated output
       # ------------------------------------------------------------
-      - name: Validate OCI prices output
+      - name: Validate OCI output
         shell: bash
         run: |
           set -euo pipefail
           test -s docs/data/oci/oci.prices.json
+          echo "Output size (bytes):"
+          wc -c docs/data/oci/oci.prices.json
           echo "Top-level keys:"
-          jq 'keys' docs/data/oci/oci.prices.json
-
+          jq 'keys' docs/data/oci/oci.prices.json | sed 's/^/  /' || true
+          echo "Presence checks:"
+          jq -e '.compute.linux.amd | length > 0' docs/data/oci/oci.prices.json >/dev/null || { echo "::error::linux.amd is empty"; exit 1; }
+          jq -e '.compute.linux.arm | length > 0' docs/data/oci/oci.prices.json >/dev/null || { echo "::error::linux.arm is empty"; exit 1; }
+          # intel may be empty in some regions; do not fail on it
           echo "Storage block:"
           jq '.storage' docs/data/oci/oci.prices.json
 
@@ -119,3 +98,36 @@ jobs:
           path: docs/data/oci/oci.prices.json
           if-no-files-found: error
           retention-days: 7
+
+      # =========================================
+      # OPTIONAL DEBUG MODE — snapshot to docs/data (no direct overwrite)
+      # =========================================
+      - name: Debug Publish to docs/data (optional)
+        if: ${{ vars.DEBUG_PUBLISH == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "DEBUG MODE ENABLED: Snapshotting OCI output under docs/data/oci/_debug"
+          mkdir -p docs/data/oci/_debug
+          cp -f docs/data/oci/oci.prices.json docs/data/oci/_debug/oci.prices.json
+
+      - name: Commit debug provider files (optional)
+        if: ${{ vars.DEBUG_PUBLISH == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git fetch origin main
+          git checkout main
+          git reset --hard origin/main
+
+          git add -f docs/data/oci/oci.prices.json
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git commit -m "Debug publish: OCI pricing update"
+          git push
