@@ -61,7 +61,15 @@ jobs:
           mkdir -p docs/data/oci
 
       # ------------------------------------------------------------
-      # ✅ STEP 1: Validate OCI pricing SOURCE
+      # NEW: STEP 0 — Try pulling live OCI prices (never fail)
+      # ------------------------------------------------------------
+      - name: Try to pull live OCI price list (Ashburn / USD)
+        run: node scripts/providers/oci.pull-live.js || true
+        env:
+          OCI_REGION: "us-ashburn-1"
+
+      # ------------------------------------------------------------
+      # STEP 1: Validate OCI pricing SOURCE
       # ------------------------------------------------------------
       - name: Validate OCI pricing source
         shell: bash
@@ -79,7 +87,7 @@ jobs:
           echo "✅ OCI pricing source validated"
 
       # ------------------------------------------------------------
-      # ✅ STEP 2: Generate OCI prices FROM source
+      # STEP 2: Generate OCI prices FROM source
       # ------------------------------------------------------------
       - name: Generate OCI prices from pricing source
         run: node scripts/providers/oci.fetch.js
