@@ -11,7 +11,7 @@ import {
 } from "./ui/utils.js";
 
 import { STORAGE_CFG, loadPricesAndMeta } from "./ui/state.js";
-import { initStorageTypeTooltip, initOsTypeTooltip } from "./ui/tooltips.js";
+import { initStorageTypeTooltip, initOsTypeTooltip, initOciTooltip } from "./ui/tooltips.js";
 
 import {
   findBestAws,
@@ -34,10 +34,12 @@ async function loadBuildInfo() {
 }
 
 /* ============================================================
-   FAMILY FILTERS
+   FILTERS (show controls)
+   - NOTE: OCI shows Processor (not Family)
 ============================================================ */
 function showFamilyFilters() {
-  ["awsFamilyWrap", "azFamilyWrap", "gcpFamilyWrap", "ociFamilyWrap"].forEach(id => {
+  // OCI: use ociProcessorWrap instead of the old ociFamilyWrap
+  ["awsFamilyWrap", "azFamilyWrap", "gcpFamilyWrap", "ociProcessorWrap"].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = "flex";
   });
@@ -92,6 +94,39 @@ function findBestGcp(list, vcpu, ram, os, family) {
 }
 
 /* ============================================================
+   OCI helpers (UI-side)
+   - latest generation per processor family
+============================================================ */
+function ociLatestGen(linux, processor) {
+  if (!linux || !processor || processor === "auto") return null;
+
+  // Newest -> oldest preference (extend when Oracle adds new gens)
+  const ORDER = {
+    amd:   ["E6", "E5", "E4", "E3"],
+    arm:   ["A4", "A2", "A1"],
+    intel: ["Optimized3", "Standard3"]
+  };
+
+  const arr = processor === "amd"   ? (linux.amd   || [])
+            : processor === "arm"   ? (linux.arm   || [])
+            : processor === "intel" ? (linux.intel || [])
+            : [];
+
+  if (!Array.isArray(arr) || arr.length === 0) return null;
+
+  const gens = new Set(arr.map(e => String(e.gen || "").toLowerCase()));
+  for (const g of (ORDER[processor] || [])) {
+    if (gens.has(g.toLowerCase())) return g;
+  }
+  // Fallback: lexicographically latest if labels differ
+  return arr
+    .map(e => String(e.gen || ""))
+    .filter(Boolean)
+    .sort((a, b) => a.localeCompare(b))
+    .pop() || null;
+}
+
+/* ============================================================
    MAIN compare()
 ============================================================ */
 export async function compare(resetFamilies = false) {
@@ -99,7 +134,7 @@ export async function compare(resetFamilies = false) {
   if (btn) btn.disabled = true;
   setStatus("Fetching local prices…");
 
-  // Reset family dropdowns on request
+  // Reset family / processor dropdowns on request
   if (resetFamilies) {
     const awsEl = document.getElementById("awsFamily");
     if (awsEl) awsEl.value = "";
@@ -110,8 +145,9 @@ export async function compare(resetFamilies = false) {
     const gcpEl = document.getElementById("gcpFamily");
     if (gcpEl) gcpEl.value = "";
 
-    const ociEl = document.getElementById("ociFamily");
-    if (ociEl) ociEl.value = "auto";  // ✅ keep Auto, not empty
+    // OCI: reset processor selector to Auto
+    const ociProcReset = document.getElementById("ociProcessor");
+    if (ociProcReset) ociProcReset.value = "auto";
   }
 
   const os           = document.getElementById("os")?.value || "Linux";
@@ -123,7 +159,20 @@ export async function compare(resetFamilies = false) {
   const familyAws = document.getElementById("awsFamily")?.value || "";
   const familyAz  = document.getElementById("azFamily")?.value  || "";
   const familyGcp = document.getElementById("gcpFamily")?.value || "";
-  const familyOci = document.getElementById("ociFamily")?.value || "auto";
+
+  // NEW: OCI processor (replaces 'family')
+  const ociProcEl = document.getElementById("ociProcessor");
+  let ociProcessor = (ociProcEl?.value || "auto").toLowerCase();
+
+  // Enforce Windows ≠ Ampere (UI-side)
+  if (String(os).toLowerCase() === "windows") {
+    const armOpt = ociProcEl?.querySelector('option value="arm"') || ociProcEl?.querySelector('option[value="arm"]');
+    if (armOpt) armOpt.disabled = true;
+    if (ociProcessor === "arm") { ociProcessor = "auto"; if (ociProcEl) ociProcEl.value = "auto"; }
+  } else {
+    const armOpt = ociProcEl?.querySelector('option[value="arm"]');
+    if (armOpt) armOpt.disabled = false;
+  }
 
   try {
     resetCards();
@@ -167,7 +216,15 @@ export async function compare(resetFamilies = false) {
     /* ---------- OCI ---------- */
     let ociCard;
     try {
-      const o = findBestOci(data.oci, vcpu, ram, os, familyOci);
+      // Build options for OCI matcher
+      const ociCompute = data.oci;
+      const linux = ociCompute?.linux || {};
+      const latestGen = (ociProcessor === "auto") ? null : ociLatestGen(linux, ociProcessor);
+      const ociOptions = latestGen
+        ? { processor: ociProcessor, generation: latestGen }
+        : { processor: ociProcessor };
+
+      const o = findBestOci(ociCompute, vcpu, ram, os, ociOptions);
       ociCard = o ? { instance: o.instance, vcpu: o.vcpu, ram: o.ram, pricePerHourUSD: o.pricePerHourUSD, region: (STORAGE_CFG?.oci?.region || "—") } : null;
     } catch (e) { ociCard = { error: e.message }; }
 
@@ -326,13 +383,15 @@ document.addEventListener("DOMContentLoaded", () => {
   setSelectValue("cpu", "2");
   setSelectValue("ram", "4");
 
-  ["awsFamily", "azFamily", "gcpFamily", "ociFamily"].forEach(id => {
+  // Listen for changes on family/processor filters
+  ["awsFamily", "azFamily", "gcpFamily", "ociProcessor"].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener("change", () => compare(false));
   });
 
   initStorageTypeTooltip();
   initOsTypeTooltip();
+  initOciTooltip();
 
   compare(false);
 });
