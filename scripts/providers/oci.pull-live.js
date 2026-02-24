@@ -1,7 +1,7 @@
 // scripts/providers/oci.pull-live.js
 // Node 20+
-// Simple contract: try to fetch live USD list prices; if successful, overwrite
-// scripts/providers/oci.pricing-source.json. If anything fails, exit 0 without writing.
+// Arrays-first model: linux.amd[], linux.arm[], linux.intel[] (NO legacy single keys).
+// If live fetch fails, do nothing and exit 0 so the pipeline stays green.
 
 import fs from "node:fs";
 import path from "node:path";
@@ -10,61 +10,74 @@ import { setTimeout as sleep } from "node:timers/promises";
 const REGION = process.env.OCI_REGION || "us-ashburn-1";
 const TARGET = path.join("scripts", "providers", "oci.pricing-source.json");
 
-// Oracle public endpoints / references (USD list)
+// Oracle APEX (public, USD). May rate-limit or 403 occasionally → retry/backoff.
 const APEX_URL = "https://apexapps.oracle.com/pls/apex/cetools/api/v1/products/?currencyCode=USD";
-// Fallback: static rates consolidated from Oracle's public price pages
-// (Compute & Block Volume pricing) — used if APEX is unavailable. [3](https://calculator.holori.com/oci)[4](https://www.cloudzero.com/blog/oracle-cloud-pricing/)
+
+// Fallback from Oracle public price tables (USD list).
 const FALLBACK = {
-  e3: { cpu: 0.025,  ram: 0.0015 },
-  e4: { cpu: 0.025,  ram: 0.0015 },
-  e5: { cpu: 0.03,   ram: 0.002  },
-  e6: { cpu: 0.03,   ram: 0.002  },
-  a1: { cpu: 0.01,   ram: 0.0015 },
-  a2: { cpu: 0.014,  ram: 0.002  },
-  a4: { cpu: 0.0138, ram: 0.0027 },
-  x9s:{ cpu: 0.04,   ram: 0.0015 },  // “Standard3 Flex” maps to X9 Standard on price list
-  x9o:{ cpu: 0.054,  ram: 0.0015 },  // “Optimized3 Flex” maps to X9 Optimized on price list
-  bv:  0.0255, // Block Volume base $/GB-month
-  win: 0.046   // Windows uplift / vCPU-hour (commonly published uplift)
+  amd: {
+    E3: { cpu: 0.025,  ram: 0.0015, shape: "VM.Standard.E3.Flex", arch: "x86" },
+    E4: { cpu: 0.025,  ram: 0.0015, shape: "VM.Standard.E4.Flex", arch: "x86" },
+    E5: { cpu: 0.03,   ram: 0.002,  shape: "VM.Standard.E5.Flex", arch: "x86" },
+    E6: { cpu: 0.03,   ram: 0.002,  shape: "VM.Standard.E6.Flex", arch: "x86" }
+  },
+  arm: {
+    A1: { cpu: 0.01,   ram: 0.0015, shape: "VM.Standard.A1.Flex", arch: "arm" },
+    A2: { cpu: 0.014,  ram: 0.002,  shape: "VM.Standard.A2.Flex", arch: "arm" },
+    A4: { cpu: 0.0138, ram: 0.0027, shape: "VM.Standard.A4.Flex", arch: "arm" }
+  },
+  intel: {
+    Standard3:  { cpu: 0.04,  ram: 0.0015, shape: "VM.Standard3.Flex",  arch: "x86" },
+    Optimized3: { cpu: 0.054, ram: 0.0015, shape: "VM.Optimized3.Flex", arch: "x86" }
+  },
+  bv: 0.0255,   // Block Volume base price ($/GB-month)
+  win: 0.046    // Windows uplift ($/vCPU-hour)
 };
 
-function isNum(x){ return Number.isFinite(x); }
+const isNum = (x) => Number.isFinite(Number(x));
 function priceOf(item){
   const c = item?.currencyCodeLocalizations?.[0];
   const p = c?.prices?.[0];
   return Number(p?.value);
 }
-function byName(items, rx){
-  const name = (o) => (o?.serviceName || o?.displayName || o?.partDescription || "").toString();
-  return items.find(i => rx.test(name(i)));
+function labelOf(item){
+  return (item?.serviceName || item?.displayName || item?.partDescription || "").toString();
 }
-function val(items, rx, fb){
-  const v = priceOf(byName(items, rx));
+function matches(items, rx){ return items.filter(i => rx.test(labelOf(i))); }
+function firstVal(items, rx, fb){
+  const v = priceOf(matches(items, rx)[0]);
   return isNum(v) ? v : fb;
 }
-
+function minVal(items, rx, fb){
+  const vs = matches(items, rx).map(priceOf).filter(isNum);
+  return vs.length ? Math.min(...vs) : fb;
+}
 async function fetchWithRetry(url, attempts=4){
   let lastErr;
   for (let i=0; i<attempts; i++){
     try{
-      const resp = await fetch(url, {
-        headers: {
-          "User-Agent": "cloud-compare-ci/1.0 (+github actions)",
-          "Accept": "application/json"
-        }
+      const r = await fetch(url, {
+        headers: { "User-Agent": "cloud-compare-ci/1.0", "Accept": "application/json" }
       });
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      return await resp.json();
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return await r.json();
     }catch(e){
       lastErr = e;
-      await sleep(500 * Math.pow(2, i)); // back-off
+      await sleep(500 * Math.pow(2, i));
     }
   }
   throw lastErr;
 }
+function entry(gen, shape, cpu, ram, arch){
+  return {
+    gen, shape, architecture: arch,
+    ocpu_per_hour: Number(cpu),
+    ram_gb_per_hour: Number(ram)
+  };
+}
 
-async function tryPullFromApex(){
-  // Regex keyed to Oracle “Compute …” / “Block Volume …” naming seen in price list pages. [3](https://calculator.holori.com/oci)
+async function buildFromApex(){
+  // Regex for the public price list’s labels.
   const RX = {
     // AMD
     E3_CPU: /Compute\s*-\s*Standard\s*-\s*E3\s*-\s*OCPU/i,
@@ -75,14 +88,14 @@ async function tryPullFromApex(){
     E5_RAM: /Compute\s*-\s*Standard\s*-\s*E5\s*-\s*Memory/i,
     E6_CPU: /Compute\s*-\s*Standard\s*-\s*E6\s*-\s*OCPU/i,
     E6_RAM: /Compute\s*-\s*Standard\s*-\s*E6\s*-\s*Memory/i,
-    // Arm
+    // Arm (dash variants)
     A1_CPU: /Compute\s*(–|-)\s*Ampere\s*A1\s*(–|-)\s*OCPU/i,
     A1_RAM: /Compute\s*(–|-)\s*Ampere\s*A1\s*(–|-)\s*Memory/i,
     A2_CPU: /Compute\s*-\s*Standard\s*-\s*A2\s*-\s*OCPU/i,
     A2_RAM: /Compute\s*-\s*Standard\s*-\s*A2\s*-\s*Memory/i,
     A4_CPU: /Compute\s*-\s*Standard\s*-\s*A4\s*-\s*OCPU/i,
     A4_RAM: /Compute\s*-\s*Standard\s*-\s*A4\s*-\s*Memory/i,
-    // Intel (maps to Standard3/Optimized3 Flex on UI; X9 in price list docs)
+    // Intel (X9 Standard/Optimized on public pages)
     X9S_CPU: /Compute\s*-\s*Standard\s*-\s*X9\s*-\s*OCPU/i,
     X9S_RAM: /Compute\s*-\s*Standard\s*-\s*X9\s*-\s*Memory/i,
     X9O_CPU: /Compute\s*-\s*Virtual\s*Machine\s*Optimized\s*-\s*X9\s*-\s*OCPU/i,
@@ -92,69 +105,85 @@ async function tryPullFromApex(){
     BV:  /Block\s*Volume\s*Storage/i
   };
 
-  const json = await fetchWithRetry(APEX_URL); // may 403 sometimes. [1](https://expertbeacon.com/oracle-cloud-storage-pricing-guide-2023-tiers-cost-optimization-more/)
+  const json = await fetchWithRetry(APEX_URL);
   const items = json?.items || [];
 
-  function pick(rx, fb){ const v = val(items, rx, fb); return isNum(v) ? v : fb; }
+  const amd = [
+    entry("E3", "VM.Standard.E3.Flex",
+      firstVal(items, RX.E3_CPU, FALLBACK.amd.E3.cpu),
+      firstVal(items, RX.E3_RAM, FALLBACK.amd.E3.ram),
+      "x86"),
+    entry("E4", "VM.Standard.E4.Flex",
+      firstVal(items, RX.E4_CPU, FALLBACK.amd.E4.cpu),
+      firstVal(items, RX.E4_RAM, FALLBACK.amd.E4.ram),
+      "x86"),
+    entry("E5", "VM.Standard.E5.Flex",
+      firstVal(items, RX.E5_CPU, FALLBACK.amd.E5.cpu),
+      firstVal(items, RX.E5_RAM, FALLBACK.amd.E5.ram),
+      "x86"),
+    entry("E6", "VM.Standard.E6.Flex",
+      firstVal(items, RX.E6_CPU, FALLBACK.amd.E6.cpu),
+      firstVal(items, RX.E6_RAM, FALLBACK.amd.E6.ram),
+      "x86")
+  ].filter(e => isNum(e.ocpu_per_hour) && isNum(e.ram_gb_per_hour));
 
-  const out = {
+  const arm = [
+    entry("A1", "VM.Standard.A1.Flex",
+      firstVal(items, RX.A1_CPU, FALLBACK.arm.A1.cpu),
+      firstVal(items, RX.A1_RAM, FALLBACK.arm.A1.ram),
+      "arm"),
+    entry("A2", "VM.Standard.A2.Flex",
+      firstVal(items, RX.A2_CPU, FALLBACK.arm.A2.cpu),
+      firstVal(items, RX.A2_RAM, FALLBACK.arm.A2.ram),
+      "arm"),
+    entry("A4", "VM.Standard.A4.Flex",
+      firstVal(items, RX.A4_CPU, FALLBACK.arm.A4.cpu),
+      firstVal(items, RX.A4_RAM, FALLBACK.arm.A4.ram),
+      "arm")
+  ].filter(e => isNum(e.ocpu_per_hour) && isNum(e.ram_gb_per_hour));
+
+  const intel = [
+    entry("Standard3",  "VM.Standard3.Flex",
+      firstVal(items, RX.X9S_CPU, FALLBACK.intel.Standard3.cpu),
+      firstVal(items, RX.X9S_RAM, FALLBACK.intel.Standard3.ram),
+      "x86"),
+    entry("Optimized3", "VM.Optimized3.Flex",
+      firstVal(items, RX.X9O_CPU, FALLBACK.intel.Optimized3.cpu),
+      firstVal(items, RX.X9O_RAM, FALLBACK.intel.Optimized3.ram),
+      "x86")
+  ].filter(e => isNum(e.ocpu_per_hour) && isNum(e.ram_gb_per_hour));
+
+  // Windows uplift + Block Volume base
+  const win = firstVal(items, RX.WIN, FALLBACK.win);
+  // Prefer the minimum price among “Block Volume Storage” entries; fallback to 0.0255.
+  const bv  = minVal(items, RX.BV, FALLBACK.bv);
+
+  // Require at least one AMD & one Arm entry to keep both arches usable.
+  if (!amd.length) throw new Error("AMD list is empty after APEX parse");
+  if (!arm.length) throw new Error("Arm list is empty after APEX parse");
+
+  return {
     meta: {
       currency: "USD",
       source: "Oracle Public Pricelist (APEX) or fallback static rates",
       last_verified: new Date().toISOString(),
       region: REGION
     },
-    linux: {
-      // minimal (today’s tool needs only one AMD + one Arm; we also include intel for future)
-      amd_e4: {
-        shape: "VM.Standard.E4.Flex", architecture: "x86",
-        ocpu_per_hour: pick(RX.E4_CPU, FALLBACK.e4.cpu),
-        ram_gb_per_hour: pick(RX.E4_RAM, FALLBACK.e4.ram)
-      },
-      ampere_a1: {
-        shape: "VM.Standard.A1.Flex", architecture: "arm",
-        ocpu_per_hour: pick(RX.A1_CPU, FALLBACK.a1.cpu),
-        ram_gb_per_hour: pick(RX.A1_RAM, FALLBACK.a1.ram)
-      },
-      // extra (not used by current UI; preserved for future Processor/Generation)
-      intel_standard3: {
-        shape: "VM.Standard3.Flex", architecture: "x86",
-        ocpu_per_hour: pick(RX.X9S_CPU, FALLBACK.x9s.cpu),
-        ram_gb_per_hour: pick(RX.X9S_RAM, FALLBACK.x9s.ram)
-      },
-      intel_optimized3: {
-        shape: "VM.Optimized3.Flex", architecture: "x86",
-        ocpu_per_hour: pick(RX.X9O_CPU, FALLBACK.x9o.cpu),
-        ram_gb_per_hour: pick(RX.X9O_RAM, FALLBACK.x9o.ram)
-      }
-    },
-    windows: {
-      license_per_vcpu_hour: pick(RX.WIN, FALLBACK.win)
-    },
-    storage: {
-      block_volume_gb_month: pick(RX.BV, FALLBACK.bv)
-    }
+    linux: { amd, arm, intel },
+    windows: { license_per_vcpu_hour: win },
+    storage: { block_volume_gb_month: bv }
   };
-
-  // Minimal sanity check: ensure we at least got AMD E4 CPU & RAM rates
-  if (!isNum(out.linux.amd_e4.ocpu_per_hour) || !isNum(out.linux.amd_e4.ram_gb_per_hour)) {
-    throw new Error("AMD E4 rates missing after APEX parse");
-  }
-  return out;
 }
 
 async function main(){
   try{
-    // Try APEX; if APEX fails entirely, fall through to static fallback block below.
-    const out = await tryPullFromApex(); // may throw on 403/parse error. [2](https://redresscompliance.com/oci-pricing-and-oracle-licensing/)
-    fs.writeFileSync(TARGET, JSON.stringify(out, null, 2));
-    console.log(`[OCI] ✅ Updated ${TARGET} with live pricing.`);
+    const src = await buildFromApex();
+    fs.writeFileSync(TARGET, JSON.stringify(src, null, 2));
+    console.log(`[OCI] ✅ Updated ${TARGET} (arrays; no legacy keys).`);
     process.exit(0);
   }catch(e){
-    // Last resort: do not write, keep previous file, and exit 0 to keep pipeline green.
-    console.warn("[OCI] Live pull failed, keeping existing pricing-source.json:", e?.message);
+    console.warn("[OCI] Live pull failed; keeping existing pricing-source.json:", e?.message);
     process.exit(0);
   }
 }
-
 main().catch(() => process.exit(0));
