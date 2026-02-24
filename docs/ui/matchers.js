@@ -144,18 +144,17 @@ export function gcpFamilyMatch(row, family) {
 }
 
 //
-// ---------------- OCI HELPERS (NEW) ----------------
+// ---------------- OCI HELPERS (UPDATED) ----------------
 //
-// OCI compute in your aggregated prices.json is NOT a list of instances.
-// It is a small "rates object" built from oci.prices.json:
-//   { linux: { amd_e4:{...}, ampere_a1:{...} }, windows:{ license_per_vcpu_hour: ... } }
-// We compute the on-demand hourly price on the fly.
+// With the arrays‑first model, OCI compute in the aggregated prices.json looks like:
+//   oci.compute = {
+//     linux: { amd:[{gen,shape,architecture,ocpu_per_hour,ram_gb_per_hour},...],
+//              arm:[...],
+//              intel:[...] },
+//     windows: { license_per_vcpu_hour }
+//   }
 //
-// Policy used (aligned with backend decisions):
-//  - Linux + Auto: try Ampere A1, fallback AMD E4
-//  - Windows: AMD E4 only (no ARM)
-//  - Family filters do not change RAM/vCPU input; they only affect which candidate is allowed.
-//    (Auto chooses cheapest. Non-auto defaults to AMD E4 for apples-to-apples.)
+// We compute the on-demand hourly price on the fly based on vCPU/RAM inputs.
 
 function safeNum(x, fallback = null) {
   const n = Number(x);
@@ -164,13 +163,12 @@ function safeNum(x, fallback = null) {
 
 function vcpuToOcpuForArch(vcpu, arch) {
   const v = safeNum(vcpu, 0);
-  if (arch === "arm") return v;       // modeled 1:1
+  if (arch === "arm") return v;       // ARM: 1 OCPU = 1 vCPU
   return v / 2;                       // x86: 1 OCPU = 2 vCPU
 }
 
+// Kept for compatibility (not used by the new OCI matcher)
 export function isOciInFamily(_inst, family) {
-  // OCI Flex shapes don’t map 1:1 to AWS-like families in naming.
-  // We keep this permissive; selection is controlled in findBestOci.
   if (!family) return true;
   const f = String(family).toLowerCase();
   return f === "auto" || f === "general" || f === "compute" || f === "memory";
@@ -269,87 +267,96 @@ export function findBestAzure(list, vcpu, ram, os, family) {
 }
 
 //
-// ---------------- OCI FINDER (NEW) ----------------
+// ---------------- OCI FINDER (arrays‑first, processor-aware) ----------------
 //
-export function findBestOci(ociCompute, vcpu, ram, os, family) {
+// Signature change: findBestOci(ociCompute, vcpu, ram, os, options)
+//   options = { processor: "auto"|"amd"|"arm"|"intel", generation: "auto"|string }
+//
+// Behavior:
+//   - Auto: cheapest across allowed candidates.
+//   - Windows: exclude ARM always.
+//   - If processor is set, restrict to that arch;
+//     if generation is also set, restrict to that gen label.
+//   - Returns the single cheapest candidate; tie-break by gen label.
+
+export function findBestOci(ociCompute, vcpu, ram, os, options = {}) {
   if (!ociCompute || typeof ociCompute !== "object")
     throw new Error("OCI pricing block is missing (prices.json.oci)");
 
   const wantOS = normalizeOs(os || "Linux");
-  const fam = String(family || "auto").toLowerCase();
+  const isWindows = (wantOS === "windows");
 
-  const linux = ociCompute.linux || {};
-  const windows = ociCompute.windows || {};
-
-  const amd = linux.amd_e4;
-  const a1  = linux.ampere_a1;
-
-  if (!amd) throw new Error("OCI pricing missing linux.amd_e4");
+  const L = ociCompute.linux || {};
+  const W = ociCompute.windows || {};
 
   const v = safeNum(vcpu, null);
   const m = safeNum(ram, null);
   if (!Number.isFinite(v) || !Number.isFinite(m))
     throw new Error("OCI requires numeric vCPU and RAM inputs");
 
-  const licensePerVcpuHr = (wantOS === "windows")
-    ? safeNum(windows.license_per_vcpu_hour, 0) ?? 0
-    : 0;
+  const proc = String(options.processor || "auto").toLowerCase();    // "auto"|"amd"|"arm"|"intel"
+  const genFilter = String(options.generation || "auto").toLowerCase();
 
-  function priceCandidate(shapeObj, arch) {
-    const ocpuRate = safeNum(shapeObj?.ocpu_per_hour, null);
-    const memRate  = safeNum(shapeObj?.ram_gb_per_hour, null);
-    if (!Number.isFinite(ocpuRate) || !Number.isFinite(memRate)) return null;
+  const winUpliftPerVcpu = isWindows ? safeNum(W?.license_per_vcpu_hour, 0) ?? 0 : 0;
 
-    const ocpu = vcpuToOcpuForArch(v, arch);
+  const candidates = [];
+
+  function addCandidate(entry, archLabel) {
+    const ocpuRate = safeNum(entry?.ocpu_per_hour, null);
+    const memRate  = safeNum(entry?.ram_gb_per_hour, null);
+    if (!Number.isFinite(ocpuRate) || !Number.isFinite(memRate)) return;
+
+    // Processor filter
+    if (proc !== "auto") {
+      const wantArch = (proc === "arm") ? "arm" : "x86";
+      if (archLabel !== wantArch) return;
+    }
+
+    // Generation filter
+    const entGen = String(entry?.gen || "").toLowerCase();
+    if (genFilter !== "auto" && entGen && entGen !== genFilter) return;
+
+    // Windows excludes ARM
+    if (isWindows && archLabel === "arm") return;
+
+    const ocpu = vcpuToOcpuForArch(v, archLabel);
     const cpuBase = ocpu * ocpuRate;
     const memCost = m * memRate;
-    const winLic  = v * licensePerVcpuHr;
+    const winLic  = v * winUpliftPerVcpu;
 
     const ph = cpuBase + memCost + winLic;
 
-    return {
+    candidates.push({
       provider: "oci",
-      instance: shapeObj.shape,
+      instance: entry.shape || "VM.Standard.Flex",
       vcpu: v,
       ram: m,
-      os: (wantOS === "windows") ? "Windows" : "Linux",
-      category: fam === "auto" ? "auto" : fam,      // UI display hint
-      series: arch,
+      os: isWindows ? "Windows" : "Linux",
+      series: archLabel,
+      gen: entry.gen || undefined,
       pricePerHourUSD: ph,
-      // Optional breakdown for UI debugging
       breakdown: {
         cpu_base_per_hour: cpuBase,
         windows_license_per_hour: winLic,
         memory_per_hour: memCost
       }
-    };
+    });
   }
 
-  // Windows => no ARM
-  if (wantOS === "windows") {
-    const best = priceCandidate(amd, "x86");
-    if (!best) throw new Error("OCI AMD pricing invalid");
-    return best;
+  // Gather from arrays; intel may be empty in some regions
+  (Array.isArray(L.amd)   ? L.amd   : []).forEach(e => addCandidate(e, "x86"));
+  (Array.isArray(L.arm)   ? L.arm   : []).forEach(e => addCandidate(e, "arm"));
+  (Array.isArray(L.intel) ? L.intel : []).forEach(e => addCandidate(e, "x86"));
+
+  if (candidates.length === 0) {
+    throw new Error(`No OCI candidates for processor=${proc}`);
   }
 
-  // Linux:
-  // Auto => choose cheapest of A1 and AMD
-  if (fam === "auto") {
-    const cands = [];
-    if (a1) {
-      const c1 = priceCandidate(a1, "arm");
-      if (c1) cands.push(c1);
-    }
-    const c2 = priceCandidate(amd, "x86");
-    if (c2) cands.push(c2);
+  // Sort cheapest first; tie-break by gen label (alphabetical)
+  candidates.sort((a, b) =>
+    a.pricePerHourUSD - b.pricePerHourUSD ||
+    String(a.gen || "zzz").localeCompare(String(b.gen || "zzz"))
+  );
 
-    if (cands.length === 0) throw new Error("OCI candidates missing/invalid");
-    cands.sort((p, q) => p.pricePerHourUSD - q.pricePerHourUSD);
-    return cands[0];
-  }
-
-  // Non-auto families: keep apples-to-apples => AMD x86
-  const best = priceCandidate(amd, "x86");
-  if (!best) throw new Error("OCI AMD pricing invalid");
-  return best;
+  return candidates[0];
 }
