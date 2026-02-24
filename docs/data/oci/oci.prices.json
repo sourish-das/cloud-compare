@@ -7,35 +7,80 @@
       "Linux",
       "Windows"
     ],
-    "source": "Oracle Public Pricelist (APEX) or fallback static rates",
-    "last_verified": "2026-02-24T10:11:43.423Z"
+    "source": "Oracle Public Pricelist (APEX) or defaults",
+    "last_verified": "2026-02-24T11:38:45.484Z"
   },
   "compute": {
     "linux": {
-      "amd_e4": {
-        "shape": "VM.Standard.E4.Flex",
-        "architecture": "x86",
-        "ocpu_per_hour": 0.025,
-        "ram_gb_per_hour": 0.0015
-      },
-      "ampere_a1": {
-        "shape": "VM.Standard.A1.Flex",
-        "architecture": "arm",
-        "ocpu_per_hour": 0.01,
-        "ram_gb_per_hour": 0.0015
-      },
-      "intel_standard3": {
-        "shape": "VM.Standard3.Flex",
-        "architecture": "x86",
-        "ocpu_per_hour": 0.04,
-        "ram_gb_per_hour": 0.0015
-      },
-      "intel_optimized3": {
-        "shape": "VM.Optimized3.Flex",
-        "architecture": "x86",
-        "ocpu_per_hour": 0.054,
-        "ram_gb_per_hour": 0.0015
-      }
+      "amd": [
+        {
+          "gen": "E3",
+          "shape": "VM.Standard.E3.Flex",
+          "architecture": "x86",
+          "ocpu_per_hour": 0.025,
+          "ram_gb_per_hour": 0.0015
+        },
+        {
+          "gen": "E4",
+          "shape": "VM.Standard.E4.Flex",
+          "architecture": "x86",
+          "ocpu_per_hour": 0.025,
+          "ram_gb_per_hour": 0.0015
+        },
+        {
+          "gen": "E5",
+          "shape": "VM.Standard.E5.Flex",
+          "architecture": "x86",
+          "ocpu_per_hour": 0.03,
+          "ram_gb_per_hour": 0.002
+        },
+        {
+          "gen": "E6",
+          "shape": "VM.Standard.E6.Flex",
+          "architecture": "x86",
+          "ocpu_per_hour": 0.03,
+          "ram_gb_per_hour": 0.002
+        }
+      ],
+      "arm": [
+        {
+          "gen": "A1",
+          "shape": "VM.Standard.A1.Flex",
+          "architecture": "arm",
+          "ocpu_per_hour": 0.01,
+          "ram_gb_per_hour": 0.0015
+        },
+        {
+          "gen": "A2",
+          "shape": "VM.Standard.A2.Flex",
+          "architecture": "arm",
+          "ocpu_per_hour": 0.014,
+          "ram_gb_per_hour": 0.002
+        },
+        {
+          "gen": "A4",
+          "shape": "VM.Standard.A4.Flex",
+          "architecture": "arm",
+          "ocpu_per_hour": 0.0138,
+          "ram_gb_per_hour": 0.0027
+        }
+      ],
+      "intel": [
+        {
+          "gen": "Standard3",
+          "shape": "VM.Standard3.Flex",
+          "architecture": "x86",
+          "ocpu_per_hour": 0.04,
+          "ram_gb_per_hour": 0.0015
+        },
+        {
+          "gen": "Optimized3",
+          "shape": "VM.Optimized3.Flex",
+          "architecture": "x86",
+          "ocpu_per_hour": 0.054,
+          "ram_gb_per_hour": 0.0015
+        }
+      ]
     },
     "windows": {
       "license_per_vcpu_hour": 0.046
