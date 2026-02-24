@@ -163,8 +163,7 @@ button:disabled {
 }
 
 /* ======================================================
-   ✅ SINGLE SOURCE OF TRUTH — INFO BUTTON
-   Used by tooltips.js via .info-btn
+   INFO BUTTON
    ====================================================== */
 .info-btn {
   width:12px;
@@ -213,7 +212,7 @@ button:disabled {
 }
 
 /* ======================================================
-   TOOLTIP PANEL
+   TOOLTIP PANEL (default small tooltip)
    ====================================================== */
 .info-pop {
   position:absolute;
@@ -241,6 +240,69 @@ button:disabled {
   height:12px;
   background:#2b2b2b;
   transform:rotate(45deg);
+}
+
+/* ======================================================
+   OCI INFO MODAL VARIANT (big tooltip)
+   ====================================================== */
+.info-pop--modal {
+  position: fixed;
+  inset: 0;
+  display: none;          /* toggled by aria-hidden */
+  place-items: center;
+  background: rgba(0,0,0,0.35);
+  padding: 20px;
+  z-index: 2000;
+}
+
+.info-pop--modal[aria-hidden="false"] {
+  display: grid;
+}
+
+.info-pop--modal .info-pop__content {
+  background: #fff;
+  color: var(--text);
+  width: min(680px, 90vw);
+  max-height: 80vh;
+  overflow: auto;
+  border-radius: 10px;
+  padding: 20px 24px;
+  box-shadow: 0 14px 40px rgba(0,0,0,0.25);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.info-pop--modal .info-pop__arrow {
+  display: none !important;
+}
+
+.info-pop__close {
+  float: right;
+  border: none;
+  background: transparent;
+  font-size: 20px;
+  color: #777;
+  cursor: pointer;
+}
+
+.info-pop__close:hover {
+  color: #222;
+}
+
+/* ======================================================
+   OCI TITLE ALIGNMENT (Compute ⓘ)
+   ====================================================== */
+h3.inline-flex {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ======================================================
+   DISABLED OPTION STYLE
+   ====================================================== */
+select option[disabled] {
+  color: #aaa;
 }
 
 /* ======================================================
