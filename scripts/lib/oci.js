@@ -4,27 +4,10 @@
 const fs = require("fs");
 const path = require("path");
 
-const OCI_REGION = process.env.OCI_REGION || "us-ashburn-1";
+// Optional: used only by recommendOciFromRuntime()
+const RUNTIME_PATH_DEFAULT = path.join("docs", "data", "oci", "oci.prices.json");
 
-const SRC_PATH =
-  process.env.OCI_PRICING_SOURCE ||
-  path.join(__dirname, "..", "providers", "oci.pricing-source.json");
-
-// ---- Cache pricing source to avoid repeated FS reads
-let _cachedSource = null;
-let _cachedMtimeMs = null;
-
-function loadSourceCached() {
-  const stat = fs.statSync(SRC_PATH);
-  if (_cachedSource && _cachedMtimeMs === stat.mtimeMs) return _cachedSource;
-
-  const raw = fs.readFileSync(SRC_PATH, "utf-8");
-  _cachedSource = JSON.parse(raw);
-  _cachedMtimeMs = stat.mtimeMs;
-  return _cachedSource;
-}
-
-// Normalization helpers
+// ---------- Helpers ----------
 function vcpuToOcpu_x86(vcpu) {
   const n = Number(vcpu);
   if (!Number.isFinite(n) || n <= 0) return 0;
@@ -34,7 +17,7 @@ function vcpuToOcpu_x86(vcpu) {
 function vcpuToOcpu_arm(vcpu) {
   const n = Number(vcpu);
   if (!Number.isFinite(n) || n <= 0) return 0;
-  return n; // modeled as 1:1 for A1 in this tool
+  return n; // Ampere Flex modeled 1:1
 }
 
 function storageHourly(blockVolumeGbMonth, storageGb) {
@@ -49,116 +32,164 @@ function familyRam(vcpu, family) {
   if (!Number.isFinite(n) || n <= 0) return 0;
 
   switch (String(family || "").toLowerCase()) {
-    case "compute":
-      return n * 2;
-    case "memory":
-      return n * 8;
+    case "compute": return n * 2;
+    case "memory":  return n * 8;
     case "general":
-    default:
-      return n * 4;
+    default:        return n * 4;
   }
 }
 
 /**
- * Recommend cheapest OCI option for given inputs (on-demand list).
- * Policy:
- *  - Only VM.Standard.*.Flex
- *  - Auto(Linux): try Ampere A1 first, else AMD E4
- *  - Windows: AMD E4 only (no ARM)
+ * Build a recommender bound to a given OCI pricing object (preferred for UI).
+ * @param {object} pricing  docs/data/oci/oci.prices.json contents (or the `oci` portion from docs/data/prices.json)
+ * Expected shape:
+ * {
+ *   meta:{...},
+ *   compute:{ linux:{ amd:[], arm:[], intel:[] }, windows:{ license_per_vcpu_hour } },
+ *   storage:{ block_volume_gb_month }
+ * }
  */
-function recommendOci({ os, vcpu, ramGb, family, storageGb }) {
-  const src = loadSourceCached();
-
-  const OS = String(os || "Linux");
-  const isWindows = OS.toLowerCase() === "windows";
-  const fam = String(family || "general").toLowerCase();
-
-  const vcpuN = Number(vcpu);
-  const storageN = Number(storageGb) || 0;
-
-  // If RAM not explicitly provided, derive from family like your GUI
-  const desiredRam =
-    Number.isFinite(Number(ramGb)) && Number(ramGb) > 0
-      ? Number(ramGb)
-      : (fam === "auto" ? familyRam(vcpuN, "general") : familyRam(vcpuN, fam));
-
-  const candidates = [];
-
-  function safeNum(x, fallback = 0) {
-    const n = Number(x);
-    return Number.isFinite(n) ? n : fallback;
+function createOciRecommender(pricing) {
+  if (!pricing || typeof pricing !== "object") {
+    throw new Error("createOciRecommender: missing pricing object");
   }
 
-  function addCandidate({ arch, shapeLabel, ocpuRate, memRate }) {
-    const ocpu =
-      arch === "arm" ? vcpuToOcpu_arm(vcpuN) : vcpuToOcpu_x86(vcpuN);
+  const compute = pricing.compute || {};
+  const linux = compute.linux || {};
+  const windows = compute.windows || {};
+  const storage = pricing.storage || {};
 
-    const licenseUplift = isWindows
-      ? safeNum(src?.windows?.license_per_vcpu_hour, 0)
-      : 0;
+  /**
+   * Arrays-first recommender for OCI Flex.
+   * @param {object} args
+   *   - os: "Linux"|"Windows"
+   *   - vcpu: number
+   *   - ramGb: number
+   *   - family: "auto"|"general"|"compute"|"memory" (for RAM default only)
+   *   - storageGb: number
+   * @param {object} options?
+   *   - processor?: "auto"|"amd"|"arm"|"intel"  (default "auto")
+   *   - generation?: "auto"|string             (e.g., "E6","A1","Standard3","Optimized3")
+   * @returns {{ best: Object, candidates: Object[] }}
+   */
+  function recommendOci({
+    os, vcpu, ramGb, family, storageGb
+  }, options = {}) {
+    const OS = String(os || "Linux");
+    const isWindows = OS.toLowerCase() === "windows";
+    const fam = String(family || "general").toLowerCase();
 
-    const cpuRateN = safeNum(ocpuRate);
-    const memRateN = safeNum(memRate);
+    const proc = String(options.processor || "auto").toLowerCase();
+    const genFilter = String(options.generation || "auto").toLowerCase();
 
-    // Breakdown
-    const cpuBase = ocpu * cpuRateN;
-    const windowsLicense = vcpuN * licenseUplift;
-    const memCost = desiredRam * memRateN;
+    const v = Number(vcpu);
+    const storageN = Number(storageGb) || 0;
 
-    const blockGbMonth = safeNum(src?.storage?.block_volume_gb_month, 0);
-    const storCost = storageHourly(blockGbMonth, storageN);
+    const desiredRam =
+      Number.isFinite(Number(ramGb)) && Number(ramGb) > 0
+        ? Number(ramGb)
+        : (fam === "auto" ? familyRam(v, "general") : familyRam(v, fam));
 
-    const totalPerHour = cpuBase + windowsLicense + memCost + storCost;
+    const safeNum = (x, fb = 0) => {
+      const n = Number(x);
+      return Number.isFinite(n) ? n : fb;
+    };
 
-    candidates.push({
-      provider: "oci",
-      shape: shapeLabel,
-      arch,
-      os: OS,
-      vcpu: vcpuN,
-      ramGb: desiredRam,
-      storageGb: storageN,
-      pricePerHour: totalPerHour,
-      breakdown: {
-        cpu_base_per_hour: cpuBase,
-        windows_license_per_hour: windowsLicense,
-        memory_per_hour: memCost,
-        storage_per_hour: storCost
+    const winUplift = isWindows ? safeNum(windows?.license_per_vcpu_hour, 0) : 0;
+    const bvBase = safeNum(storage?.block_volume_gb_month, 0);
+
+    const candidates = [];
+
+    function add(entry, archLabel) {
+      const cpuRate = safeNum(entry?.ocpu_per_hour, null);
+      const memRate = safeNum(entry?.ram_gb_per_hour, null);
+      if (!Number.isFinite(cpuRate) || !Number.isFinite(memRate)) return;
+
+      // Processor filter
+      if (proc !== "auto") {
+        const wantArch = (proc === "arm") ? "arm" : "x86";
+        if (archLabel !== wantArch) return;
       }
-    });
+
+      // Generation filter (if present)
+      const entGen = String(entry?.gen || "").toLowerCase();
+      if (genFilter !== "auto" && entGen && entGen !== genFilter) return;
+
+      // Windows excludes Arm
+      if (isWindows && archLabel === "arm") return;
+
+      const ocpu = (archLabel === "arm") ? vcpuToOcpu_arm(v) : vcpuToOcpu_x86(v);
+      const cpuBase = ocpu * cpuRate;
+      const memCost = desiredRam * memRate;
+      const winLic  = v * winUplift;
+      const stor    = storageHourly(bvBase, storageN);
+
+      const ph = cpuBase + memCost + winLic + stor;
+
+      candidates.push({
+        provider: "oci",
+        shape: entry.shape || "VM.Standard.Flex",
+        arch: archLabel,
+        os: OS,
+        vcpu: v,
+        ramGb: desiredRam,
+        storageGb: storageN,
+        pricePerHour: ph,
+        breakdown: {
+          cpu_base_per_hour: cpuBase,
+          windows_license_per_hour: winLic,
+          memory_per_hour: memCost,
+          storage_per_hour: stor
+        },
+        gen: entry.gen || undefined
+      });
+    }
+
+    // Arrays-first (intel may be empty)
+    (Array.isArray(linux.amd)   ? linux.amd   : []).forEach(e => add(e, "x86"));
+    (Array.isArray(linux.arm)   ? linux.arm   : []).forEach(e => add(e, "arm"));
+    (Array.isArray(linux.intel) ? linux.intel : []).forEach(e => add(e, "x86"));
+
+    if (candidates.length === 0) {
+      const p = proc || "auto";
+      throw new Error(`No OCI candidates for OS=${os || "any"} processor=${p}`);
+    }
+
+    // Auto (or explicit) => pick cheapest; tie-break by gen label if present
+    candidates.sort((a, b) =>
+      a.pricePerHour - b.pricePerHour ||
+      ((a.gen || "zzz") > (b.gen || "zzz") ? 1 : -1)
+    );
+
+    const best = candidates[0];
+    return { best, candidates };
   }
 
-  // Auto: allow ARM first only for Linux
-  if (!isWindows && fam === "auto" && src?.linux?.ampere_a1) {
-    const a1 = src.linux.ampere_a1;
-    addCandidate({
-      arch: "arm",
-      shapeLabel: a1.shape,
-      ocpuRate: a1.ocpu_per_hour,
-      memRate: a1.ram_gb_per_hour
-    });
+  return { recommendOci };
+}
+
+/**
+ * Optional Node helper: load runtime pricing from docs/data/oci/oci.prices.json
+ * and run the recommender. Useful for quick CLI/tests without wiring a pricing object.
+ */
+function recommendOciFromRuntime(args, options = {}, runtimePath = RUNTIME_PATH_DEFAULT) {
+  const raw = fs.readFileSync(runtimePath, "utf-8");
+  const runtime = JSON.parse(raw);
+  if (!runtime?.compute?.linux) {
+    throw new Error("Invalid OCI runtime JSON: missing compute.linux");
   }
-
-  // AMD E4 always available (must exist)
-  if (!src?.linux?.amd_e4) {
-    throw new Error("[OCI] Missing linux.amd_e4 in pricing source JSON.");
-  }
-
-  const e4 = src.linux.amd_e4;
-  addCandidate({
-    arch: "x86",
-    shapeLabel: e4.shape,
-    ocpuRate: e4.ocpu_per_hour,
-    memRate: e4.ram_gb_per_hour
-  });
-
-  candidates.sort((a, b) => a.pricePerHour - b.pricePerHour);
-  return { best: candidates[0], candidates };
+  const { recommendOci } = createOciRecommender(runtime);
+  return recommendOci(args, options);
 }
 
 module.exports = {
-  OCI_REGION,
-  recommendOci,
+  // Factory for browser/app code that already has pricing loaded
+  createOciRecommender,
+
+  // Convenience for Node usage
+  recommendOciFromRuntime,
+
+  // Expose helpers (unchanged API)
   vcpuToOcpu_x86,
   vcpuToOcpu_arm,
   familyRam,
