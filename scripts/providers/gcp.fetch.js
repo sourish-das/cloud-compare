@@ -24,13 +24,11 @@ const {
   listRegionZones,
   listZoneMachineTypes,
   buildSeriesUnitRateMaps,
-  buildWindowsCoreRate  // <<< NEW: resolve Windows per-vCPU license rate from Catalog
+  buildWindowsCoreRate // <- resolve Windows per-vCPU license rate (hybrid)
 } = require("../lib/gcp");
 
 // Output & env
-// UPDATED: honor OUTPUT_PATH, default to docs/data (no data/... usage)
 const OUT      = process.env.OUTPUT_PATH || path.join("docs", "data", "gcp", "gcp.prices.json");
-// UPDATED: region is now fully workflow-driven (falls back to us-east1 if not provided)
 const REGION   = process.env.GCP_REGION   || "us-east1";
 const CURRENCY = process.env.GCP_CURRENCY || "USD";
 const API_KEY  = process.env.GCP_PRICE_API_KEY;   // Catalog API (public)
@@ -40,7 +38,7 @@ const PROJECT  = process.env.GCP_PROJECT_ID;      // for Compute API fallback
 async function listSkus(serviceId, pageToken = "") {
   const base =
     `https://cloudbilling.googleapis.com/v1/services/${serviceId}/skus` +
-    `?currencyCode=${encodeURIComponent(CURRENCY)}&pageSize=5000`; // <-- fixed &amp;
+    `?currencyCode=${encodeURIComponent(CURRENCY)}&pageSize=5000`;
   const url = pageToken ? `${base}&pageToken=${encodeURIComponent(pageToken)}` : base;
 
   const bearer =
@@ -49,14 +47,14 @@ async function listSkus(serviceId, pageToken = "") {
     "";
 
   const headers = bearer ? { Authorization: `Bearer ${bearer}` } : {};
-  const finalUrl = bearer ? url : `${url}&key=${API_KEY}`; // <-- fixed &amp;
+  const finalUrl = bearer ? url : `${url}&key=${API_KEY}`;
 
   console.log(`[GCP] Catalog auth: ${bearer ? "OAuth(Bearer)" : "API key"}`);
 
   const r = await fetch(finalUrl, { headers });
   if (!r.ok) {
     const txt = await r.text().catch(() => "");
-    throw new Error(`[GCP] skus HTTP ${r.status} ${txt}`); // <-- fixed &gt;
+    throw new Error(`[GCP] skus HTTP ${r.status} ${txt}`);
   }
   return await r.json();
 }
@@ -64,7 +62,7 @@ async function listSkus(serviceId, pageToken = "") {
 async function fetchGcpPrices() {
   logStart("[GCP] Fetching PAYG pricing via Catalog API (with FULL-mode fallback)…");
 
-  if (!process.env.GCLOUD_ACCESS_TOKEN && !process.env.GCP_PRICE_API_KEY) { // <-- fixed &amp;&amp;
+  if (!process.env.GCLOUD_ACCESS_TOKEN && !process.env.GCP_PRICE_API_KEY) {
     throw new Error("[GCP] No Catalog credentials found (need GCLOUD_ACCESS_TOKEN or GCP_PRICE_API_KEY).");
   }
 
@@ -80,12 +78,14 @@ async function fetchGcpPrices() {
   // Build Linux unit-rate maps (Core/Ram per series) for fallback
   const linuxSeriesRates = buildSeriesUnitRateMaps(allSkus, REGION);
 
-  // Resolve Windows license per-vCPU rate from Catalog (region-scoped)
+  // Resolve Windows license per-vCPU rate (hybrid: Catalog if present; else public/env)
   const windowsCoreRate = buildWindowsCoreRate(allSkus, REGION);
   if (windowsCoreRate) {
     console.log(`[GCP] Windows per-vCPU (license) rate: $${windowsCoreRate.toFixed(6)}/vCPU-hr`);
   } else {
-    console.warn("[GCP] Windows per-vCPU rate not found for this region; Windows rows will be synthesized only if rate is present.");
+    // With the hybrid resolver you added in lib/gcp.js, this should not happen;
+    // it returns a fallback rate when Catalog has no license SKU.
+    console.warn("[GCP] Windows per-vCPU rate not resolved; Windows synthesis will be skipped.");
   }
 
   // Optional: force composition path via env (ignores lack of per-instance rows)
@@ -101,7 +101,7 @@ async function fetchGcpPrices() {
   for (const sku of allSkus) {
     const cat = sku.category || {};
     if (cat.resourceFamily !== "Compute") continue;
-    if (cat.usageType && !/OnDemand/i.test(cat.usageType)) continue;
+    if (cat.usageType && !/OnDemand/i.test(cat.usageType)) continue; // On‑demand only
     if (!regionMatches(sku.serviceRegions, REGION)) continue;
 
     const mt = inferMachineType(sku);
@@ -115,7 +115,7 @@ async function fetchGcpPrices() {
     const readable = (sku.description || sku.displayName || "");
     const os    = /windows/i.test(readable) ? "Windows" : "Linux";
     const price = extractHourlyPrice(sku.pricingInfo);
-    if (!(price > 0)) continue; // <-- fixed &gt;
+    if (!(price > 0)) continue;
 
     const a = sku.attributes || {};
     let vcpu = a.vcpu ? Number(a.vcpu) : undefined;
@@ -183,7 +183,7 @@ async function fetchGcpPrices() {
           if (!mtMap.has(name)) {
             const vcpu   = Number(mt.guestCpus || 0);
             const ramGiB = Number(mt.memoryMb || 0) / 1024;
-            if (vcpu > 0 && ramGiB > 0) mtMap.set(name, { vcpu, ramGiB }); // <-- fixed &gt; and &amp;&amp;
+            if (vcpu > 0 && ramGiB > 0) mtMap.set(name, { vcpu, ramGiB });
           }
         }
       }
@@ -202,7 +202,7 @@ async function fetchGcpPrices() {
         if (!rates || !rates.core || !rates.ram) continue;
 
         const price = hw.vcpu * rates.core + hw.ramGiB * rates.ram;
-        if (!(price > 0)) continue; // <-- fixed &gt;
+        if (!(price > 0)) continue;
 
         const key = `sku_${++counter}`;
         gcp_price_list[key] = {
@@ -279,7 +279,7 @@ async function main() {
 
     const os = item.os && item.os.toLowerCase().includes("win") ? "Windows" : "Linux";
     const price = Number(item.price_per_hour);
-    if (!Number.isFinite(price) || price <= 0) continue; // <-- fixed &lt;=
+    if (!Number.isFinite(price) || price <= 0) continue;
 
     const vcpu = Number(item.vcpu);
     const ram  = Number(item.memory_gb);
@@ -306,7 +306,7 @@ async function main() {
 
   const cheapest = dedupeCheapestByKey(
     rows,
-    r => `${r.instance}-${r.region}-${r.os}` // <-- fixed &gt;
+    r => `${r.instance}-${r.region}-${r.os}`
   );
 
   // Quick category counts (nice for logs)
@@ -322,7 +322,7 @@ async function main() {
     ram:  uniqSortedNums(cheapest.map(x => x.ram))
   };
 
-  // (Static storage placeholders; can be replaced with PD SKUs later)
+  // Storage (public list prices converted to hourly in UI)
   const storage = {
     region: REGION,
     ssd_per_gb_month: 0.17,
