@@ -49,24 +49,26 @@ jobs:
             "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/current/${AWS_REGION}/index.json")
           echo "AWS Price List probe HTTP: ${CODE}"
           if [[ "${CODE}" != "200" ]]; then
-            echo "::warning::AWS Price List probe failed (HTTP ${CODE}). Continuing; the fetch script may use a different endpoint or caching."
+            echo "::warning::AWS Price List probe failed (HTTP ${CODE}). Continuing..."
           else
             echo "Top-level keys (truncated):"
             jq 'keys' /tmp/aws-price.json | head -n 20 || true
           fi
 
-      # Output directory (NEW: docs/data/aws)
+      # Output directory
       - name: Ensure output directory
         run: mkdir -p docs/data/aws
 
-      # >>> Run your AWS fetcher (still writes to old default unless OUTPUT_PATH is provided)
+      # >>> Run the AWS fetcher (now supports Windows via catalog + fallback uplift)
       - name: Fetch AWS prices
         run: node scripts/providers/aws.fetch.js
         env:
           AWS_REGION: "us-east-1"
           OUTPUT_PATH: "docs/data/aws/aws.prices.json"
+          # Optional: set Windows per‑vCPU uplift if you want to pin it (code default is 0.046)
+          # AWS_WINDOWS_RATE_PER_VCPU: "0.046"
 
-      # Validate the output was created and is non-empty
+      # Validate the output was created and is non-empty + show quick stats
       - name: Validate AWS output
         shell: bash
         run: |
@@ -78,6 +80,8 @@ jobs:
           jq 'keys' docs/data/aws/aws.prices.json | sed 's/^/  /' || true
           echo "Compute array length:"
           jq '.compute | length' docs/data/aws/aws.prices.json || true
+          echo "Counts by OS:"
+          jq -r '.compute | group_by(.os) | map({os: .[0].os, count: length})' docs/data/aws/aws.prices.json
 
       # Upload artifact for orchestrator
       - name: Upload AWS pricing JSON (artifact)
@@ -89,7 +93,7 @@ jobs:
           retention-days: 7
 
       # =========================================
-      # OPTIONAL DEBUG MODE — publish & commit directly to docs/data
+      # OPTIONAL DEBUG MODE — snapshot to docs/data (no direct overwrite)
       # =========================================
       - name: Debug Publish to docs/data (optional)
         if: ${{ vars.DEBUG_PUBLISH == 'true' }}
