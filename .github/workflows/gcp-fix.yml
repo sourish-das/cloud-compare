@@ -104,7 +104,7 @@ jobs:
 
           mkdir -p docs/data/gcp
 
-      # Quick peek at the Catalog API via OAuth (fix URL & unescape '&')
+      # Quick peek at the Catalog API via OAuth (fix URL to use '&')
       - name: Probe Catalog API (OAuth, first 10)
         shell: bash
         env:
@@ -113,7 +113,7 @@ jobs:
           GCP_CURRENCY: "USD"
         run: |
           set -euo pipefail
-          URL="https://cloudbilling.googleapis.com/v1/services/${CE_SERVICE_ID}/skus?currencyCode=${GCP_CURRENCY}&pageSize=10"  # NEW: '&' not '&amp;'
+          URL="https://cloudbilling.googleapis.com/v1/services/${CE_SERVICE_ID}/skus?currencyCode=${GCP_CURRENCY}&pageSize=10"
           echo "Catalog probe URL: ${URL}"
           CODE=$(curl -s -o /tmp/skus10.json -w "%{http_code}" -H "Authorization: Bearer ${OIDC_TOKEN}" "$URL")
           echo "Catalog probe HTTP: ${CODE}"
@@ -125,8 +125,8 @@ jobs:
             jq -r '.skus[0:10][]?.description' /tmp/skus10.json || true
           fi
 
-      # Deeper probe to confirm Windows license SKU shows up (OAuth)
-      - name: Deep Catalog probe (OAuth, Windows license search)
+      # 🔍 Deep, paginated probe: enumerate ALL pages and count ANY 'Windows'
+      - name: Deep Catalog probe (OAuth, ALL Windows — paginated)
         shell: bash
         env:
           OIDC_TOKEN: ${{ steps.auth.outputs.access_token }}
@@ -134,19 +134,45 @@ jobs:
           GCP_CURRENCY: "USD"
         run: |
           set -euo pipefail
-          URL="https://cloudbilling.googleapis.com/v1/services/${CE_SERVICE_ID}/skus?currencyCode=${GCP_CURRENCY}&pageSize=2000"  # NEW
-          echo "Deep Catalog URL: ${URL}"
-          CODE=$(curl -s -o /tmp/skus2000.json -w "%{http_code}" -H "Authorization: Bearer ${OIDC_TOKEN}" "$URL")
-          echo "Deep Catalog HTTP: ${CODE}"
-          if [[ "${CODE}" != "200" ]]; then
-            echo "::warning::Deep Catalog OAuth probe failed."
-            head -c 2000 /tmp/skus2000.json || true
-          else
-            echo "Windows license-like SKUs (first 10):"
-            jq -r '.skus[]?|select(.description|test("Windows Server"; "i"))|select(.description|test("license|paid image|per vCPU"; "i"))|.description' /tmp/skus2000.json | head -n 10 || true
-            echo "Count (Windows-ish):"
-            jq '[.skus[]?|select(.description|test("Windows Server"; "i"))|select(.description|test("license|paid image|per vCPU"; "i"))] | length' /tmp/skus2000.json || true
-          fi
+          PAGE_TOKEN=""
+          TOTAL=0
+          HITS=0
+          SAMPLES="$(mktemp)"
+          : > "${SAMPLES}"
+
+          while :; do
+            URL="https://cloudbilling.googleapis.com/v1/services/${CE_SERVICE_ID}/skus?currencyCode=${GCP_CURRENCY}&pageSize=5000"
+            [[ -n "${PAGE_TOKEN}" ]] && URL="${URL}&pageToken=${PAGE_TOKEN}"
+
+            RESP="$(mktemp)"
+            CODE=$(curl -s -o "${RESP}" -w "%{http_code}" -H "Authorization: Bearer ${OIDC_TOKEN}" "$URL")
+            if [[ "$CODE" != "200" ]]; then
+              echo "::warning::Catalog page fetch failed (HTTP ${CODE})"
+              head -c 1000 "${RESP}" || true
+              rm -f "${RESP}"
+              break
+            fi
+
+            PAGE_COUNT=$(jq '.skus|length' "${RESP}")
+            TOTAL=$((TOTAL + PAGE_COUNT))
+
+            # Count ANY Windows SKUs (no license filter)
+            PAGE_HITS=$(jq '[.skus[]?|select(.description|test("Windows"; "i"))] | length' "${RESP}")
+            HITS=$((HITS + PAGE_HITS))
+
+            # Collect up to ~20 samples overall for wording inspection
+            jq -r '.skus[]?|select(.description|test("Windows"; "i"))|.description' "${RESP}" | head -n 20 >> "${SAMPLES}"
+
+            echo "Fetched page: ${PAGE_COUNT} SKUs; cumulative=${TOTAL}; page_windows_hits=${PAGE_HITS}; total_windows_hits=${HITS}"
+
+            PAGE_TOKEN=$(jq -r '.nextPageToken // ""' "${RESP}")
+            rm -f "${RESP}"
+            [[ -z "${PAGE_TOKEN}" ]] && break
+          done
+
+          echo "Total SKUs scanned=${TOTAL}; Windows-related hits=${HITS}"
+          echo "Sample Windows descriptions (de-duped):"
+          sort -u "${SAMPLES}" | head -n 20
 
       # >>> Run fetcher (enable Windows debug + fixed OUTPUT_PATH)
       - name: Fetch GCP prices (FULL mode)
@@ -158,7 +184,8 @@ jobs:
           GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
           GCLOUD_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
           OUTPUT_PATH: "docs/data/gcp/gcp.prices.json"
-          GCP_DEBUG_WIN: "1"   # NEW: print Windows SKU candidates
+          GCP_DEBUG_WIN: "1"         # prints Windows candidate SKUs
+          # GCP_FORCE_COMPOSE: "1"    # optional: guarantees Linux rows for Windows synthesis
 
       # Validate output
       - name: Validate output
@@ -173,7 +200,7 @@ jobs:
           echo "Compute array length:"
           jq '.compute | length' docs/data/gcp/gcp.prices.json || true
 
-      # NEW: Explicit Windows vs Linux counts for quick triage
+      # NEW: Explicit Windows vs Linux counts
       - name: Validate Windows presence
         shell: bash
         run: |
@@ -205,7 +232,7 @@ jobs:
           retention-days: 7
 
       # =========================================
-      # OPTIONAL DEBUG MODE — updated to avoid copy-to-self
+      # OPTIONAL DEBUG PUBLISH
       # =========================================
       - name: Debug Publish to docs/data (optional)
         if: ${{ vars.DEBUG_PUBLISH == 'true' }}
