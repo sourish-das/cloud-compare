@@ -390,6 +390,7 @@ window.compare = compare;
 
 /* ============================================================
    BOOTSTRAP
+   - Populate controls & tooltips only; DO NOT auto-run compare.
 ============================================================ */
 document.addEventListener("DOMContentLoaded", () => {
   fillSelect("os",   [{ value: "Linux", text: "Linux" }, { value: "Windows", text: "Windows" }]);
@@ -410,5 +411,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initOsTypeTooltip();
   initOciTooltip();
 
-  compare(false);
+  // Do NOT auto-compare; wait for explicit user click.
+  setStatus("Select inputs and click Compare");
+  safeSetText("dataInfo", "Loading…"); // will be replaced after first Compare
 });
