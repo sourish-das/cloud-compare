@@ -130,7 +130,7 @@ function buildSeriesUnitRateMaps(allSkus, region) {
   for (const sku of allSkus) {
     const cat = sku.category || {};
     if (cat.resourceFamily !== "Compute") continue;
-    if (cat.usageType && !/OnDemand/i.test(cat.usageType)) continue;
+    if (cat.usageType && !/OnDemand/i.test(cat.usageType)) continue; // On‑demand only
     if (!regionMatches(sku.serviceRegions, region)) continue;
     const info = parseSeriesUnitRate(sku);
     if (!info) continue;
@@ -140,31 +140,31 @@ function buildSeriesUnitRateMaps(allSkus, region) {
   return maps;
 }
 
-/**
- * Find the Windows Server on‑demand license rate PER vCPU for the given region
- * by scanning the Cloud Billing Catalog SKUs you already fetched.
- * Returns a Number (USD per vCPU‑hour) or null if not found.
- *
- * Strategy:
- *  - Pass 1 (strict): require windows + (license|licensing|core|vcpu), exclude obvious non-candidates.
- *  - Pass 2 (relaxed): accept "paid/on‑demand/windows server" phrasing like the Console UI if strict finds nothing.
- *  - If multiple, pick the lowest positive price defensively.
- *  - If GCP_DEBUG_WIN=1, print a sample of candidates for diagnostics.
- */
+/* ============================================================
+ * Hybrid Windows per‑vCPU license rate resolver (Windows Standard)
+ * ------------------------------------------------------------
+ * - Try to discover a Windows Server license SKU in Catalog (region-scoped).
+ * - If none found in the tenant, fallback to public/env rate (Windows Standard).
+ *   Default rate: $0.046 per vCPU-hour.
+ * ============================================================ */
+
+const WINDOWS_STANDARD_FALLBACK_RATE =
+  Number(process.env.GCP_WINDOWS_RATE_PER_VCPU || 0) || 0.046;
+
 function buildWindowsCoreRate(allSkus, region) {
   const inRegion = (sku) => {
     const cat = sku.category || {};
     if (cat.resourceFamily !== "Compute") return false;
-    if (cat.usageType && !/OnDemand/i.test(cat.usageType)) return false;
+    if (cat.usageType && !/OnDemand/i.test(cat.usageType)) return false; // on‑demand only
     return regionMatches(sku.serviceRegions, region);
   };
 
   // Exclusions that are never the Windows Server license core SKU
-  const BAD = /(ram|memory|gpu|sole\s*tenan|local ssd|persistent disk|commitment|spot|preemptible|sles|rhel|sql)/i;
+  const BAD = /(byol|ram|memory|gpu|sole\s*tenan|local ssd|persistent disk|commitment|spot|preemptible|sles|rhel|sql|windows\s*(7|8|10|11))/i;
 
   const candidates = [];
 
-  // Pass 1: strict
+  // Pass 1: strict — require windows + (license|licensing|core|vcpu)
   for (const sku of allSkus) {
     if (!inRegion(sku)) continue;
     const name = (sku.description || sku.displayName || "").toLowerCase();
@@ -173,22 +173,20 @@ function buildWindowsCoreRate(allSkus, region) {
     if (BAD.test(name)) continue;
 
     const price = extractHourlyPrice(sku.pricingInfo);
-    if (price && price > 0) candidates.push({ price, name, sku });
+    if (price && price > 0) candidates.push({ price, name });
   }
 
-  // Pass 2: relaxed
+  // Pass 2: relaxed — accept "paid/on‑demand/windows server" phrasing if strict found nothing
   if (candidates.length === 0) {
     for (const sku of allSkus) {
       if (!inRegion(sku)) continue;
       const name = (sku.description || sku.displayName || "").toLowerCase();
       if (!/windows/.test(name)) continue;
       if (BAD.test(name)) continue;
-
-      // Phrases commonly seen in UI / catalog variants
       if (!/(paid|on-?demand|windows\s*server)/.test(name)) continue;
 
       const price = extractHourlyPrice(sku.pricingInfo);
-      if (price && price > 0) candidates.push({ price, name, sku });
+      if (price && price > 0) candidates.push({ price, name });
     }
   }
 
@@ -200,11 +198,22 @@ function buildWindowsCoreRate(allSkus, region) {
     console.log("[GCP][WIN] candidate SKUs (sample):", JSON.stringify(sample, null, 2));
   }
 
-  if (candidates.length === 0) return null;
+  // Catalog candidate → pick the lowest positive price
+  if (candidates.length > 0) {
+    candidates.sort((a, b) => a.price - b.price);
+    return candidates[0].price;
+  }
 
-  candidates.sort((a, b) => a.price - b.price);
-  return candidates[0].price;
+  // No Catalog license SKU in tenant → fallback to public/env Standard rate
+  if (process.env.GCP_DEBUG_WIN === "1") {
+    console.log(`[GCP][WIN] No Catalog license SKU found in '${region}'. Using fallback Standard rate $${WINDOWS_STANDARD_FALLBACK_RATE}/vCPU-hr`);
+  }
+  return WINDOWS_STANDARD_FALLBACK_RATE;
 }
+
+/* ============================================================
+ * Family classification
+ * ============================================================ */
 
 function classifyGcpInstance(instance) {
   if (!instance) return null;
