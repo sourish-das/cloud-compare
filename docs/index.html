@@ -255,7 +255,7 @@
     <div class="panel">
       <h3 class="inline-flex">
         OCI Compute
-        <!-- Info button (opens modal/tooltip below) -->
+        <!-- Info button (opens tooltip below, anchored to this button) -->
         <button
           type="button"
           class="info-btn"
@@ -305,8 +305,9 @@
         <span id="ociTotalMonthly">–</span>
       </div>
 
-      <!-- OCI Info tooltip/modal content -->
-      <div class="info-pop info-pop--modal" id="ociInfoTip" role="dialog" aria-hidden="true">
+      <!-- OCI Info tooltip content (anchored, not modal) -->
+      <div class="info-pop" id="ociInfoTip" role="tooltip" aria-hidden="true">
+        <div class="info-pop__arrow"></div>
         <div class="info-pop__content">
           <button class="info-pop__close" aria-label="Close">×</button>
           <strong>OCI Compute — How Pricing Works</strong><br /><br />
