@@ -80,11 +80,11 @@ jobs:
             echo "Probe OK - sample keys:" && jq 'keys' /tmp/arm.json | head -n 20 || true
           fi
 
-      # Output directory (UPDATED)
+      # Output directory
       - name: Ensure output directory
         run: mkdir -p docs/data/azure
 
-      # >>> Run your Azure fetcher (UPDATED OUTPUT_PATH)
+      # >>> Run the Azure fetcher (writes to docs/data/azure/azure.prices.json)
       - name: Fetch Azure prices
         run: node scripts/providers/azure.fetch.js
         env:
@@ -93,7 +93,7 @@ jobs:
           AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           OUTPUT_PATH: "docs/data/azure/azure.prices.json"
 
-      # Validate output (UPDATED path)
+      # Validate output & show quick stats (counts by OS)
       - name: Validate Azure output
         shell: bash
         run: |
@@ -105,8 +105,10 @@ jobs:
           jq 'keys' docs/data/azure/azure.prices.json | sed 's/^/  /' || true
           echo "Compute array length:"
           jq '.compute | length' docs/data/azure/azure.prices.json || true
+          echo "Counts by OS:"
+          jq -r '.compute | group_by(.os) | map({os: .[0].os, count: length})' docs/data/azure/azure.prices.json
 
-      # Upload artifact (UPDATED path)
+      # Upload artifact for orchestrator
       - name: Upload Azure pricing JSON (artifact)
         uses: actions/upload-artifact@v4
         with:
@@ -116,7 +118,7 @@ jobs:
           retention-days: 7
 
       # =========================================
-      # OPTIONAL DEBUG MODE — updated to avoid copy-to-self
+      # OPTIONAL DEBUG MODE — snapshot to docs/data (no direct overwrite)
       # =========================================
       - name: Debug Publish to docs/data (optional)
         if: ${{ vars.DEBUG_PUBLISH == 'true' }}
@@ -124,7 +126,6 @@ jobs:
         run: |
           set -euo pipefail
           echo "DEBUG MODE ENABLED: Publishing Azure output directly to docs/data/azure"
-          # Main file is already in docs/data/azure; create a safe debug snapshot
           mkdir -p docs/data/azure/_debug
           cp -f docs/data/azure/azure.prices.json docs/data/azure/_debug/azure.prices.json
 
@@ -140,7 +141,6 @@ jobs:
           git checkout main
           git reset --hard origin/main
 
-          # Commit the main file exactly as before (unchanged behavior)
           git add -f docs/data/azure/azure.prices.json
           if git diff --cached --quiet; then
             echo "No changes to commit."
