@@ -166,7 +166,7 @@ export async function compare(resetFamilies = false) {
 
   // Enforce Windows ≠ Ampere (UI-side)
   if (String(os).toLowerCase() === "windows") {
-    // FIX: use a valid selector to avoid DOMException (SyntaxError)
+    // FIX: valid selector to avoid DOMException (SyntaxError)
     const armOpt = ociProcEl?.querySelector('option[value="arm"]');
     if (armOpt) armOpt.disabled = true;
     if (ociProcessor === "arm") {
@@ -183,21 +183,31 @@ export async function compare(resetFamilies = false) {
 
     const data = await loadPricesAndMeta();
 
-    // Footer: freshness + row counts
+    /* ---------- Footer: freshness + row counts (robust, no optional chaining) ---------- */
     try {
+      function len(a) { return Array.isArray(a) ? a.length : 0; }
+      function ociRowCount(oci) {
+        if (!oci || typeof oci !== "object") return 0;
+        const linux = oci.linux || {};
+        return len(linux.amd) + len(linux.arm) + len(linux.intel);
+      }
+
       const info = await loadBuildInfo();
       const counts = {
-        az: (data.azure || []).length,
-        aw: (data.aws   || []).length,
-        gc: (data.gcp   || []).length,
-        oc: 
-          (data.oci?.linux?.amd?.length ?? 0)r +
-          (data.oci?.linux?.arm?.length ?? 0) +
-          (data.oci?.linux?.intel?.length ?? 0)
-    };
-      const when = info?.generatedAt || '—';
-      safeSetText("dataInfo", `Data: ${when} · Rows — Azure: ${counts.az}, AWS: ${counts.aw}, GCP: ${counts.gc}, OCI: ${counts.oc}`);
-    } catch { /* non-fatal */ }
+        az: Array.isArray(data.azure) ? data.azure.length : 0,
+        aw: Array.isArray(data.aws)   ? data.aws.length   : 0,
+        gc: Array.isArray(data.gcp)   ? data.gcp.length   : 0,
+        oc: ociRowCount(data.oci)
+      };
+      const when = (info && info.generatedAt) ? info.generatedAt : "—";
+      safeSetText(
+        "dataInfo",
+        `Data: ${when} · Rows — Azure: ${counts.az}, AWS: ${counts.aw}, GCP: ${counts.gc}, OCI: ${counts.oc}`
+      );
+    } catch (e) {
+      console.warn("Footer render failed:", e);
+      safeSetText("dataInfo", "Data: — · Rows — Azure: —, AWS: —, GCP: —, OCI: —");
+    }
 
     /* ---------- AWS ---------- */
     let awsCard;
@@ -225,14 +235,14 @@ export async function compare(resetFamilies = false) {
     try {
       // Build options for OCI matcher
       const ociCompute = data.oci;
-      const linux = ociCompute?.linux || {};
+      const linux = (ociCompute && ociCompute.linux) ? ociCompute.linux : {};
       const latestGen = (ociProcessor === "auto") ? null : ociLatestGen(linux, ociProcessor);
       const ociOptions = latestGen
         ? { processor: ociProcessor, generation: latestGen }
         : { processor: ociProcessor };
 
       const o = findBestOci(ociCompute, vcpu, ram, os, ociOptions);
-      ociCard = o ? { instance: o.instance, vcpu: o.vcpu, ram: o.ram, pricePerHourUSD: o.pricePerHourUSD, region: (STORAGE_CFG?.oci?.region || "—") } : null;
+      ociCard = o ? { instance: o.instance, vcpu: o.vcpu, ram: o.ram, pricePerHourUSD: o.pricePerHourUSD, region: (STORAGE_CFG && STORAGE_CFG.oci && STORAGE_CFG.oci.region) ? STORAGE_CFG.oci.region : "—" } : null;
     } catch (e) { ociCard = { error: e.message }; }
 
     /* ---------- Storage labels ---------- */
