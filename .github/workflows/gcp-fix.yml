@@ -125,8 +125,11 @@ jobs:
             jq -r '.skus[0:10][]?.description' /tmp/skus10.json || true
           fi
 
-      # 🔍 Deep, paginated probe — Windows Server (paid, on-demand, per-vCPU/core) only (non-failing)
-      - name: Deep Catalog probe (Windows Server editions only)
+      # 🔎 Deep, paginated diagnostics for Windows in 3 tiers (non-failing):
+      #   A) Any "Windows"
+      #   B) Any "Windows Server"
+      #   C) Windows Server (paid, on-demand, per-vCPU/core) for us-east1/us/global
+      - name: Deep Catalog probe (Windows diagnostics, paginated)
         shell: bash
         env:
           OIDC_TOKEN: ${{ steps.auth.outputs.access_token }}
@@ -138,12 +141,17 @@ jobs:
 
           BASE="https://cloudbilling.googleapis.com/v1/services/${CE_SERVICE_ID}/skus"
           PAGE_TOKEN=""
-          TOTAL=0
-          TMP="$(mktemp)"
-          : > "${TMP}"
 
-          echo "=== Deep probe: Windows Server ON-DEMAND SKUs ==="
-          echo "Region match: ${GCP_REGION} (also accepts 'us' and 'global')"
+          TMP_ALL="$(mktemp)"      # A) any Windows
+          TMP_SERVER="$(mktemp)"   # B) any Windows Server
+          TMP_CAND="$(mktemp)"     # C) Server paid/on-demand per-vCPU/core
+
+          : > "${TMP_ALL}"
+          : > "${TMP_SERVER}"
+          : > "${TMP_CAND}"
+
+          TOTAL=0
+          echo "=== Deep probe region: ${GCP_REGION} (accepts 'us'/'global' as well) ==="
 
           while :; do
             curl -s -G \
@@ -156,7 +164,23 @@ jobs:
             COUNT=$(jq '.skus|length' /tmp/_p.json)
             TOTAL=$((TOTAL + COUNT))
 
-            # Keep only paid Windows Server per-vCPU/core on-demand SKUs. Drop BYOL / RAM / GPU / SQL / desktop noise.
+            # A) ANY "Windows"
+            jq -r '
+              .skus[]? as $s
+              | ($s.description // $s.displayName // "") as $d
+              | select($d | test("windows"; "i"))
+              | {desc:$d}
+            ' /tmp/_p.json >> "${TMP_ALL}"
+
+            # B) ANY "Windows Server"
+            jq -r '
+              .skus[]? as $s
+              | ($s.description // $s.displayName // "") as $d
+              | select($d | test("windows\\s*server"; "i"))
+              | {desc:$d}
+            ' /tmp/_p.json >> "${TMP_SERVER}"
+
+            # C) Paid Windows Server per-vCPU/core OnDemand, region match
             jq --arg R "$GCP_REGION" -r '
               .skus[]? as $s
               | ($s.description // $s.displayName // "") as $d
@@ -180,7 +204,7 @@ jobs:
                       | (.units // 0) + ((.nanos // 0)/1e9) ),
                   regions: $regions
                 }
-            ' /tmp/_p.json >> "${TMP}"
+            ' /tmp/_p.json >> "${TMP_CAND}"
 
             PAGE_TOKEN=$(jq -r '.nextPageToken // ""' /tmp/_p.json)
             [[ -z "${PAGE_TOKEN}" ]] && break
@@ -188,14 +212,16 @@ jobs:
 
           echo "=== Deep Probe Summary ==="
           echo "Total SKUs scanned: ${TOTAL}"
-          echo "Windows Server candidates (count):"
-          jq -s 'length' "${TMP}"
+          echo "A) Any 'Windows' count:"
+          jq -s 'length' "${TMP_ALL}"
+          echo "B) Any 'Windows Server' count:"
+          jq -s 'length' "${TMP_SERVER}"
 
-          echo "=== Sample Windows Server SKUs (sorted by price) ==="
-          jq -s '
-            sort_by(.pricePerVcpuHour)
-          | .[0:15]
-          ' "${TMP}"
+          echo "C) Paid Windows Server per-vCPU/core candidates for region (${GCP_REGION}/us/global) — count:"
+          jq -s 'length' "${TMP_CAND}"
+
+          echo "C) Top 15 candidates (sorted by price):"
+          jq -s 'sort_by(.pricePerVcpuHour) | .[0:15]' "${TMP_CAND}"
 
       # >>> Run existing fetcher (UNCHANGED), with extra debug logging
       - name: Fetch GCP prices (FULL mode)
@@ -255,7 +281,7 @@ jobs:
           retention-days: 7
 
       # =========================================
-      # OPTIONAL DEBUG PUBLISH (no commit unless explicitly enabled)
+      # OPTIONAL DEBUG PUBLISH (controlled by repo variable)
       # =========================================
       - name: Debug Publish to docs/data (optional)
         if: ${{ vars.DEBUG_PUBLISH == 'true' }}
