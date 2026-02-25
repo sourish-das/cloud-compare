@@ -1,6 +1,5 @@
 // scripts/providers/azure.fetch.js
 // Node 18+ (global fetch)
-const fs = require("fs");
 const path = require("path");
 const {
   atomicWrite,
@@ -10,14 +9,25 @@ const {
   logDone,
   uniqSortedNums
 } = require("../lib/common");
+
 const {
-  detectOsFromProductName,
+  // New robust helpers
+  getRetailOsInfo,
+  isWindowsRetailEligible,
+  isLinuxRetailEligible,
+  extractRetailHourlyUSD,
+  normalizeAzureInstanceName,
+  isAzureArmInstance,
+
+  // Existing helpers
   getResourceSkusMap,
   categorizeByInstanceName,
   widenAzureSeries
 } = require("../lib/azure");
 
-const OUT = path.join("data", "azure", "azure.prices.json");
+// Output → prefer workflow override, else docs/data (consistent with other providers)
+const OUT =
+  process.env.OUTPUT_PATH || path.join("docs", "data", "azure", "azure.prices.json");
 const REGION = process.env.AZURE_REGION || "eastus";
 
 /* ------------------------------------------------------------------
@@ -28,11 +38,9 @@ async function fetchWithRetry(url, retries = 6) {
   for (let i = 0; i < retries; i++) {
     try {
       const res = await fetch(url);
-
       if (res.ok) {
         return res.json();
       }
-
       console.warn(
         `[Azure] Retail HTTP ${res.status} on attempt ${i + 1}/${retries}`
       );
@@ -41,11 +49,9 @@ async function fetchWithRetry(url, retries = 6) {
         `[Azure] Retail error on attempt ${i + 1}/${retries} → ${err.message}`
       );
     }
-
     // Exponential backoff: 1.5s, 3s, 6s, 12s, 24s...
     await new Promise(res => setTimeout(res, 1500 * Math.pow(2, i)));
   }
-
   throw new Error(`[Azure] Retail failed after ${retries} retries → ${url}`);
 }
 
@@ -55,6 +61,7 @@ async function fetchWithRetry(url, retries = 6) {
 async function fetchRetailPrices() {
   logStart(`[Azure] Retail (PAYG) ${REGION}`);
 
+  // VM consumption prices for the region
   const base =
     `https://prices.azure.com/api/retail/prices` +
     `?$filter=serviceName eq 'Virtual Machines' and armRegionName eq '${REGION}' and type eq 'Consumption'`;
@@ -81,50 +88,63 @@ async function main() {
   const retail = await fetchRetailPrices();
 
   // 2) Normalize + strict filtering to standard PAYG
-  const pre = [];
+  const rows = [];
   for (const it of retail) {
 
-    // --- Unit must be hourly (Azure varies: "1 Hour", "Hours", "1H", etc.)
-    const uom = String(it.unitOfMeasure || "").toLowerCase();
-    if (!/hour|hrs?|\b1h\b/.test(uom)) continue;
-
-    // --- Textual exclusions
+    // --- Filter out promo/reservation/spot/savings/AHB etc. up front (textual + meta)
+    // NOTE: We still rely on isWindowsRetailEligible/isLinuxRetailEligible below for final OS filtering.
     const blob = [
       it.productName, it.skuName, it.meterName, it.armSkuName, it.retailPriceType
     ].filter(Boolean).join(" ").toLowerCase();
 
+    // Common exclusions for pay-as-you-go comparison:
     if (/\bpromo\b/.test(blob)) continue;
-    if (/dev\s*\/?\s*test|devtest/.test(blob)) continue;
-    if (/spot|low\s*priority/.test(blob)) continue;
-    if (/reservation|reserved/.test(blob)) continue;
-    if (/savings\s*plan/.test(blob)) continue;
-    if (/\bahb\b|hybrid\s*benefit/.test(blob)) continue;
+    if (/dev\s*\/?\s*test|devtest|msdn/i.test(blob)) continue;
+    if (/spot|low\s*priority/i.test(blob)) continue;
+    if (/reservation|reserved/i.test(blob)) continue;
+    if (/savings\s*plan/i.test(blob)) continue;
+    if (/\bahb\b|hybrid\s*benefit/i.test(blob)) continue;
 
-    // --- Instance extraction
-    const armSku  = (it?.armSkuName || "").trim();
-    const skuName = (it?.skuName || "").trim();
-    const instance = (armSku || skuName.split(" ")[0] || "").trim();
+    // --- Must be hourly price
+    const price = extractRetailHourlyUSD(it);
+    if (!(price > 0)) continue;
+
+    // --- Instance extraction/normalization
+    const instRaw = it.armSkuName || (it.skuName ? it.skuName.split(" ")[0] : "");
+    if (!instRaw) continue;
+    const instance = normalizeAzureInstanceName(instRaw);
     if (!instance) continue;
     if (!widenAzureSeries(instance)) continue;
 
-    // --- OS + price
-    const os = detectOsFromProductName(it.productName);
-    const price = Number(it.unitPrice);
-    if (!Number.isFinite(price) || price <= 0) continue;
+    // --- OS classification (and special flags)
+    const { os } = getRetailOsInfo(it);
 
-    pre.push({
+    // Final OS acceptance:
+    if (os === "Linux") {
+      if (!isLinuxRetailEligible(it)) continue;       // exclude paid Linux & Dev/Test
+    } else if (os === "Windows") {
+      if (!isWindowsRetailEligible(it)) continue;     // exclude SQL/DevTest
+      if (isAzureArmInstance(instance)) continue;     // block ARM for Windows
+    } else {
+      continue; // unknown OS
+    }
+
+    rows.push({
       instance,
       pricePerHourUSD: price,
       region: REGION,
-      os
+      os,
+      source: "retail"
     });
   }
 
-  const cheapest = dedupeCheapestByKey(pre, r => `${r.instance}-${r.region}-${r.os}`);
-  console.log(`[Azure] collected=${pre.length}, cheapest=${cheapest.length}`);
+  // Keep the cheapest per (instance, region, OS)
+  const cheapest = dedupeCheapestByKey(rows, r => `${r.instance}-${r.region}-${r.os}`);
+  const countsByOs = cheapest.reduce((a, r) => (a[r.os] = (a[r.os] || 0) + 1, a), {});
+  console.log(`[Azure] collected=${rows.length}, cheapest=${cheapest.length}, byOS=`, countsByOs);
   if (warnAndSkipWriteOnEmpty("Azure", cheapest)) return;
 
-  // 3) Optionally enrich with ResourceSkus
+  // 3) Optionally enrich with ResourceSkus (vcpu/ram)
   const subscriptionId = process.env.AZURE_SUBSCRIPTION_ID;
   const armToken = process.env.ARM_TOKEN;
 
@@ -135,8 +155,8 @@ async function main() {
 
   for (const vm of cheapest) {
     const spec = skuMap.get(String(vm.instance).toLowerCase());
-    vm.vcpu = spec?.vcpu ?? null;
-    vm.ram  = spec?.ram  ?? null;
+    vm.vcpu = (spec?.vcpu ?? null);
+    vm.ram  = (spec?.ram  ?? null);
     vm.category = categorizeByInstanceName(vm.instance);
   }
 
