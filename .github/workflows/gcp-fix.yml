@@ -104,7 +104,7 @@ jobs:
 
           mkdir -p docs/data/gcp
 
-      # Quick peek at Catalog API via OAuth (use & and not HTML escapes)
+      # Quick peek at Catalog API via OAuth (use '&' - no HTML escapes)
       - name: Probe Catalog API (OAuth, first 10)
         shell: bash
         env:
@@ -125,64 +125,77 @@ jobs:
             jq -r '.skus[0:10][]?.description' /tmp/skus10.json || true
           fi
 
-      # 🔍 Deep, paginated probe — URL-encode nextPageToken (non-failing)
-      - name: Deep Catalog probe (OAuth, ALL Windows — paginated)
+      # 🔍 Deep, paginated probe — Windows Server (paid, on-demand, per-vCPU/core) only (non-failing)
+      - name: Deep Catalog probe (Windows Server editions only)
         shell: bash
         env:
           OIDC_TOKEN: ${{ steps.auth.outputs.access_token }}
           CE_SERVICE_ID: "6F81-5844-456A"
           GCP_CURRENCY: "USD"
+          GCP_REGION: "us-east1"
         run: |
           set -euo pipefail
+
           BASE="https://cloudbilling.googleapis.com/v1/services/${CE_SERVICE_ID}/skus"
           PAGE_TOKEN=""
           TOTAL=0
-          HITS=0
-          SAMPLES="$(mktemp)"
-          : > "${SAMPLES}"
+          TMP="$(mktemp)"
+          : > "${TMP}"
+
+          echo "=== Deep probe: Windows Server ON-DEMAND SKUs ==="
+          echo "Region match: ${GCP_REGION} (also accepts 'us' and 'global')"
 
           while :; do
-            RESP="$(mktemp)"
-            if [[ -n "${PAGE_TOKEN}" ]]; then
-              CODE=$(curl -s -o "${RESP}" -w "%{http_code}" -G \
-                -H "Authorization: Bearer ${OIDC_TOKEN}" \
-                --data-urlencode "currencyCode=${GCP_CURRENCY}" \
-                --data-urlencode "pageSize=5000" \
-                --data-urlencode "pageToken=${PAGE_TOKEN}" \
-                "${BASE}")
-            else
-              CODE=$(curl -s -o "${RESP}" -w "%{http_code}" -G \
-                -H "Authorization: Bearer ${OIDC_TOKEN}" \
-                --data-urlencode "currencyCode=${GCP_CURRENCY}" \
-                --data-urlencode "pageSize=5000" \
-                "${BASE}")
-            fi
+            curl -s -G \
+              -H "Authorization: Bearer ${OIDC_TOKEN}" \
+              --data-urlencode "currencyCode=${GCP_CURRENCY}" \
+              --data-urlencode "pageSize=5000" \
+              ${PAGE_TOKEN:+--data-urlencode "pageToken=${PAGE_TOKEN}"} \
+              "${BASE}" > /tmp/_p.json
 
-            if [[ "$CODE" != "200" ]]; then
-              echo "::warning::Catalog page fetch failed (HTTP ${CODE})"
-              head -c 1200 "${RESP}" || true
-              rm -f "${RESP}"
-              break
-            fi
+            COUNT=$(jq '.skus|length' /tmp/_p.json)
+            TOTAL=$((TOTAL + COUNT))
 
-            PAGE_COUNT=$(jq '.skus|length' "${RESP}")
-            TOTAL=$((TOTAL + PAGE_COUNT))
+            # Keep only paid Windows Server per-vCPU/core on-demand SKUs. Drop BYOL / RAM / GPU / SQL / desktop noise.
+            jq --arg R "$GCP_REGION" -r '
+              .skus[]? as $s
+              | ($s.description // $s.displayName // "") as $d
+              | ($s.serviceRegions // []) as $regions
+              | ($s.category.usageType // "") as $usage
+              | ($s.category.resourceFamily // "") as $fam
+              | select(
+                  ($fam | test("compute"; "i")) and
+                  ($usage | test("OnDemand"; "i")) and
+                  ($d | test("windows\\s*server"; "i")) and
+                  ($d | test("2012|2012\\s*r2|2016|2019|2022|standard|datacenter"; "i")) and
+                  ($d | test("license|licensing|per[- ]?(vcpu|core)|paid|on\\s*vm|on-?demand"; "i")) and
+                  ($d | test("byol|ram|memory|gpu|sql|vpn|data transfer|active directory|windows\\s*(7|8|10|11)"; "i") | not) and
+                  ( [ $regions[]? | ascii_downcase ] | index($R) or index("us") or index("global") )
+                )
+              | {
+                  description: $d,
+                  usageType: $usage,
+                  pricePerVcpuHour:
+                    ( .pricingInfo[0].pricingExpression.tieredRates[0].unitPrice
+                      | (.units // 0) + ((.nanos // 0)/1e9) ),
+                  regions: $regions
+                }
+            ' /tmp/_p.json >> "${TMP}"
 
-            PAGE_HITS=$(jq '[.skus[]?|select(.description|test("Windows"; "i"))] | length' "${RESP}")
-            HITS=$((HITS + PAGE_HITS))
-
-            jq -r '.skus[]?|select(.description|test("Windows"; "i"))|.description' "${RESP}" | head -n 20 >> "${SAMPLES}"
-
-            echo "Fetched page: ${PAGE_COUNT} SKUs; cumulative=${TOTAL}; page_windows_hits=${PAGE_HITS}; total_windows_hits=${HITS}"
-
-            PAGE_TOKEN=$(jq -r '.nextPageToken // ""' "${RESP}")
-            rm -f "${RESP}"
+            PAGE_TOKEN=$(jq -r '.nextPageToken // ""' /tmp/_p.json)
             [[ -z "${PAGE_TOKEN}" ]] && break
           done
 
-          echo "Total SKUs scanned=${TOTAL}; Windows-related hits=${HITS}"
-          echo "Sample Windows descriptions (de-duped):"
-          sort -u "${SAMPLES}" | head -n 20
+          echo "=== Deep Probe Summary ==="
+          echo "Total SKUs scanned: ${TOTAL}"
+          echo "Windows Server candidates (count):"
+          jq -s 'length' "${TMP}"
+
+          echo "=== Sample Windows Server SKUs (sorted by price) ==="
+          jq -s '
+            sort_by(.pricePerVcpuHour)
+          | .[0:15]
+          ' "${TMP}"
 
       # >>> Run existing fetcher (UNCHANGED), with extra debug logging
       - name: Fetch GCP prices (FULL mode)
@@ -194,7 +207,7 @@ jobs:
           GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
           GCLOUD_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
           OUTPUT_PATH: "docs/data/gcp/gcp.prices.json"
-          GCP_DEBUG_WIN: "1"         # prints Windows candidate SKUs
+          GCP_DEBUG_WIN: "1"         # prints Windows candidate SKUs inside the fetcher
           # GCP_FORCE_COMPOSE: "1"    # optional: guarantees Linux rows for Windows synthesis
 
       # Validate output (non-fatal)
@@ -242,7 +255,7 @@ jobs:
           retention-days: 7
 
       # =========================================
-      # OPTIONAL DEBUG PUBLISH
+      # OPTIONAL DEBUG PUBLISH (no commit unless explicitly enabled)
       # =========================================
       - name: Debug Publish to docs/data (optional)
         if: ${{ vars.DEBUG_PUBLISH == 'true' }}
