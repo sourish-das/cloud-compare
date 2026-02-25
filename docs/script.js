@@ -190,8 +190,11 @@ export async function compare(resetFamilies = false) {
         az: (data.azure || []).length,
         aw: (data.aws   || []).length,
         gc: (data.gcp   || []).length,
-        oc: (data.oci   ? 1 : 0)
-      };
+        oc: 
+          (data.oci?.linux?.amd?.length ?? 0)r +
+          (data.oci?.linux?.arm?.length ?? 0) +
+          (data.oci?.linux?.intel?.length ?? 0)
+    };
       const when = info?.generatedAt || '—';
       safeSetText("dataInfo", `Data: ${when} · Rows — Azure: ${counts.az}, AWS: ${counts.aw}, GCP: ${counts.gc}, OCI: ${counts.oc}`);
     } catch { /* non-fatal */ }
