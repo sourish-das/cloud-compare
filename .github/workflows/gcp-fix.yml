@@ -1,4 +1,4 @@
-name: Fetch GCP Prices-1
+name: Fetch GCP Prices 1
 
 permissions:
   contents: read
@@ -104,7 +104,7 @@ jobs:
 
           mkdir -p docs/data/gcp
 
-      # Quick peek at the Catalog API via OAuth (fix URL to use '&')
+      # Quick peek at Catalog API via OAuth (use & and not HTML escapes)
       - name: Probe Catalog API (OAuth, first 10)
         shell: bash
         env:
@@ -125,7 +125,7 @@ jobs:
             jq -r '.skus[0:10][]?.description' /tmp/skus10.json || true
           fi
 
-      # 🔍 Deep, paginated probe: enumerate ALL pages and count ANY 'Windows'
+      # 🔍 Deep, paginated probe — URL-encode nextPageToken (non-failing)
       - name: Deep Catalog probe (OAuth, ALL Windows — paginated)
         shell: bash
         env:
@@ -134,6 +134,7 @@ jobs:
           GCP_CURRENCY: "USD"
         run: |
           set -euo pipefail
+          BASE="https://cloudbilling.googleapis.com/v1/services/${CE_SERVICE_ID}/skus"
           PAGE_TOKEN=""
           TOTAL=0
           HITS=0
@@ -141,14 +142,25 @@ jobs:
           : > "${SAMPLES}"
 
           while :; do
-            URL="https://cloudbilling.googleapis.com/v1/services/${CE_SERVICE_ID}/skus?currencyCode=${GCP_CURRENCY}&pageSize=5000"
-            [[ -n "${PAGE_TOKEN}" ]] && URL="${URL}&pageToken=${PAGE_TOKEN}"
-
             RESP="$(mktemp)"
-            CODE=$(curl -s -o "${RESP}" -w "%{http_code}" -H "Authorization: Bearer ${OIDC_TOKEN}" "$URL")
+            if [[ -n "${PAGE_TOKEN}" ]]; then
+              CODE=$(curl -s -o "${RESP}" -w "%{http_code}" -G \
+                -H "Authorization: Bearer ${OIDC_TOKEN}" \
+                --data-urlencode "currencyCode=${GCP_CURRENCY}" \
+                --data-urlencode "pageSize=5000" \
+                --data-urlencode "pageToken=${PAGE_TOKEN}" \
+                "${BASE}")
+            else
+              CODE=$(curl -s -o "${RESP}" -w "%{http_code}" -G \
+                -H "Authorization: Bearer ${OIDC_TOKEN}" \
+                --data-urlencode "currencyCode=${GCP_CURRENCY}" \
+                --data-urlencode "pageSize=5000" \
+                "${BASE}")
+            fi
+
             if [[ "$CODE" != "200" ]]; then
               echo "::warning::Catalog page fetch failed (HTTP ${CODE})"
-              head -c 1000 "${RESP}" || true
+              head -c 1200 "${RESP}" || true
               rm -f "${RESP}"
               break
             fi
@@ -156,11 +168,9 @@ jobs:
             PAGE_COUNT=$(jq '.skus|length' "${RESP}")
             TOTAL=$((TOTAL + PAGE_COUNT))
 
-            # Count ANY Windows SKUs (no license filter)
             PAGE_HITS=$(jq '[.skus[]?|select(.description|test("Windows"; "i"))] | length' "${RESP}")
             HITS=$((HITS + PAGE_HITS))
 
-            # Collect up to ~20 samples overall for wording inspection
             jq -r '.skus[]?|select(.description|test("Windows"; "i"))|.description' "${RESP}" | head -n 20 >> "${SAMPLES}"
 
             echo "Fetched page: ${PAGE_COUNT} SKUs; cumulative=${TOTAL}; page_windows_hits=${PAGE_HITS}; total_windows_hits=${HITS}"
@@ -174,7 +184,7 @@ jobs:
           echo "Sample Windows descriptions (de-duped):"
           sort -u "${SAMPLES}" | head -n 20
 
-      # >>> Run fetcher (enable Windows debug + fixed OUTPUT_PATH)
+      # >>> Run existing fetcher (UNCHANGED), with extra debug logging
       - name: Fetch GCP prices (FULL mode)
         run: node scripts/providers/gcp.fetch.js
         env:
@@ -187,7 +197,7 @@ jobs:
           GCP_DEBUG_WIN: "1"         # prints Windows candidate SKUs
           # GCP_FORCE_COMPOSE: "1"    # optional: guarantees Linux rows for Windows synthesis
 
-      # Validate output
+      # Validate output (non-fatal)
       - name: Validate output
         shell: bash
         run: |
@@ -200,7 +210,7 @@ jobs:
           echo "Compute array length:"
           jq '.compute | length' docs/data/gcp/gcp.prices.json || true
 
-      # NEW: Explicit Windows vs Linux counts
+      # Show Windows vs Linux counts (non-fatal)
       - name: Validate Windows presence
         shell: bash
         run: |
@@ -210,7 +220,7 @@ jobs:
           echo "Linux rows:"
           jq '.compute | map(select(.os=="Linux")) | length' docs/data/gcp/gcp.prices.json
 
-      # Summaries
+      # Summaries (diagnostic)
       - name: Summarize family coverage
         if: always()
         shell: bash
