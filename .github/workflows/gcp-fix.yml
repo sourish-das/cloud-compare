@@ -233,4 +233,3 @@ jobs:
           fi
           git commit -m "Debug publish: GCP pricing update"
           git push
-``
