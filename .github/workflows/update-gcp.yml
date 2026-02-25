@@ -1,8 +1,8 @@
 name: Fetch GCP Prices
 
 permissions:
-  contents: read            # provider does not commit; orchestrator will
-  id-token: write           # required for OIDC
+  contents: read        # provider does not commit; orchestrator will
+  id-token: write       # required for google-github-actions/auth@v3
 
 on:
   workflow_call:
@@ -22,17 +22,20 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      - name: Checkout repo
+      # Checkout
+      - name: Checkout repo (read-only)
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      # Node
       - name: Set up Node (LTS)
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
-      - name: Ensure jq (for quick validation)
+      # jq (simple validation)
+      - name: Ensure jq
         run: |
           if ! command -v jq >/dev/null 2>&1; then
             sudo apt-get update -y
@@ -49,95 +52,35 @@ jobs:
           service_account: ${{ secrets.GCP_WIF_SA_EMAIL }}
           token_format: access_token
 
-      - name: Show config (debug)
-        run: |
-          echo "Project: $GCP_PROJECT_ID"
-          echo "Region:  $GCP_REGION"
-          echo "Currency: $GCP_CURRENCY"
-        env:
-          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-          GCP_REGION: "us-east1"
-          GCP_CURRENCY: "USD"
+      # Ensure output directory
+      - name: Ensure output directory
+        run: mkdir -p docs/data/gcp
 
-      # Hard pre-flight checks + live Compute API probe
-      - name: Pre-flight checks (Catalog + Fallback)
-        shell: bash
-        env:
-          GCP_PRICE_API_KEY: ${{ secrets.GCP_PRICE_API_KEY }}
-          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-          GCP_REGION: "us-east1"
-          GCP_CURRENCY: "USD"
-          OIDC_TOKEN: ${{ steps.auth.outputs.access_token }}
-        run: |
-          set -euo pipefail
-          echo "== Pre-flight =="
-          echo "Region: ${GCP_REGION}"
-          echo "Currency: ${GCP_CURRENCY}"
-
-          if [[ -z "${GCP_PRICE_API_KEY:-}" ]]; then
-            echo "Catalog: API key not set (OK; using OAuth/Bearer)."
-          else
-            echo "Catalog: API key is set ✓"
-          fi
-
-          if [[ -z "${GCP_PROJECT_ID:-}" ]]; then
-            echo "::error::GCP_PROJECT_ID is empty"
-            exit 1
-          fi
-          echo "Fallback: Project ID is set ✓ -> ${GCP_PROJECT_ID}"
-
-          if [[ -z "${OIDC_TOKEN:-}" ]]; then
-            echo "::error::OIDC access token not found."
-            exit 1
-          fi
-          echo "Fallback: OIDC access token is present ✓"
-
-          ZONES_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            -H "Authorization: Bearer ${OIDC_TOKEN}" \
-            "https://compute.googleapis.com/compute/v1/projects/${GCP_PROJECT_ID}/zones")
-          echo "Compute API probe status: ${ZONES_STATUS}"
-          if [[ "${ZONES_STATUS}" != "200" ]]; then
-            echo "::error::Compute API probe failed (HTTP ${ZONES_STATUS})."
-            exit 1
-          fi
-          echo "Compute API probe OK ✓ (zones.list)"
-
-          # UPDATED output dir
-          mkdir -p docs/data/gcp
-
-      # (Optional) Quick peek at the Catalog API via OAuth
-      - name: Probe Catalog API (OAuth, first 10)
-        shell: bash
-        env:
-          OIDC_TOKEN: ${{ steps.auth.outputs.access_token }}
-          CE_SERVICE_ID: "6F81-5844-456A"
-          GCP_CURRENCY: "USD"
-        run: |
-          set -euo pipefail
-          URL="https://cloudbilling.googleapis.com/v1/services/${CE_SERVICE_ID}/skus?currencyCode=${GCP_CURRENCY}&pageSize=10"
-          CODE=$(curl -s -o /tmp/skus.json -w "%{http_code}" -H "Authorization: Bearer ${OIDC_TOKEN}" "$URL")
-          echo "Catalog probe HTTP: ${CODE}"
-          if [[ "${CODE}" != "200" ]]; then
-            echo "::warning::Catalog OAuth probe failed."
-            cat /tmp/skus.json || true
-          else
-            echo "Top 10 descriptions:"
-            jq -r '.skus[0:10][]?.description' /tmp/skus.json || true
-          fi
-
-      # >>> Run fetcher (UPDATED OUTPUT_PATH)
-      - name: Fetch GCP prices (FULL mode)
+      # >>> Run the GCP fetcher
+      - name: Fetch GCP prices
         run: node scripts/providers/gcp.fetch.js
         env:
-          GCP_PRICE_API_KEY: ${{ secrets.GCP_PRICE_API_KEY }}
+          # Region & currency (adjust if needed)
           GCP_REGION: "us-east1"
           GCP_CURRENCY: "USD"
+
+          # Project + access token for FULL-mode fallback & API calls
           GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
           GCLOUD_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+
+          # Optional: Catalog API key (the script prefers OAuth if present)
+          GCP_PRICE_API_KEY: ${{ secrets.GCP_PRICE_API_KEY }}
+
+          # Output path
           OUTPUT_PATH: "docs/data/gcp/gcp.prices.json"
 
-      # Validate output (UPDATED PATH)
-      - name: Validate output
+          # Optional debug / knobs (leave commented for simplicity)
+          # GCP_DEBUG_WIN: "1"                 # logs Windows rate resolution
+          # GCP_FORCE_COMPOSE: "1"             # force compose Linux shapes
+          # GCP_WINDOWS_RATE_PER_VCPU: "0.046" # pin Windows Standard per‑vCPU
+
+      # Validate the output exists and show quick stats
+      - name: Validate GCP output
         shell: bash
         run: |
           set -euo pipefail
@@ -149,20 +92,7 @@ jobs:
           echo "Compute array length:"
           jq '.compute | length' docs/data/gcp/gcp.prices.json || true
 
-      # Summaries (UPDATED PATH)
-      - name: Summarize family coverage
-        if: always()
-        shell: bash
-        run: |
-          set -euo pipefail
-          echo "Counts by category:"
-          jq -r '.compute | group_by(.category) | map({cat: .[0].category, count: length})' docs/data/gcp/gcp.prices.json
-          echo "Counts by category × series:"
-          jq -r '.compute | group_by(.category, .series) | map({cat: .[0].category, series: .[0].series, count: length})' docs/data/gcp/gcp.prices.json
-          echo "Counts by category × vCPU:"
-          jq -r '.compute | group_by(.category, .vcpu) | map({cat: .[0].category, vcpu: .[0].vcpu, count: length})' docs/data/gcp/gcp.prices.json
-
-      # Upload artifact (UPDATED PATH)
+      # Upload artifact for the orchestrator
       - name: Upload GCP pricing JSON (artifact)
         uses: actions/upload-artifact@v4
         with:
@@ -170,34 +100,3 @@ jobs:
           path: docs/data/gcp/gcp.prices.json
           if-no-files-found: error
           retention-days: 7
-
-      # =========================================
-      # OPTIONAL DEBUG MODE — updated to avoid copy-to-self
-      # =========================================
-      - name: Debug Publish to docs/data (optional)
-        if: ${{ vars.DEBUG_PUBLISH == 'true' }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          echo "DEBUG MODE ENABLED: Publishing GCP output directly to docs/data/gcp"
-          # Main file already exists at docs/data/gcp; create a safe debug snapshot
-          mkdir -p docs/data/gcp/_debug
-          cp -f docs/data/gcp/gcp.prices.json docs/data/gcp/_debug/gcp.prices.json
-
-      - name: Commit debug provider files (optional)
-        if: ${{ vars.DEBUG_PUBLISH == 'true' }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git fetch origin main
-          git checkout main
-          git reset --hard origin/main
-          git add -f docs/data/gcp/gcp.prices.json
-          if git diff --cached --quiet; then
-            echo "No changes to commit."
-            exit 0
-          fi
-          git commit -m "Debug publish: GCP pricing update"
-          git push
