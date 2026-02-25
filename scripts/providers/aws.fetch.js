@@ -10,14 +10,19 @@ const {
   logDone,
   uniqSortedNums
 } = require("../lib/common");
-const { isWantedEc2Family } = require("../lib/aws");
 
+const {
+  isWantedEc2Family,
+  isAwsGravitonInstance,
+  synthesizeAwsWindowsRows
+} = require("../lib/aws");
+
+// Region + output
 const REGION = process.env.AWS_REGION || "us-east-1";
-const OUT = path.join("data", "aws", "aws.prices.json");
+const OUT = process.env.OUTPUT_PATH || path.join("docs", "data", "aws", "aws.prices.json");
 
 /**
  * Fetch the regional EC2 public price index JSON.
- * Doc note: EC2 publishes a region-specific index at:
  * https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/current/<REGION>/index.json
  */
 async function fetchAwsIndex() {
@@ -31,32 +36,54 @@ async function fetchAwsIndex() {
 }
 
 /**
- * Pick the first OnDemand price dimension that is hourly and in USD.
+ * Pick the lowest OnDemand price dimension in USD with an hourly unit.
+ * (A few SKUs expose >1 dimension; choose the cheapest defensively.)
  */
-function pickHourlyUsd(onDemandTermsForSku) {
+function pickHourlyUsdMin(onDemandTermsForSku) {
   if (!onDemandTermsForSku) return null;
   const termKey = Object.keys(onDemandTermsForSku)[0];
   if (!termKey) return null;
   const dims = onDemandTermsForSku[termKey]?.priceDimensions || {};
+  let best = null;
+
   for (const dimKey of Object.keys(dims)) {
     const dim = dims[dimKey];
-    // Expect unit "Hrs" (or "Hrs ") and USD price present
-    if (dim?.unit?.toLowerCase().startsWith("hrs") && dim?.pricePerUnit?.USD) {
-      const price = Number(dim.pricePerUnit.USD);
-      if (Number.isFinite(price) && price > 0) return price;
-    }
+    const unit = String(dim?.unit || "").toLowerCase();
+    if (!unit.startsWith("hrs")) continue;
+    const usd = Number(dim?.pricePerUnit?.USD);
+    if (!Number.isFinite(usd) || usd <= 0) continue;
+    if (best === null || usd < best) best = usd;
   }
-  return null;
+  return best;
 }
 
-/**
- * Normalize memory string to Number GiB.
- * Examples: "16 GiB", "32GiB", "64 GiB  "
- */
+/** Normalize memory string like "16 GiB" -> 16 */
 function parseGiB(memStr) {
   if (!memStr) return null;
-  const n = Number(String(memStr).replace(/[^0-9.]/g, "")); // keep digits + dot
+  const n = Number(String(memStr).replace(/[^0-9.]/g, ""));
   return Number.isFinite(n) ? n : null;
+}
+
+/** Normalize OS label for rows */
+function normOs(val) {
+  const s = String(val || "").toLowerCase();
+  return s.startsWith("win") ? "Windows" : "Linux";
+}
+
+/** True if this product is a clean Windows Server license-included VM (no SQL, no BYOL) */
+function isWindowsLicenseIncluded(attrs) {
+  const os = String(attrs?.operatingSystem || "");
+  if (os !== "Windows") return false;
+
+  // Exclude BYOL; prefer "License Included" only
+  const lm = String(attrs?.licenseModel || "");
+  if (lm && lm !== "License Included") return false;
+
+  // Exclude any SQL preinstalled variants; we want plain Windows Server
+  const pre = String(attrs?.preInstalledSw || "");
+  if (pre && pre !== "NA") return false;
+
+  return true;
 }
 
 async function main() {
@@ -74,12 +101,23 @@ async function main() {
     const inst = a.instanceType;
     if (!inst || !isWantedEc2Family(inst)) continue;
 
-    const os = a.operatingSystem;
-    if (os !== "Linux" && os !== "Windows") continue;
+    // Capacity and tenancy filters
     if (a.tenancy !== "Shared") continue;
     if (!["Used", "Normal"].includes(a.capacitystatus)) continue;
 
-    const price = pickHourlyUsd(onDemandTerms[sku]);
+    // OS filters:
+    //  - Linux: operatingSystem must be exactly "Linux"
+    //  - Windows: must be "Windows" AND licenseModel = "License Included" AND preInstalledSw = "NA"
+    const os = String(a.operatingSystem || "");
+    const isLinux = (os === "Linux");
+    const isWinOK = isWindowsLicenseIncluded(a);
+
+    if (!(isLinux || isWinOK)) continue;
+
+    // Also exclude Graviton shapes for Windows (no public Windows AMIs on Graviton)
+    if (!isLinux && isAwsGravitonInstance(inst)) continue;
+
+    const price = pickHourlyUsdMin(onDemandTerms[sku]);
     if (!(price > 0)) continue;
 
     const vcpu = a.vcpu ? Number(a.vcpu) : null;
@@ -91,13 +129,29 @@ async function main() {
       ram,
       pricePerHourUSD: price,
       region: REGION,
-      os
+      os: normOs(os),
+      source: "catalog"
     });
   }
 
+  // (Optional) If Windows rows are thin for this region (or absent), synthesize from Linux by uplift
+  const beforeWin = rows.filter(r => r.os === "Windows").length;
+  if (beforeWin === 0) {
+    const added = synthesizeAwsWindowsRows(rows);
+    console.log(`[AWS] Windows rows were absent; synthesized ${added} from Linux via uplift.`);
+  }
+
   // Keep the cheapest per (instance, region, OS)
-  const cheapest = dedupeCheapestByKey(rows, r => `${r.instance}-${r.region}-${r.os}`);
-  console.log(`[AWS] collected=${rows.length}, cheapest=${cheapest.length}`);
+  const cheapest = dedupeCheapestByKey(
+    rows,
+    r => `${r.instance}-${r.region}-${r.os}`
+  );
+
+  const countsByOs = cheapest.reduce((acc, r) => {
+    acc[r.os] = (acc[r.os] || 0) + 1; return acc;
+  }, {});
+  console.log(`[AWS] collected=${rows.length}, cheapest=${cheapest.length}, byOS=`, countsByOs);
+
   if (warnAndSkipWriteOnEmpty("AWS", cheapest)) return;
 
   const meta = {
@@ -106,11 +160,11 @@ async function main() {
     ram:  uniqSortedNums(cheapest.map(x => x.ram))
   };
 
+  // Storage placeholders (you model EBS in UI; these are baseline list prices)
   const storage = {
     region: REGION,
-    // Small constants; replace with a real fetcher if/when you want EBS by volume type
-    ssd_per_gb_month: 0.08,     // gp3 ballpark
-    hdd_st1_per_gb_month: 0.045 // st1
+    ssd_per_gb_month: 0.08,     // gp3 (ballpark)
+    hdd_st1_per_gb_month: 0.045 // st1 (ballpark)
   };
 
   const out = { meta, compute: cheapest, storage };
