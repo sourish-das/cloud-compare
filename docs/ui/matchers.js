@@ -22,6 +22,8 @@ export function isOnDemandShared(x) {
   return okBilling && okTenancy && !looksSpot;
 }
 
+// ---------------- Provider family helpers ----------------
+
 export function isAwsInFamily(inst, family) {
   if (!family) return true;
   const s = String(inst || "").toLowerCase();
@@ -85,6 +87,24 @@ export function inferAzureCoresRamFromName(name) {
 }
 
 //
+// ---------------- Additional guards for Windows ----------------
+//
+
+// Azure: common ARM shapes (Windows Server images generally unavailable for these)
+function isAzureArmInstance(name) {
+  const n = String(name || "").toLowerCase();
+  // Bpsv2 (e.g., Standard_B2pls_v2), Dpsv5, Epsv5 indicate Ampere/ARM
+  return /standard_b.*psv2|standard_dpsv5|standard_epsv5/.test(n);
+}
+
+// AWS: Graviton families (no public Windows AMIs)
+function isAwsGravitonInstance(name) {
+  const s = String(name || "").toLowerCase();
+  // t4g, c6g/c7g, m6g/m7g, r6g/r7g etc.
+  return /(^|_)t4g|(^|_)c[6-9]g|(^|_)m[6-9]g|(^|_)r[6-9]g/.test(s);
+}
+
+//
 // ---------------- GCP FAMILY MATCHING ----------------
 //
 
@@ -113,10 +133,9 @@ export function isGcpInFamily(inst, family) {
     );
   }
 
+  // FIX: C3/C4* were incorrectly allowed under "general".
   if (family === "general") {
     return (
-      name.startsWith("C3")  || name.startsWith("C3D") ||
-      name.startsWith("C4")  || name.startsWith("C4A") || name.startsWith("C4D") ||
       name.startsWith("E2")  ||
       name.startsWith("N1")  || name.startsWith("N2")   || name.startsWith("N2D") ||
       name.startsWith("N4")  || name.startsWith("N4A")  || name.startsWith("N4D") ||
@@ -182,6 +201,7 @@ export function findBestAws(list, vcpu, ram, os, family) {
     throw new Error("AWS price list is empty");
 
   const wantOS = String(os || "").toLowerCase();
+  const isWin = (wantOS === "windows");
 
   const filtered = list.filter(x =>
     isOnDemandShared(x) &&
@@ -189,7 +209,8 @@ export function findBestAws(list, vcpu, ram, os, family) {
     isFinite(x.ram) &&
     isFinite(x.pricePerHourUSD) &&
     (!wantOS || normalizeOs(x.os) === wantOS) &&
-    isAwsInFamily(x.instance, family)
+    isAwsInFamily(x.instance, family) &&
+    (!isWin || !isAwsGravitonInstance(x.instance)) // block Graviton for Windows
   );
   if (filtered.length === 0) {
     const fLabel = family ? ` family=${family}` : "";
@@ -215,25 +236,32 @@ export function findBestAzure(list, vcpu, ram, os, family) {
     throw new Error("Azure price list is empty");
 
   const wantOS = String(os || "").toLowerCase();
+  const isWin = (wantOS === "windows");
 
   // 1) strict: OS + family (accept Unknown OS)
   let pre = list.filter(x =>
     isOnDemandShared(x) &&
     azureFamilyMatch(x, family) &&
-    (normalizeOs(x.os) === wantOS || x.os === "Unknown")
+    (normalizeOs(x.os) === wantOS || x.os === "Unknown") &&
+    (!isWin || !isAzureArmInstance(x.instance))          // block ARM on Windows
   );
 
   // 2) fallback: remove family filter
   if (pre.length === 0 && family) {
     pre = list.filter(x =>
       isOnDemandShared(x) &&
-      (normalizeOs(x.os) === wantOS || x.os === "Unknown")
+      (normalizeOs(x.os) === wantOS || x.os === "Unknown") &&
+      (!isWin || !isAzureArmInstance(x.instance))
     );
   }
 
   // 3) fallback: ignore OS
   if (pre.length === 0) {
-    pre = list.filter(x => isOnDemandShared(x) && azureFamilyMatch(x, family));
+    pre = list.filter(x =>
+      isOnDemandShared(x) &&
+      azureFamilyMatch(x, family) &&
+      (!isWin || !isAzureArmInstance(x.instance))
+    );
   }
 
   if (pre.length === 0) {
