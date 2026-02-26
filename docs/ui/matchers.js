@@ -93,15 +93,21 @@ export function inferAzureCoresRamFromName(name) {
 // Azure: common ARM shapes (Windows Server images generally unavailable for these)
 function isAzureArmInstance(name) {
   const n = String(name || "").toLowerCase();
-  // Bpsv2 (e.g., Standard_B2pls_v2), Dpsv5, Epsv5 indicate Ampere/ARM
-  return /standard_b.*psv2|standard_dpsv5|standard_epsv5/.test(n);
+  // Bpsv2 (e.g., Standard_B2pls_v2), Dpsv5, Dpldsv5, Epsv5 indicate Ampere/ARM
+  return /standard_b.*psv2|standard_dpsv5|standard_dpldsv5|standard_epsv5/.test(n);
 }
 
 // AWS: Graviton families (no public Windows AMIs)
 function isAwsGravitonInstance(name) {
   const s = String(name || "").toLowerCase();
-  // t4g, c6g/c7g, m6g/m7g, r6g/r7g etc.
+  // t4g, c6g/c7g/etc., m6g/m7g/etc., r6g/r7g/etc.
   return /(^|_)t4g|(^|_)c[6-9]g|(^|_)m[6-9]g|(^|_)r[6-9]g/.test(s);
+}
+
+// GCP: Arm families helper (for future use in GCP finders or extra validation)
+export function isGcpArmInstance(name) {
+  const n = String(name || "").toUpperCase();
+  return n.startsWith("T2A") || n.startsWith("C4A") || n.startsWith("N4A") || n.startsWith("A4X");
 }
 
 //
@@ -133,7 +139,7 @@ export function isGcpInFamily(inst, family) {
     );
   }
 
-  // FIX: C3/C4* were incorrectly allowed under "general".
+  // C3/C4* should not be under "general"
   if (family === "general") {
     return (
       name.startsWith("E2")  ||
@@ -297,7 +303,7 @@ export function findBestAzure(list, vcpu, ram, os, family) {
 //
 // ---------------- OCI FINDER (arrays‑first, processor-aware) ----------------
 //
-// Signature change: findBestOci(ociCompute, vcpu, ram, os, options)
+// Signature: findBestOci(ociCompute, vcpu, ram, os, options)
 //   options = { processor: "auto"|"amd"|"arm"|"intel", generation: "auto"|string }
 //
 // Behavior:
@@ -325,7 +331,7 @@ export function findBestOci(ociCompute, vcpu, ram, os, options = {}) {
   const proc = String(options.processor || "auto").toLowerCase();    // "auto"|"amd"|"arm"|"intel"
   const genFilter = String(options.generation || "auto").toLowerCase();
 
-  const winUpliftPerVcpu = isWindows ? safeNum(W?.license_per_vcpu_hour, 0) ?? 0 : 0;
+  const winUpliftPerVcpu = isWindows ? (safeNum(W?.license_per_vcpu_hour, 0) ?? 0) : 0;
 
   const candidates = [];
 
