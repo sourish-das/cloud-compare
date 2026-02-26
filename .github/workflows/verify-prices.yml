@@ -1,0 +1,58 @@
+name: Verify Prices (OCI, GCP, AWS)
+
+on:
+  workflow_dispatch:
+    inputs:
+      data_path:
+        description: "Path to generated prices.json used by the site"
+        required: false
+        default: "docs/data/prices.json"
+      gcp_region:
+        description: "GCP region to check"
+        required: false
+        default: "us-central1"
+      aws_region:
+        description: "AWS region to check"
+        required: false
+        default: "us-east-1"
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # If you added the npm script
+      - name: Install deps (if any)
+        run: npm ci --ignore-scripts || true
+
+      - name: Inject inputs (optional)
+        run: |
+          echo "DATA_PATH=${{ github.event.inputs.data_path }}" >> $GITHUB_ENV
+          echo "GCP_REGION=${{ github.event.inputs.gcp_region }}" >> $GITHUB_ENV
+          echo "AWS_REGION=${{ github.event.inputs.aws_region }}" >> $GITHUB_ENV
+
+      # EITHER call via npm script (if you added it)...
+      - name: Run verify via npm script
+        if: ${{ always() }}
+        run: npm run verify:prices
+
+      # ...OR call the script directly (uncomment if you skipped package.json change)
+      # - name: Run verify directly
+      #   run: node scripts/verify-prices.mjs
+
+      - name: Archive logs (optional)
+        uses: actions/upload-artifact@v4
+        with:
+          name: verify-logs
+          path: |
+            scripts/verify-prices.mjs
+            ${{ env.DATA_PATH }}
+          if-no-files-found: ignore
