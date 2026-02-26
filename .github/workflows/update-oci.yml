@@ -90,6 +90,7 @@ jobs:
 
       # ------------------------------------------------------------
       # Sanity: Windows hourly > Linux hourly for a canonical x86 sample
+      # (Rewritten using Python for robust float math & error handling)
       # ------------------------------------------------------------
       - name: Sanity: Windows hourly should exceed Linux hourly (2 vCPU / 4 GB)
         shell: bash
@@ -111,24 +112,40 @@ jobs:
             exit 1
           fi
           if [ -z "$WIN_LIC" ] || [ "$WIN_LIC" = "null" ]; then
-            echo "::warning::Windows license_per_vcpu_hour is missing or null; treating as 0 for sanity check"
+            echo "::warning::Windows license_per_vcpu_hour missing/null; treating as 0 for sanity check"
             WIN_LIC=0
           fi
 
           VCPU=2
           RAM=4
 
-          # x86 mapping: 1 OCPU = 2 vCPU
-          OCPU=$(awk -v v="$VCPU" 'BEGIN{ printf("%.6f", v/2.0) }')
+          python - <<'PY'
+import os, sys
+def f(env, key):
+    v = os.environ.get(key, "")
+    try:
+        return float(v)
+    except Exception:
+        print(f"::error::{key} is not a valid number: {v!r}")
+        sys.exit(1)
 
-          LINUX=$(awk -v cpu="$CPU_RATE" -v mem="$MEM_RATE" -v ocpu="$OCPU" -v ram="$RAM" \
-            'BEGIN{ printf("%.6f", ocpu*cpu + ram*mem) }')
-          WINDOWS=$(awk -v linux="$LINUX" -v lic="$WIN_LIC" -v vcpu="$VCPU" \
-            'BEGIN{ printf("%.6f", linux + vcpu*lic) }')
+cpu = f(os.environ, "CPU_RATE")
+mem = f(os.environ, "MEM_RATE")
+lic = f(os.environ, "WIN_LIC")
+vcpu = f(os.environ, "VCPU")
+ram  = f(os.environ, "RAM")
 
-          echo "Linux/hr=$LINUX  Windows/hr=$WINDOWS  (x86, 2 vCPU, 4 GiB)"
-          awk -v w="$WINDOWS" -v l="$LINUX" 'BEGIN{ if (w <= l) { exit 1 } }' \
-            || { echo "::error::Expected Windows > Linux for sample x86 shape"; exit 1; }
+# x86 mapping: 1 OCPU = 2 vCPU
+ocpu = vcpu / 2.0
+
+linux = ocpu * cpu + ram * mem
+windows = linux + vcpu * lic
+
+print(f"Linux/hr={linux:.6f}  Windows/hr={windows:.6f}  (x86, 2 vCPU, 4 GiB)")
+if not (windows > linux):
+    print("::error::Expected Windows > Linux for sample x86 shape")
+    sys.exit(1)
+PY
 
       # ------------------------------------------------------------
       # Upload artifact (for update-all.yml)
@@ -173,4 +190,3 @@ jobs:
 
           git commit -m "Debug publish: OCI pricing update"
           git push
-``
