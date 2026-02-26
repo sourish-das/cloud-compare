@@ -134,9 +134,13 @@ function buildFromApex(items) {
 
   if (!amd.length) throw new Error("AMD list empty");
   if (!arm.length) throw new Error("Arm list empty");
+  // intel may be empty in some regions; do not enforce
 
   const win = firstVal(items, RX.WIN, FALLBACK.win);
   const bv  = minVal(items, RX.BV,  FALLBACK.bv); // prefer minimum published base
+
+  if (!isNum(win)) console.warn("[OCI] Windows license price not found in APEX; using fallback.");
+  if (!isNum(bv))  console.warn("[OCI] Block Volume base not found in APEX; using fallback.");
 
   return {
     meta: {
@@ -149,9 +153,9 @@ function buildFromApex(items) {
     },
     compute: {
       linux: { amd, arm, intel },
-      windows: { license_per_vcpu_hour: win }
+      windows: { license_per_vcpu_hour: Number(isNum(win) ? win : FALLBACK.win) }
     },
-    storage: { region: OCI_REGION, block_volume_gb_month: bv }
+    storage: { region: OCI_REGION, block_volume_gb_month: Number(isNum(bv) ? bv : FALLBACK.bv) }
   };
 }
 
@@ -209,10 +213,15 @@ async function main() {
   }
 
   fs.mkdirSync(path.dirname(OUT), { recursive: true });
-  warnAndSkipWriteOnEmpty(out, OUT);
-  atomicWrite(OUT, out);
 
-  logDone(`[OCI] ✅ Wrote ${OUT}`);
+  // IMPORTANT: Honor the skip flag to keep last-known-good file when output is invalid/empty
+  const skip = warnAndSkipWriteOnEmpty(out, OUT);
+  if (skip) {
+    console.warn(`[OCI] Skipping write to keep last-known-good file: ${OUT}`);
+  } else {
+    atomicWrite(OUT, out);
+    logDone(`[OCI] ✅ Wrote ${OUT}`);
+  }
 }
 
 main().catch(e => {
