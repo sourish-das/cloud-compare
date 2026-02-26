@@ -1,5 +1,3 @@
-// scripts/lib/aws.js
-
 /**
  * Family filter: m, c, r, t, x, i, z, h
  * (same behavior as before)
@@ -7,6 +5,17 @@
 function isWantedEc2Family(instance = "") {
   const c = String(instance)[0]?.toLowerCase();
   return ["m", "c", "r", "t", "x", "i", "z", "h"].includes(c);
+}
+
+/**
+ * Detect AWS burstable (credit-based) instance families (T-class).
+ * Matches t2, t3, t3a, t4g, etc.
+ * Use this in the AWS fetcher to EXCLUDE burstables at source.
+ */
+function isBurstableAws(instance = "") {
+  const s = String(instance || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  // t + digit + optional letter suffix (t2, t3, t3a, t4g, ...)
+  return /^t\d[a-z0-9]*$/.test(s);
 }
 
 /**
@@ -65,11 +74,13 @@ function _hasWindowsRowAlready(rows, base) {
 /**
  * Synthesize AWS Windows rows from Linux rows.
  *   windows_price = linux_price + (vcpu * uplift)
- * - Skips Graviton families (t4g/c7g/m7g/r7g/...)
+ * - Skips Graviton families (t4g/c7g/m7g/r7g/…)
  * - Keeps all other fields the same; sets os="Windows" and
  *   appends "+win" to the source marker for traceability.
  *
  * @param {Array<Object>} rows - array of provider-normalized rows
+ *   Expected row shape fields used here:
+ *     { instance, region, os, vcpu, pricePerHourUSD, source? }
  * @returns {number} count of Windows rows added
  */
 function synthesizeAwsWindowsRows(rows) {
@@ -107,6 +118,7 @@ function synthesizeAwsWindowsRows(rows) {
 
 module.exports = {
   isWantedEc2Family,
+  isBurstableAws,
   isAwsGravitonInstance,
   getAwsWindowsUplift,
   synthesizeAwsWindowsRows
