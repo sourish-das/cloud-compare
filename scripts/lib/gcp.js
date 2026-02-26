@@ -1,4 +1,3 @@
-// scripts/lib/gcp.js
 "use strict";
 
 /**
@@ -22,6 +21,9 @@ const GCP_SERIES_ALLOW = {
   // Add X4 (bare-metal memory-optimized)
   memory:  ["M1", "M2", "M3", "M4", "X4"]
 };
+
+// Arm-identifying series (keep in sync with UI/matchers)
+const ARM_SERIES = new Set(["t2a", "c4a", "n4a", "a4x"]);
 
 // IMPORTANT: Do NOT map STANDARD here. We decide STANDARD by series.
 const CLASS_TO_CATEGORY = {
@@ -66,6 +68,11 @@ function extractHourlyPrice(pricingInfo) {
   return null;
 }
 
+/**
+ * Derive vCPU/RAM from a predefined machine type string
+ * (e.g., e2-standard-2, n2-highmem-8, c3-standard-4).
+ * For M*/X* memory-optimized we avoid guessing RAM (leave undefined).
+ */
 function deriveVcpuRamFromType(mt) {
   if (!mt) return { vcpu: undefined, ram: undefined };
   if (/^custom-/.test(mt)) return { vcpu: undefined, ram: undefined }; // exclude custom
@@ -83,6 +90,10 @@ function deriveVcpuRamFromType(mt) {
   return { vcpu, ram: undefined };
 }
 
+/**
+ * Region/geo matching for Catalog SKUs.
+ * Accepts exact region, 'global', and 'us' for any 'us-*'.
+ */
 function regionMatches(serviceRegions, region) {
   const want = String(region || "").toLowerCase();
   const set = new Set((serviceRegions || []).map(r => String(r).toLowerCase()));
@@ -108,6 +119,7 @@ function isPerInstanceSku(sku, machineType) {
  */
 function parseSeriesUnitRate(sku) {
   const name = (sku.description || sku.displayName || "").toLowerCase();
+  // Exclude Windows license SKUs (we handle those separately)
   if (/windows.*license|license.*windows/i.test(name)) return null;
 
   // Expanded series list with x4, h3, h4, h4d
@@ -127,8 +139,8 @@ function parseSeriesUnitRate(sku) {
 
 function buildSeriesUnitRateMaps(allSkus, region) {
   const maps = {};
-  for (const sku of allSkus) {
-    const cat = sku.category || {};
+  for (const sku of (allSkus || [])) {
+    const cat = sku?.category || {};
     if (cat.resourceFamily !== "Compute") continue;
     if (cat.usageType && !/OnDemand/i.test(cat.usageType)) continue; // On‑demand only
     if (!regionMatches(sku.serviceRegions, region)) continue;
@@ -153,7 +165,7 @@ const WINDOWS_STANDARD_FALLBACK_RATE =
 
 function buildWindowsCoreRate(allSkus, region) {
   const inRegion = (sku) => {
-    const cat = sku.category || {};
+    const cat = sku?.category || {};
     if (cat.resourceFamily !== "Compute") return false;
     if (cat.usageType && !/OnDemand/i.test(cat.usageType)) return false; // on‑demand only
     return regionMatches(sku.serviceRegions, region);
@@ -165,7 +177,7 @@ function buildWindowsCoreRate(allSkus, region) {
   const candidates = [];
 
   // Pass 1: strict — require windows + (license|licensing|core|vcpu)
-  for (const sku of allSkus) {
+  for (const sku of (allSkus || [])) {
     if (!inRegion(sku)) continue;
     const name = (sku.description || sku.displayName || "").toLowerCase();
     if (!/windows/.test(name)) continue;
@@ -178,7 +190,7 @@ function buildWindowsCoreRate(allSkus, region) {
 
   // Pass 2: relaxed — accept "paid/on‑demand/windows server" phrasing if strict found nothing
   if (candidates.length === 0) {
-    for (const sku of allSkus) {
+    for (const sku of (allSkus || [])) {
       if (!inRegion(sku)) continue;
       const name = (sku.description || sku.displayName || "").toLowerCase();
       if (!/windows/.test(name)) continue;
@@ -240,7 +252,61 @@ function getGcpAllowedPrefixes(category) {
   return (GCP_SERIES_ALLOW[category] || []).map(s => s.toUpperCase());
 }
 
-/* FULL-mode helpers (Compute API via OIDC) */
+/* ============================================================
+ * Arm detection helpers (for fetchers)
+ * ============================================================ */
+
+/** Returns true if the series is Arm (T2A/C4A/N4A/A4X). */
+function isGcpArmSeries(series) {
+  if (!series) return false;
+  return ARM_SERIES.has(String(series).toLowerCase());
+}
+
+/** Returns true if a predefined machine type (e.g., t2a-standard-4) is Arm. */
+function isGcpArmMachineType(machineType) {
+  if (!machineType) return false;
+  const m = String(machineType).toLowerCase().match(/^([a-z0-9]+)-[a-z]+[a-z0-9]*-\d+$/);
+  if (!m) return false;
+  return isGcpArmSeries(m[1]);
+}
+
+/* ============================================================
+ * Base price computation (Linux) from series unit-rate maps
+ * ============================================================ */
+
+/**
+ * Given a machine type and a series unit-rate map (from buildSeriesUnitRateMaps),
+ * compute the base Linux hourly price.
+ *   price = (vcpu * core_rate_for_series) + (ramGiB * ram_rate_for_series)
+ *
+ * Returns { price, vcpu, ram } where price may be null if incomplete.
+ */
+function computeBaseHourlyFromUnitMaps(machineType, unitMaps) {
+  if (!machineType || !unitMaps) return { price: null, vcpu: undefined, ram: undefined };
+
+  const { vcpu, ram } = deriveVcpuRamFromType(machineType);
+  if (!Number.isFinite(vcpu) || !Number.isFinite(ram)) {
+    return { price: null, vcpu, ram };
+  }
+
+  const series = String(machineType).toLowerCase().split("-")[0];
+  const rates = unitMaps[series];
+  if (!rates) return { price: null, vcpu, ram };
+
+  const core = Number(rates.core);
+  const mem  = Number(rates.ram);
+  if (!Number.isFinite(core) || !Number.isFinite(mem)) {
+    return { price: null, vcpu, ram };
+  }
+
+  const price = (vcpu * core) + (ram * mem);
+  return { price, vcpu, ram };
+}
+
+/* ============================================================
+ * FULL-mode helpers (Compute API via OIDC)
+ * ============================================================ */
+
 async function getAccessTokenFromADC() {
   const token =
     process.env.GCLOUD_ACCESS_TOKEN ||
@@ -313,5 +379,11 @@ module.exports = {
   listRegionZones,
   listZoneMachineTypes,
   buildSeriesUnitRateMaps,
-  buildWindowsCoreRate
+  buildWindowsCoreRate,
+
+  // New helpers (for fetchers and validation)
+  isGcpArmSeries,
+  isGcpArmMachineType,
+  computeBaseHourlyFromUnitMaps,
+  WINDOWS_STANDARD_FALLBACK_RATE
 };
