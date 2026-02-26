@@ -89,6 +89,48 @@ jobs:
           jq '.storage' docs/data/oci/oci.prices.json
 
       # ------------------------------------------------------------
+      # Sanity: Windows hourly > Linux hourly for a canonical x86 sample
+      # ------------------------------------------------------------
+      - name: Sanity: Windows hourly should exceed Linux hourly (2 vCPU / 4 GB)
+        shell: bash
+        run: |
+          set -euo pipefail
+          J=docs/data/oci/oci.prices.json
+
+          # Prefer AMD as canonical x86; fallback to Intel if AMD absent
+          CPU_RATE=$(jq -r '.compute.linux.amd[0].ocpu_per_hour // .compute.linux.intel[0].ocpu_per_hour' "$J")
+          MEM_RATE=$(jq -r '.compute.linux.amd[0].ram_gb_per_hour // .compute.linux.intel[0].ram_gb_per_hour' "$J")
+          WIN_LIC=$(jq -r '.compute.windows.license_per_vcpu_hour' "$J")
+
+          if [ -z "$CPU_RATE" ] || [ "$CPU_RATE" = "null" ]; then
+            echo "::error::Missing x86 ocpu_per_hour in AMD/Intel arrays"
+            exit 1
+          fi
+          if [ -z "$MEM_RATE" ] || [ "$MEM_RATE" = "null" ]; then
+            echo "::error::Missing x86 ram_gb_per_hour in AMD/Intel arrays"
+            exit 1
+          fi
+          if [ -z "$WIN_LIC" ] || [ "$WIN_LIC" = "null" ]; then
+            echo "::warning::Windows license_per_vcpu_hour is missing or null; treating as 0 for sanity check"
+            WIN_LIC=0
+          fi
+
+          VCPU=2
+          RAM=4
+
+          # x86 mapping: 1 OCPU = 2 vCPU
+          OCPU=$(awk -v v="$VCPU" 'BEGIN{ printf("%.6f", v/2.0) }')
+
+          LINUX=$(awk -v cpu="$CPU_RATE" -v mem="$MEM_RATE" -v ocpu="$OCPU" -v ram="$RAM" \
+            'BEGIN{ printf("%.6f", ocpu*cpu + ram*mem) }')
+          WINDOWS=$(awk -v linux="$LINUX" -v lic="$WIN_LIC" -v vcpu="$VCPU" \
+            'BEGIN{ printf("%.6f", linux + vcpu*lic) }')
+
+          echo "Linux/hr=$LINUX  Windows/hr=$WINDOWS  (x86, 2 vCPU, 4 GiB)"
+          awk -v w="$WINDOWS" -v l="$LINUX" 'BEGIN{ if (w <= l) { exit 1 } }' \
+            || { echo "::error::Expected Windows > Linux for sample x86 shape"; exit 1; }
+
+      # ------------------------------------------------------------
       # Upload artifact (for update-all.yml)
       # ------------------------------------------------------------
       - name: Upload OCI pricing JSON (artifact)
@@ -131,3 +173,4 @@ jobs:
 
           git commit -m "Debug publish: OCI pricing update"
           git push
+``
