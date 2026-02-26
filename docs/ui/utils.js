@@ -12,7 +12,7 @@ export function monthly(ph) {
 
 export function sumSafe(a, b) {
   const na = (a == null || isNaN(a)) ? 0 : Number(a);
-  const nb = (b == null || isNaN(b)) ? 0 : Number(a == null || isNaN(b) ? 0 : b);
+  const nb = (b == null || isNaN(b)) ? 0 : Number(b); // FIX: use b, not a
   if (a == null && b == null) return null;
   return na + nb;
 }
@@ -37,9 +37,19 @@ export function setSelectValue(id, value) {
   if (match) el.value = value;
 }
 
-export function safeSetText(id, text) {
+/**
+ * Set text into an element, optionally allowing trusted HTML.
+ * Use { html: true } ONLY for known, code-generated strings.
+ */
+export function safeSetText(id, value, { html = false } = {}) {
   const el = document.getElementById(id);
-  if (el) el.textContent = text;
+  if (!el) return;
+  const v = (value == null) ? "" : String(value);
+  if (html) {
+    el.innerHTML = v; // trusted, code-generated strings only
+  } else {
+    el.textContent = v; // default: escape HTML
+  }
 }
 
 export function appendToText(id, extra) {
@@ -136,7 +146,7 @@ export function getGcpStorageMonthlyFromCfg(type, gb, gcpCfg) {
   return gb * Number(gcpCfg?.hdd_per_gb_month ?? 0.04);
 }
 
-/* ---------- OCI storage pricing (NEW) ---------- */
+/* ---------- OCI storage pricing ---------- */
 /**
  * OCI Block Volume:
  * - One base price (USD per GB-month)
@@ -150,14 +160,8 @@ export function getOciStorageMonthlyFromCfg(gb, ociCfg) {
 
 /* ---------- Reset all UI fields (AWS + Azure + GCP + OCI) ---------- */
 export function resetCards() {
-  // Helper so resetCards stays safe even if an element is missing
-  const safeSetHtml = (id, html) => {
-    const el = document.getElementById(id);
-    if (el) el.innerHTML = html;
-  };
-
-  // AWS
-  safeSetHtml("awsInstance", `<strong>Recommended Instance:</strong> …`);
+  // Titles use trusted HTML for bold labels; everything else stays text-only.
+  safeSetText("awsInstance", `<strong>Recommended Instance:</strong> …`, { html: true });
   safeSetText("awsCpu",     "vCPU: …");
   safeSetText("awsRam",     "RAM: …");
   safeSetText("awsPrice",   "Price/hr: —");
@@ -168,8 +172,7 @@ export function resetCards() {
   safeSetText("awsTotalHr",        "—");
   safeSetText("awsTotalMonthly",   "—");
 
-  // Azure
-  safeSetHtml("azInstance", `<strong>Recommended VM Size:</strong> …`);
+  safeSetText("azInstance", `<strong>Recommended VM Size:</strong> …`, { html: true });
   safeSetText("azCpu",     "vCPU: …");
   safeSetText("azRam",     "RAM: …");
   safeSetText("azPrice",   "Price/hr: —");
@@ -180,8 +183,7 @@ export function resetCards() {
   safeSetText("azTotalHr",        "—");
   safeSetText("azTotalMonthly",   "—");
 
-  // GCP
-  safeSetHtml("gcpInstance", `<strong>Recommended Machine:</strong> …`);
+  safeSetText("gcpInstance", `<strong>Recommended Machine:</strong> …`, { html: true });
   safeSetText("gcpCpu",     "vCPU: …");
   safeSetText("gcpRam",     "RAM: …");
   safeSetText("gcpPrice",   "Price/hr: —");
@@ -192,8 +194,7 @@ export function resetCards() {
   safeSetText("gcpTotalHr",        "—");
   safeSetText("gcpTotalMonthly",   "—");
 
-  // OCI
-  safeSetHtml("ociInstance", `<strong>Recommended Machine:</strong> …`);
+  safeSetText("ociInstance", `<strong>Recommended Machine:</strong> …`, { html: true });
   safeSetText("ociCpu",     "vCPU: …");
   safeSetText("ociRam",     "RAM: …");
   safeSetText("ociPrice",   "Price/hr: —");
