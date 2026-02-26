@@ -21,16 +21,25 @@ jobs:
     timeout-minutes: 30
 
     steps:
+      # ------------------------------------------------------------
+      # Checkout (read-only)
+      # ------------------------------------------------------------
       - name: Checkout repo (read-only)
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      # ------------------------------------------------------------
+      # Node setup (LTS)
+      # ------------------------------------------------------------
       - name: Set up Node (LTS)
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
+      # ------------------------------------------------------------
+      # jq (for quick validation)
+      # ------------------------------------------------------------
       - name: Ensure jq (for quick validation)
         run: |
           if ! command -v jq >/dev/null 2>&1; then
@@ -38,7 +47,9 @@ jobs:
             sudo apt-get install -y jq
           fi
 
+      # ------------------------------------------------------------
       # Optional: quick probe against AWS Price List (no auth required)
+      # ------------------------------------------------------------
       - name: Probe AWS Price List API (sample)
         shell: bash
         env:
@@ -55,11 +66,15 @@ jobs:
             jq 'keys' /tmp/aws-price.json | head -n 20 || true
           fi
 
-      # Output directory
+      # ------------------------------------------------------------
+      # Ensure output directory
+      # ------------------------------------------------------------
       - name: Ensure output directory
         run: mkdir -p docs/data/aws
 
-      # >>> Run the AWS fetcher (now supports Windows via catalog + fallback uplift)
+      # ------------------------------------------------------------
+      # >>> Run the AWS fetcher (Windows via catalog; fallback uplift if needed)
+      # ------------------------------------------------------------
       - name: Fetch AWS prices
         run: node scripts/providers/aws.fetch.js
         env:
@@ -68,7 +83,9 @@ jobs:
           # Optional: set Windows per‑vCPU uplift if you want to pin it (code default is 0.046)
           # AWS_WINDOWS_RATE_PER_VCPU: "0.046"
 
-      # Validate the output was created and is non-empty + show quick stats
+      # ------------------------------------------------------------
+      # Validate the output was created and show quick stats
+      # ------------------------------------------------------------
       - name: Validate AWS output
         shell: bash
         run: |
@@ -83,7 +100,9 @@ jobs:
           echo "Counts by OS:"
           jq -r '.compute | group_by(.os) | map({os: .[0].os, count: length})' docs/data/aws/aws.prices.json
 
+      # ------------------------------------------------------------
       # Upload artifact for orchestrator
+      # ------------------------------------------------------------
       - name: Upload AWS pricing JSON (artifact)
         uses: actions/upload-artifact@v4
         with:
@@ -94,6 +113,7 @@ jobs:
 
       # =========================================
       # OPTIONAL DEBUG MODE — snapshot to docs/data (no direct overwrite)
+      # Enable by setting repo variable: DEBUG_PUBLISH=true
       # =========================================
       - name: Debug Publish to docs/data (optional)
         if: ${{ vars.DEBUG_PUBLISH == 'true' }}
@@ -118,7 +138,6 @@ jobs:
           git checkout main
           git reset --hard origin/main
 
-          # Commit the main path (unchanged behavior)
           git add -f docs/data/aws/aws.prices.json
           if git diff --cached --quiet; then
             echo "No changes to commit."
