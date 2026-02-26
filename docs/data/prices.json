@@ -52,7 +52,6 @@
     ],
     "ram": [
       0.5,
-      0.613,
       1,
       1.7,
       1.7998046875,
@@ -25737,15 +25736,6 @@
       "source": "catalog"
     },
     {
-      "instance": "t3.xlarge",
-      "vcpu": 4,
-      "ram": 16,
-      "pricePerHourUSD": 0.1664,
-      "region": "us-east-1",
-      "os": "Linux",
-      "source": "catalog"
-    },
-    {
       "instance": "m8id.2xlarge",
       "vcpu": 8,
       "ram": 32,
@@ -26196,15 +26186,6 @@
       "source": "catalog"
     },
     {
-      "instance": "t3.large",
-      "vcpu": 2,
-      "ram": 8,
-      "pricePerHourUSD": 0.0832,
-      "region": "us-east-1",
-      "os": "Linux",
-      "source": "catalog"
-    },
-    {
       "instance": "r6idn.2xlarge",
       "vcpu": 8,
       "ram": 64,
@@ -26578,15 +26559,6 @@
       "vcpu": 4,
       "ram": 8,
       "pricePerHourUSD": 0.1785,
-      "region": "us-east-1",
-      "os": "Linux",
-      "source": "catalog"
-    },
-    {
-      "instance": "t2.small",
-      "vcpu": 1,
-      "ram": 2,
-      "pricePerHourUSD": 0.023,
       "region": "us-east-1",
       "os": "Linux",
       "source": "catalog"
@@ -26979,15 +26951,6 @@
       "source": "catalog"
     },
     {
-      "instance": "t4g.2xlarge",
-      "vcpu": 8,
-      "ram": 32,
-      "pricePerHourUSD": 0.2688,
-      "region": "us-east-1",
-      "os": "Linux",
-      "source": "catalog"
-    },
-    {
       "instance": "c5ad.2xlarge",
       "vcpu": 8,
       "ram": 16,
@@ -27019,15 +26982,6 @@
       "vcpu": 8,
       "ram": 15,
       "pricePerHourUSD": 0.42,
-      "region": "us-east-1",
-      "os": "Linux",
-      "source": "catalog"
-    },
-    {
-      "instance": "t2.xlarge",
-      "vcpu": 4,
-      "ram": 16,
-      "pricePerHourUSD": 0.1856,
       "region": "us-east-1",
       "os": "Linux",
       "source": "catalog"
@@ -27550,15 +27504,6 @@
       "vcpu": 32,
       "ram": 128,
       "pricePerHourUSD": 1.904,
-      "region": "us-east-1",
-      "os": "Linux",
-      "source": "catalog"
-    },
-    {
-      "instance": "t3a.xlarge",
-      "vcpu": 4,
-      "ram": 16,
-      "pricePerHourUSD": 0.1504,
       "region": "us-east-1",
       "os": "Linux",
       "source": "catalog"
@@ -28140,15 +28085,6 @@
       "source": "catalog"
     },
     {
-      "instance": "t4g.large",
-      "vcpu": 2,
-      "ram": 8,
-      "pricePerHourUSD": 0.0672,
-      "region": "us-east-1",
-      "os": "Linux",
-      "source": "catalog"
-    },
-    {
       "instance": "i3.4xlarge",
       "vcpu": 16,
       "ram": 122,
@@ -28180,15 +28116,6 @@
       "vcpu": 2,
       "ram": 8,
       "pricePerHourUSD": 0.1455,
-      "region": "us-east-1",
-      "os": "Linux",
-      "source": "catalog"
-    },
-    {
-      "instance": "t3a.2xlarge",
-      "vcpu": 8,
-      "ram": 32,
-      "pricePerHourUSD": 0.3008,
       "region": "us-east-1",
       "os": "Linux",
       "source": "catalog"
@@ -28518,15 +28445,6 @@
       "source": "catalog"
     },
     {
-      "instance": "t2.micro",
-      "vcpu": 1,
-      "ram": 1,
-      "pricePerHourUSD": 0.0116,
-      "region": "us-east-1",
-      "os": "Linux",
-      "source": "catalog"
-    },
-    {
       "instance": "r6in.4xlarge",
       "vcpu": 16,
       "ram": 128,
@@ -28540,15 +28458,6 @@
       "vcpu": 96,
       "ram": 192,
       "pricePerHourUSD": 5.32224,
-      "region": "us-east-1",
-      "os": "Linux",
-      "source": "catalog"
-    },
-    {
-      "instance": "t4g.xlarge",
-      "vcpu": 4,
-      "ram": 16,
-      "pricePerHourUSD": 0.1344,
       "region": "us-east-1",
       "os": "Linux",
       "source": "catalog"
@@ -28869,15 +28778,6 @@
       "source": "catalog"
     },
     {
-      "instance": "t3.micro",
-      "vcpu": 2,
-      "ram": 1,
-      "pricePerHourUSD": 0.0104,
-      "region": "us-east-1",
-      "os": "Linux",
-      "source": "catalog"
-    },
-    {
       "instance": "r5.24xlarge",
       "vcpu": 96,
       "ram": 768,
@@ -28900,15 +28800,6 @@
       "vcpu": 64,
       "ram": 128,
       "pricePerHourUSD": 3.792,
-      "region": "us-east-1",
-      "os": "Linux",
-      "source": "catalog"
-    },
-    {
-      "instance": "t3.nano",
-      "vcpu": 2,
-      "ram": 0.5,
-      "pricePerHourUSD": 0.0052,
       "region": "us-east-1",
       "os": "Linux",
       "source": "catalog"
@@ -29724,15 +29615,6 @@
       "source": "catalog"
     },
     {
-      "instance": "t2.medium",
-      "vcpu": 2,
-      "ram": 4,
-      "pricePerHourUSD": 0.0464,
-      "region": "us-east-1",
-      "os": "Linux",
-      "source": "catalog"
-    },
-    {
       "instance": "i7ie.2xlarge",
       "vcpu": 8,
       "ram": 64,
@@ -29836,15 +29718,6 @@
       "vcpu": 8,
       "ram": 32,
       "pricePerHourUSD": 0.582,
-      "region": "us-east-1",
-      "os": "Linux",
-      "source": "catalog"
-    },
-    {
-      "instance": "t4g.medium",
-      "vcpu": 2,
-      "ram": 4,
-      "pricePerHourUSD": 0.0336,
       "region": "us-east-1",
       "os": "Linux",
       "source": "catalog"
@@ -30435,15 +30308,6 @@
       "source": "catalog"
     },
     {
-      "instance": "t3a.small",
-      "vcpu": 2,
-      "ram": 2,
-      "pricePerHourUSD": 0.0188,
-      "region": "us-east-1",
-      "os": "Linux",
-      "source": "catalog"
-    },
-    {
       "instance": "c6id.32xlarge",
       "vcpu": 128,
       "ram": 256,
@@ -30502,15 +30366,6 @@
       "vcpu": 4,
       "ram": 30.5,
       "pricePerHourUSD": 0.853,
-      "region": "us-east-1",
-      "os": "Linux",
-      "source": "catalog"
-    },
-    {
-      "instance": "t3.small",
-      "vcpu": 2,
-      "ram": 2,
-      "pricePerHourUSD": 0.0208,
       "region": "us-east-1",
       "os": "Linux",
       "source": "catalog"
@@ -31326,15 +31181,6 @@
       "source": "catalog"
     },
     {
-      "instance": "t3a.large",
-      "vcpu": 2,
-      "ram": 8,
-      "pricePerHourUSD": 0.0752,
-      "region": "us-east-1",
-      "os": "Linux",
-      "source": "catalog"
-    },
-    {
       "instance": "x2gd.xlarge",
       "vcpu": 4,
       "ram": 64,
@@ -31740,15 +31586,6 @@
       "source": "catalog"
     },
     {
-      "instance": "t3a.micro",
-      "vcpu": 2,
-      "ram": 1,
-      "pricePerHourUSD": 0.0094,
-      "region": "us-east-1",
-      "os": "Linux",
-      "source": "catalog"
-    },
-    {
       "instance": "c1.medium",
       "vcpu": 2,
       "ram": 1.7,
@@ -31866,15 +31703,6 @@
       "source": "catalog"
     },
     {
-      "instance": "t3a.medium",
-      "vcpu": 2,
-      "ram": 4,
-      "pricePerHourUSD": 0.0376,
-      "region": "us-east-1",
-      "os": "Linux",
-      "source": "catalog"
-    },
-    {
       "instance": "c6a.large",
       "vcpu": 2,
       "ram": 4,
@@ -31933,15 +31761,6 @@
       "vcpu": 48,
       "ram": 192,
       "pricePerHourUSD": 3.492,
-      "region": "us-east-1",
-      "os": "Linux",
-      "source": "catalog"
-    },
-    {
-      "instance": "t3.2xlarge",
-      "vcpu": 8,
-      "ram": 32,
-      "pricePerHourUSD": 0.3328,
       "region": "us-east-1",
       "os": "Linux",
       "source": "catalog"
@@ -32343,15 +32162,6 @@
       "source": "catalog"
     },
     {
-      "instance": "t1.micro",
-      "vcpu": 1,
-      "ram": 0.613,
-      "pricePerHourUSD": 0.02,
-      "region": "us-east-1",
-      "os": "Linux",
-      "source": "catalog"
-    },
-    {
       "instance": "c8gd.24xlarge",
       "vcpu": 96,
       "ram": 192,
@@ -32437,15 +32247,6 @@
       "vcpu": 8,
       "ram": 16,
       "pricePerHourUSD": 0.3072,
-      "region": "us-east-1",
-      "os": "Linux",
-      "source": "catalog"
-    },
-    {
-      "instance": "t3a.nano",
-      "vcpu": 2,
-      "ram": 0.5,
-      "pricePerHourUSD": 0.0047,
       "region": "us-east-1",
       "os": "Linux",
       "source": "catalog"
@@ -32811,15 +32612,6 @@
       "source": "catalog"
     },
     {
-      "instance": "t2.2xlarge",
-      "vcpu": 8,
-      "ram": 32,
-      "pricePerHourUSD": 0.3712,
-      "region": "us-east-1",
-      "os": "Linux",
-      "source": "catalog"
-    },
-    {
       "instance": "m8g.4xlarge",
       "vcpu": 16,
       "ram": 64,
@@ -32955,15 +32747,6 @@
       "source": "catalog"
     },
     {
-      "instance": "t4g.nano",
-      "vcpu": 2,
-      "ram": 0.5,
-      "pricePerHourUSD": 0.0042,
-      "region": "us-east-1",
-      "os": "Linux",
-      "source": "catalog"
-    },
-    {
       "instance": "m6gd.large",
       "vcpu": 2,
       "ram": 8,
@@ -33045,15 +32828,6 @@
       "source": "catalog"
     },
     {
-      "instance": "t4g.small",
-      "vcpu": 2,
-      "ram": 2,
-      "pricePerHourUSD": 0.0168,
-      "region": "us-east-1",
-      "os": "Linux",
-      "source": "catalog"
-    },
-    {
       "instance": "m7i.large",
       "vcpu": 2,
       "ram": 8,
@@ -33103,15 +32877,6 @@
       "vcpu": 72,
       "ram": 576,
       "pricePerHourUSD": 8.5428,
-      "region": "us-east-1",
-      "os": "Linux",
-      "source": "catalog"
-    },
-    {
-      "instance": "t2.nano",
-      "vcpu": 1,
-      "ram": 0.5,
-      "pricePerHourUSD": 0.0058,
       "region": "us-east-1",
       "os": "Linux",
       "source": "catalog"
@@ -33346,15 +33111,6 @@
       "vcpu": 192,
       "ram": 3072,
       "pricePerHourUSD": 18.7584,
-      "region": "us-east-1",
-      "os": "Linux",
-      "source": "catalog"
-    },
-    {
-      "instance": "t3.medium",
-      "vcpu": 2,
-      "ram": 4,
-      "pricePerHourUSD": 0.0416,
       "region": "us-east-1",
       "os": "Linux",
       "source": "catalog"
@@ -33765,15 +33521,6 @@
       "source": "catalog"
     },
     {
-      "instance": "t2.large",
-      "vcpu": 2,
-      "ram": 8,
-      "pricePerHourUSD": 0.0928,
-      "region": "us-east-1",
-      "os": "Linux",
-      "source": "catalog"
-    },
-    {
       "instance": "m7g.xlarge",
       "vcpu": 4,
       "ram": 16,
@@ -34026,15 +33773,6 @@
       "source": "catalog"
     },
     {
-      "instance": "t4g.micro",
-      "vcpu": 2,
-      "ram": 1,
-      "pricePerHourUSD": 0.0084,
-      "region": "us-east-1",
-      "os": "Linux",
-      "source": "catalog"
-    },
-    {
       "instance": "r8g.large",
       "vcpu": 2,
       "ram": 16,
@@ -34192,15 +33930,6 @@
       "vcpu": 72,
       "ram": 192,
       "pricePerHourUSD": 34.2,
-      "region": "us-east-1",
-      "os": "Windows",
-      "source": "catalog+win"
-    },
-    {
-      "instance": "t3.xlarge",
-      "vcpu": 4,
-      "ram": 16,
-      "pricePerHourUSD": 0.8304,
       "region": "us-east-1",
       "os": "Windows",
       "source": "catalog+win"
@@ -34647,15 +34376,6 @@
       "source": "catalog+win"
     },
     {
-      "instance": "t3.large",
-      "vcpu": 2,
-      "ram": 8,
-      "pricePerHourUSD": 0.1752,
-      "region": "us-east-1",
-      "os": "Windows",
-      "source": "catalog+win"
-    },
-    {
       "instance": "r6idn.2xlarge",
       "vcpu": 8,
       "ram": 64,
@@ -34993,15 +34713,6 @@
       "vcpu": 4,
       "ram": 8,
       "pricePerHourUSD": 1.8625,
-      "region": "us-east-1",
-      "os": "Windows",
-      "source": "catalog+win"
-    },
-    {
-      "instance": "t2.small",
-      "vcpu": 1,
-      "ram": 2,
-      "pricePerHourUSD": 0.1368,
       "region": "us-east-1",
       "os": "Windows",
       "source": "catalog+win"
@@ -35371,15 +35082,6 @@
       "vcpu": 8,
       "ram": 15,
       "pricePerHourUSD": 0.788,
-      "region": "us-east-1",
-      "os": "Windows",
-      "source": "catalog+win"
-    },
-    {
-      "instance": "t2.xlarge",
-      "vcpu": 4,
-      "ram": 16,
-      "pricePerHourUSD": 0.4372,
       "region": "us-east-1",
       "os": "Windows",
       "source": "catalog+win"
@@ -35857,15 +35559,6 @@
       "vcpu": 32,
       "ram": 128,
       "pricePerHourUSD": 3.917,
-      "region": "us-east-1",
-      "os": "Windows",
-      "source": "catalog+win"
-    },
-    {
-      "instance": "t3a.xlarge",
-      "vcpu": 4,
-      "ram": 16,
-      "pricePerHourUSD": 0.402,
       "region": "us-east-1",
       "os": "Windows",
       "source": "catalog+win"
@@ -36384,15 +36077,6 @@
       "source": "catalog+win"
     },
     {
-      "instance": "t3a.2xlarge",
-      "vcpu": 8,
-      "ram": 32,
-      "pricePerHourUSD": 0.804,
-      "region": "us-east-1",
-      "os": "Windows",
-      "source": "catalog+win"
-    },
-    {
       "instance": "r5.2xlarge",
       "vcpu": 8,
       "ram": 64,
@@ -36681,15 +36365,6 @@
       "source": "catalog+win"
     },
     {
-      "instance": "t2.micro",
-      "vcpu": 1,
-      "ram": 1,
-      "pricePerHourUSD": 0.1252,
-      "region": "us-east-1",
-      "os": "Windows",
-      "source": "catalog+win"
-    },
-    {
       "instance": "r6in.4xlarge",
       "vcpu": 16,
       "ram": 128,
@@ -36951,28 +36626,10 @@
       "source": "catalog+win"
     },
     {
-      "instance": "t3.micro",
-      "vcpu": 2,
-      "ram": 1,
-      "pricePerHourUSD": 0.10239999999999999,
-      "region": "us-east-1",
-      "os": "Windows",
-      "source": "catalog+win"
-    },
-    {
       "instance": "r5.24xlarge",
       "vcpu": 96,
       "ram": 768,
       "pricePerHourUSD": 10.464,
-      "region": "us-east-1",
-      "os": "Windows",
-      "source": "catalog+win"
-    },
-    {
-      "instance": "t3.nano",
-      "vcpu": 2,
-      "ram": 0.5,
-      "pricePerHourUSD": 0.0972,
       "region": "us-east-1",
       "os": "Windows",
       "source": "catalog+win"
@@ -37698,15 +37355,6 @@
       "source": "catalog+win"
     },
     {
-      "instance": "t2.medium",
-      "vcpu": 2,
-      "ram": 4,
-      "pricePerHourUSD": 0.1384,
-      "region": "us-east-1",
-      "os": "Windows",
-      "source": "catalog+win"
-    },
-    {
       "instance": "i7ie.2xlarge",
       "vcpu": 8,
       "ram": 64,
@@ -38247,15 +37895,6 @@
       "source": "catalog+win"
     },
     {
-      "instance": "t3a.small",
-      "vcpu": 2,
-      "ram": 2,
-      "pricePerHourUSD": 0.1784,
-      "region": "us-east-1",
-      "os": "Windows",
-      "source": "catalog+win"
-    },
-    {
       "instance": "c6id.32xlarge",
       "vcpu": 128,
       "ram": 256,
@@ -38314,15 +37953,6 @@
       "vcpu": 4,
       "ram": 30.5,
       "pricePerHourUSD": 1.105,
-      "region": "us-east-1",
-      "os": "Windows",
-      "source": "catalog+win"
-    },
-    {
-      "instance": "t3.small",
-      "vcpu": 2,
-      "ram": 2,
-      "pricePerHourUSD": 0.1804,
       "region": "us-east-1",
       "os": "Windows",
       "source": "catalog+win"
@@ -38967,15 +38597,6 @@
       "source": "catalog+win"
     },
     {
-      "instance": "t3a.large",
-      "vcpu": 2,
-      "ram": 8,
-      "pricePerHourUSD": 0.16720000000000002,
-      "region": "us-east-1",
-      "os": "Windows",
-      "source": "catalog+win"
-    },
-    {
       "instance": "x2gd.xlarge",
       "vcpu": 4,
       "ram": 64,
@@ -39219,15 +38840,6 @@
       "source": "catalog+win"
     },
     {
-      "instance": "t3a.micro",
-      "vcpu": 2,
-      "ram": 1,
-      "pricePerHourUSD": 0.1014,
-      "region": "us-east-1",
-      "os": "Windows",
-      "source": "catalog+win"
-    },
-    {
       "instance": "c1.medium",
       "vcpu": 2,
       "ram": 1.7,
@@ -39336,15 +38948,6 @@
       "source": "catalog+win"
     },
     {
-      "instance": "t3a.medium",
-      "vcpu": 2,
-      "ram": 4,
-      "pricePerHourUSD": 0.1296,
-      "region": "us-east-1",
-      "os": "Windows",
-      "source": "catalog+win"
-    },
-    {
       "instance": "c6a.large",
       "vcpu": 2,
       "ram": 4,
@@ -39385,15 +38988,6 @@
       "vcpu": 128,
       "ram": 2048,
       "pricePerHourUSD": 22.05632,
-      "region": "us-east-1",
-      "os": "Windows",
-      "source": "catalog+win"
-    },
-    {
-      "instance": "t3.2xlarge",
-      "vcpu": 8,
-      "ram": 32,
-      "pricePerHourUSD": 0.8360000000000001,
       "region": "us-east-1",
       "os": "Windows",
       "source": "catalog+win"
@@ -39633,15 +39227,6 @@
       "source": "catalog+win"
     },
     {
-      "instance": "t1.micro",
-      "vcpu": 1,
-      "ram": 0.613,
-      "pricePerHourUSD": 0.066,
-      "region": "us-east-1",
-      "os": "Windows",
-      "source": "catalog+win"
-    },
-    {
       "instance": "x2gd.2xlarge",
       "vcpu": 8,
       "ram": 128,
@@ -39691,15 +39276,6 @@
       "vcpu": 8,
       "ram": 30,
       "pricePerHourUSD": 0.9,
-      "region": "us-east-1",
-      "os": "Windows",
-      "source": "catalog+win"
-    },
-    {
-      "instance": "t3a.nano",
-      "vcpu": 2,
-      "ram": 0.5,
-      "pricePerHourUSD": 0.0967,
       "region": "us-east-1",
       "os": "Windows",
       "source": "catalog+win"
@@ -39867,15 +39443,6 @@
       "source": "catalog+win"
     },
     {
-      "instance": "t2.2xlarge",
-      "vcpu": 8,
-      "ram": 32,
-      "pricePerHourUSD": 0.7392,
-      "region": "us-east-1",
-      "os": "Windows",
-      "source": "catalog+win"
-    },
-    {
       "instance": "is4gen.large",
       "vcpu": 2,
       "ram": 12,
@@ -39993,15 +39560,6 @@
       "source": "catalog+win"
     },
     {
-      "instance": "t2.nano",
-      "vcpu": 1,
-      "ram": 0.5,
-      "pricePerHourUSD": 0.0518,
-      "region": "us-east-1",
-      "os": "Windows",
-      "source": "catalog+win"
-    },
-    {
       "instance": "c5d.2xlarge",
       "vcpu": 8,
       "ram": 16,
@@ -40042,15 +39600,6 @@
       "vcpu": 16,
       "ram": 122,
       "pricePerHourUSD": 3.7199999999999998,
-      "region": "us-east-1",
-      "os": "Windows",
-      "source": "catalog+win"
-    },
-    {
-      "instance": "t3.medium",
-      "vcpu": 2,
-      "ram": 4,
-      "pricePerHourUSD": 0.1336,
       "region": "us-east-1",
       "os": "Windows",
       "source": "catalog+win"
@@ -40114,15 +39663,6 @@
       "vcpu": 4,
       "ram": 16,
       "pricePerHourUSD": 0.5819,
-      "region": "us-east-1",
-      "os": "Windows",
-      "source": "catalog+win"
-    },
-    {
-      "instance": "t2.large",
-      "vcpu": 2,
-      "ram": 8,
-      "pricePerHourUSD": 0.25239999999999996,
       "region": "us-east-1",
       "os": "Windows",
       "source": "catalog+win"
@@ -41344,7 +40884,7 @@
       "region": "us-east1",
       "os": "Linux",
       "series": "c4a",
-      "arch": "x86",
+      "arch": "arm",
       "source": "composed"
     },
     {
@@ -41356,7 +40896,7 @@
       "region": "us-east1",
       "os": "Linux",
       "series": "c4a",
-      "arch": "x86",
+      "arch": "arm",
       "source": "composed"
     },
     {
@@ -41368,7 +40908,7 @@
       "region": "us-east1",
       "os": "Linux",
       "series": "c4a",
-      "arch": "x86",
+      "arch": "arm",
       "source": "composed"
     },
     {
@@ -41380,7 +40920,7 @@
       "region": "us-east1",
       "os": "Linux",
       "series": "c4a",
-      "arch": "x86",
+      "arch": "arm",
       "source": "composed"
     },
     {
@@ -41392,7 +40932,7 @@
       "region": "us-east1",
       "os": "Linux",
       "series": "c4a",
-      "arch": "x86",
+      "arch": "arm",
       "source": "composed"
     },
     {
@@ -41404,7 +40944,7 @@
       "region": "us-east1",
       "os": "Linux",
       "series": "c4a",
-      "arch": "x86",
+      "arch": "arm",
       "source": "composed"
     },
     {
@@ -41416,7 +40956,7 @@
       "region": "us-east1",
       "os": "Linux",
       "series": "c4a",
-      "arch": "x86",
+      "arch": "arm",
       "source": "composed"
     },
     {
@@ -41428,7 +40968,7 @@
       "region": "us-east1",
       "os": "Linux",
       "series": "c4a",
-      "arch": "x86",
+      "arch": "arm",
       "source": "composed"
     },
     {
@@ -41440,7 +40980,7 @@
       "region": "us-east1",
       "os": "Linux",
       "series": "c4a",
-      "arch": "x86",
+      "arch": "arm",
       "source": "composed"
     },
     {
@@ -41452,7 +40992,7 @@
       "region": "us-east1",
       "os": "Linux",
       "series": "c4a",
-      "arch": "x86",
+      "arch": "arm",
       "source": "composed"
     },
     {
@@ -41464,7 +41004,7 @@
       "region": "us-east1",
       "os": "Linux",
       "series": "c4a",
-      "arch": "x86",
+      "arch": "arm",
       "source": "composed"
     },
     {
@@ -41476,7 +41016,7 @@
       "region": "us-east1",
       "os": "Linux",
       "series": "c4a",
-      "arch": "x86",
+      "arch": "arm",
       "source": "composed"
     },
     {
@@ -41488,7 +41028,7 @@
       "region": "us-east1",
       "os": "Linux",
       "series": "c4a",
-      "arch": "x86",
+      "arch": "arm",
       "source": "composed"
     },
     {
@@ -41500,7 +41040,7 @@
       "region": "us-east1",
       "os": "Linux",
       "series": "c4a",
-      "arch": "x86",
+      "arch": "arm",
       "source": "composed"
     },
     {
@@ -41512,7 +41052,7 @@
       "region": "us-east1",
       "os": "Linux",
       "series": "c4a",
-      "arch": "x86",
+      "arch": "arm",
       "source": "composed"
     },
     {
@@ -41524,7 +41064,7 @@
       "region": "us-east1",
       "os": "Linux",
       "series": "c4a",
-      "arch": "x86",
+      "arch": "arm",
       "source": "composed"
     },
     {
@@ -41536,7 +41076,7 @@
       "region": "us-east1",
       "os": "Linux",
       "series": "c4a",
-      "arch": "x86",
+      "arch": "arm",
       "source": "composed"
     },
     {
@@ -41548,7 +41088,7 @@
       "region": "us-east1",
       "os": "Linux",
       "series": "c4a",
-      "arch": "x86",
+      "arch": "arm",
       "source": "composed"
     },
     {
@@ -41560,7 +41100,7 @@
       "region": "us-east1",
       "os": "Linux",
       "series": "c4a",
-      "arch": "x86",
+      "arch": "arm",
       "source": "composed"
     },
     {
@@ -41572,7 +41112,7 @@
       "region": "us-east1",
       "os": "Linux",
       "series": "c4a",
-      "arch": "x86",
+      "arch": "arm",
       "source": "composed"
     },
     {
@@ -41584,7 +41124,7 @@
       "region": "us-east1",
       "os": "Linux",
       "series": "c4a",
-      "arch": "x86",
+      "arch": "arm",
       "source": "composed"
     },
     {
@@ -41596,7 +41136,7 @@
       "region": "us-east1",
       "os": "Linux",
       "series": "c4a",
-      "arch": "x86",
+      "arch": "arm",
       "source": "composed"
     },
     {
@@ -41608,7 +41148,7 @@
       "region": "us-east1",
       "os": "Linux",
       "series": "c4a",
-      "arch": "x86",
+      "arch": "arm",
       "source": "composed"
     },
     {
@@ -41620,7 +41160,7 @@
       "region": "us-east1",
       "os": "Linux",
       "series": "c4a",
-      "arch": "x86",
+      "arch": "arm",
       "source": "composed"
     },
     {
@@ -41632,7 +41172,7 @@
       "region": "us-east1",
       "os": "Linux",
       "series": "c4a",
-      "arch": "x86",
+      "arch": "arm",
       "source": "composed"
     },
     {
@@ -41644,7 +41184,7 @@
       "region": "us-east1",
       "os": "Linux",
       "series": "c4a",
-      "arch": "x86",
+      "arch": "arm",
       "source": "composed"
     },
     {
@@ -41656,7 +41196,7 @@
       "region": "us-east1",
       "os": "Linux",
       "series": "c4a",
-      "arch": "x86",
+      "arch": "arm",
       "source": "composed"
     },
     {
@@ -44896,330 +44436,6 @@
       "region": "us-east1",
       "os": "Windows",
       "series": "c4",
-      "arch": "x86",
-      "source": "composed+win"
-    },
-    {
-      "instance": "c4a_highcpu_1",
-      "category": "compute",
-      "vcpu": 1,
-      "ram": 2,
-      "pricePerHourUSD": 0.07755999999999999,
-      "region": "us-east1",
-      "os": "Windows",
-      "series": "c4a",
-      "arch": "x86",
-      "source": "composed+win"
-    },
-    {
-      "instance": "c4a_highcpu_16",
-      "category": "compute",
-      "vcpu": 16,
-      "ram": 32,
-      "pricePerHourUSD": 1.2409599999999998,
-      "region": "us-east1",
-      "os": "Windows",
-      "series": "c4a",
-      "arch": "x86",
-      "source": "composed+win"
-    },
-    {
-      "instance": "c4a_highcpu_2",
-      "category": "compute",
-      "vcpu": 2,
-      "ram": 4,
-      "pricePerHourUSD": 0.15511999999999998,
-      "region": "us-east1",
-      "os": "Windows",
-      "series": "c4a",
-      "arch": "x86",
-      "source": "composed+win"
-    },
-    {
-      "instance": "c4a_highcpu_32",
-      "category": "compute",
-      "vcpu": 32,
-      "ram": 64,
-      "pricePerHourUSD": 2.4819199999999997,
-      "region": "us-east1",
-      "os": "Windows",
-      "series": "c4a",
-      "arch": "x86",
-      "source": "composed+win"
-    },
-    {
-      "instance": "c4a_highcpu_4",
-      "category": "compute",
-      "vcpu": 4,
-      "ram": 8,
-      "pricePerHourUSD": 0.31023999999999996,
-      "region": "us-east1",
-      "os": "Windows",
-      "series": "c4a",
-      "arch": "x86",
-      "source": "composed+win"
-    },
-    {
-      "instance": "c4a_highcpu_48",
-      "category": "compute",
-      "vcpu": 48,
-      "ram": 96,
-      "pricePerHourUSD": 3.72288,
-      "region": "us-east1",
-      "os": "Windows",
-      "series": "c4a",
-      "arch": "x86",
-      "source": "composed+win"
-    },
-    {
-      "instance": "c4a_highcpu_64",
-      "category": "compute",
-      "vcpu": 64,
-      "ram": 128,
-      "pricePerHourUSD": 4.963839999999999,
-      "region": "us-east1",
-      "os": "Windows",
-      "series": "c4a",
-      "arch": "x86",
-      "source": "composed+win"
-    },
-    {
-      "instance": "c4a_highcpu_72",
-      "category": "compute",
-      "vcpu": 72,
-      "ram": 144,
-      "pricePerHourUSD": 5.58432,
-      "region": "us-east1",
-      "os": "Windows",
-      "series": "c4a",
-      "arch": "x86",
-      "source": "composed+win"
-    },
-    {
-      "instance": "c4a_highcpu_8",
-      "category": "compute",
-      "vcpu": 8,
-      "ram": 16,
-      "pricePerHourUSD": 0.6204799999999999,
-      "region": "us-east1",
-      "os": "Windows",
-      "series": "c4a",
-      "arch": "x86",
-      "source": "composed+win"
-    },
-    {
-      "instance": "c4a_highmem_1",
-      "category": "memory",
-      "vcpu": 1,
-      "ram": 8,
-      "pricePerHourUSD": 0.07966,
-      "region": "us-east1",
-      "os": "Windows",
-      "series": "c4a",
-      "arch": "x86",
-      "source": "composed+win"
-    },
-    {
-      "instance": "c4a_highmem_16",
-      "category": "memory",
-      "vcpu": 16,
-      "ram": 128,
-      "pricePerHourUSD": 1.27456,
-      "region": "us-east1",
-      "os": "Windows",
-      "series": "c4a",
-      "arch": "x86",
-      "source": "composed+win"
-    },
-    {
-      "instance": "c4a_highmem_2",
-      "category": "memory",
-      "vcpu": 2,
-      "ram": 16,
-      "pricePerHourUSD": 0.15932,
-      "region": "us-east1",
-      "os": "Windows",
-      "series": "c4a",
-      "arch": "x86",
-      "source": "composed+win"
-    },
-    {
-      "instance": "c4a_highmem_32",
-      "category": "memory",
-      "vcpu": 32,
-      "ram": 256,
-      "pricePerHourUSD": 2.54912,
-      "region": "us-east1",
-      "os": "Windows",
-      "series": "c4a",
-      "arch": "x86",
-      "source": "composed+win"
-    },
-    {
-      "instance": "c4a_highmem_4",
-      "category": "memory",
-      "vcpu": 4,
-      "ram": 32,
-      "pricePerHourUSD": 0.31864,
-      "region": "us-east1",
-      "os": "Windows",
-      "series": "c4a",
-      "arch": "x86",
-      "source": "composed+win"
-    },
-    {
-      "instance": "c4a_highmem_48",
-      "category": "memory",
-      "vcpu": 48,
-      "ram": 384,
-      "pricePerHourUSD": 3.8236800000000004,
-      "region": "us-east1",
-      "os": "Windows",
-      "series": "c4a",
-      "arch": "x86",
-      "source": "composed+win"
-    },
-    {
-      "instance": "c4a_highmem_64",
-      "category": "memory",
-      "vcpu": 64,
-      "ram": 512,
-      "pricePerHourUSD": 5.09824,
-      "region": "us-east1",
-      "os": "Windows",
-      "series": "c4a",
-      "arch": "x86",
-      "source": "composed+win"
-    },
-    {
-      "instance": "c4a_highmem_72",
-      "category": "memory",
-      "vcpu": 72,
-      "ram": 576,
-      "pricePerHourUSD": 5.735519999999999,
-      "region": "us-east1",
-      "os": "Windows",
-      "series": "c4a",
-      "arch": "x86",
-      "source": "composed+win"
-    },
-    {
-      "instance": "c4a_highmem_8",
-      "category": "memory",
-      "vcpu": 8,
-      "ram": 64,
-      "pricePerHourUSD": 0.63728,
-      "region": "us-east1",
-      "os": "Windows",
-      "series": "c4a",
-      "arch": "x86",
-      "source": "composed+win"
-    },
-    {
-      "instance": "c4a_standard_1",
-      "category": "compute",
-      "vcpu": 1,
-      "ram": 4,
-      "pricePerHourUSD": 0.07826,
-      "region": "us-east1",
-      "os": "Windows",
-      "series": "c4a",
-      "arch": "x86",
-      "source": "composed+win"
-    },
-    {
-      "instance": "c4a_standard_16",
-      "category": "compute",
-      "vcpu": 16,
-      "ram": 64,
-      "pricePerHourUSD": 1.25216,
-      "region": "us-east1",
-      "os": "Windows",
-      "series": "c4a",
-      "arch": "x86",
-      "source": "composed+win"
-    },
-    {
-      "instance": "c4a_standard_2",
-      "category": "compute",
-      "vcpu": 2,
-      "ram": 8,
-      "pricePerHourUSD": 0.15652,
-      "region": "us-east1",
-      "os": "Windows",
-      "series": "c4a",
-      "arch": "x86",
-      "source": "composed+win"
-    },
-    {
-      "instance": "c4a_standard_32",
-      "category": "compute",
-      "vcpu": 32,
-      "ram": 128,
-      "pricePerHourUSD": 2.50432,
-      "region": "us-east1",
-      "os": "Windows",
-      "series": "c4a",
-      "arch": "x86",
-      "source": "composed+win"
-    },
-    {
-      "instance": "c4a_standard_4",
-      "category": "compute",
-      "vcpu": 4,
-      "ram": 16,
-      "pricePerHourUSD": 0.31304,
-      "region": "us-east1",
-      "os": "Windows",
-      "series": "c4a",
-      "arch": "x86",
-      "source": "composed+win"
-    },
-    {
-      "instance": "c4a_standard_48",
-      "category": "compute",
-      "vcpu": 48,
-      "ram": 192,
-      "pricePerHourUSD": 3.75648,
-      "region": "us-east1",
-      "os": "Windows",
-      "series": "c4a",
-      "arch": "x86",
-      "source": "composed+win"
-    },
-    {
-      "instance": "c4a_standard_64",
-      "category": "compute",
-      "vcpu": 64,
-      "ram": 256,
-      "pricePerHourUSD": 5.00864,
-      "region": "us-east1",
-      "os": "Windows",
-      "series": "c4a",
-      "arch": "x86",
-      "source": "composed+win"
-    },
-    {
-      "instance": "c4a_standard_72",
-      "category": "compute",
-      "vcpu": 72,
-      "ram": 288,
-      "pricePerHourUSD": 5.63472,
-      "region": "us-east1",
-      "os": "Windows",
-      "series": "c4a",
-      "arch": "x86",
-      "source": "composed+win"
-    },
-    {
-      "instance": "c4a_standard_8",
-      "category": "compute",
-      "vcpu": 8,
-      "ram": 32,
-      "pricePerHourUSD": 0.62608,
-      "region": "us-east1",
-      "os": "Windows",
-      "series": "c4a",
       "arch": "x86",
       "source": "composed+win"
     },
