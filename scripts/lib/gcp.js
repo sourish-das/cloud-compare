@@ -1,3 +1,4 @@
+// scripts/lib/gcp.js
 "use strict";
 
 /**
@@ -71,7 +72,7 @@ function extractHourlyPrice(pricingInfo) {
 /**
  * Derive vCPU/RAM from a predefined machine type string
  * (e.g., e2-standard-2, n2-highmem-8, c3-standard-4).
- * For M*/X* memory-optimized we avoid guessing RAM (leave undefined).
+ * For M- and X-series memory-optimized types, we avoid guessing RAM (leave undefined).
  */
 function deriveVcpuRamFromType(mt) {
   if (!mt) return { vcpu: undefined, ram: undefined };
