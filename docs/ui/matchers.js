@@ -104,7 +104,7 @@ function isAwsGravitonInstance(name) {
   return /(^|_)t4g|(^|_)c[6-9]g|(^|_)m[6-9]g|(^|_)r[6-9]g/.test(s);
 }
 
-// GCP: Arm families helper (for future use in GCP finders or extra validation)
+// GCP: Arm families helper (for GCP finders or extra validation)
 export function isGcpArmInstance(name) {
   const n = String(name || "").toUpperCase();
   return n.startsWith("T2A") || n.startsWith("C4A") || n.startsWith("N4A") || n.startsWith("A4X");
@@ -297,6 +297,64 @@ export function findBestAzure(list, vcpu, ram, os, family) {
     }
   }
   if (best) best.os = os;
+  return best;
+}
+
+//
+// ---------------- GCP FINDER (now centralized) ----------------
+//
+export function findBestGcp(list, vcpu, ram, os, family) {
+  if (!Array.isArray(list) || list.length === 0)
+    throw new Error("GCP price list is empty");
+
+  const wantOS = String(os || "").toLowerCase();
+  const isWin  = (wantOS === "windows");
+
+  // 1) strict: OS + family
+  let pre = list.filter(x =>
+    isFinite(x?.vcpu) &&
+    isFinite(x?.ram) &&
+    isFinite(x?.pricePerHourUSD) &&
+    (!wantOS || String(x.os || "").toLowerCase() === wantOS) &&
+    gcpFamilyMatch(x, family) &&
+    (!isWin || !isGcpArmInstance(x.instance))             // Windows ≠ Arm
+  );
+
+  // 2) fallback: remove family
+  if (pre.length === 0 && family) {
+    pre = list.filter(x =>
+      isFinite(x?.vcpu) &&
+      isFinite(x?.ram) &&
+      isFinite(x?.pricePerHourUSD) &&
+      (!wantOS || String(x.os || "").toLowerCase() === wantOS) &&
+      (!isWin || !isGcpArmInstance(x.instance))
+    );
+  }
+
+  // 3) fallback: ignore OS (keep family)
+  if (pre.length === 0) {
+    pre = list.filter(x =>
+      isFinite(x?.vcpu) &&
+      isFinite(x?.ram) &&
+      isFinite(x?.pricePerHourUSD) &&
+      gcpFamilyMatch(x, family) &&
+      (!isWin || !isGcpArmInstance(x.instance))
+    );
+  }
+
+  if (pre.length === 0) {
+    const fLabel = family ? ` family=${family}` : "";
+    throw new Error(`No GCP entries for OS=${os || "any"}${fLabel}`);
+  }
+
+  let best = null, bestScore = Infinity;
+  for (const x of pre) {
+    const score = Math.abs(x.vcpu - vcpu) + Math.abs(x.ram - ram);
+    const tieBreaker = x.pricePerHourUSD ?? Infinity;
+    if (score < bestScore || (score === bestScore && tieBreaker < (best?.pricePerHourUSD ?? Infinity))) {
+      best = x; bestScore = score;
+    }
+  }
   return best;
 }
 
