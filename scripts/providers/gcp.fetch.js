@@ -24,7 +24,9 @@ const {
   listRegionZones,
   listZoneMachineTypes,
   buildSeriesUnitRateMaps,
-  buildWindowsCoreRate // <- resolve Windows per-vCPU license rate (hybrid)
+  buildWindowsCoreRate,
+  // New helpers to keep Windows off Arm & simplify fetchers
+  isGcpArmMachineType
 } = require("../lib/gcp");
 
 // Output & env
@@ -83,8 +85,7 @@ async function fetchGcpPrices() {
   if (windowsCoreRate) {
     console.log(`[GCP] Windows per-vCPU (license) rate: $${windowsCoreRate.toFixed(6)}/vCPU-hr`);
   } else {
-    // With the hybrid resolver you added in lib/gcp.js, this should not happen;
-    // it returns a fallback rate when Catalog has no license SKU.
+    // Hybrid resolver returns a fallback when Catalog has no license SKU.
     console.warn("[GCP] Windows per-vCPU rate not resolved; Windows synthesis will be skipped.");
   }
 
@@ -221,14 +222,28 @@ async function fetchGcpPrices() {
   // 4) Synthesize Windows rows from Linux base + per-vCPU Windows license (x86 only)
   if (windowsCoreRate) {
     const linuxEntries = Object.values(gcp_price_list).filter(v => v.os === "Linux");
+    // map of existing per-instance Windows rows (avoid adding duplicate synthesized if desired)
+    const existingWindows = new Set(
+      Object.values(gcp_price_list)
+        .filter(v => v.os === "Windows")
+        .map(v => `${v.machine_type}__${v.region}`)
+    );
+
     let added = 0;
     for (const base of linuxEntries) {
-      const series = String(base.machine_type).split("-")[0].toLowerCase();
-      if (series === "t2a") continue; // skip Arm
-      const vcpu = Number(base.vcpu || 0);
-      if (!Number.isFinite(vcpu) || vcpu <= 0) continue;
+      // Skip Arm machine types entirely for Windows (e.g., t2a-*, c4a-*, n4a-*, a4x-*)
+      if (isGcpArmMachineType(base.machine_type)) continue;
 
-      const winPrice = Number(base.price_per_hour || 0) + (vcpu * windowsCoreRate);
+      // If a Catalog Windows row already exists for the same mt+region, you can skip synthesis
+      const winKey = `${base.machine_type}__${base.region}`;
+      if (existingWindows.has(winKey)) continue;
+
+      const vcpu = Number(base.vcpu || 0);
+      const basePrice = Number(base.price_per_hour || 0);
+      if (!Number.isFinite(vcpu) || vcpu <= 0) continue;
+      if (!Number.isFinite(basePrice) || basePrice <= 0) continue;
+
+      const winPrice = basePrice + (vcpu * windowsCoreRate);
       if (!Number.isFinite(winPrice) || winPrice <= 0) continue;
 
       const key = `sku_${++counter}`;
@@ -287,7 +302,7 @@ async function main() {
 
     // Enrichments for UI/troubleshooting
     const series = String(item.machine_type).split("-")[0].toLowerCase(); // e.g., n2, c3d, m2
-    const arch = series === "t2a" ? "arm" : "x86";
+    const arch = isGcpArmMachineType(item.machine_type) ? "arm" : "x86";
     const source = item.__src || "catalog";
 
     rows.push({
@@ -310,7 +325,10 @@ async function main() {
   );
 
   // Quick category counts (nice for logs)
-  const counts = cheapest.reduce((acc, r) => (acc[r.category] = (acc[r.category] || 0) + 1, acc), {});
+  const counts = cheapest.reduce((acc, r) => {
+    acc[r.category] = (acc[r.category] || 0) + 1;
+    return acc;
+  }, {});
   console.log("[GCP] category-counts:", counts, "region:", REGION);
 
   console.log(`[GCP] collected=${rows.length}, cheapest=${cheapest.length}`);
