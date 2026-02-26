@@ -1,4 +1,3 @@
-// scripts/lib/gcp.js
 "use strict";
 
 /**
