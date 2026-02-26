@@ -90,7 +90,7 @@ jobs:
 
       # ------------------------------------------------------------
       # Sanity: Windows hourly > Linux hourly for a canonical x86 sample
-      # (Rewritten using Python for robust float math & error handling)
+      # (Python for robust float math & env handling)
       # ------------------------------------------------------------
       - name: Sanity: Windows hourly should exceed Linux hourly (2 vCPU / 4 GB)
         shell: bash
@@ -116,24 +116,28 @@ jobs:
             WIN_LIC=0
           fi
 
-          VCPU=2
-          RAM=4
+          # Export so Python sees them in os.environ
+          export CPU_RATE MEM_RATE WIN_LIC
+          export VCPU=2 RAM=4
 
           python - <<'PY'
 import os, sys
-def f(env, key):
+def f(key, allow_zero=False):
     v = os.environ.get(key, "")
     try:
-        return float(v)
+        x = float(v)
+        if not allow_zero and x == 0.0:
+            return x
+        return x
     except Exception:
         print(f"::error::{key} is not a valid number: {v!r}")
         sys.exit(1)
 
-cpu = f(os.environ, "CPU_RATE")
-mem = f(os.environ, "MEM_RATE")
-lic = f(os.environ, "WIN_LIC")
-vcpu = f(os.environ, "VCPU")
-ram  = f(os.environ, "RAM")
+cpu  = f("CPU_RATE")
+mem  = f("MEM_RATE")
+lic  = f("WIN_LIC", allow_zero=True)  # license can be 0 in fallback
+vcpu = f("VCPU")
+ram  = f("RAM")
 
 # x86 mapping: 1 OCPU = 2 vCPU
 ocpu = vcpu / 2.0
