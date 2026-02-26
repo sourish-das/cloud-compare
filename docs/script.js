@@ -59,6 +59,102 @@ function getGcpStorageMonthly(type, gb) {
 }
 
 /* ============================================================
+   Windows ↔ Arm guardrails (provider-agnostic helpers)
+   - Keep Windows off Arm families/series across providers.
+============================================================ */
+function isArmArchField(obj) {
+  const a = String(obj?.arch || obj?.cpuArch || obj?.architecture || "").toLowerCase();
+  return a.includes("arm") || a.includes("aarch64") || a.includes("ampere");
+}
+function isArmSkuPattern(provider, skuString) {
+  const s = String(skuString || "").toLowerCase();
+
+  if (provider === "aws") {
+    // Graviton & A1 families (t4g, c7g, m7g, r7g, a1)
+    return /(t4g|a1|c\d+g|m\d+g|r\d+g)\b/.test(s) || s.includes("graviton");
+  }
+  if (provider === "azure") {
+    // Arm series are the *psv5 (Dpsv5/Dpldsv5/Epsv5)
+    return /\b(dpsv5|dpldsv5|epsv5)\b/.test(s);
+  }
+  if (provider === "gcp") {
+    // Arm families: T2A/C4A/N4A, plus Grace A4X
+    return /\b(t2a|c4a|n4a|a4x)\b/.test(s);
+  }
+  if (provider === "oci") {
+    // Ampere A1/A2; also catch "ampere"/"arm"
+    return /\.a1\b|\.a2\b/.test(s) || s.includes("ampere") || s.includes("arm");
+  }
+  return false;
+}
+function isArmEntry(provider, entry) {
+  const byArch = isArmArchField(entry);
+  const label = entry?.instance || entry?.family || entry?.series || entry?.size || "";
+  const byName = isArmSkuPattern(provider, label);
+  return byArch || byName;
+}
+function filterOutArmForWindows(list, provider, os) {
+  if (String(os || "").toLowerCase() !== "windows") return Array.isArray(list) ? list : [];
+  if (!Array.isArray(list)) return [];
+  const filtered = list.filter(x => !isArmEntry(provider, x));
+  // If everything got filtered out (unlikely), fall back to original to avoid a hard failure.
+  return filtered.length > 0 ? filtered : list;
+}
+function sanitizeFamilyForWindows(provider, family, os) {
+  if (String(os || "").toLowerCase() !== "windows") return family || "";
+  return isArmSkuPattern(provider, family) ? "" : (family || "");
+}
+
+/* Disable specific option values in a <select> if present (case-insensitive) */
+function disableOptionsIfPresent(selectEl, values, disabled) {
+  if (!selectEl || !Array.isArray(values) || values.length === 0) return;
+  const targets = values.map(v => String(v).toLowerCase());
+  Array.from(selectEl.options || []).forEach(opt => {
+    if (targets.includes(String(opt.value).toLowerCase())) {
+      opt.disabled = !!disabled;
+    }
+  });
+}
+
+/* Sanitize family dropdowns + OCI processor dropdown when OS toggles */
+function sanitizeFamiliesForWindows(os) {
+  const isWin = String(os || "").toLowerCase() === "windows";
+
+  // AWS family
+  const awsSel = document.getElementById("awsFamily");
+  if (awsSel) {
+    if (isWin && isArmSkuPattern("aws", awsSel.value)) awsSel.value = "";
+    disableOptionsIfPresent(awsSel, ["t4g", "c7g", "m7g", "r7g", "a1", "graviton"], isWin);
+  }
+
+  // Azure family
+  const azSel = document.getElementById("azFamily");
+  if (azSel) {
+    if (isWin && isArmSkuPattern("azure", azSel.value)) azSel.value = "";
+    disableOptionsIfPresent(azSel, ["Dpsv5", "Dpldsv5", "Epsv5"], isWin);
+  }
+
+  // GCP family
+  const gcpSel = document.getElementById("gcpFamily");
+  if (gcpSel) {
+    if (isWin && isArmSkuPattern("gcp", gcpSel.value)) gcpSel.value = "";
+    disableOptionsIfPresent(gcpSel, ["t2a", "c4a", "n4a", "a4x"], isWin);
+  }
+
+  // OCI processor
+  const ociProcEl = document.getElementById("ociProcessor");
+  if (ociProcEl) {
+    // Disable "arm" option when OS = Windows; revert to Auto if currently set
+    Array.from(ociProcEl.options || []).forEach(opt => {
+      if (String(opt.value).toLowerCase() === "arm") opt.disabled = isWin;
+    });
+    if (isWin && String(ociProcEl.value).toLowerCase() === "arm") {
+      ociProcEl.value = "auto";
+    }
+  }
+}
+
+/* ============================================================
    findBestGcp()
 ============================================================ */
 function findBestGcp(list, vcpu, ram, os, family) {
@@ -156,9 +252,14 @@ export async function compare(resetFamilies = false) {
   const storageType  = (document.getElementById("storageType")?.value || "hdd").toLowerCase();
   const storageAmtGB = Number(document.getElementById("storageAmt")?.value ?? 0);
 
-  const familyAws = document.getElementById("awsFamily")?.value || "";
-  const familyAz  = document.getElementById("azFamily")?.value  || "";
-  const familyGcp = document.getElementById("gcpFamily")?.value || "";
+  // Read raw family selections, then sanitize for Windows
+  const familyAwsRaw = document.getElementById("awsFamily")?.value || "";
+  const familyAzRaw  = document.getElementById("azFamily")?.value  || "";
+  const familyGcpRaw = document.getElementById("gcpFamily")?.value || "";
+
+  const familyAws = sanitizeFamilyForWindows("aws",   familyAwsRaw, os);
+  const familyAz  = sanitizeFamilyForWindows("azure", familyAzRaw,  os);
+  const familyGcp = sanitizeFamilyForWindows("gcp",   familyGcpRaw, os);
 
   // NEW: OCI processor (replaces 'family')
   const ociProcEl = document.getElementById("ociProcessor");
@@ -166,7 +267,6 @@ export async function compare(resetFamilies = false) {
 
   // Enforce Windows ≠ Ampere (UI-side)
   if (String(os).toLowerCase() === "windows") {
-    // FIX: valid selector to avoid DOMException (SyntaxError)
     const armOpt = ociProcEl?.querySelector('option[value="arm"]');
     if (armOpt) armOpt.disabled = true;
     if (ociProcessor === "arm") {
@@ -177,6 +277,9 @@ export async function compare(resetFamilies = false) {
     const armOpt = ociProcEl?.querySelector('option[value="arm"]');
     if (armOpt) armOpt.disabled = false;
   }
+
+  // Also sanitize dropdowns now (so the UI reflects the constraint)
+  sanitizeFamiliesForWindows(os);
 
   try {
     resetCards();
@@ -209,24 +312,29 @@ export async function compare(resetFamilies = false) {
       safeSetText("dataInfo", "Data: — · Rows — Azure: —, AWS: —, GCP: —, OCI: —");
     }
 
+    // Defensive pre-filtering: keep Windows off Arm families (data-level) for AWS/Azure/GCP
+    const awsList = filterOutArmForWindows(data.aws || [],   "aws",   os);
+    const azList  = filterOutArmForWindows(data.azure || [], "azure", os);
+    const gcpList = filterOutArmForWindows(data.gcp || [],   "gcp",   os);
+
     /* ---------- AWS ---------- */
     let awsCard;
     try {
-      const a = findBestAws(data.aws || [], vcpu, ram, os, familyAws);
+      const a = findBestAws(awsList, vcpu, ram, os, familyAws);
       awsCard = a ? { instance: a.instance, vcpu: a.vcpu, ram: a.ram, pricePerHourUSD: a.pricePerHourUSD, region: a.region } : null;
     } catch (e) { awsCard = { error: e.message }; }
 
     /* ---------- Azure ---------- */
     let azCard;
     try {
-      const z = findBestAzure(data.azure || [], vcpu, ram, os, familyAz);
+      const z = findBestAzure(azList, vcpu, ram, os, familyAz);
       azCard = z ? { instance: z.instance, vcpu: z.vcpu ?? vcpu, ram: z.ram ?? ram, pricePerHourUSD: z.pricePerHourUSD, region: z.region, os } : null;
     } catch (e) { azCard = { error: e.message }; }
 
     /* ---------- GCP ---------- */
     let gcpCard;
     try {
-      const g = findBestGcp(data.gcp || [], vcpu, ram, os, familyGcp);
+      const g = findBestGcp(gcpList, vcpu, ram, os, familyGcp);
       gcpCard = g ? { instance: g.instance, vcpu: g.vcpu, ram: g.ram, pricePerHourUSD: g.pricePerHourUSD, region: g.region } : null;
     } catch (e) { gcpCard = { error: e.message }; }
 
@@ -401,7 +509,12 @@ document.addEventListener("DOMContentLoaded", () => {
   setSelectValue("cpu", "2");
   setSelectValue("ram", "4");
 
-  // Listen for changes on family/processor filters
+  // Keep behavior consistent: do not auto-compare on OS change,
+  // but do sanitize arm families/options instantly in the UI.
+  const osEl = document.getElementById("os");
+  if (osEl) osEl.addEventListener("change", () => sanitizeFamiliesForWindows(osEl.value));
+
+  // Listen for changes on family/processor filters -> run compare
   ["awsFamily", "azFamily", "gcpFamily", "ociProcessor"].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener("change", () => compare(false));
