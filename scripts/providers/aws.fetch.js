@@ -13,6 +13,7 @@ const {
 
 const {
   isWantedEc2Family,
+  isBurstableAws,
   isAwsGravitonInstance,
   synthesizeAwsWindowsRows
 } = require("../lib/aws");
@@ -100,6 +101,9 @@ async function main() {
     const a = p.attributes || {};
     const inst = a.instanceType;
     if (!inst || !isWantedEc2Family(inst)) continue;
+
+    // ❗ Exclude burstable T-class at source for enterprise consistency
+    if (isBurstableAws(inst)) continue;
 
     // Capacity and tenancy filters
     if (a.tenancy !== "Shared") continue;
