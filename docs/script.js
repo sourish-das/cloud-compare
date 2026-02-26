@@ -16,7 +16,7 @@ import { initStorageTypeTooltip, initOsTypeTooltip, initOciTooltip } from "./ui/
 import {
   findBestAws,
   findBestAzure,
-  findBestGcp,        // NOW IMPORTED from matchers.js
+  findBestGcp,        // centralized in matchers.js (Option B)
   findBestOci
 } from "./ui/matchers.js";
 
@@ -287,9 +287,9 @@ export async function compare(resetFamilies = false) {
 
     /* ---------- Render AWS ---------- */
     if (!awsCard || awsCard.error) {
-      safeSetText("awsInstance", `<strong>Recommended Instance:</strong> Error: ${awsCard?.error ?? "No match"}`);
+      safeSetText("awsInstance", `<strong>Recommended Instance:</strong> Error: ${awsCard?.error ?? "No match"}`, { html: true });
     } else {
-      safeSetText("awsInstance", `<strong>Recommended Instance:</strong> ${awsCard.instance} (${awsCard.region})`);
+      safeSetText("awsInstance", `<strong>Recommended Instance:</strong> ${awsCard.instance} (${awsCard.region})`, { html: true });
       safeSetText("awsCpu",     `vCPU: ${awsCard.vcpu}`);
       safeSetText("awsRam",     `RAM: ${awsCard.ram} GB`);
       safeSetText("awsPrice",   `Price/hr: ${fmt(awsCard.pricePerHourUSD)}`);
@@ -298,9 +298,9 @@ export async function compare(resetFamilies = false) {
 
     /* ---------- Render Azure ---------- */
     if (!azCard || azCard.error) {
-      safeSetText("azInstance", `<strong>Recommended VM Size:</strong> Error: ${azCard?.error ?? "No match"}`);
+      safeSetText("azInstance", `<strong>Recommended VM Size:</strong> Error: ${azCard?.error ?? "No match"}`, { html: true });
     } else {
-      safeSetText("azInstance", `<strong>Recommended VM Size:</strong> ${azCard.instance} (${azCard.region})`);
+      safeSetText("azInstance", `<strong>Recommended VM Size:</strong> ${azCard.instance} (${azCard.region})`, { html: true });
       safeSetText("azCpu",     `vCPU: ${azCard.vcpu}`);
       safeSetText("azRam",     `RAM: ${azCard.ram} GB`);
       safeSetText("azPrice",   `Price/hr: ${fmt(azCard.pricePerHourUSD)}`);
@@ -309,9 +309,9 @@ export async function compare(resetFamilies = false) {
 
     /* ---------- Render GCP ---------- */
     if (!gcpCard || gcpCard.error) {
-      safeSetText("gcpInstance", `<strong>Recommended Machine:</strong> Error: ${gcpCard?.error ?? "No match"}`);
+      safeSetText("gcpInstance", `<strong>Recommended Machine:</strong> Error: ${gcpCard?.error ?? "No match"}`, { html: true });
     } else {
-      safeSetText("gcpInstance", `<strong>Recommended Machine:</strong> ${gcpCard.instance} (${gcpCard.region})`);
+      safeSetText("gcpInstance", `<strong>Recommended Machine:</strong> ${gcpCard.instance} (${gcpCard.region})`, { html: true });
       safeSetText("gcpCpu",     `vCPU: ${gcpCard.vcpu}`);
       safeSetText("gcpRam",     `RAM: ${gcpCard.ram} GB`);
       safeSetText("gcpPrice",   `Price/hr: ${fmt(gcpCard.pricePerHourUSD)}`);
@@ -320,9 +320,9 @@ export async function compare(resetFamilies = false) {
 
     /* ---------- Render OCI ---------- */
     if (!ociCard || ociCard.error) {
-      safeSetText("ociInstance", `<strong>Recommended Machine:</strong> Error: ${ociCard?.error ?? "No match"}`);
+      safeSetText("ociInstance", `<strong>Recommended Machine:</strong> Error: ${ociCard?.error ?? "No match"}`, { html: true });
     } else {
-      safeSetText("ociInstance", `<strong>Recommended Machine:</strong> ${ociCard.instance} (${ociCard.region})`);
+      safeSetText("ociInstance", `<strong>Recommended Machine:</strong> ${ociCard.instance} (${ociCard.region})`, { html: true });
       safeSetText("ociCpu",     `vCPU: ${ociCard.vcpu}`);
       safeSetText("ociRam",     `RAM: ${ociCard.ram} GB`);
       safeSetText("ociPrice",   `Price/hr: ${fmt(ociCard.pricePerHourUSD)}`);
