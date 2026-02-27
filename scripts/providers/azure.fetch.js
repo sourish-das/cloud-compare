@@ -1,5 +1,6 @@
 // scripts/providers/azure.fetch.js
 // Node 18+ (global fetch)
+
 const path = require("path");
 const {
   atomicWrite,
@@ -18,6 +19,7 @@ const {
   extractRetailHourlyUSD,
   normalizeAzureInstanceName,
   isAzureArmInstance,
+  isBurstableAzure,
 
   // Existing helpers
   getResourceSkusMap,
@@ -72,9 +74,8 @@ async function main() {
 
   const rows = [];
   for (const it of retail) {
-
     // Require PRIMARY meters (prevent secondary meters from winning)
-    if (it?.isPrimaryMeterRegion !== true) continue;         // <-- NEW & IMPORTANT
+    if (it?.isPrimaryMeterRegion !== true) continue; // <-- IMPORTANT
 
     // Exclude discounted/alt offers by text (defense-in-depth)
     const blob = [
@@ -93,20 +94,23 @@ async function main() {
     if (!(price > 0)) continue;
 
     // Use full name, do NOT split (prevents collapsing D2s v5 -> D2s)
-    const instRaw = it.armSkuName || it.skuName || "";        // <-- CHANGED (no split)
+    const instRaw = it.armSkuName || it.skuName || "";
     if (!instRaw) continue;
 
     const instance = normalizeAzureInstanceName(instRaw);
     if (!instance) continue;
     if (!widenAzureSeries(instance)) continue;
 
+    // Exclude burstable at source (B-series)
+    if (isBurstableAzure(instance)) continue;
+
     // OS eligibility
     const { os } = getRetailOsInfo(it);
     if (os === "Linux") {
       if (!isLinuxRetailEligible(it)) continue;       // free Linux only
     } else if (os === "Windows") {
-      if (!isWindowsRetailEligible(it)) continue;     // license-included, no SQL/DevTest
-      if (isAzureArmInstance(instance)) continue;     // block ARM (Bpsv2 / Dpsv5 / Epsv5)
+      if (!isWindowsRetailEligible(it)) continue;     // license-included, no SQL/DevTest/BYOL/preinstalled
+      if (isAzureArmInstance(instance)) continue;     // block ARM (Bpsv2 / Dpsv5 / Dpldsv5 / Epsv5)
     } else {
       continue;
     }
@@ -148,6 +152,7 @@ async function main() {
     ram:  uniqSortedNums(cheapest.map(x => x.ram))
   };
 
+  // Storage (monthly) — UI converts to hourly
   const storage = {
     region: REGION,
     ssd_monthly: { 128: 9.6, 256: 19.2 },
