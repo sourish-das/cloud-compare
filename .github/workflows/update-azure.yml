@@ -22,16 +22,25 @@ jobs:
     timeout-minutes: 30
 
     steps:
+      # ------------------------------------------------------------
+      # Checkout (read-only)
+      # ------------------------------------------------------------
       - name: Checkout repo (read-only)
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      # ------------------------------------------------------------
+      # Node setup (LTS)
+      # ------------------------------------------------------------
       - name: Set up Node (LTS)
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
+      # ------------------------------------------------------------
+      # jq (for quick validation)
+      # ------------------------------------------------------------
       - name: Ensure jq (for quick validation)
         run: |
           if ! command -v jq >/dev/null 2>&1; then
@@ -39,7 +48,9 @@ jobs:
             sudo apt-get install -y jq
           fi
 
+      # ------------------------------------------------------------
       # Azure authentication (OIDC)
+      # ------------------------------------------------------------
       - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
@@ -47,7 +58,9 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      # Generate ARM (management) token for scripts that call ARM/Retail/ResourceSKUs
+      # ------------------------------------------------------------
+      # Generate ARM (management) token for scripts that call ARM/ResourceSkus
+      # ------------------------------------------------------------
       - name: Generate ARM Token
         shell: bash
         run: |
@@ -61,7 +74,9 @@ jobs:
           fi
           echo "ARM_TOKEN=${ARM_TOKEN}" >> "$GITHUB_ENV"
 
+      # ------------------------------------------------------------
       # Optional: probe that the token works against ARM (diagnostic)
+      # ------------------------------------------------------------
       - name: Probe ARM (locations list)
         shell: bash
         env:
@@ -80,11 +95,15 @@ jobs:
             echo "Probe OK - sample keys:" && jq 'keys' /tmp/arm.json | head -n 20 || true
           fi
 
-      # Output directory
+      # ------------------------------------------------------------
+      # Ensure output directory
+      # ------------------------------------------------------------
       - name: Ensure output directory
         run: mkdir -p docs/data/azure
 
+      # ------------------------------------------------------------
       # >>> Run the Azure fetcher (writes to docs/data/azure/azure.prices.json)
+      # ------------------------------------------------------------
       - name: Fetch Azure prices
         run: node scripts/providers/azure.fetch.js
         env:
@@ -93,7 +112,9 @@ jobs:
           AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           OUTPUT_PATH: "docs/data/azure/azure.prices.json"
 
+      # ------------------------------------------------------------
       # Validate output & show quick stats (counts by OS)
+      # ------------------------------------------------------------
       - name: Validate Azure output
         shell: bash
         run: |
@@ -108,7 +129,9 @@ jobs:
           echo "Counts by OS:"
           jq -r '.compute | group_by(.os) | map({os: .[0].os, count: length})' docs/data/azure/azure.prices.json
 
+      # ------------------------------------------------------------
       # Upload artifact for orchestrator
+      # ------------------------------------------------------------
       - name: Upload Azure pricing JSON (artifact)
         uses: actions/upload-artifact@v4
         with:
