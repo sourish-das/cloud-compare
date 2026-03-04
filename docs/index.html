@@ -8,11 +8,11 @@
 </head>
 
 <body>
-  <h2>Live Cloud Price Compare</h2>
+  <h2>Cloud Cost Comparator</h2>
 
   <!-- ==================================================
        FILTERS SECTION
-  =================================================== -->
+  ================================================== -->
   <div class="filters">
     <div class="row">
 
@@ -37,7 +37,7 @@
           <div class="info-pop__arrow"></div>
           <div class="info-pop__content">
             <strong>OS selection</strong><br />
-            • <em>Linux</em>: Standard Linux VM rates (no OS license).<br />
+            • <em>Linux (Open‑source)</em>: Standard Linux VM rates (no OS license).<br />
             • <em>Windows</em>: Windows PAYG (license included).
           </div>
         </div>
@@ -114,13 +114,13 @@
 
   <!-- ==================================================
        RESULTS SECTION (AWS + Azure + GCP + OCI)
-  =================================================== -->
+  ================================================== -->
   <div class="results">
 
     <!-- ===========================
          AWS PANEL
     ============================ -->
-    <div class="panel">
+    <div class="panel panel--aws">
       <h3>AWS EC2</h3>
 
       <div class="family-filter" id="awsFamilyWrap" style="display:none;">
@@ -141,11 +141,11 @@
       <p id="awsMonthly">≈ Monthly: –</p>
 
       <div class="split">
-        <span class="label">Storage Price/hr:</span>
+        <span class="label" id="awsStoragePriceHrLabel">Storage Price/hr:</span>
         <span id="awsStoragePriceHr">–</span>
       </div>
       <div class="split">
-        <span class="label">≈ Storage Monthly:</span>
+        <span class="label" id="awsStorageMonthlyLabel">≈ Storage Monthly:</span>
         <span id="awsStorageMonthly">–</span>
       </div>
 
@@ -164,7 +164,7 @@
     <!-- ===========================
          AZURE PANEL
     ============================ -->
-    <div class="panel">
+    <div class="panel panel--azure">
       <h3>Azure VM</h3>
 
       <div class="family-filter" id="azFamilyWrap" style="display:none;">
@@ -185,11 +185,11 @@
       <p id="azMonthly">≈ Monthly: –</p>
 
       <div class="split">
-        <span class="label">Storage Price/hr:</span>
+        <span class="label" id="azStoragePriceHrLabel">Storage Price/hr:</span>
         <span id="azStoragePriceHr">–</span>
       </div>
       <div class="split">
-        <span class="label">≈ Storage Monthly:</span>
+        <span class="label" id="azStorageMonthlyLabel">≈ Storage Monthly:</span>
         <span id="azStorageMonthly">–</span>
       </div>
 
@@ -208,7 +208,7 @@
     <!-- ===========================
          GCP PANEL
     ============================ -->
-    <div class="panel">
+    <div class="panel panel--gcp">
       <h3>GCP Compute Engine</h3>
 
       <div class="family-filter" id="gcpFamilyWrap" style="display:none;">
@@ -229,11 +229,11 @@
       <p id="gcpMonthly">≈ Monthly: –</p>
 
       <div class="split">
-        <span class="label">Storage Price/hr:</span>
+        <span class="label" id="gcpStoragePriceHrLabel">Storage Price/hr:</span>
         <span id="gcpStoragePriceHr">–</span>
       </div>
       <div class="split">
-        <span class="label">≈ Storage Monthly:</span>
+        <span class="label" id="gcpStorageMonthlyLabel">≈ Storage Monthly:</span>
         <span id="gcpStorageMonthly">–</span>
       </div>
 
@@ -252,7 +252,7 @@
     <!-- ===========================
          OCI PANEL
     ============================ -->
-    <div class="panel">
+    <div class="panel panel--oci">
       <h3 class="inline-flex">
         OCI Compute
         <!-- Info button (opens tooltip below, anchored to this button) -->
@@ -286,11 +286,11 @@
       <p id="ociMonthly">≈ Monthly: –</p>
 
       <div class="split">
-        <span class="label">Storage Price/hr:</span>
+        <span class="label" id="ociStoragePriceHrLabel">Storage Price/hr:</span>
         <span id="ociStoragePriceHr">–</span>
       </div>
       <div class="split">
-        <span class="label">≈ Storage Monthly:</span>
+        <span class="label" id="ociStorageMonthlyLabel">≈ Storage Monthly:</span>
         <span id="ociStorageMonthly">–</span>
       </div>
 
