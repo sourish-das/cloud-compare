@@ -21,6 +21,25 @@ import {
 } from "./ui/matchers.js";
 
 /* ============================================================
+   Provider label maps (centralized)
+============================================================ */
+// === Provider-specific UI labels (centralized) ===
+const PROVIDER_LABELS = {
+  aws:   { price: 'EC2 Price/hr',               monthly: 'EC2 Monthly' },
+  azure: { price: 'VM Price/hr',                monthly: 'VM Monthly' },
+  gcp:   { price: 'Compute Engine Price/hr',    monthly: 'Compute Engine Monthly' },
+  oci:   { price: 'Compute Price/hr',           monthly: 'Compute Monthly' }
+};
+
+// === Storage labels per provider (short to fit cards) ===
+const STORAGE_LABELS = {
+  aws:   { hr: 'EBS Price/hr',             monthly: 'EBS Monthly' },
+  azure: { hr: 'Azure Disk Price/hr',      monthly: 'Azure Disk Monthly' },
+  gcp:   { hr: 'Persistent Disk Price/hr', monthly: 'Persistent Disk Monthly' },
+  oci:   { hr: 'Block Volume Price/hr',    monthly: 'Block Volume Monthly' },
+};
+
+/* ============================================================
    Freshness loader: docs/data/buildInfo.json
 ============================================================ */
 async function loadBuildInfo() {
@@ -285,6 +304,16 @@ export async function compare(resetFamilies = false) {
     const ociStorageMonthly = getOciStorageMonthlyFromCfg(storageAmtGB, STORAGE_CFG.oci);
     const ociStorageHr      = ociStorageMonthly / HRS_PER_MONTH;
 
+    /* ---------- Branded Storage Labels (set after costs computed) ---------- */
+    safeSetText("awsStoragePriceHrLabel", `${STORAGE_LABELS.aws.hr}:`);
+    safeSetText("awsStorageMonthlyLabel", `≈ ${STORAGE_LABELS.aws.monthly}:`);
+    safeSetText("azStoragePriceHrLabel",  `${STORAGE_LABELS.azure.hr}:`);
+    safeSetText("azStorageMonthlyLabel",  `≈ ${STORAGE_LABELS.azure.monthly}:`);
+    safeSetText("gcpStoragePriceHrLabel", `${STORAGE_LABELS.gcp.hr}:`);
+    safeSetText("gcpStorageMonthlyLabel", `≈ ${STORAGE_LABELS.gcp.monthly}:`);
+    safeSetText("ociStoragePriceHrLabel", `${STORAGE_LABELS.oci.hr}:`);
+    safeSetText("ociStorageMonthlyLabel", `≈ ${STORAGE_LABELS.oci.monthly}:`);
+
     /* ---------- Render AWS ---------- */
     if (!awsCard || awsCard.error) {
       safeSetText("awsInstance", `<strong>Recommended Instance:</strong> Error: ${awsCard?.error ?? "No match"}`, { html: true });
@@ -292,8 +321,8 @@ export async function compare(resetFamilies = false) {
       safeSetText("awsInstance", `<strong>Recommended Instance:</strong> ${awsCard.instance} (${awsCard.region})`, { html: true });
       safeSetText("awsCpu",     `vCPU: ${awsCard.vcpu}`);
       safeSetText("awsRam",     `RAM: ${awsCard.ram} GB`);
-      safeSetText("awsPrice",   `Price/hr: ${fmt(awsCard.pricePerHourUSD)}`);
-      safeSetText("awsMonthly", `≈ Monthly: ${fmt(monthly(awsCard.pricePerHourUSD))}`);
+      safeSetText("awsPrice",   `${PROVIDER_LABELS.aws.price}: ${fmt(awsCard.pricePerHourUSD)}`);
+      safeSetText("awsMonthly", `≈ ${PROVIDER_LABELS.aws.monthly}: ${fmt(monthly(awsCard.pricePerHourUSD))}`);
     }
 
     /* ---------- Render Azure ---------- */
@@ -303,8 +332,8 @@ export async function compare(resetFamilies = false) {
       safeSetText("azInstance", `<strong>Recommended VM Size:</strong> ${azCard.instance} (${azCard.region})`, { html: true });
       safeSetText("azCpu",     `vCPU: ${azCard.vcpu}`);
       safeSetText("azRam",     `RAM: ${azCard.ram} GB`);
-      safeSetText("azPrice",   `Price/hr: ${fmt(azCard.pricePerHourUSD)}`);
-      safeSetText("azMonthly", `≈ Monthly: ${fmt(monthly(azCard.pricePerHourUSD))}`);
+      safeSetText("azPrice",   `${PROVIDER_LABELS.azure.price}: ${fmt(azCard.pricePerHourUSD)}`);
+      safeSetText("azMonthly", `≈ ${PROVIDER_LABELS.azure.monthly}: ${fmt(monthly(azCard.pricePerHourUSD))}`);
     }
 
     /* ---------- Render GCP ---------- */
@@ -314,8 +343,8 @@ export async function compare(resetFamilies = false) {
       safeSetText("gcpInstance", `<strong>Recommended Machine:</strong> ${gcpCard.instance} (${gcpCard.region})`, { html: true });
       safeSetText("gcpCpu",     `vCPU: ${gcpCard.vcpu}`);
       safeSetText("gcpRam",     `RAM: ${gcpCard.ram} GB`);
-      safeSetText("gcpPrice",   `Price/hr: ${fmt(gcpCard.pricePerHourUSD)}`);
-      safeSetText("gcpMonthly", `≈ Monthly: ${fmt(monthly(gcpCard.pricePerHourUSD))}`);
+      safeSetText("gcpPrice",   `${PROVIDER_LABELS.gcp.price}: ${fmt(gcpCard.pricePerHourUSD)}`);
+      safeSetText("gcpMonthly", `≈ ${PROVIDER_LABELS.gcp.monthly}: ${fmt(monthly(gcpCard.pricePerHourUSD))}`);
     }
 
     /* ---------- Render OCI ---------- */
@@ -325,8 +354,8 @@ export async function compare(resetFamilies = false) {
       safeSetText("ociInstance", `<strong>Recommended Machine:</strong> ${ociCard.instance} (${ociCard.region})`, { html: true });
       safeSetText("ociCpu",     `vCPU: ${ociCard.vcpu}`);
       safeSetText("ociRam",     `RAM: ${ociCard.ram} GB`);
-      safeSetText("ociPrice",   `Price/hr: ${fmt(ociCard.pricePerHourUSD)}`);
-      safeSetText("ociMonthly", `≈ Monthly: ${fmt(monthly(ociCard.pricePerHourUSD))}`);
+      safeSetText("ociPrice",   `${PROVIDER_LABELS.oci.price}: ${fmt(ociCard.pricePerHourUSD)}`);
+      safeSetText("ociMonthly", `≈ ${PROVIDER_LABELS.oci.monthly}: ${fmt(monthly(ociCard.pricePerHourUSD))}`);
     }
 
     /* ---------- Storage Cost Render ---------- */
@@ -385,7 +414,11 @@ window.compare = compare;
    BOOTSTRAP
 ============================================================ */
 document.addEventListener("DOMContentLoaded", () => {
-  fillSelect("os",   [{value:"Linux",text:"Linux"}, {value:"Windows",text:"Windows"}]);
+  // OS dropdown: visible label changed; value remains "Linux"
+  fillSelect("os",   [
+    { value: "Linux",   text: "Linux (Open‑source)" },
+    { value: "Windows", text: "Windows" }
+  ]);
   fillSelect("cpu",  [1,2,4,8,16].map(v => ({value:v, text:v})));
   fillSelect("ram",  [1,2,4,8,16,32].map(v => ({value:v, text:v})));
 
