@@ -8,6 +8,14 @@
   --total:#0a7a34;
 }
 
+/* === Google logo-inspired provider accents (override defaults) === */
+:root {
+  --aws:   #4285F4; /* Blue    */
+  --azure: #EA4335; /* Red     */
+  --gcp:   #FBBC05; /* Yellow  */
+  --oci:   #34A853; /* Green   */
+}
+
 * { box-sizing: border-box; }
 
 html, body {
@@ -96,6 +104,14 @@ button {
   white-space:nowrap;
 }
 
+/* Primary button polish (modern gradient) */
+button {
+  background: linear-gradient(180deg, #2b79ff 0%, #1e5bd6 100%);
+  border: 1px solid #1c50bd;
+}
+button:hover:not(:disabled) { filter: brightness(1.03); }
+button:active:not(:disabled) { transform: translateY(1px); }
+
 button:disabled {
   background:#9fbef2;
   cursor:not-allowed;
@@ -118,11 +134,23 @@ button:disabled {
   margin:0 auto 40px;
 }
 
+/* More breathing room on larger screens */
+@media (min-width: 1200px) {
+  .results { gap: 22px; } /* was 16px */
+}
+
 .panel {
   background:var(--panel);
   padding:14px;
   border-radius:8px;
   box-shadow:var(--shadow);
+  min-height:340px; /* normalize height so adjacent cards align */
+  transition: transform .12s ease, box-shadow .12s ease; /* subtle lift on hover */
+}
+
+.panel:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,.10);
 }
 
 .panel h3 { margin:0 0 10px; }
@@ -137,7 +165,9 @@ button:disabled {
   margin:5px 0;
 }
 
-.split .label { color:#444; }
+/* Keep labels and values on a single line for tidy cards */
+.split .label { color:#333; white-space: nowrap; }
+.split span:last-child { white-space: nowrap; }
 
 .total .label { font-weight:700; }
 .total span:last-child { font-weight:700; color:var(--total); }
@@ -146,6 +176,37 @@ button:disabled {
   border:0;
   border-top:1px dashed #e5e7eb;
   margin:8px 0;
+}
+
+/* ======================================================
+   PROVIDER ACCENTS (top stripe + heading color)
+   ====================================================== */
+.panel--aws   { border-top: 4px solid var(--aws); }
+.panel--azure { border-top: 4px solid var(--azure); }
+.panel--gcp   { border-top: 4px solid var(--gcp); }
+.panel--oci   { border-top: 4px solid var(--oci); }
+
+.panel--aws   h3 { color: var(--aws); }
+.panel--azure h3 { color: var(--azure); }
+.panel--oci   h3 { color: var(--oci); }
+
+/* Improve legibility for the yellow theme (GCP) */
+.panel--gcp h3 {
+  color: #C49000; /* darker than pure #FBBC05 for contrast on white */
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, rgba(251,188,5,0.08), rgba(251,188,5,0.00));
+}
+
+/* Optional: add the same subtle pill to others for consistency */
+.panel--aws h3,
+.panel--azure h3,
+.panel--oci h3 {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: transparent;
 }
 
 /* ======================================================
