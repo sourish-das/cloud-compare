@@ -1,3 +1,6 @@
+// scripts/lib/aws.js
+// Helpers for Aws Retail Prices + ResourceSkus enrichment
+
 /**
  * Family filter: m, c, r, t, x, i, z, h
  * (same behavior as before)
