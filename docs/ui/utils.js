@@ -6,8 +6,15 @@ export function fmt(n) {
   return (n == null || isNaN(n)) ? "—" : `$${Number(n).toFixed(4)}`;
 }
 
+export function fmtDelta(n) {
+  if (n == null || isNaN(n)) return "—";
+  const v = Number(n);
+  const sign = v > 0 ? "+" : "";
+  return `${sign}$${v.toFixed(4)}`;
+}
+
 export function monthly(ph) {
-  return (ph == null || isNaN(ph)) ? null : ph * HRS_PER_MONTH;
+  return (ph == null || isNaN(ph)) ? null : Number(ph) * HRS_PER_MONTH;
 }
 
 export function sumSafe(a, b) {
@@ -21,20 +28,61 @@ export function sumSafe(a, b) {
 export function fillSelect(id, items) {
   const el = document.getElementById(id);
   if (!el) return;
+
   el.innerHTML = "";
-  for (const it of items) {
+
+  // Accept strings (used directly as value/text) or objects
+  for (const it of (items || [])) {
     const opt = document.createElement("option");
-    opt.value = it.value;
-    opt.textContent = it.text;
+
+    if (typeof it === "string") {
+      opt.value = it;
+      opt.textContent = it;
+    } else if (it && typeof it === "object") {
+      opt.value = (it.value != null) ? String(it.value) : "";
+      opt.textContent = (it.text != null) ? String(it.text) : String(it.value ?? "");
+      if (it.disabled) opt.disabled = true;
+      if (it.selected) opt.selected = true;
+    } else {
+      continue;
+    }
+
     el.appendChild(opt);
+  }
+}
+
+/**
+ * Ensures an option with given value exists in the select.
+ * If not present, insert it after the "Linux" option (if found),
+ * otherwise append at the end.
+ */
+export function ensureSelectOption(id, value, label) {
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  const needle = String(value).toLowerCase();
+  const exists = Array.from(el.options).some(o => String(o.value).toLowerCase() === needle);
+  if (exists) return;
+
+  const opt = document.createElement("option");
+  opt.value = value;
+  opt.textContent = label || String(value);
+
+  // Try to place after Linux for nicer order
+  const linuxIdx = Array.from(el.options).findIndex(o => String(o.value).toLowerCase() === "linux");
+  if (linuxIdx >= 0 && linuxIdx < el.options.length - 1) {
+    el.add(opt, el.options[linuxIdx + 1]);
+  } else {
+    el.add(opt);
   }
 }
 
 export function setSelectValue(id, value) {
   const el = document.getElementById(id);
   if (!el) return;
+  const current = el.value;
   const match = Array.from(el.options).find(o => o.value == value);
-  if (match) el.value = value;
+  el.value = match ? value : current;
 }
 
 /**
@@ -71,7 +119,7 @@ export function setStatus(msg, level = "info") {
 
 /* ---------- Numeric helpers ---------- */
 export function nearestCeil(requested, allowed) {
-  const sorted = [...allowed].sort((a, b) => a - b);
+  const sorted = [...(allowed || [])].sort((a, b) => a - b);
   for (const s of sorted) if (requested <= s) return s;
   return sorted.length ? sorted[sorted.length - 1] : null;
 }
