@@ -1,4 +1,12 @@
 // docs/script.js (4‑provider coordinator - AWS, Azure, GCP, OCI)
+//
+// Responsibilities:
+//  - Hydrate controls (OS / vCPU / RAM) from meta (with safe fallbacks)
+//  - Keep Windows ↔ ARM guardrails consistent in UI
+//  - Coordinate per‑provider "best" match calls (AWS/Azure/GCP/OCI)
+//  - Compute + render storage costs per provider
+//  - Render totals and basic build info
+//  - Ensure RHEL is selectable regardless of meta overwrite order
 
 import {
   fmt, monthly, sumSafe, fillSelect, setSelectValue, safeSetText,
@@ -7,7 +15,8 @@ import {
   getAwsStorageMonthlyFromCfg,
   getAzureStorageSkuAndMonthlyFromCfg,
   getGcpStorageMonthlyFromCfg,
-  getOciStorageMonthlyFromCfg
+  getOciStorageMonthlyFromCfg,
+  ensureSelectOption
 } from "./ui/utils.js";
 
 import { STORAGE_CFG, loadPricesAndMeta } from "./ui/state.js";
@@ -16,14 +25,15 @@ import { initStorageTypeTooltip, initOsTypeTooltip, initOciTooltip } from "./ui/
 import {
   findBestAws,
   findBestAzure,
-  findBestGcp,        // centralized in matchers.js (Option B)
+  findBestGcp,
   findBestOci
 } from "./ui/matchers.js";
 
-/* ============================================================
+/* ========================================================================
    Provider label maps (centralized)
-============================================================ */
-// === Provider-specific UI labels (centralized) ===
+   ======================================================================== */
+
+// Visible price labels per provider
 const PROVIDER_LABELS = {
   aws:   { price: 'EC2 Price/hr',               monthly: 'EC2 Monthly' },
   azure: { price: 'VM Price/hr',                monthly: 'VM Monthly' },
@@ -31,7 +41,7 @@ const PROVIDER_LABELS = {
   oci:   { price: 'Compute Price/hr',           monthly: 'Compute Monthly' }
 };
 
-// === Storage labels per provider (short to fit cards) ===
+// Storage labels per provider (short text that fits in cards)
 const STORAGE_LABELS = {
   aws:   { hr: 'EBS Price/hr',             monthly: 'EBS Monthly' },
   azure: { hr: 'Azure Disk Price/hr',      monthly: 'Azure Disk Monthly' },
@@ -39,9 +49,10 @@ const STORAGE_LABELS = {
   oci:   { hr: 'Block Volume Price/hr',    monthly: 'Block Volume Monthly' },
 };
 
-/* ============================================================
-   Freshness loader: docs/data/buildInfo.json
-============================================================ */
+/* ========================================================================
+   Build freshness (optional footer info)
+   ======================================================================== */
+
 async function loadBuildInfo() {
   try {
     const r = await fetch('./data/buildInfo.json?v=' + Date.now(), { cache: 'no-store' });
@@ -52,10 +63,12 @@ async function loadBuildInfo() {
   }
 }
 
-/* ============================================================
-   FILTERS (show controls)
-   - NOTE: OCI shows Processor (not Family)
-============================================================ */
+/* ========================================================================
+   Filter visibility
+   - AWS/Azure/GCP use "Family" (already in HTML)
+   - OCI uses "Processor" (Ampere/AMD/Intel)
+   ======================================================================== */
+
 function showFamilyFilters() {
   ["awsFamilyWrap", "azFamilyWrap", "gcpFamilyWrap", "ociProcessorWrap"].forEach(id => {
     const el = document.getElementById(id);
@@ -63,27 +76,31 @@ function showFamilyFilters() {
   });
 }
 
-/* ============================================================
-   STORAGE HELPERS
-============================================================ */
+/* ========================================================================
+   Storage helpers (provider pass‑throughs)
+   ======================================================================== */
+
 function getAwsStorageMonthly(type, gb) {
   return getAwsStorageMonthlyFromCfg(type, gb, STORAGE_CFG.aws);
 }
+
 function getAzureStorage(type, gb) {
   return getAzureStorageSkuAndMonthlyFromCfg(type, gb, STORAGE_CFG.azure);
 }
+
 function getGcpStorageMonthly(type, gb) {
   return getGcpStorageMonthlyFromCfg(type, gb, STORAGE_CFG.gcp);
 }
 
-/* ============================================================
-   Windows ↔ Arm guardrails (UI-side)
-============================================================ */
+/* ========================================================================
+   Windows ↔ Arm guardrails (UI assist; finders also enforce server‑side)
+   ======================================================================== */
 
 function isArmArchField(obj) {
   const a = String(obj?.arch || obj?.cpuArch || obj?.architecture || "").toLowerCase();
   return a.includes("arm") || a.includes("aarch64") || a.includes("ampere");
 }
+
 function isArmSkuPattern(provider, skuString) {
   const s = String(skuString || "").toLowerCase();
 
@@ -94,6 +111,7 @@ function isArmSkuPattern(provider, skuString) {
 
   return false;
 }
+
 function isArmEntry(provider, entry) {
   const byArch = isArmArchField(entry);
   const label  = entry?.instance || entry?.family || entry?.series || entry?.size || "";
@@ -105,6 +123,7 @@ function filterOutArmForWindows(list, provider, os) {
   const f = list.filter(x => !isArmEntry(provider, x));
   return f.length > 0 ? f : list;
 }
+
 function sanitizeFamilyForWindows(provider, family, os) {
   if (String(os).toLowerCase() !== "windows") return family || "";
   return isArmSkuPattern(provider, family) ? "" : family || "";
@@ -125,6 +144,7 @@ function sanitizeFamiliesForWindows(os) {
 
   const awsSel = document.getElementById("awsFamily");
   if (awsSel) {
+    // Family values are ( "", general, compute, memory ) — UI assist is no‑op for most values
     if (isWin && isArmSkuPattern("aws", awsSel.value)) awsSel.value = "";
     disableOptionsIfPresent(awsSel, ["t4g","c7g","m7g","r7g","a1","graviton"], isWin);
   }
@@ -152,39 +172,84 @@ function sanitizeFamiliesForWindows(os) {
   }
 }
 
-/* ============================================================
-   OCI helpers
-============================================================ */
+/* ========================================================================
+   OCI helpers (generation preference finder)
+   ======================================================================== */
+
 function ociLatestGen(linux, processor) {
   if (!linux || !processor || processor === "auto") return null;
+
   const ORDER = {
     amd: ["E6","E5","E4","E3"],
     arm: ["A4","A2","A1"],
     intel:["Optimized3","Standard3"]
   };
+
   const arr = linux[processor] || [];
   if (!Array.isArray(arr) || arr.length === 0) return null;
 
-  const gens = new Set(arr.map(e => String(e.gen||"").toLowerCase()));
+  const gens = new Set(arr.map(e => String(e.gen || "").toLowerCase()));
   for (const g of ORDER[processor] || []) {
     if (gens.has(g.toLowerCase())) return g;
   }
+
+  // Fallback: pick max by name (alphabetical)
   return arr
-    .map(e => String(e.gen||""))
+    .map(e => String(e.gen || ""))
     .filter(Boolean)
-    .sort((a,b)=>a.localeCompare(b))
+    .sort((a, b) => a.localeCompare(b))
     .pop() || null;
 }
 
-/* ============================================================
+/* ========================================================================
+   Controls hydration from meta (safe fallbacks)
+   - Ensures RHEL is present regardless of data order or late repopulation.
+   ======================================================================== */
+
+async function hydrateControlsFromMeta() {
+  try {
+    const { meta } = await loadPricesAndMeta();
+
+    // OS — use meta.os if present; else fallback to our default list
+    const osList = Array.isArray(meta?.os) && meta.os.length
+      ? meta.os
+      : ["Linux", "RHEL", "Windows"];
+
+    // Render OS list (strings or {value,text})
+    fillSelect("os", osList.map(v => {
+      const s = (typeof v === "string") ? v : v?.value;
+      return { value: s, text: (s === "Linux" ? "Linux (Open‑source)" :
+                                s === "RHEL"  ? "RHEL (Red Hat Enterprise Linux)" :
+                                s === "Windows" ? "Windows" : String(s)) };
+    }));
+    // Safety: guarantee RHEL even if future code repopulates the select
+    ensureSelectOption("os", "RHEL", "RHEL (Red Hat Enterprise Linux)");
+
+    // vCPU/RAM — meta or defaults (keep small sets to avoid huge dropdowns)
+    const vcpus = (Array.isArray(meta?.vcpu) && meta.vcpu.length) ? meta.vcpu : [1,2,4,8,16];
+    const rams  = (Array.isArray(meta?.ram)  && meta.ram.length)  ? meta.ram  : [1,2,4,8,16,32];
+
+    fillSelect("cpu", vcpus.map(v => ({ value: v, text: v })));
+    fillSelect("ram", rams.map(v  => ({ value: v, text: v })));
+
+    // Defaults — keep Linux for first view; change to "RHEL" to preselect it
+    setSelectValue("os",  "Linux");
+    setSelectValue("cpu", String(vcpus.includes(2) ? 2 : vcpus[0]));
+    setSelectValue("ram", String(rams.includes(4) ? 4 : rams[0]));
+  } catch {
+    // Hard fallback if meta cannot be read
+
+/* ========================================================================
    MAIN compare()
-============================================================ */
+   ======================================================================== */
+
 export async function compare(resetFamilies = false) {
   const btn = document.getElementById("compareBtn");
   if (btn) btn.disabled = true;
 
   setStatus("Fetching local prices…");
 
+  // Optional: reset family/processor selectors when user explicitly requested a fresh compare
   if (resetFamilies) {
     ["awsFamily","azFamily","gcpFamily"].forEach(id => {
       const el = document.getElementById(id);
@@ -194,6 +259,7 @@ export async function compare(resetFamilies = false) {
     if (ocip) ocip.value = "auto";
   }
 
+  // Read controls
   const os           = document.getElementById("os")?.value || "Linux";
   const vcpu         = Number(document.getElementById("cpu")?.value ?? 0);
   const ram          = Number(document.getElementById("ram")?.value ?? 0);
@@ -207,6 +273,7 @@ export async function compare(resetFamilies = false) {
   const ociProcEl  = document.getElementById("ociProcessor");
   let ociProcessor = (ociProcEl?.value || "auto").toLowerCase();
 
+  // Windows doesn't run on ARM: force reset (UI assist; finders also enforce)
   if (String(os).toLowerCase() === "windows") {
     const armOpt = ociProcEl?.querySelector('option[value="arm"]');
     if (armOpt) armOpt.disabled = true;
@@ -216,86 +283,111 @@ export async function compare(resetFamilies = false) {
     }
   }
 
+  // Make sure family drop‑downs aren't stuck with ARM-ish strings on Windows
   sanitizeFamiliesForWindows(os);
 
   try {
+    // Reset all cards
     resetCards();
+
+    // Load latest data/meta
     const data = await loadPricesAndMeta();
 
-    /* ---------- Footer ---------- */
+    // Footer freshness + row counts (best‑effort)
     try {
       const info = await loadBuildInfo();
       const counts = {
-        az: Array.isArray(data.azure)?data.azure.length:0,
-        aw: Array.isArray(data.aws)?data.aws.length:0,
-        gc: Array.isArray(data.gcp)?data.gcp.length:0,
+        az: Array.isArray(data.azure) ? data.azure.length : 0,
+        aw: Array.isArray(data.aws)   ? data.aws.length   : 0,
+        gc: Array.isArray(data.gcp)   ? data.gcp.length   : 0,
         oc: (() => {
           const l = data.oci?.linux || {};
-          return (l.amd?.length||0)+(l.arm?.length||0)+(l.intel?.length||0);
+          return (l.amd?.length || 0) + (l.arm?.length || 0) + (l.intel?.length || 0);
         })()
       };
       const when = info?.generatedAt || "—";
-      safeSetText("dataInfo", `Data: ${when} · Rows — Azure: ${counts.az}, AWS: ${counts.aw}, GCP: ${counts.gc}, OCI: ${counts.oc}`);
+      safeSetText(
+        "dataInfo",
+        `Data: ${when} · Rows — Azure: ${counts.az}, AWS: ${counts.aw}, GCP: ${counts.gc}, OCI: ${counts.oc}`
+      );
     } catch {
       safeSetText("dataInfo","Data: — · Rows — Azure: —, AWS: —, GCP: —, OCI: —");
     }
-
-    /* ---------- Pre-filter Arm ---------- */
+	
+	// Pre‑filter ARM rows for Windows (finder side still protects)
     const awsList = filterOutArmForWindows(data.aws   || [], "aws",   os);
     const azList  = filterOutArmForWindows(data.azure || [], "azure", os);
     const gcpList = filterOutArmForWindows(data.gcp   || [], "gcp",   os);
 
-    /* ---------- AWS ---------- */
+    /* ---------------- AWS ---------------- */
     let awsCard;
     try {
       const a = findBestAws(awsList, vcpu, ram, os, familyAws);
       awsCard = a ? { instance:a.instance, vcpu:a.vcpu, ram:a.ram, pricePerHourUSD:a.pricePerHourUSD, region:a.region } : null;
-    } catch (e) { awsCard = { error:e.message }; }
+    } catch (e) {
+      awsCard = { error: e.message };
+    }
 
-    /* ---------- Azure ---------- */
+    /* ---------------- Azure ---------------- */
     let azCard;
     try {
       const z = findBestAzure(azList, vcpu, ram, os, familyAz);
       azCard = z ? {
-        instance:z.instance, vcpu:z.vcpu ?? vcpu, ram:z.ram ?? ram,
-        pricePerHourUSD:z.pricePerHourUSD, region:z.region, os
+        instance:z.instance,
+        vcpu: z.vcpu ?? vcpu,
+        ram:  z.ram  ?? ram,
+        pricePerHourUSD: z.pricePerHourUSD,
+        region: z.region,
+        os
       } : null;
-    } catch (e) { azCard = { error:e.message }; }
+    } catch (e) {
+      azCard = { error: e.message };
+    }
 
-    /* ---------- GCP ---------- */
+    /* ---------------- GCP ---------------- */
     let gcpCard;
     try {
       const g = findBestGcp(gcpList, vcpu, ram, os, familyGcp);
-      gcpCard = g ? { instance:g.instance, vcpu:g.vcpu, ram:g.ram, pricePerHourUSD:g.pricePerHourUSD, region:g.region } : null;
-    } catch (e) { gcpCard = { error:e.message }; }
+      gcpCard = g ? {
+        instance:g.instance, vcpu:g.vcpu, ram:g.ram, pricePerHourUSD:g.pricePerHourUSD, region:g.region
+      } : null;
+    } catch (e) {
+      gcpCard = { error: e.message };
+    }
 
-    /* ---------- OCI ---------- */
+    /* ---------------- OCI ---------------- */
     let ociCard;
     try {
-      const comp   = data.oci;
+      const comp   = data.oci;                  // normalized compute block (linux/windows(+rhel uplift))
       const linux  = comp?.linux || {};
-      const latest = (ociProcessor==="auto") ? null : ociLatestGen(linux, ociProcessor);
-      const opts   = latest ? { processor:ociProcessor, generation:latest } : { processor:ociProcessor };
-      const o      = findBestOci(comp, vcpu, ram, os, opts);
-      ociCard      = o ? {
-        instance:o.instance, vcpu:o.vcpu, ram:o.ram,
-        pricePerHourUSD:o.pricePerHourUSD,
-        region: STORAGE_CFG?.oci?.region || "—"
-      } : null;
-    } catch (e) { ociCard = { error:e.message }; }
+      const latest = (ociProcessor === "auto") ? null : ociLatestGen(linux, ociProcessor);
+      const opts   = latest ? { processor: ociProcessor, generation: latest } : { processor: ociProcessor };
 
-    /* ---------- Storage labels ---------- */
+      const o      = findBestOci(comp, vcpu, ram, os, opts);
+
+      ociCard      = o ? {
+        instance: o.instance,
+        vcpu:     o.vcpu,
+        ram:      o.ram,
+        pricePerHourUSD: o.pricePerHourUSD,
+        region:   STORAGE_CFG?.oci?.region || "—"
+      } : null;
+    } catch (e) {
+      ociCard = { error: e.message };
+    }
+	
+	/* ---------------- Storage labels ---------------- */
     const sLabel = `${storageAmtGB} GB ${storageType.toUpperCase()}`;
     safeSetText("awsStorageSel", `Storage: ${sLabel}`);
     safeSetText("azStorageSel",  `Storage: ${sLabel}`);
     safeSetText("gcpStorageSel", `Storage: ${sLabel}`);
     safeSetText("ociStorageSel", `Storage: ${sLabel}`);
 
-    /* ---------- Storage costs ---------- */
+    /* ---------------- Storage costs ---------------- */
     const awsStorageMonthly = getAwsStorageMonthly(storageType, storageAmtGB);
     const awsStorageHr      = awsStorageMonthly / HRS_PER_MONTH;
 
-    const { sku:azDiskSku, size:azDiskGB, monthlyUSD:azStorageMonthly } = getAzureStorage(storageType, storageAmtGB);
+    const { sku: azDiskSku, size: azDiskGB, monthlyUSD: azStorageMonthly } = getAzureStorage(storageType, storageAmtGB);
     const azStorageHr = azStorageMonthly / HRS_PER_MONTH;
 
     const gcpStorageMonthly = getGcpStorageMonthly(storageType, storageAmtGB);
@@ -304,7 +396,7 @@ export async function compare(resetFamilies = false) {
     const ociStorageMonthly = getOciStorageMonthlyFromCfg(storageAmtGB, STORAGE_CFG.oci);
     const ociStorageHr      = ociStorageMonthly / HRS_PER_MONTH;
 
-    /* ---------- Branded Storage Labels (set after costs computed) ---------- */
+    // Brand the labels (after costs computed, just for consistent flow)
     safeSetText("awsStoragePriceHrLabel", `${STORAGE_LABELS.aws.hr}:`);
     safeSetText("awsStorageMonthlyLabel", `≈ ${STORAGE_LABELS.aws.monthly}:`);
     safeSetText("azStoragePriceHrLabel",  `${STORAGE_LABELS.azure.hr}:`);
@@ -314,7 +406,7 @@ export async function compare(resetFamilies = false) {
     safeSetText("ociStoragePriceHrLabel", `${STORAGE_LABELS.oci.hr}:`);
     safeSetText("ociStorageMonthlyLabel", `≈ ${STORAGE_LABELS.oci.monthly}:`);
 
-    /* ---------- Render AWS ---------- */
+    /* ---------------- Render AWS card ---------------- */
     if (!awsCard || awsCard.error) {
       safeSetText("awsInstance", `<strong>Recommended Instance:</strong> Error: ${awsCard?.error ?? "No match"}`, { html: true });
     } else {
@@ -325,7 +417,7 @@ export async function compare(resetFamilies = false) {
       safeSetText("awsMonthly", `≈ ${PROVIDER_LABELS.aws.monthly}: ${fmt(monthly(awsCard.pricePerHourUSD))}`);
     }
 
-    /* ---------- Render Azure ---------- */
+    /* ---------------- Render Azure card ---------------- */
     if (!azCard || azCard.error) {
       safeSetText("azInstance", `<strong>Recommended VM Size:</strong> Error: ${azCard?.error ?? "No match"}`, { html: true });
     } else {
@@ -336,7 +428,7 @@ export async function compare(resetFamilies = false) {
       safeSetText("azMonthly", `≈ ${PROVIDER_LABELS.azure.monthly}: ${fmt(monthly(azCard.pricePerHourUSD))}`);
     }
 
-    /* ---------- Render GCP ---------- */
+    /* ---------------- Render GCP card ---------------- */
     if (!gcpCard || gcpCard.error) {
       safeSetText("gcpInstance", `<strong>Recommended Machine:</strong> Error: ${gcpCard?.error ?? "No match"}`, { html: true });
     } else {
@@ -347,7 +439,7 @@ export async function compare(resetFamilies = false) {
       safeSetText("gcpMonthly", `≈ ${PROVIDER_LABELS.gcp.monthly}: ${fmt(monthly(gcpCard.pricePerHourUSD))}`);
     }
 
-    /* ---------- Render OCI ---------- */
+    /* ---------------- Render OCI card ---------------- */
     if (!ociCard || ociCard.error) {
       safeSetText("ociInstance", `<strong>Recommended Machine:</strong> Error: ${ociCard?.error ?? "No match"}`, { html: true });
     } else {
@@ -358,7 +450,7 @@ export async function compare(resetFamilies = false) {
       safeSetText("ociMonthly", `≈ ${PROVIDER_LABELS.oci.monthly}: ${fmt(monthly(ociCard.pricePerHourUSD))}`);
     }
 
-    /* ---------- Storage Cost Render ---------- */
+    /* ---------------- Storage cost render ---------------- */
     safeSetText("awsStoragePriceHr", fmt(awsStorageHr));
     safeSetText("awsStorageMonthly", fmt(awsStorageMonthly));
 
@@ -371,14 +463,15 @@ export async function compare(resetFamilies = false) {
     safeSetText("ociStoragePriceHr", fmt(ociStorageHr));
     safeSetText("ociStorageMonthly", fmt(ociStorageMonthly));
 
+    // Azure disk SKU/size note (if the requested size was rounded up)
     if (azDiskSku) {
       const extra = (azDiskGB && azDiskGB !== storageAmtGB)
         ? ` (billed as ${azDiskGB} GB ${storageType.toUpperCase()}, ${azDiskSku})`
         : ` (${azDiskSku})`;
       appendToText("azStorageSel", extra);
     }
-
-    /* ---------- TOTAL COSTS ---------- */
+	
+	/* ---------------- Totals ---------------- */
     const awsTotalHr = sumSafe(awsCard?.pricePerHourUSD, awsStorageHr);
     const azTotalHr  = sumSafe(azCard?.pricePerHourUSD,  azStorageHr);
     const gcpTotalHr = sumSafe(gcpCard?.pricePerHourUSD, gcpStorageHr);
@@ -396,48 +489,55 @@ export async function compare(resetFamilies = false) {
     safeSetText("ociTotalHr",      fmt(ociTotalHr));
     safeSetText("ociTotalMonthly", fmt(sumSafe(monthly(ociCard?.pricePerHourUSD), ociStorageMonthly)));
 
+    // Done
     showFamilyFilters();
     setStatus("Comparison complete ✓");
-
   } catch (err) {
     console.error(err);
     setStatus(`Error: ${err.message}`, "error");
     alert("Unable to read local prices. Please try again.");
   } finally {
-    if (btn) btn.disabled = false;
+    const btn2 = document.getElementById("compareBtn");
+    if (btn2) btn2.disabled = false;
   }
 }
 
+// Expose globally for inline onclick="compare(true)"
 window.compare = compare;
 
-/* ============================================================
-   BOOTSTRAP
-============================================================ */
-document.addEventListener("DOMContentLoaded", () => {
-  // OS dropdown: visible label changed; value remains "Linux"
-  fillSelect("os",   [
-    { value: "Linux",   text: "Linux (Open‑source)" },
-    { value: "Windows", text: "Windows" }
-  ]);
-  fillSelect("cpu",  [1,2,4,8,16].map(v => ({value:v, text:v})));
-  fillSelect("ram",  [1,2,4,8,16,32].map(v => ({value:v, text:v})));
+/* ========================================================================
+   BOOTSTRAP: controls, tooltips, listeners
+   ======================================================================== */
 
-  setSelectValue("os","Linux");
-  setSelectValue("cpu","2");
-  setSelectValue("ram","4");
+document.addEventListener("DOMContentLoaded", async () => {
+  // Hydrate controls from meta (safe fallbacks if data not yet available)
+  await hydrateControlsFromMeta();
 
+  // Keep Windows/ARM guardrails aligned when OS changes
   const osEl = document.getElementById("os");
-  if (osEl) osEl.addEventListener("change", () => sanitizeFamiliesForWindows(osEl.value));
+  if (osEl) {
+    osEl.addEventListener("change", () => sanitizeFamiliesForWindows(osEl.value));
+  }
 
+  // Recompute on selector changes (family/processor)
   ["awsFamily","azFamily","gcpFamily","ociProcessor"].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener("change", () => compare(false));
   });
 
+  // Tooltips
   initStorageTypeTooltip();
   initOsTypeTooltip();
   initOciTooltip();
 
+  // Fallback handler for Compare if inline onclick is removed
+  const btn = document.getElementById("compareBtn");
+  if (btn && !btn.getAttribute("data-bound")) {
+    btn.addEventListener("click", () => compare(true));
+    btn.setAttribute("data-bound", "1");
+  }
+
+  // Initial status
   setStatus("Select inputs and click Compare");
-  safeSetText("dataInfo","Loading…");
+  safeSetText("dataInfo", "Loading…");
 });
