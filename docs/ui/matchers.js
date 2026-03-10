@@ -1,9 +1,13 @@
 // docs/ui/matchers.js
 // All matching logic: normalization, families, scoring, inference, and fallbacks
 
+//
+// ---------------- OS NORMALIZATION (UPDATED) ----------------
+//
 export function normalizeOs(val) {
   const s = String(val || '').toLowerCase();
   if (s.startsWith('win')) return 'windows';
+  if (/\bred\s*hat\b|\brhel\b/.test(s)) return 'rhel';
   return 'linux';
 }
 
@@ -176,7 +180,8 @@ export function gcpFamilyMatch(row, family) {
 //     linux: { amd:[{gen,shape,architecture,ocpu_per_hour,ram_gb_per_hour},...],
 //              arm:[...],
 //              intel:[...] },
-//     windows: { license_per_vcpu_hour }
+//     windows: { license_per_vcpu_hour },
+//     // (optional) rhel: { license_per_vcpu_hour }   <-- NEW (BYOS uplift if supplied)
 //   }
 //
 // We compute the on-demand hourly price on the fly based on vCPU/RAM inputs.
@@ -296,7 +301,7 @@ export function findBestAzure(list, vcpu, ram, os, family) {
       best = x; bestScore = score;
     }
   }
-  if (best) best.os = os;
+  if (best) best.os = os; // ensure UI sees the requested OS label
   return best;
 }
 
@@ -359,7 +364,7 @@ export function findBestGcp(list, vcpu, ram, os, family) {
 }
 
 //
-// ---------------- OCI FINDER (arrays‑first, processor-aware) ----------------
+// ---------------- OCI FINDER (arrays‑first, processor-aware) — UPDATED FOR RHEL ----------------
 //
 // Signature: findBestOci(ociCompute, vcpu, ram, os, options)
 //   options = { processor: "auto"|"amd"|"arm"|"intel", generation: "auto"|string }
@@ -367,19 +372,21 @@ export function findBestGcp(list, vcpu, ram, os, family) {
 // Behavior:
 //   - Auto: cheapest across allowed candidates.
 //   - Windows: exclude ARM always.
-//   - If processor is set, restrict to that arch;
-//     if generation is also set, restrict to that gen label.
+//   - RHEL: allowed on ARM; adds BYOS/PAYG uplift per vCPU if provided.
+//   - If processor is set, restrict to that arch; if generation is set, restrict to that gen.
 //   - Returns the single cheapest candidate; tie-break by gen label.
 
 export function findBestOci(ociCompute, vcpu, ram, os, options = {}) {
   if (!ociCompute || typeof ociCompute !== "object")
     throw new Error("OCI pricing block is missing (prices.json.oci)");
 
-  const wantOS = normalizeOs(os || "Linux");
+  const wantOS = normalizeOs(os || "Linux");          // "linux" | "windows" | "rhel"
   const isWindows = (wantOS === "windows");
+  const isRhel    = (wantOS === "rhel");
 
   const L = ociCompute.linux || {};
   const W = ociCompute.windows || {};
+  const R = ociCompute.rhel || {};                    // optional (BYOS uplift if present)
 
   const v = safeNum(vcpu, null);
   const m = safeNum(ram, null);
@@ -389,7 +396,16 @@ export function findBestOci(ociCompute, vcpu, ram, os, options = {}) {
   const proc = String(options.processor || "auto").toLowerCase();    // "auto"|"amd"|"arm"|"intel"
   const genFilter = String(options.generation || "auto").toLowerCase();
 
-  const winUpliftPerVcpu = isWindows ? (safeNum(W?.license_per_vcpu_hour, 0) ?? 0) : 0;
+  const winUpliftPerVcpu  = isWindows ? (safeNum(W?.license_per_vcpu_hour, 0) ?? 0) : 0;
+
+  // RHEL uplift priority:
+  //   1) ociCompute.rhel.license_per_vcpu_hour (if backend provides)
+  //   2) window.OCI_RHEL_RATE_PER_VCPU (if exposed by app)
+  //   3) 0 (no uplift info -> treat as infra-only; still allowed to render)
+  const rhelUpliftPerVcpu = isRhel
+    ? (safeNum(R?.license_per_vcpu_hour,
+        safeNum(typeof window !== "undefined" ? window.OCI_RHEL_RATE_PER_VCPU : undefined, 0)) ?? 0)
+    : 0;
 
   const candidates = [];
 
@@ -414,22 +430,25 @@ export function findBestOci(ociCompute, vcpu, ram, os, options = {}) {
     const ocpu = vcpuToOcpuForArch(v, archLabel);
     const cpuBase = ocpu * ocpuRate;
     const memCost = m * memRate;
-    const winLic  = v * winUpliftPerVcpu;
 
-    const ph = cpuBase + memCost + winLic;
+    const winLic  = v * winUpliftPerVcpu;
+    const rhelLic = v * rhelUpliftPerVcpu;
+
+    const ph = cpuBase + memCost + winLic + rhelLic;
 
     candidates.push({
       provider: "oci",
       instance: entry.shape || "VM.Standard.Flex",
       vcpu: v,
       ram: m,
-      os: isWindows ? "Windows" : "Linux",
+      os: isWindows ? "Windows" : (isRhel ? "RHEL" : "Linux"),
       series: archLabel,
       gen: entry.gen || undefined,
       pricePerHourUSD: ph,
       breakdown: {
         cpu_base_per_hour: cpuBase,
-        windows_license_per_hour: winLic,
+        windows_license_per_hour: winLic || undefined,
+        rhel_license_per_hour: rhelLic || undefined,
         memory_per_hour: memCost
       }
     });
