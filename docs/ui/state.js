@@ -3,9 +3,12 @@
 
 export const API_BASE = "./data/prices.json";
 
-// Defaults for dropdown meta (used if merged file omits/has sparse meta)
+/**
+ * Default dropdown meta used if the aggregated file omits/sparsely defines meta.
+ * We keep these as STRINGS so the UI can bind directly to option values.
+ */
 export const FALLBACK_META = {
-  os:   [{ value: "Linux" }, { value: "Windows" }],
+  os:   ["Linux", "RHEL", "Windows"], // RHEL added
   vcpu: [1, 2, 4, 8, 16],
   ram:  [1, 2, 4, 8, 16, 32]
 };
@@ -35,6 +38,22 @@ export let STORAGE_CFG = {
     block_volume_gb_month: 0.0255
   }
 };
+
+/**
+ * Coerce a provider meta "os" array to plain string values.
+ * Accepts either ["Linux","RHEL","Windows"] or [{value:"Linux"}, ...].
+ */
+function coerceOsList(arr) {
+  if (!Array.isArray(arr)) return [];
+  const out = [];
+  for (const x of arr) {
+    if (typeof x === "string" && x.trim()) out.push(x.trim());
+    else if (x && typeof x === "object" && typeof x.value === "string" && x.value.trim()) {
+      out.push(x.value.trim());
+    }
+  }
+  return out;
+}
 
 /**
  * Loads the aggregated file (docs/data/prices.json),
@@ -136,11 +155,33 @@ export async function loadPricesAndMeta() {
   };
 
   // ---- Defensive meta fallback (ensure arrays exist) ----
+  // Accept both ["Linux","RHEL","Windows"] and [{value:"Linux"}, ...]
+  const fromFileOs = coerceOsList(meta.os);
+  const fallbackOs = coerceOsList(FALLBACK_META.os).length
+    ? coerceOsList(FALLBACK_META.os)
+    : ["Linux", "RHEL", "Windows"];
+
   const normMeta = {
-    os:   Array.isArray(meta.os)   && meta.os.length   ? meta.os   : FALLBACK_META.os.map(x => x.value),
+    os:   fromFileOs.length ? fromFileOs : fallbackOs,
     vcpu: Array.isArray(meta.vcpu) && meta.vcpu.length ? meta.vcpu : FALLBACK_META.vcpu,
     ram:  Array.isArray(meta.ram)  && meta.ram.length  ? meta.ram  : FALLBACK_META.ram
   };
+
+  // ---- Optional QoL: prime OCI RHEL uplift for BYOS (if present) ----
+  // If the aggregated JSON carries an uplift hint, initialize window.OCI_RHEL_RATE_PER_VCPU once.
+  try {
+    const metaHint =
+      (raw?.oci?.rhel && Number(raw.oci.rhel.license_per_vcpu_hour)) ||
+      (raw?.meta?.oci?.rhel_rate_per_vcpu && Number(raw.meta.oci.rhel_rate_per_vcpu));
+
+    if (typeof window !== "undefined" &&
+        typeof window.OCI_RHEL_RATE_PER_VCPU === "undefined" &&
+        Number.isFinite(metaHint) && metaHint >= 0) {
+      window.OCI_RHEL_RATE_PER_VCPU = metaHint;
+    }
+  } catch (_) {
+    // non-fatal
+  }
 
   return {
     meta: normMeta,
