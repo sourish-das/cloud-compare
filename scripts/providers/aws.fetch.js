@@ -15,7 +15,11 @@ const {
   isWantedEc2Family,
   isBurstableAws,
   isAwsGravitonInstance,
-  synthesizeAwsWindowsRows
+  synthesizeAwsWindowsRows,
+  synthesizeAwsRhelRows,
+  // NEW strict helpers from lib/aws.js
+  isPlainRhel,
+  filterOnlyPlainRhel
 } = require("../lib/aws");
 
 // Region + output
@@ -65,10 +69,12 @@ function parseGiB(memStr) {
   return Number.isFinite(n) ? n : null;
 }
 
-/** Normalize OS label for rows */
+/** Normalize OS label for rows (Windows | RHEL | Linux) with strict word boundaries */
 function normOs(val) {
   const s = String(val || "").toLowerCase();
-  return s.startsWith("win") ? "Windows" : "Linux";
+  if (s.startsWith("win")) return "Windows";
+  if (/\bred\s*hat\b|\brhel\b/.test(s)) return "RHEL";
+  return "Linux";
 }
 
 /** True if this product is a clean Windows Server license-included VM (no SQL, no BYOL) */
@@ -109,17 +115,20 @@ async function main() {
     if (a.tenancy !== "Shared") continue;
     if (!["Used", "Normal"].includes(a.capacitystatus)) continue;
 
-    // OS filters:
-    //  - Linux: operatingSystem must be exactly "Linux"
-    //  - Windows: must be "Windows" AND licenseModel = "License Included" AND preInstalledSw = "NA"
-    const os = String(a.operatingSystem || "");
-    const isLinux = (os === "Linux");
+    // OS filters (Linux, Windows, RHEL-plain only)
+    const osRaw   = String(a.operatingSystem || "");
+    const isLinux = (osRaw === "Linux");
     const isWinOK = isWindowsLicenseIncluded(a);
+    const isRhelOK = isPlainRhel(a, {
+      productName: p.productName,
+      skuName: a.instanceType || a.sku || "",
+      meterName: a.usagetype || ""
+    });
 
-    if (!(isLinux || isWinOK)) continue;
+    if (!(isLinux || isWinOK || isRhelOK)) continue;
 
-    // Also exclude Graviton shapes for Windows (no public Windows AMIs on Graviton)
-    if (!isLinux && isAwsGravitonInstance(inst)) continue;
+    // Exclude Graviton shapes for Windows (no public Windows AMIs on Graviton)
+    if (isWinOK && isAwsGravitonInstance(inst)) continue;
 
     const price = pickHourlyUsdMin(onDemandTerms[sku]);
     if (!(price > 0)) continue;
@@ -133,33 +142,43 @@ async function main() {
       ram,
       pricePerHourUSD: price,
       region: REGION,
-      os: normOs(os),
+      os: normOs(osRaw),
       source: "catalog"
     });
   }
 
-  // (Optional) If Windows rows are thin for this region (or absent), synthesize from Linux by uplift
+  // (Optional) Synthesize Windows if missing
   const beforeWin = rows.filter(r => r.os === "Windows").length;
   if (beforeWin === 0) {
     const added = synthesizeAwsWindowsRows(rows);
     console.log(`[AWS] Windows rows were absent; synthesized ${added} from Linux via uplift.`);
   }
 
+  // (Optional) Synthesize RHEL (plain) if missing
+  const beforeRhel = rows.filter(r => r.os === "RHEL").length;
+  if (beforeRhel === 0) {
+    const added = synthesizeAwsRhelRows(rows);
+    console.log(`[AWS] RHEL rows were absent; synthesized ${added} from Linux via uplift.`);
+  }
+
+  // Final safety: remove any RHEL rows that look like SQL/SAP/HA variants
+  const hardened = filterOnlyPlainRhel(rows);
+
   // Keep the cheapest per (instance, region, OS)
   const cheapest = dedupeCheapestByKey(
-    rows,
+    hardened,
     r => `${r.instance}-${r.region}-${r.os}`
   );
 
   const countsByOs = cheapest.reduce((acc, r) => {
     acc[r.os] = (acc[r.os] || 0) + 1; return acc;
   }, {});
-  console.log(`[AWS] collected=${rows.length}, cheapest=${cheapest.length}, byOS=`, countsByOs);
+  console.log(`[AWS] collected=${rows.length}, hardened=${hardened.length}, cheapest=${cheapest.length}, byOS=`, countsByOs);
 
   if (warnAndSkipWriteOnEmpty("AWS", cheapest)) return;
 
   const meta = {
-    os: ["Linux", "Windows"],
+    os: ["Linux", "RHEL", "Windows"],
     vcpu: uniqSortedNums(cheapest.map(x => x.vcpu)),
     ram:  uniqSortedNums(cheapest.map(x => x.ram))
   };
