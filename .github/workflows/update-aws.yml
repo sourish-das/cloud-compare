@@ -1,7 +1,7 @@
 name: Fetch AWS Prices
 
 permissions:
-  contents: read          # provider does not commit; orchestrator will
+  contents: read          # provider does not commit; orchestrator (or separate job) will
 
 on:
   workflow_call:
@@ -73,15 +73,26 @@ jobs:
         run: mkdir -p docs/data/aws
 
       # ------------------------------------------------------------
-      # >>> Run the AWS fetcher (Windows via catalog; fallback uplift if needed)
+      # >>> Run the AWS fetcher (Linux + native Windows/RHEL where available;
+      #     otherwise synthesize via pinned per‑vCPU uplifts)
+      #     NOTE: RHEL path is STRICT — only plain "Red Hat Enterprise Linux"
+      #           (no SQL/SAP/HA) via lib/aws.js helpers.
       # ------------------------------------------------------------
       - name: Fetch AWS prices
         run: node scripts/providers/aws.fetch.js
         env:
           AWS_REGION: "us-east-1"
           OUTPUT_PATH: "docs/data/aws/aws.prices.json"
-          # Optional: set Windows per‑vCPU uplift if you want to pin it (code default is 0.046)
-          # AWS_WINDOWS_RATE_PER_VCPU: "0.046"
+
+          # --------------------------------------------------------
+          # Optional: tune license uplifts (used only when the catalog
+          # doesn't return Windows/RHEL rows in a region).
+          # If unset, code-level safe defaults are used:
+          #  - Windows: 0.046 $/vCPU-hr
+          #  - RHEL:    0.060 $/vCPU-hr
+          # --------------------------------------------------------
+          AWS_WINDOWS_RATE_PER_VCPU: "0.046"
+          AWS_RHEL_RATE_PER_VCPU: "0.060"
 
       # ------------------------------------------------------------
       # Validate the output was created and show quick stats
@@ -101,7 +112,7 @@ jobs:
           jq -r '.compute | group_by(.os) | map({os: .[0].os, count: length})' docs/data/aws/aws.prices.json
 
       # ------------------------------------------------------------
-      # Upload artifact for orchestrator
+      # Upload artifact for downstream merge/orchestrator
       # ------------------------------------------------------------
       - name: Upload AWS pricing JSON (artifact)
         uses: actions/upload-artifact@v4
@@ -112,7 +123,8 @@ jobs:
           retention-days: 7
 
       # =========================================
-      # OPTIONAL DEBUG MODE — snapshot to docs/data (no direct overwrite)
+      # OPTIONAL DEBUG MODE — snapshot to docs/data
+      # (does NOT overwrite your main file)
       # Enable by setting repo variable: DEBUG_PUBLISH=true
       # =========================================
       - name: Debug Publish to docs/data (optional)
@@ -120,8 +132,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          echo "DEBUG MODE ENABLED: Publishing AWS output directly to docs/data/aws"
-          # Main output is already in docs/data/aws; create a safe debug snapshot to avoid copy-to-self
+          echo "DEBUG MODE ENABLED: Publishing AWS output directly to docs/data/aws/_debug"
           mkdir -p docs/data/aws/_debug
           cp -f docs/data/aws/aws.prices.json docs/data/aws/_debug/aws.prices.json
 
@@ -144,5 +155,5 @@ jobs:
             exit 0
           fi
 
-          git commit -m "Debug publish: AWS pricing update"
+          git commit -m "Debug publish: AWS pricing update (Linux/RHEL/Windows)"
           git push
