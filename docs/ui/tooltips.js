@@ -1,6 +1,10 @@
 // docs/ui/tooltips.js
 // Canonical tooltip initializer with future‑proof info button styling
 
+/* ======================================================
+   INTERNAL HELPERS
+   ====================================================== */
+
 function normalizeInfoBtn(btn) {
   if (!btn) return;
   // Single source of truth for styling (CSS hooks)
@@ -9,9 +13,30 @@ function normalizeInfoBtn(btn) {
   btn.setAttribute("aria-haspopup", "dialog");
 }
 
+function canHover() {
+  try {
+    return !!(window.matchMedia && window.matchMedia("(hover: hover)").matches);
+  } catch {
+    return false;
+  }
+}
+
+function getRect(el) {
+  return el?.getBoundingClientRect?.() || { left: 0, top: 0, bottom: 0 };
+}
+
+function setAriaHidden(tip, hidden) {
+  if (!tip) return;
+  tip.setAttribute("aria-hidden", hidden ? "true" : "false");
+}
+
+function isOpen(tip) {
+  return tip?.getAttribute?.("aria-hidden") === "false";
+}
+
 /**
- * Generic tooltip/modal wiring
- * - enableHover: true => add hover open/close (only for non-modal tips, and only when device supports hover)
+ * Attach a small, anchored tooltip or a modal-like panel.
+ * - enableHover: true => hover open/close (only for non-modal tips and hover-capable devices)
  * - anchorEl: element used to position non-modal tips
  */
 function attachTooltip({
@@ -23,12 +48,16 @@ function attachTooltip({
 }) {
   if (!btn || !tip || !label || !anchorEl) return;
 
+  // Avoid double-binding the same tooltip
+  if (btn.__tooltipBound && btn.__tooltipBound.has(tip)) return;
+  if (!btn.__tooltipBound) btn.__tooltipBound = new WeakSet();
+  btn.__tooltipBound.add(tip);
+
   normalizeInfoBtn(btn);
 
-  // Hover capability detection (touch devices often report no hover)
-  const CAN_HOVER = !!(window.matchMedia && window.matchMedia("(hover: hover)").matches);
-
+  const CAN_HOVER = canHover();
   let hoverTimer = null;
+
   function clearHoverTimer() {
     if (hoverTimer) {
       clearTimeout(hoverTimer);
@@ -36,32 +65,30 @@ function attachTooltip({
     }
   }
 
-  function getAnchorRect() {
-    return anchorEl.getBoundingClientRect();
-  }
-
   function positionTip() {
-    const rect = getAnchorRect();
-    const scrollX = window.scrollX || window.pageXOffset;
-    const scrollY = window.scrollY || window.pageYOffset;
-    const left = rect.left + scrollX;
-    const top  = rect.bottom + scrollY + 6;
-
-    // If tip has a modal class, let CSS center it; else, anchor it
     const isModal = tip.classList.contains("info-pop--modal");
-    if (!isModal) {
-      tip.style.position = "absolute";
-      tip.style.left = `${left}px`;
-      tip.style.top  = `${top}px`;
-    } else {
+    if (isModal) {
+      // Modal flavor is centered by CSS; leave positioning to stylesheet
       tip.style.left = "";
-      tip.style.top  = "";
-      tip.style.position = ""; // fall back to stylesheet rules (fixed/centered)
+      tip.style.top = "";
+      tip.style.position = "";
+      return;
     }
 
+    const rect = getRect(anchorEl);
+    const scrollX = window.scrollX || window.pageXOffset || 0;
+    const scrollY = window.scrollY || window.pageYOffset || 0;
+
+    const left = rect.left + scrollX;
+    const top  = rect.bottom + scrollY + 6; // small offset below control
+
+    tip.style.position = "absolute";
+    tip.style.left = `${left}px`;
+    tip.style.top  = `${top}px`;
+
     const arrow = tip.querySelector(".info-pop__arrow");
-    if (arrow && !isModal) {
-      const btnRect = btn.getBoundingClientRect();
+    if (arrow) {
+      const btnRect = getRect(btn);
       const offset = Math.max(10, Math.min(28, btnRect.left - rect.left));
       arrow.style.left = `${offset}px`;
     }
@@ -69,32 +96,33 @@ function attachTooltip({
 
   function openTip() {
     positionTip();
-    tip.setAttribute("aria-hidden", "false");
+    setAriaHidden(tip, false);
     btn.setAttribute("aria-expanded", "true");
-    document.addEventListener("click", outsideClose, { capture: true });
+
+    // Bind once per open to avoid stacking listeners
+    document.addEventListener("mousedown", outsideClose, { capture: true });
     document.addEventListener("keydown", escClose);
+    window.addEventListener("resize", onViewport);
+    window.addEventListener("scroll", onViewport, { passive: true });
   }
 
   function closeTip() {
-    tip.setAttribute("aria-hidden", "true");
+    setAriaHidden(tip, true);
     btn.setAttribute("aria-expanded", "false");
-    document.removeEventListener("click", outsideClose, { capture: true });
+
+    document.removeEventListener("mousedown", outsideClose, { capture: true });
     document.removeEventListener("keydown", escClose);
+    window.removeEventListener("resize", onViewport);
+    window.removeEventListener("scroll", onViewport);
   }
 
   function toggleTip() {
-    const open = tip.getAttribute("aria-hidden") === "false";
-    open ? closeTip() : openTip();
+    isOpen(tip) ? closeTip() : openTip();
   }
 
   function outsideClose(e) {
-    // Do not close if the click is inside any of these
-    if (
-      tip.contains(e.target) ||
-      btn.contains(e.target) ||
-      label.contains(e.target) ||
-      anchorEl.contains(e.target)
-    ) {
+    // If click is inside any of these, do not close
+    if (tip.contains(e.target) || btn.contains(e.target) || label.contains(e.target) || anchorEl.contains(e.target)) {
       return;
     }
     closeTip();
@@ -104,7 +132,11 @@ function attachTooltip({
     if (e.key === "Escape") closeTip();
   }
 
-  // Allow an inline "close" control inside the tooltip (×)
+  function onViewport() {
+    if (isOpen(tip)) positionTip();
+  }
+
+  // Inline "×" closer (optional)
   const closer = tip.querySelector(".info-pop__close");
   if (closer) {
     closer.addEventListener("click", (e) => {
@@ -114,7 +146,7 @@ function attachTooltip({
   }
 
   // ---------- INTERACTION MODEL ----------
-  // 1) Click / keyboard toggle (works for all: small tooltips + modal)
+  // 1) Click / keyboard toggle (all tooltips)
   btn.addEventListener("click", (e) => {
     e.stopPropagation();
     toggleTip();
@@ -127,7 +159,7 @@ function attachTooltip({
     }
   });
 
-  // 2) Hover-to-open ONLY when requested and ONLY for non-modal tips
+  // 2) Hover-to-open for small, anchored tips (if enabled and device supports hover)
   const isModal = tip.classList.contains("info-pop--modal");
   if (enableHover && !isModal && CAN_HOVER) {
     const HOVER_OPEN_DELAY_MS = 120;
@@ -154,12 +186,10 @@ function attachTooltip({
     }
 
     // Keep open while hovering the tooltip itself
-    tip.addEventListener("mouseenter", () => {
-      clearHoverTimer();
-    });
+    tip.addEventListener("mouseenter", () => clearHoverTimer());
     tip.addEventListener("mouseleave", scheduleClose);
 
-    // Also support focus/blur for keyboard-only users
+    // Focus/blur support for keyboard users
     btn.addEventListener("focus", openTip);
     btn.addEventListener("blur", scheduleClose);
     if (anchorEl !== btn) {
@@ -168,13 +198,9 @@ function attachTooltip({
     }
   }
 
-  // Keep position synced on viewport changes
-  window.addEventListener("resize", () => {
-    if (tip.getAttribute("aria-hidden") === "false") positionTip();
-  });
-  window.addEventListener("scroll", () => {
-    if (tip.getAttribute("aria-hidden") === "false") positionTip();
-  });
+  // Ensure initial hidden state
+  setAriaHidden(tip, true);
+  btn.setAttribute("aria-expanded", "false");
 }
 
 /* ======================================================
@@ -191,6 +217,10 @@ export function initStorageTypeTooltip() {
   });
 }
 
+/**
+ * OS selector tooltip. This assumes your HTML tooltip
+ * content already mentions Linux, RHEL, and Windows.
+ */
 export function initOsTypeTooltip() {
   const label =
     document.querySelector('label[for="os"].label-with-info') ||
@@ -217,6 +247,8 @@ export function initOciTooltip() {
   const btn  = document.getElementById("ociInfoBtn");
   const tip  = document.getElementById("ociInfoTip");
 
+  if (!btn || !tip) return;
+
   // Anchor precisely to the OCI "i" button
   const anchorEl = btn;
 
@@ -228,12 +260,10 @@ export function initOciTooltip() {
     btn;
 
   // Force hidden state on boot and ensure anchored behavior
-  if (tip) {
-    tip.setAttribute("aria-hidden", "true");
-    tip.classList.remove("info-pop--modal"); // ensure it's NOT modal
-    tip.setAttribute("role", "tooltip");
-  }
-  if (btn) btn.setAttribute("aria-expanded", "false");
+  setAriaHidden(tip, true);
+  tip.classList.remove("info-pop--modal"); // ensure it's NOT modal
+  tip.setAttribute("role", "tooltip");
+  btn.setAttribute("aria-expanded", "false");
 
   attachTooltip({ btn, tip, label, anchorEl, enableHover: false });
 }
