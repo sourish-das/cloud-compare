@@ -31,13 +31,19 @@
           </button>
         </label>
 
-        <select id="os"></select>
+        <!-- Explicit options: Linux, RHEL, Windows (no Auto) -->
+        <select id="os">
+          <option value="Linux">Linux (Open‑source)</option>
+          <option value="RHEL">RHEL (Red Hat Enterprise Linux)</option>
+          <option value="Windows">Windows</option>
+        </select>
 
         <div class="info-pop" id="osInfoTip" role="tooltip" aria-hidden="true">
           <div class="info-pop__arrow"></div>
           <div class="info-pop__content">
             <strong>OS selection</strong><br />
             • <em>Linux (Open‑source)</em>: Standard Linux VM rates (no OS license).<br />
+            • <em>RHEL</em>: Red Hat Enterprise Linux — license uplift or BYOS may apply depending on cloud provider/config.<br />
             • <em>Windows</em>: Windows PAYG (license included).
           </div>
         </div>
