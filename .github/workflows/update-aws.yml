@@ -1,81 +1,7 @@
-name: Fetch AWS Prices, code-level defaults are used:
-          #  - Windows: 0.046 $/vCPU-hr
-          #  - RHEL:    0.0168 $/vCPU-hr  (aligned to AWS Calculator for us-east-1)
-          #
-          # You can also supply a region map for RHEL, e.g.:
-          #   AWS_RHEL_RATE_PER_VCPU_MAP='{"us-east-1":0.0168,"_default":0.0160}'
-          # --------------------------------------------------------
-          AWS_WINDOWS_RATE_PER_VCPU: "0.046"
-          AWS_RHEL_RATE_PER_VCPU: "0.0168"
-          # AWS_RHEL_RATE_PER_VCPU_MAP: '{"us-east-1":0.0168,"_default":0.0160}'
-
-      # ------------------------------------------------------------
-      # Validate the output was created and show quick stats
-      # ------------------------------------------------------------
-      - name: Validate AWS output
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -s docs/data/aws/aws.prices.json
-          echo "Output size (bytes):"
-          wc -c docs/data/aws/aws.prices.json
-          echo "Top-level keys:"
-          jq 'keys' docs/data/aws/aws.prices.json | sed 's/^/  /' || true
-          echo "Compute array length:"
-          jq '.compute | length' docs/data/aws/aws.prices.json || true
-          echo "Counts by OS:"
-          jq -r '.compute | group_by(.os) | map({os: .[0].os, count: length})' docs/data/aws/aws.prices.json
-
-      # ------------------------------------------------------------
-      # Upload artifact for downstream merge/orchestrator
-      # ------------------------------------------------------------
-      - name: Upload AWS pricing JSON (artifact)
-        uses: actions/upload-artifact@v4
-        with:
-          name: aws-prices
-          path: docs/data/aws/aws.prices.json
-          if-no-files-found: error
-          retention-days: 7
-
-      # =========================================
-      # OPTIONAL DEBUG MODE — snapshot to docs/data
-      # (does NOT overwrite your main file)
-      # Enable by setting repo variable: DEBUG_PUBLISH=true
-      # =========================================
-      - name: Debug Publish to docs/data (optional)
-        if: ${{ vars.DEBUG_PUBLISH == 'true' }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          echo "DEBUG MODE ENABLED: Publishing AWS output directly to docs/data/aws/_debug"
-          mkdir -p docs/data/aws/_debug
-          cp -f docs/data/aws/aws.prices.json docs/data/aws/_debug/aws.prices.json
-
-      - name: Commit debug provider files (optional)
-        if: ${{ vars.DEBUG_PUBLISH == 'true' }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          # Align with remote to avoid rebase prompts
-          git fetch origin main
-          git checkout main
-          git reset --hard origin/main
-
-          git add -f docs/data/aws/aws.prices.json
-          if git diff --cached --quiet; then
-            echo "No changes to commit."
-            exit 0
-          fi
-
-          git commit -m "Debug publish: AWS pricing update (Linux/RHEL/Windows)"
-          git push
-``
+name: Fetch AWS Prices
 
 permissions:
-  contents: read          # provider does not commit; orchestrator (or separate job) will
+  contents: read          # provider does not commit; orchestrator will
 
 on:
   workflow_call:
@@ -147,10 +73,7 @@ jobs:
         run: mkdir -p docs/data/aws
 
       # ------------------------------------------------------------
-      # >>> Run the AWS fetcher (Linux + native Windows/RHEL where available;
-      #     otherwise synthesize via per‑vCPU uplifts)
-      #     NOTE: RHEL path is STRICT — only plain "Red Hat Enterprise Linux"
-      #           (no SQL/SAP/HA) via lib/aws.js helpers.
+      # >>> Run the AWS fetcher (Windows via catalog; fallback uplift if needed)
       # ------------------------------------------------------------
       - name: Fetch AWS prices
         run: node scripts/providers/aws.fetch.js
@@ -158,6 +81,70 @@ jobs:
           AWS_REGION: "us-east-1"
           OUTPUT_PATH: "docs/data/aws/aws.prices.json"
 
-          # --------------------------------------------------------
-          # Optional: tune license uplifts (used only when the catalog
-          # doesn't return Windows/RHEL rows in a region).
+          # Optional Windows uplift (default = 0.046)
+          # AWS_WINDOWS_RATE_PER_VCPU: "0.046"
+
+          # NEW: correct RHEL uplift (default fallback in code now ~0.0168)
+          AWS_RHEL_RATE_PER_VCPU: "0.0168"
+
+      # ------------------------------------------------------------
+      # Validate the output was created and show quick stats
+      # ------------------------------------------------------------
+      - name: Validate AWS output
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s docs/data/aws/aws.prices.json
+          echo "Output size (bytes):"
+          wc -c docs/data/aws/aws.prices.json
+          echo "Top-level keys:"
+          jq 'keys' docs/data/aws/aws.prices.json | sed 's/^/  /' || true
+          echo "Compute array length:"
+          jq '.compute | length' docs/data/aws/aws.prices.json || true
+          echo "Counts by OS:"
+          jq -r '.compute | group_by(.os) | map({os: .[0].os, count: length})' docs/data/aws/aws.prices.json
+
+      # ------------------------------------------------------------
+      # Upload artifact for orchestrator
+      # ------------------------------------------------------------
+      - name: Upload AWS pricing JSON (artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: aws-prices
+          path: docs/data/aws/aws.prices.json
+          if-no-files-found: error
+          retention-days: 7
+
+      # =========================================
+      # OPTIONAL DEBUG MODE — snapshot to docs/data (no direct overwrite)
+      # Enable by setting repo variable: DEBUG_PUBLISH=true
+      # =========================================
+      - name: Debug Publish to docs/data (optional)
+        if: ${{ vars.DEBUG_PUBLISH == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "DEBUG MODE ENABLED: Publishing AWS output directly to docs/data/aws"
+          mkdir -p docs/data/aws/_debug
+          cp -f docs/data/aws/aws.prices.json docs/data/aws/_debug/aws.prices.json
+
+      - name: Commit debug provider files (optional)
+        if: ${{ vars.DEBUG_PUBLISH == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git fetch origin main
+          git checkout main
+          git reset --hard origin/main
+
+          git add -f docs/data/aws/aws.prices.json
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git commit -m "Debug publish: AWS pricing update"
+          git push
