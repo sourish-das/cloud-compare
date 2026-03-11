@@ -17,7 +17,6 @@ const {
   isAwsGravitonInstance,
   synthesizeAwsWindowsRows,
   synthesizeAwsRhelRows,
-  // NEW strict helpers from lib/aws.js
   isPlainRhel,
   filterOnlyPlainRhel
 } = require("../lib/aws");
@@ -28,7 +27,6 @@ const OUT = process.env.OUTPUT_PATH || path.join("docs", "data", "aws", "aws.pri
 
 /**
  * Fetch the regional EC2 public price index JSON.
- * https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/current/<REGION>/index.json
  */
 async function fetchAwsIndex() {
   logStart(`[AWS] EC2 PAYG ${REGION}`);
@@ -42,7 +40,7 @@ async function fetchAwsIndex() {
 
 /**
  * Pick the lowest OnDemand price dimension in USD with an hourly unit.
- * (A few SKUs expose >1 dimension; choose the cheapest defensively.)
+ * Accept both "Hrs" and "Hour" (AWS uses both).
  */
 function pickHourlyUsdMin(onDemandTermsForSku) {
   if (!onDemandTermsForSku) return null;
@@ -54,7 +52,10 @@ function pickHourlyUsdMin(onDemandTermsForSku) {
   for (const dimKey of Object.keys(dims)) {
     const dim = dims[dimKey];
     const unit = String(dim?.unit || "").toLowerCase();
-    if (!unit.startsWith("hrs")) continue;
+
+    // Accept units like "Hrs", "Hrs.", "Hour", "Hours"
+    if (!(unit.startsWith("hrs") || unit.startsWith("hour"))) continue;
+
     const usd = Number(dim?.pricePerUnit?.USD);
     if (!Number.isFinite(usd) || usd <= 0) continue;
     if (best === null || usd < best) best = usd;
@@ -69,7 +70,7 @@ function parseGiB(memStr) {
   return Number.isFinite(n) ? n : null;
 }
 
-/** Normalize OS label for rows (Windows | RHEL | Linux) with strict word boundaries */
+/** Normalize OS label (Windows | RHEL | Linux) */
 function normOs(val) {
   const s = String(val || "").toLowerCase();
   if (s.startsWith("win")) return "Windows";
@@ -77,16 +78,14 @@ function normOs(val) {
   return "Linux";
 }
 
-/** True if this product is a clean Windows Server license-included VM (no SQL, no BYOL) */
+/** Check for clean Windows license-included (no SQL, no BYOL) */
 function isWindowsLicenseIncluded(attrs) {
   const os = String(attrs?.operatingSystem || "");
   if (os !== "Windows") return false;
 
-  // Exclude BYOL; prefer "License Included" only
   const lm = String(attrs?.licenseModel || "");
   if (lm && lm !== "License Included") return false;
 
-  // Exclude any SQL preinstalled variants; we want plain Windows Server
   const pre = String(attrs?.preInstalledSw || "");
   if (pre && pre !== "NA") return false;
 
@@ -100,6 +99,7 @@ async function main() {
   const onDemandTerms = (j.terms && j.terms.OnDemand) || {};
 
   const rows = [];
+
   for (const sku in products) {
     const p = products[sku];
     if (!p || p.productFamily !== "Compute Instance") continue;
@@ -108,17 +108,18 @@ async function main() {
     const inst = a.instanceType;
     if (!inst || !isWantedEc2Family(inst)) continue;
 
-    // ❗ Exclude burstable T-class at source for enterprise consistency
+    // Exclude burstable (T-class)
     if (isBurstableAws(inst)) continue;
 
-    // Capacity and tenancy filters
+    // Tenancy/capacity
     if (a.tenancy !== "Shared") continue;
     if (!["Used", "Normal"].includes(a.capacitystatus)) continue;
 
-    // OS filters (Linux, Windows, RHEL-plain only)
-    const osRaw   = String(a.operatingSystem || "");
+    // OS classification
+    const osRaw = String(a.operatingSystem || "");
     const isLinux = (osRaw === "Linux");
     const isWinOK = isWindowsLicenseIncluded(a);
+
     const isRhelOK = isPlainRhel(a, {
       productName: p.productName,
       skuName: a.instanceType || a.sku || "",
@@ -127,7 +128,7 @@ async function main() {
 
     if (!(isLinux || isWinOK || isRhelOK)) continue;
 
-    // Exclude Graviton shapes for Windows (no public Windows AMIs on Graviton)
+    // Windows cannot run on Graviton
     if (isWinOK && isAwsGravitonInstance(inst)) continue;
 
     const price = pickHourlyUsdMin(onDemandTerms[sku]);
@@ -147,32 +148,34 @@ async function main() {
     });
   }
 
-  // (Optional) Synthesize Windows if missing
+  // Synthesize Windows rows (if missing)
   const beforeWin = rows.filter(r => r.os === "Windows").length;
   if (beforeWin === 0) {
     const added = synthesizeAwsWindowsRows(rows);
-    console.log(`[AWS] Windows rows were absent; synthesized ${added} from Linux via uplift.`);
+    console.log(`[AWS] Windows rows missing; synthesized ${added} rows.`);
   }
 
-  // (Optional) Synthesize RHEL (plain) if missing
+  // Synthesize RHEL rows (if missing)
   const beforeRhel = rows.filter(r => r.os === "RHEL").length;
   if (beforeRhel === 0) {
     const added = synthesizeAwsRhelRows(rows);
-    console.log(`[AWS] RHEL rows were absent; synthesized ${added} from Linux via uplift.`);
+    console.log(`[AWS] RHEL rows missing; synthesized ${added} rows.`);
   }
 
-  // Final safety: remove any RHEL rows that look like SQL/SAP/HA variants
+  // Remove SQL/HA/SAP variants defensively
   const hardened = filterOnlyPlainRhel(rows);
 
-  // Keep the cheapest per (instance, region, OS)
+  // Deduplicate lowest price for each (instance, region, OS)
   const cheapest = dedupeCheapestByKey(
     hardened,
     r => `${r.instance}-${r.region}-${r.os}`
   );
 
   const countsByOs = cheapest.reduce((acc, r) => {
-    acc[r.os] = (acc[r.os] || 0) + 1; return acc;
+    acc[r.os] = (acc[r.os] || 0) + 1;
+    return acc;
   }, {});
+
   console.log(`[AWS] collected=${rows.length}, hardened=${hardened.length}, cheapest=${cheapest.length}, byOS=`, countsByOs);
 
   if (warnAndSkipWriteOnEmpty("AWS", cheapest)) return;
@@ -180,14 +183,13 @@ async function main() {
   const meta = {
     os: ["Linux", "RHEL", "Windows"],
     vcpu: uniqSortedNums(cheapest.map(x => x.vcpu)),
-    ram:  uniqSortedNums(cheapest.map(x => x.ram))
+    ram: uniqSortedNums(cheapest.map(x => x.ram))
   };
 
-  // Storage placeholders (you model EBS in UI; these are baseline list prices)
   const storage = {
     region: REGION,
-    ssd_per_gb_month: 0.08,     // gp3 (ballpark)
-    hdd_st1_per_gb_month: 0.045 // st1 (ballpark)
+    ssd_per_gb_month: 0.08,
+    hdd_st1_per_gb_month: 0.045
   };
 
   const out = { meta, compute: cheapest, storage };
