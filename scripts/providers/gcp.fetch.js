@@ -387,8 +387,12 @@ async function main() {
     if (!item.region || item.region !== REGION) continue;
     if (!item.machine_type) continue;
 
-    const instance = item.machine_type.replace(/-/g, "_");
-    const category = classifyGcpInstance(instance);
+    // Keep hyphenated machine_type for display and storage
+    const instance = String(item.machine_type); // e.g., "c4-highcpu-2"
+
+    // classifyGcpInstance expects the tokenized form SERIES_CLASS_COUNT (underscores + uppercase)
+    const instTok = instance.replace(/-/g, "_").toUpperCase(); // e.g., "C4_HIGHCPU_2"
+    const category = classifyGcpInstance(instTok);
     if (!category) continue;
 
     // Preserve 'Windows' and 'RHEL' labels; default to Linux otherwise
@@ -412,7 +416,7 @@ async function main() {
     const source = item.__src || "catalog";
 
     rows.push({
-      instance,
+      instance,           // hyphenated for UI: "c4-highcpu-2"
       category,
       vcpu,
       ram,
