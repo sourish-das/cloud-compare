@@ -376,22 +376,34 @@ export async function compare(resetFamilies = false) {
     }
 
     /* ---------------- OCI ---------------- */
+    // NOTE: If OS === "RHEL" we intentionally do NOT show an OCI prebuilt RHEL image.
+    // Instead we mark OCI as disabled and show a BYOL/BYOS notice to the user.
     let ociCard;
     try {
-      const comp   = data.oci;                  // normalized compute block (linux/windows(+rhel uplift))
-      const linux  = comp?.linux || {};
-      const latest = (ociProcessor === "auto") ? null : ociLatestGen(linux, ociProcessor);
-      const opts   = latest ? { processor: ociProcessor, generation: latest } : { processor: ociProcessor };
+      if (String(os).toLowerCase() === "rhel") {
+        ociCard = {
+          disabled: true,
+          // keep pricePerHourUSD explicitly null so totals render as "—"
+          pricePerHourUSD: null,
+          message: "OCI does not provide a pre-built RHEL platform image. Use BYOL / BYOS (bring your own license/subscription)."
+        };
+      } else {
+        const comp   = data.oci;                  // normalized compute block (linux/windows(+rhel uplift))
+        const linux  = comp?.linux || {};
+        const latest = (ociProcessor === "auto") ? null : ociLatestGen(linux, ociProcessor);
+        const opts   = latest ? { processor: ociProcessor, generation: latest } : { processor: ociProcessor };
 
-      const o      = findBestOci(comp, vcpu, ram, os, opts);
+        const o      = findBestOci(comp, vcpu, ram, os, opts);
 
-      ociCard      = o ? {
-        instance: o.instance,
-        vcpu:     o.vcpu,
-        ram:      o.ram,
-        pricePerHourUSD: o.pricePerHourUSD,
-        region:   STORAGE_CFG?.oci?.region || "—"
-      } : null;
+        ociCard      = o ? {
+          instance: o.instance,
+          vcpu:     o.vcpu,
+          ram:      o.ram,
+          pricePerHourUSD: o.pricePerHourUSD,
+          region:   STORAGE_CFG?.oci?.region || "—",
+          breakdown: o.breakdown
+        } : null;
+      }
     } catch (e) {
       ociCard = { error: e.message };
     }
@@ -404,17 +416,23 @@ export async function compare(resetFamilies = false) {
     safeSetText("ociStorageSel", `Storage: ${sLabel}`);
 
     /* ---------------- Storage costs ---------------- */
-    const awsStorageMonthly = getAwsStorageMonthly(storageType, storageAmtGB);
-    const awsStorageHr      = awsStorageMonthly / HRS_PER_MONTH;
+    let awsStorageMonthly = getAwsStorageMonthly(storageType, storageAmtGB);
+    let awsStorageHr      = awsStorageMonthly / HRS_PER_MONTH;
 
     const { sku: azDiskSku, size: azDiskGB, monthlyUSD: azStorageMonthly } = getAzureStorage(storageType, storageAmtGB);
-    const azStorageHr = azStorageMonthly / HRS_PER_MONTH;
+    let azStorageHr = azStorageMonthly / HRS_PER_MONTH;
 
-    const gcpStorageMonthly = getGcpStorageMonthly(storageType, storageAmtGB);
-    const gcpStorageHr      = gcpStorageMonthly / HRS_PER_MONTH;
+    let gcpStorageMonthly = getGcpStorageMonthly(storageType, storageAmtGB);
+    let gcpStorageHr      = gcpStorageMonthly / HRS_PER_MONTH;
 
-    const ociStorageMonthly = getOciStorageMonthlyFromCfg(storageAmtGB, STORAGE_CFG.oci);
-    const ociStorageHr      = ociStorageMonthly / HRS_PER_MONTH;
+    let ociStorageMonthly = getOciStorageMonthlyFromCfg(storageAmtGB, STORAGE_CFG.oci);
+    let ociStorageHr      = ociStorageMonthly / HRS_PER_MONTH;
+
+    // If OCI is disabled (RHEL selected), blank OCI storage values so totals remain empty
+    if (ociCard?.disabled) {
+      ociStorageMonthly = null;
+      ociStorageHr = null;
+    }
 
     // Brand the labels (after costs computed, just for consistent flow)
     safeSetText("awsStoragePriceHrLabel", `${STORAGE_LABELS.aws.hr}:`);
@@ -425,8 +443,8 @@ export async function compare(resetFamilies = false) {
     safeSetText("gcpStorageMonthlyLabel", `≈ ${STORAGE_LABELS.gcp.monthly}:`);
     safeSetText("ociStoragePriceHrLabel", `${STORAGE_LABELS.oci.hr}:`);
     safeSetText("ociStorageMonthlyLabel", `≈ ${STORAGE_LABELS.oci.monthly}:`);
-	
-	/* ---------------- Render AWS card ---------------- */
+    
+    /* ---------------- Render AWS card ---------------- */
     if (!awsCard || awsCard.error) {
       safeSetText("awsInstance", `<strong>Recommended Instance:</strong> Error: ${awsCard?.error ?? "No match"}`, { html: true });
     } else {
@@ -460,14 +478,61 @@ export async function compare(resetFamilies = false) {
     }
 
     /* ---------------- Render OCI card ---------------- */
+    // Use the new disabled/notice flow for RHEL
+    const ociNoticeEl = document.getElementById("ociRhelNotice");
+    const ociRhelLineEl = document.getElementById("ociRhelLine");
+    const ociPanelEl = document.querySelector(".panel--oci");
+
     if (!ociCard || ociCard.error) {
       safeSetText("ociInstance", `<strong>Recommended Machine:</strong> Error: ${ociCard?.error ?? "No match"}`, { html: true });
+      safeSetText("ociCpu",     `vCPU: —`);
+      safeSetText("ociRam",     `RAM: —`);
+      safeSetText("ociPrice",   `${PROVIDER_LABELS.oci.price}: —`);
+      safeSetText("ociMonthly", `≈ ${PROVIDER_LABELS.oci.monthly}: —`);
+      if (ociNoticeEl) { ociNoticeEl.hidden = true; }
+      if (ociRhelLineEl) { ociRhelLineEl.textContent = ""; ociRhelLineEl.setAttribute("aria-hidden","true"); }
+      if (ociPanelEl) ociPanelEl.classList.remove("panel--disabled");
+    } else if (ociCard.disabled) {
+      // RHEL selected: show notice and visually disable OCI card
+      safeSetText("ociInstance", `<strong>Recommended Machine:</strong> —`, { html: true });
+      safeSetText("ociCpu",     `vCPU: —`);
+      safeSetText("ociRam",     `RAM: —`);
+      safeSetText("ociPrice",   `${PROVIDER_LABELS.oci.price}: —`);
+      safeSetText("ociMonthly", `≈ ${PROVIDER_LABELS.oci.monthly}: —`);
+
+      if (ociNoticeEl) {
+        // set text and keep a learn-more link if present in DOM
+        ociNoticeEl.textContent = ociCard.message + " ";
+        const link = document.getElementById("ociRhelLearnMore");
+        if (link) {
+          ociNoticeEl.appendChild(link);
+        }
+        ociNoticeEl.hidden = false;
+        try { ociNoticeEl.focus(); } catch (_) {}
+      }
+
+      if (ociRhelLineEl) { ociRhelLineEl.textContent = ""; ociRhelLineEl.setAttribute("aria-hidden","true"); }
+      if (ociPanelEl) ociPanelEl.classList.add("panel--disabled");
     } else {
+      // Normal OCI rendering
+      if (ociNoticeEl) ociNoticeEl.hidden = true;
+      if (ociPanelEl) ociPanelEl.classList.remove("panel--disabled");
+
       safeSetText("ociInstance", `<strong>Recommended Machine:</strong> ${ociCard.instance} (${ociCard.region})`, { html: true });
       safeSetText("ociCpu",     `vCPU: ${ociCard.vcpu}`);
       safeSetText("ociRam",     `RAM: ${ociCard.ram} GB`);
       safeSetText("ociPrice",   `${PROVIDER_LABELS.oci.price}: ${fmt(ociCard.pricePerHourUSD)}`);
       safeSetText("ociMonthly", `≈ ${PROVIDER_LABELS.oci.monthly}: ${fmt(monthly(ociCard.pricePerHourUSD))}`);
+
+      // If breakdown includes rhel uplift (future/optional), surface it
+      if (ociCard.breakdown?.rhel_license_per_hour) {
+        if (ociRhelLineEl) {
+          ociRhelLineEl.textContent = `RHEL license/hr: ${fmt(ociCard.breakdown.rhel_license_per_hour)}`;
+          ociRhelLineEl.setAttribute("aria-hidden","false");
+        }
+      } else {
+        if (ociRhelLineEl) { ociRhelLineEl.textContent = ""; ociRhelLineEl.setAttribute("aria-hidden","true"); }
+      }
     }
 
     /* ---------------- Storage cost render ---------------- */
@@ -492,10 +557,11 @@ export async function compare(resetFamilies = false) {
     }
 
     /* ---------------- Totals ---------------- */
+    // If OCI is disabled we want totals to render as "—" (null). Ensure ociStorageHr and ociCard.pricePerHourUSD are null in that case.
     const awsTotalHr = sumSafe(awsCard?.pricePerHourUSD, awsStorageHr);
     const azTotalHr  = sumSafe(azCard?.pricePerHourUSD,  azStorageHr);
     const gcpTotalHr = sumSafe(gcpCard?.pricePerHourUSD, gcpStorageHr);
-    const ociTotalHr = sumSafe(ociCard?.pricePerHourUSD, ociStorageHr);
+    const ociTotalHr = ociCard?.disabled ? null : sumSafe(ociCard?.pricePerHourUSD, ociStorageHr);
 
     safeSetText("awsTotalHr",      fmt(awsTotalHr));
     safeSetText("awsTotalMonthly", fmt(sumSafe(monthly(awsCard?.pricePerHourUSD), awsStorageMonthly)));
@@ -507,7 +573,7 @@ export async function compare(resetFamilies = false) {
     safeSetText("gcpTotalMonthly", fmt(sumSafe(monthly(gcpCard?.pricePerHourUSD), gcpStorageMonthly)));
 
     safeSetText("ociTotalHr",      fmt(ociTotalHr));
-    safeSetText("ociTotalMonthly", fmt(sumSafe(monthly(ociCard?.pricePerHourUSD), ociStorageMonthly)));
+    safeSetText("ociTotalMonthly", fmt(ociCard?.disabled ? null : sumSafe(monthly(ociCard?.pricePerHourUSD), ociStorageMonthly)));
 
     // Done
     showFamilyFilters();
