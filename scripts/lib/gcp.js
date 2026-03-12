@@ -1,3 +1,6 @@
+// scripts/lib/gcp.js
+// Helpers for GCP Retail Prices + ResourceSkus enrichment
+
 "use strict";
 
 /**
@@ -224,6 +227,78 @@ function buildWindowsCoreRate(allSkus, region) {
 }
 
 /* ============================================================
+ * NEW: RHEL per‑vCPU license rate resolver (Red Hat Enterprise Linux)
+ * ------------------------------------------------------------
+ * - Discover region-scoped RHEL license SKUs (On‑Demand).
+ * - If none found, fallback to env/public rate.
+ *   Default rate: $0.06 per vCPU-hour.
+ * ============================================================ */
+
+const RHEL_FALLBACK_RATE_PER_VCPU =
+  Number(process.env.GCP_RHEL_RATE_PER_VCPU || 0) || 0.06;
+
+function buildRhelCoreRate(allSkus, region) {
+  const inRegion = (sku) => {
+    const cat = sku?.category || {};
+    if (cat.resourceFamily !== "Compute") return false;
+    if (cat.usageType && !/OnDemand/i.test(cat.usageType)) return false; // on‑demand only
+    return regionMatches(sku.serviceRegions, region);
+  };
+
+  // Exclude items that are not the per‑vCPU RHEL license uplift
+  // (BYOL, SLES, Windows, SQL/SAP add-ons, disks/GPUs/Spot, etc.)
+  const BAD = /(byol|sles|suse|windows|sql|sap|gpu|local ssd|persistent disk|commitment|spot|preemptible|ram|memory|sole\s*tenan)/i;
+
+  const candidates = [];
+
+  // Pass 1: strict — require rhel/red hat + (license|licensing|core|vcpu)
+  for (const sku of (allSkus || [])) {
+    if (!inRegion(sku)) continue;
+    const name = (sku.description || sku.displayName || "").toLowerCase();
+    if (!/(rhel|red\s*hat)/.test(name)) continue;
+    if (!/(license|licensing|core|vcpu)/.test(name)) continue;
+    if (BAD.test(name)) continue;
+
+    const price = extractHourlyPrice(sku.pricingInfo);
+    if (price && price > 0) candidates.push({ price, name });
+  }
+
+  // Pass 2: relaxed — accept "paid/on‑demand/rhel guest os" phrasing
+  if (candidates.length === 0) {
+    for (const sku of (allSkus || [])) {
+      if (!inRegion(sku)) continue;
+      const name = (sku.description || sku.displayName || "").toLowerCase();
+      if (!/(rhel|red\s*hat)/.test(name)) continue;
+      if (BAD.test(name)) continue;
+      if (!/(paid|on-?demand|guest\s*os|rhel\s*image)/.test(name)) continue;
+
+      const price = extractHourlyPrice(sku.pricingInfo);
+      if (price && price > 0) candidates.push({ price, name });
+    }
+  }
+
+  if (process.env.GCP_DEBUG_RHEL === "1") {
+    const sample = candidates
+      .slice(0, 10)
+      .map(c => ({ price: c.price, name: c.name }))
+      .sort((a, b) => a.price - b.price);
+    console.log("[GCP][RHEL] candidate SKUs (sample):", JSON.stringify(sample, null, 2));
+  }
+
+  // Pick the lowest positive candidate
+  if (candidates.length > 0) {
+    candidates.sort((a, b) => a.price - b.price);
+    return candidates[0].price;
+  }
+
+  // Fallback
+  if (process.env.GCP_DEBUG_RHEL === "1") {
+    console.log(`[GCP][RHEL] No RHEL license SKU found in '${region}'. Using fallback rate $${RHEL_FALLBACK_RATE_PER_VCPU}/vCPU-hr`);
+  }
+  return RHEL_FALLBACK_RATE_PER_VCPU;
+}
+
+/* ============================================================
  * Family classification
  * ============================================================ */
 
@@ -385,5 +460,9 @@ module.exports = {
   isGcpArmSeries,
   isGcpArmMachineType,
   computeBaseHourlyFromUnitMaps,
-  WINDOWS_STANDARD_FALLBACK_RATE
+  WINDOWS_STANDARD_FALLBACK_RATE,
+
+  // NEW (RHEL)
+  buildRhelCoreRate,
+  RHEL_FALLBACK_RATE_PER_VCPU
 };
