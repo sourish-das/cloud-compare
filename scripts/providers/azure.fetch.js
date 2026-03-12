@@ -20,6 +20,7 @@ const {
   normalizeAzureInstanceName,
   isAzureArmInstance,
   isBurstableAzure,
+  isPlainAzureRhel, // <-- ADDED: RHEL detector
 
   // Existing helpers
   getResourceSkusMap,
@@ -104,15 +105,24 @@ async function main() {
     // Exclude burstable at source (B-series)
     if (isBurstableAzure(instance)) continue;
 
-    // OS eligibility
-    const { os } = getRetailOsInfo(it);
-    if (os === "Linux") {
-      if (!isLinuxRetailEligible(it)) continue;       // free Linux only
-    } else if (os === "Windows") {
-      if (!isWindowsRetailEligible(it)) continue;     // license-included, no SQL/DevTest/BYOL/preinstalled
-      if (isAzureArmInstance(instance)) continue;     // block ARM (Bpsv2 / Dpsv5 / Dpldsv5 / Epsv5)
+    // ---------------- RHEL FIRST (ADDED) ----------------
+    // Plain RHEL PAYG (no BYOS/AHUB/SAP/SQL/HA). Comes as first-class compute SKU on Azure.
+    let os;
+    if (isPlainAzureRhel(it)) {
+      os = "RHEL";
+      // No uplift synthesis on Azure — price is native for RHEL SKUs.
     } else {
-      continue;
+      // ---------------- Existing OS eligibility (UNTOUCHED) ----------------
+      const cls = getRetailOsInfo(it);
+      os = cls.os;
+      if (os === "Linux") {
+        if (!isLinuxRetailEligible(it)) continue;       // free Linux only
+      } else if (os === "Windows") {
+        if (!isWindowsRetailEligible(it)) continue;     // license-included, no SQL/DevTest/BYOL/preinstalled
+        if (isAzureArmInstance(instance)) continue;     // block ARM (Bpsv2 / Dpsv5 / Dpldsv5 / Epsv5)
+      } else {
+        continue;
+      }
     }
 
     rows.push({
@@ -147,7 +157,7 @@ async function main() {
   }
 
   const meta = {
-    os: ["Linux", "Windows"],
+    os: ["Linux", "RHEL", "Windows"], // <-- ADDED: include RHEL in meta
     vcpu: uniqSortedNums(cheapest.map(x => x.vcpu)),
     ram:  uniqSortedNums(cheapest.map(x => x.ram))
   };
