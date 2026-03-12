@@ -71,6 +71,11 @@ function extractHourlyPrice(pricingInfo) {
  * Derive vCPU/RAM from a predefined machine type string
  * (e.g., e2-standard-2, n2-highmem-8, c3-standard-4).
  * For M- and X-series memory-optimized types, we avoid guessing RAM (leave undefined).
+ *
+ * Realistic mapping used:
+ *  - STANDARD -> 4 GiB per vCPU
+ *  - HIGHMEM / ULTRAMEM / MEGAMEM -> 8 GiB per vCPU
+ *  - HIGHCPU -> 2 GiB per vCPU
  */
 function deriveVcpuRamFromType(mt) {
   if (!mt) return { vcpu: undefined, ram: undefined };
@@ -81,10 +86,21 @@ function deriveVcpuRamFromType(mt) {
   const cls = m[2].toLowerCase();
   const vcpu = Number(m[3]);
   if (!vcpu) return { vcpu: undefined, ram: undefined };
-  if (series.startsWith("m") || series.startsWith("x")) return { vcpu, ram: undefined }; // do not guess for M/X
+
+  // Memory-optimized series: do not guess RAM (leave undefined)
+  if (series.startsWith("m") || series.startsWith("x")) return { vcpu, ram: undefined };
+
+  // STANDARD: 4 GiB per vCPU (common for many GCP standard types)
   if (cls.startsWith("standard")) return { vcpu, ram: vcpu * 4 };
-  if (cls.startsWith("highmem"))  return { vcpu, ram: vcpu * 8 };
-  if (cls.startsWith("highcpu"))  return { vcpu, ram: series.startsWith("n1") ? vcpu * 0.9 : vcpu * 1.0 };
+
+  // HIGHMEM / ULTRAMEM / MEGAMEM: 8 GiB per vCPU
+  if (cls.startsWith("highmem") || cls.startsWith("ultramem") || cls.startsWith("megamem")) {
+    return { vcpu, ram: vcpu * 8 };
+  }
+
+  // HIGHCPU: 2 GiB per vCPU (compute-optimized shapes)
+  if (cls.startsWith("highcpu")) return { vcpu, ram: vcpu * 2 };
+
   return { vcpu, ram: undefined };
 }
 
@@ -426,6 +442,12 @@ async function listZoneMachineTypes(projectId, zone, accessToken) {
 }
 
 /* ============================================================
+ * RHEL fallback constant (exported)
+ * ============================================================ */
+const RHEL_FALLBACK_RATE_PER_VCPU =
+  Number(process.env.GCP_RHEL_RATE_PER_VCPU || 0) || 0.06;
+
+/* ============================================================
  * Exports
  * ============================================================ */
 module.exports = {
@@ -447,6 +469,7 @@ module.exports = {
   buildWindowsCoreRate,
   WINDOWS_STANDARD_FALLBACK_RATE,
   buildRhelPerInstanceAdders,
+  RHEL_FALLBACK_RATE_PER_VCPU,
 
   // Region / zone helpers
   regionMatches,
@@ -462,6 +485,5 @@ module.exports = {
   normalizeMachineTypeDisplay,
 
   // Examples & constants
-  GCP_EXAMPLE_INSTANCES,
-  CE_SERVICE_ID
+  GCP_EXAMPLE_INSTANCES
 };
