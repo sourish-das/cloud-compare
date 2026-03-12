@@ -1,6 +1,5 @@
 // scripts/lib/gcp.js
 // Helpers for GCP Retail Prices + ResourceSkus enrichment
-
 "use strict";
 
 /**
@@ -10,18 +9,15 @@
 const CE_SERVICE_ID = "6F81-5844-456A";
 
 /* ============================================================
- * Apples-to-apples family policy across clouds
- * ------------------------------------------------------------
- *  GENERAL  ↔ AWS(M/T), Azure(D)     → GCP: E/N/T series (STANDARD only)
- *  COMPUTE  ↔ AWS(C),    Azure(F)    → GCP: C-series + any *-HIGHCPU-*
- *  MEMORY   ↔ AWS(R),    Azure(E)    → GCP: M-series + any *-HIGHMEM-*
+ * Family policy across clouds (strict mapping requested)
+ *
+ * - compute series: only C2, C2D, H3, H4D
+ * - memory series: M1, M2, M3, M4, X4
+ * - general series: C4D, C4A, C4, N4, N4D, N4A, C3, C3D, T2D, T2A, N2, N2D, N1, E2
  * ============================================================ */
-
 const GCP_SERIES_ALLOW = {
-  general: ["E2", "N1", "N2", "N2D", "N4", "N4A", "N4D", "T2A", "T2D"],
-  // Add H4 (in addition to H3/H4D) for forward compatibility
-  compute: ["C2", "C2D", "C3", "C3D", "C4", "C4D", "C4A", "H3", "H4", "H4D"],
-  // Add X4 (bare-metal memory-optimized)
+  general: ["C4D", "C4A", "C4", "N4", "N4D", "N4A", "C3", "C3D", "T2D", "T2A", "N2", "N2D", "N1", "E2"],
+  compute: ["C2", "C2D", "H3", "H4D"],
   memory:  ["M1", "M2", "M3", "M4", "X4"]
 };
 
@@ -37,9 +33,9 @@ const CLASS_TO_CATEGORY = {
 };
 
 const GCP_EXAMPLE_INSTANCES = {
-  general: ["e2-standard-2", "n2-standard-4", "t2a-standard-4", "n4-standard-4"],
-  compute: ["c2-standard-4", "c3-standard-4", "c4-standard-4", "n2-highcpu-4", "e2-highcpu-8"],
-  memory:  ["m1-ultramem-40", "m2-ultramem-208", "m3-megamem-64", "n2-highmem-8", "e2-highmem-4"]
+  general: ["c4-standard-4", "c4a-standard-4", "c4d-standard-4", "n4-standard-4", "n2-standard-4"],
+  compute: ["c2-standard-4", "c2d-standard-4", "h3-standard-4", "h4d-standard-4"],
+  memory:  ["m1-ultramem-40", "m2-ultramem-208", "m3-megamem-64", "m4-ultramem-40", "x4-megamem-64"]
 };
 
 /* ---------------------------
@@ -54,8 +50,8 @@ function inferMachineType(sku) {
     return mt;
   }
   const s = String(sku?.description || sku?.displayName || "").toLowerCase();
-  // Expanded to include x4, h3, h4, h4d
-  const re = /\b(m1|m2|m3|m4|x4|h4d|h4|h3|c2d|c2|c3d|c3|c4d|c4a|c4|n4d|n4a|n4|n2d|n2|n1|e2|t2a|t2d)-(standard|highmem|highcpu|ultramem|megamem)-(\d+)\b/;
+  // tokens include the series we care about
+  const re = /\b(m1|m2|m3|m4|x4|h4d|h3|c2d|c2|c3d|c3|c4d|c4a|c4|n4d|n4a|n4|n2d|n2|n1|e2|t2a|t2d)-(standard|highmem|highcpu|ultramem|megamem)-(\d+)\b/;
   const m = s.match(re);
   if (!m) return null;
   return `${m[1]}-${m[2]}-${m[3]}`; // predefined only
@@ -79,8 +75,7 @@ function extractHourlyPrice(pricingInfo) {
 function deriveVcpuRamFromType(mt) {
   if (!mt) return { vcpu: undefined, ram: undefined };
   if (/^custom-/.test(mt)) return { vcpu: undefined, ram: undefined }; // exclude custom
-  // Expanded to include x4, h3, h4, h4d
-  const m = mt.match(/^(m1|m2|m3|m4|x4|h4d|h4|h3|c2d|c2|c3d|c3|c4d|c4a|c4|n4d|n4a|n4|n2d|n2|n1|e2|t2a|t2d)-(standard|highmem|highcpu|ultramem|megamem)-(\d+)$/i);
+  const m = mt.match(/^(m1|m2|m3|m4|x4|h4d|h3|c2d|c2|c3d|c3|c4d|c4a|c4|n4d|n4a|n4|n2d|n2|n1|e2|t2a|t2d)-(standard|highmem|highcpu|ultramem|megamem)-(\d+)$/i);
   if (!m) return { vcpu: undefined, ram: undefined };
   const series = m[1].toLowerCase();
   const cls = m[2].toLowerCase();
@@ -125,9 +120,8 @@ function parseSeriesUnitRate(sku) {
   // Exclude Windows license SKUs (we handle those separately)
   if (/windows.*license|license.*windows/i.test(name)) return null;
 
-  // Expanded series list with x4, h3, h4, h4d
   const m = name.match(
-    /\b(m1|m2|m3|m4|x4|h4d|h4|h3|n1|n2d|n2|n4|e2|t2a|t2d|c2d|c3d|c3|c4d|c4|c4a|c2)\b.*\b(core|vcpu|ram|memory|ultramem|megamem)\b/i
+    /\b(m1|m2|m3|m4|x4|h4d|h3|n1|n2d|n2|n4|e2|t2a|t2d|c2d|c2|c3d|c3|c4d|c4|c4a|c2)\b.*\b(core|vcpu|ram|memory|ultramem|megamem)\b/i
   );
   if (!m) return null;
 
@@ -156,13 +150,8 @@ function buildSeriesUnitRateMaps(allSkus, region) {
 }
 
 /* ============================================================
- * Hybrid Windows per‑vCPU license rate resolver (Windows Standard)
- * ------------------------------------------------------------
- * - Try to discover a Windows Server license SKU in Catalog (region-scoped).
- * - If none found in the tenant, fallback to public/env rate (Windows Standard).
- *   Default rate: $0.046 per vCPU-hour.
+ * Windows per‑vCPU license resolver (Windows Standard)
  * ============================================================ */
-
 const WINDOWS_STANDARD_FALLBACK_RATE =
   Number(process.env.GCP_WINDOWS_RATE_PER_VCPU || 0) || 0.046;
 
@@ -227,99 +216,96 @@ function buildWindowsCoreRate(allSkus, region) {
 }
 
 /* ============================================================
- * NEW: RHEL per‑vCPU license rate resolver (Red Hat Enterprise Linux)
- * ------------------------------------------------------------
- * - Discover region-scoped RHEL license SKUs (On‑Demand).
- * - If none found, fallback to env/public rate.
- *   Default rate: $0.06 per vCPU-hour.
+ * RHEL per‑instance image adder resolver (preferred)
  * ============================================================ */
-
-const RHEL_FALLBACK_RATE_PER_VCPU =
-  Number(process.env.GCP_RHEL_RATE_PER_VCPU || 0) || 0.06;
-
-function buildRhelCoreRate(allSkus, region) {
+function buildRhelPerInstanceAdders(allSkus, region) {
+  const map = Object.create(null);
   const inRegion = (sku) => {
     const cat = sku?.category || {};
     if (cat.resourceFamily !== "Compute") return false;
-    if (cat.usageType && !/OnDemand/i.test(cat.usageType)) return false; // on‑demand only
+    if (cat.usageType && !/OnDemand/i.test(cat.usageType)) return false;
     return regionMatches(sku.serviceRegions, region);
   };
 
-  // Exclude items that are not the per‑vCPU RHEL license uplift
-  // (BYOL, SLES, Windows, SQL/SAP add-ons, disks/GPUs/Spot, etc.)
-  const BAD = /(byol|sles|suse|windows|sql|sap|gpu|local ssd|persistent disk|commitment|spot|preemptible|ram|memory|sole\s*tenan)/i;
-
-  const candidates = [];
-
-  // Pass 1: strict — require rhel/red hat + (license|licensing|core|vcpu)
   for (const sku of (allSkus || [])) {
     if (!inRegion(sku)) continue;
-    const name = (sku.description || sku.displayName || "").toLowerCase();
+    const name = String(sku.description || sku.displayName || "").toLowerCase();
+
+    // Must be RHEL premium image; exclude BYOL/variants and unrelated SKUs
     if (!/(rhel|red\s*hat)/.test(name)) continue;
-    if (!/(license|licensing|core|vcpu)/.test(name)) continue;
-    if (BAD.test(name)) continue;
+    if (/(byol|sles|suse|windows|sql|sap|gpu|local ssd|persistent disk|commitment|spot|preemptible)/.test(name)) continue;
+
+    // Per-instance wording (we want image adders that mention Instance/VM)
+    if (!/\b(instance|vm)\b/.test(name)) continue;
+
+    // Extract machine type token (predefined)
+    const mt = inferMachineType(sku);
+    if (!mt) continue;
 
     const price = extractHourlyPrice(sku.pricingInfo);
-    if (price && price > 0) candidates.push({ price, name });
-  }
+    if (!(price > 0)) continue;
 
-  // Pass 2: relaxed — accept "paid/on‑demand/rhel guest os" phrasing
-  if (candidates.length === 0) {
-    for (const sku of (allSkus || [])) {
-      if (!inRegion(sku)) continue;
-      const name = (sku.description || sku.displayName || "").toLowerCase();
-      if (!/(rhel|red\s*hat)/.test(name)) continue;
-      if (BAD.test(name)) continue;
-      if (!/(paid|on-?demand|guest\s*os|rhel\s*image)/.test(name)) continue;
-
-      const price = extractHourlyPrice(sku.pricingInfo);
-      if (price && price > 0) candidates.push({ price, name });
-    }
+    // Keep lowest adder if multiple SKUs match same machine type
+    if (!map[mt] || price < map[mt]) map[mt] = price;
   }
 
   if (process.env.GCP_DEBUG_RHEL === "1") {
-    const sample = candidates
-      .slice(0, 10)
-      .map(c => ({ price: c.price, name: c.name }))
-      .sort((a, b) => a.price - b.price);
-    console.log("[GCP][RHEL] candidate SKUs (sample):", JSON.stringify(sample, null, 2));
+    console.log("[GCP][RHEL] addon map sample:", JSON.stringify(Object.entries(map).slice(0, 20), null, 2));
   }
 
-  // Pick the lowest positive candidate
-  if (candidates.length > 0) {
-    candidates.sort((a, b) => a.price - b.price);
-    return candidates[0].price;
-  }
-
-  // Fallback
-  if (process.env.GCP_DEBUG_RHEL === "1") {
-    console.log(`[GCP][RHEL] No RHEL license SKU found in '${region}'. Using fallback rate $${RHEL_FALLBACK_RATE_PER_VCPU}/vCPU-hr`);
-  }
-  return RHEL_FALLBACK_RATE_PER_VCPU;
+  return map;
 }
 
 /* ============================================================
- * Family classification
+ * OS classification (Linux, Windows, RHEL only)
  * ============================================================ */
+function classifyOsFromSku(sku) {
+  const name = (sku.description || sku.displayName || "").toLowerCase();
 
+  if (/windows/.test(name)) return "Windows";
+
+  if (/red\s*hat\s*enterprise\s*linux/i.test(name) || /\brhel\b/.test(name)) {
+    // Exclude SAP/HA/Extended Lifecycle variants
+    if (/sap|ha|update\s*services|extended\s*life/i.test(name)) return "Linux";
+    return "RHEL";
+  }
+
+  return "Linux";
+}
+
+/* ============================================================
+ * Family classification (STRICT)
+ * ============================================================ */
 function classifyGcpInstance(instance) {
   if (!instance) return null;
   const raw = String(instance);
   if (/^custom-/i.test(raw)) return null; // exclude custom
+
+  // Normalize token: SERIES_CLASS_COUNT (e.g., N2_STANDARD_4)
   const tok = raw.toUpperCase().replace(/-/g, "_");
   const m = tok.match(/^([A-Z0-9]+)_(STANDARD|HIGHCPU|HIGHMEM|ULTRAMEM|MEGAMEM)_(\d+)$/);
   if (!m) return null;
-  const series = m[1];
-  const cls = m[2];
 
-  // Precedence ONLY for non-standard classes
-  if (cls === "HIGHCPU") return "compute";
-  if (cls === "HIGHMEM" || cls === "ULTRAMEM" || cls === "MEGAMEM") return "memory";
+  const series = m[1]; // e.g., N2, C4, M2
+  const cls = m[2];    // STANDARD, HIGHCPU, HIGHMEM, etc.
 
-  // STANDARD → decide by series (C→compute, M/X→memory, E/N/T→general)
+  // Strict rules:
+  // 1) Non-standard classes only map when the series belongs to the matching allow list.
+  if (cls === "HIGHCPU") {
+    if (GCP_SERIES_ALLOW.compute.includes(series)) return "compute";
+    return null;
+  }
+  if (cls === "HIGHMEM" || cls === "ULTRAMEM" || cls === "MEGAMEM") {
+    if (GCP_SERIES_ALLOW.memory.includes(series)) return "memory";
+    return null;
+  }
+
+  // 2) STANDARD class: decide strictly by series membership only
   if (GCP_SERIES_ALLOW.compute.includes(series)) return "compute";
   if (GCP_SERIES_ALLOW.memory.includes(series))  return "memory";
   if (GCP_SERIES_ALLOW.general.includes(series)) return "general";
+
+  // If series not recognized, return null (exclude from recommendations)
   return null;
 }
 
@@ -330,7 +316,6 @@ function getGcpAllowedPrefixes(category) {
 /* ============================================================
  * Arm detection helpers (for fetchers)
  * ============================================================ */
-
 /** Returns true if the series is Arm (T2A/C4A/N4A/A4X). */
 function isGcpArmSeries(series) {
   if (!series) return false;
@@ -348,14 +333,6 @@ function isGcpArmMachineType(machineType) {
 /* ============================================================
  * Base price computation (Linux) from series unit-rate maps
  * ============================================================ */
-
-/**
- * Given a machine type and a series unit-rate map (from buildSeriesUnitRateMaps),
- * compute the base Linux hourly price.
- *   price = (vcpu * core_rate_for_series) + (ramGiB * ram_rate_for_series)
- *
- * Returns { price, vcpu, ram } where price may be null if incomplete.
- */
 function computeBaseHourlyFromUnitMaps(machineType, unitMaps) {
   if (!machineType || !unitMaps) return { price: null, vcpu: undefined, ram: undefined };
 
@@ -379,9 +356,17 @@ function computeBaseHourlyFromUnitMaps(machineType, unitMaps) {
 }
 
 /* ============================================================
+ * Utility: normalize machine type for display (underscores -> hyphens)
+ * Use this in UI rendering or when you want a human-friendly machineType.
+ * ============================================================ */
+function normalizeMachineTypeDisplay(name) {
+  if (name == null) return "";
+  return String(name).replace(/_/g, "-");
+}
+
+/* ============================================================
  * FULL-mode helpers (Compute API via OIDC)
  * ============================================================ */
-
 async function getAccessTokenFromADC() {
   const token =
     process.env.GCLOUD_ACCESS_TOKEN ||
@@ -440,29 +425,43 @@ async function listZoneMachineTypes(projectId, zone, accessToken) {
   return mts;
 }
 
+/* ============================================================
+ * Exports
+ * ============================================================ */
 module.exports = {
   CE_SERVICE_ID,
+
+  // Classification & family
   classifyGcpInstance,
+  classifyOsFromSku,
+  getGcpAllowedPrefixes,
+
+  // Pricing helpers
   extractHourlyPrice,
   inferMachineType,
   deriveVcpuRamFromType,
+  buildSeriesUnitRateMaps,
+  computeBaseHourlyFromUnitMaps,
+
+  // License resolvers
+  buildWindowsCoreRate,
+  WINDOWS_STANDARD_FALLBACK_RATE,
+  buildRhelPerInstanceAdders,
+
+  // Region / zone helpers
   regionMatches,
-  isPerInstanceSku,
-  getGcpAllowedPrefixes,
-  GCP_EXAMPLE_INSTANCES,
   getAccessTokenFromADC,
   listRegionZones,
   listZoneMachineTypes,
-  buildSeriesUnitRateMaps,
-  buildWindowsCoreRate,
 
-  // New helpers (for fetchers and validation)
+  // Arm helpers
   isGcpArmSeries,
   isGcpArmMachineType,
-  computeBaseHourlyFromUnitMaps,
-  WINDOWS_STANDARD_FALLBACK_RATE,
 
-  // NEW (RHEL)
-  buildRhelCoreRate,
-  RHEL_FALLBACK_RATE_PER_VCPU
+  // UI / display helper
+  normalizeMachineTypeDisplay,
+
+  // Examples & constants
+  GCP_EXAMPLE_INSTANCES,
+  CE_SERVICE_ID
 };
