@@ -10,10 +10,6 @@ const CE_SERVICE_ID = "6F81-5844-456A";
 
 /* ============================================================
  * Family policy across clouds (strict mapping requested)
- *
- * - compute series: only C2, C2D, H3, H4D
- * - memory series: M1, M2, M3, M4, X4
- * - general series: C4D, C4A, C4, N4, N4D, N4A, C3, C3D, T2D, T2A, N2, N2D, N1, E2
  * ============================================================ */
 const GCP_SERIES_ALLOW = {
   general: ["C4D", "C4A", "C4", "N4", "N4D", "N4A", "C3", "C3D", "T2D", "T2A", "N2", "N2D", "N1", "E2"],
@@ -69,13 +65,12 @@ function extractHourlyPrice(pricingInfo) {
 
 /**
  * Derive vCPU/RAM from a predefined machine type string
- * (e.g., e2-standard-2, n2-highmem-8, c3-standard-4).
- * For M- and X-series memory-optimized types, we avoid guessing RAM (leave undefined).
  *
  * Realistic mapping used:
  *  - STANDARD -> 4 GiB per vCPU
  *  - HIGHMEM / ULTRAMEM / MEGAMEM -> 8 GiB per vCPU
  *  - HIGHCPU -> 2 GiB per vCPU
+ * Memory-optimized series (M/X) avoid guessing RAM.
  */
 function deriveVcpuRamFromType(mt) {
   if (!mt) return { vcpu: undefined, ram: undefined };
@@ -90,7 +85,7 @@ function deriveVcpuRamFromType(mt) {
   // Memory-optimized series: do not guess RAM (leave undefined)
   if (series.startsWith("m") || series.startsWith("x")) return { vcpu, ram: undefined };
 
-  // STANDARD: 4 GiB per vCPU (common for many GCP standard types)
+  // STANDARD: 4 GiB per vCPU
   if (cls.startsWith("standard")) return { vcpu, ram: vcpu * 4 };
 
   // HIGHMEM / ULTRAMEM / MEGAMEM: 8 GiB per vCPU
@@ -98,19 +93,10 @@ function deriveVcpuRamFromType(mt) {
     return { vcpu, ram: vcpu * 8 };
   }
 
-  // HIGHCPU: 2 GiB per vCPU (compute-optimized shapes)
+  // HIGHCPU: 2 GiB per vCPU
   if (cls.startsWith("highcpu")) return { vcpu, ram: vcpu * 2 };
 
   return { vcpu, ram: undefined };
-}
-
-/**
- * Normalize machine type token to canonical lookup key
- * Returns lowercase hyphenated token like "c4a-standard-1"
- */
-function normalizeMachineTypeToken(mt) {
-  if (!mt) return "";
-  return String(mt).toLowerCase().replace(/_/g, "-");
 }
 
 /**
@@ -242,11 +228,6 @@ function buildWindowsCoreRate(allSkus, region) {
 
 /* ============================================================
  * RHEL per‑instance image adder resolver (preferred)
- *
- * Notes
- * - Relax matching to include SKUs that clearly target RHEL image adders
- *   even if they omit the literal words "instance" or "vm".
- * - Store keys in canonical lowercase-hyphenated form for reliable lookup.
  * ============================================================ */
 function buildRhelPerInstanceAdders(allSkus, region) {
   const map = Object.create(null);
@@ -265,40 +246,23 @@ function buildRhelPerInstanceAdders(allSkus, region) {
     if (!/(rhel|red\s*hat)/.test(name)) continue;
     if (/(byol|sles|suse|windows|sql|sap|gpu|local ssd|persistent disk|commitment|spot|preemptible)/.test(name)) continue;
 
+    // Per-instance wording (we want image adders that mention Instance/VM)
+    if (!/\b(instance|vm)\b/.test(name)) continue;
+
     // Extract machine type token (predefined)
     const mt = inferMachineType(sku);
-    if (!mt) {
-      // If inferMachineType fails, attempt to extract a token-like substring as a fallback
-      const fallbackMatch = name.match(/\b([a-z0-9]+-(standard|highmem|highcpu|ultramem|megamem)-\d+)\b/i);
-      if (fallbackMatch) {
-        // normalize fallback token
-        const f = String(fallbackMatch[1]).toLowerCase();
-        // continue with f as mt
-        // set mt variable for downstream logic
-        // eslint-disable-next-line no-var
-        var mtFallback = f;
-      }
-    }
-
-    const mtToken = mt || mtFallback || null;
-    if (!mtToken) continue;
+    if (!mt) continue;
 
     const price = extractHourlyPrice(sku.pricingInfo);
     if (!(price > 0)) continue;
 
-    // Canonical key
-    const key = normalizeMachineTypeToken(mtToken);
-
     // Keep lowest adder if multiple SKUs match same machine type
+    const key = String(mt).toLowerCase();
     if (!map[key] || price < map[key]) map[key] = price;
-
-    // Clear fallback var for next iteration
-    mtFallback = undefined;
   }
 
   if (process.env.GCP_DEBUG_RHEL === "1") {
-    const sample = Object.entries(map).slice(0, 40).map(([k, v]) => ({ machine: k, price: v }));
-    console.log("[GCP][RHEL] addon map sample:", JSON.stringify(sample, null, 2));
+    console.log("[GCP][RHEL] addon map sample:", JSON.stringify(Object.entries(map).slice(0, 20), null, 2));
   }
 
   return map;
@@ -362,15 +326,13 @@ function getGcpAllowedPrefixes(category) {
 }
 
 /* ============================================================
- * Arm detection helpers (for fetchers)
+ * Arm detection helpers
  * ============================================================ */
-/** Returns true if the series is Arm (T2A/C4A/N4A/A4X). */
 function isGcpArmSeries(series) {
   if (!series) return false;
   return ARM_SERIES.has(String(series).toLowerCase());
 }
 
-/** Returns true if a predefined machine type (e.g., t2a-standard-4) is Arm. */
 function isGcpArmMachineType(machineType) {
   if (!machineType) return false;
   const m = String(machineType).toLowerCase().match(/^([a-z0-9]+)-[a-z]+[a-z0-9]*-\d+$/);
@@ -404,8 +366,7 @@ function computeBaseHourlyFromUnitMaps(machineType, unitMaps) {
 }
 
 /* ============================================================
- * Utility: normalize machine type for display (underscores -> hyphens)
- * Use this in UI rendering or when you want a human-friendly machineType.
+ * Utility: normalize machine type for display
  * ============================================================ */
 function normalizeMachineTypeDisplay(name) {
   if (name == null) return "";
@@ -488,7 +449,7 @@ module.exports = {
   // Classification & family
   classifyGcpInstance,
   classifyOsFromSku,
-  getGcpAllowedPrefixes,
+  getGcpAllowedPrefixes: (c) => (GCP_SERIES_ALLOW[c] || []).map(s => s.toUpperCase()),
 
   // Pricing helpers
   extractHourlyPrice,
