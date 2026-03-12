@@ -370,7 +370,8 @@ select option[disabled] {
    RHEL ON OCI NOTICE (inline banner) and disabled card styles
    ====================================================== */
 
-/* Inline notice shown in the OCI card when OS = RHEL */
+/* Inline notice shown in the OCI card when OS = RHEL
+   Hidden by default; script toggles `hidden` attribute. */
 .oci-rhel-notice {
   background: #fff4f4;
   border: 1px solid #f5c2c2;
@@ -379,8 +380,13 @@ select option[disabled] {
   border-radius: 6px;
   font-size: 0.92rem;
   margin-bottom: 10px;
-  display:block;
   line-height:1.25;
+  display: none;
+}
+
+/* When script removes `hidden`, show the notice */
+.oci-rhel-notice:not([hidden]) {
+  display: block;
 }
 
 /* Small link inside the notice (learn more) */
