@@ -25,7 +25,8 @@ const {
   listZoneMachineTypes,
   buildSeriesUnitRateMaps,
   buildWindowsCoreRate,
-  buildRhelCoreRate,           // ⬅️ NEW
+  // RHEL per-instance adders (preferred)
+  buildRhelPerInstanceAdders,
   // New helpers to keep Windows off Arm & simplify fetchers
   isGcpArmMachineType
 } = require("../lib/gcp");
@@ -90,10 +91,19 @@ async function fetchGcpPrices() {
     console.warn("[GCP] Windows per-vCPU rate not resolved; Windows synthesis will be skipped.");
   }
 
-  // Resolve RHEL license per-vCPU rate (hybrid: Catalog if present; else public/env)
-  const rhelCoreRate = buildRhelCoreRate(allSkus, REGION);
-  if (rhelCoreRate) {
-    console.log(`[GCP] RHEL per-vCPU (license) rate: $${rhelCoreRate.toFixed(6)}/vCPU-hr`);
+  // Resolve RHEL per-instance image adders from Catalog (preferred)
+  const rhelAdders = buildRhelPerInstanceAdders(allSkus, REGION) || {};
+  const rhelAddersCount = Object.keys(rhelAdders).length;
+  if (rhelAddersCount > 0) {
+    console.log(`[GCP] Discovered RHEL per-instance adders: ${rhelAddersCount} machine types (region=${REGION})`);
+  } else {
+    console.log("[GCP] No RHEL per-instance adders discovered in Catalog for this region.");
+  }
+
+  // Optional fallback: per-vCPU env rate (only used if you explicitly enable it)
+  const RHEL_FALLBACK_VCPU = Number(process.env.GCP_RHEL_RATE_PER_VCPU || 0) || 0;
+  if (RHEL_FALLBACK_VCPU > 0) {
+    console.log(`[GCP] RHEL fallback per-vCPU rate enabled: $${RHEL_FALLBACK_VCPU.toFixed(6)}/vCPU-hr`);
   }
 
   // Optional: force composition path via env (ignores lack of per-instance rows)
@@ -124,7 +134,7 @@ async function fetchGcpPrices() {
     const lname = readable.toLowerCase();
     let os = "Linux";
     if (/windows/.test(lname)) os = "Windows";
-    else if (/(rhel|red\s*hat)/.test(lname)) os = "RHEL"; // ⬅️ detect per-instance RHEL
+    else if (/(rhel|red\s*hat)/.test(lname)) os = "RHEL"; // detect per-instance RHEL
 
     const price = extractHourlyPrice(sku.pricingInfo);
     if (!(price > 0)) continue;
@@ -272,40 +282,82 @@ async function fetchGcpPrices() {
     console.log(`[GCP] Synthesized Windows rows: ${added}`);
   }
 
-  // 5) Synthesize RHEL rows from Linux base + per-vCPU RHEL license (Arm + x86)
-  if (rhelCoreRate) {
+  // 5) Synthesize RHEL rows from Linux base + per-instance RHEL image adder (preferred)
+  {
     const linuxEntries = Object.values(gcp_price_list).filter(v => v.os === "Linux");
     const existingRhel = new Set(
       Object.values(gcp_price_list)
         .filter(v => v.os === "RHEL")
         .map(v => `${v.machine_type}__${v.region}`)
     );
+
     let addedRhel = 0;
+    let missingAdders = 0;
+
     for (const base of linuxEntries) {
       const rhelKey = `${base.machine_type}__${base.region}`;
       if (existingRhel.has(rhelKey)) continue;
 
-      const vcpu = Number(base.vcpu || 0);
-      const basePrice = Number(base.price_per_hour || 0);
-      if (!Number.isFinite(vcpu) || vcpu <= 0) continue;
-      if (!Number.isFinite(basePrice) || basePrice <= 0) continue;
+      const mtLower = String(base.machine_type).toLowerCase();
+      const adder = rhelAdders[mtLower];
 
-      const rhelPrice = basePrice + (vcpu * rhelCoreRate);
-      if (!Number.isFinite(rhelPrice) || rhelPrice <= 0) continue;
+      if (Number.isFinite(adder) && adder > 0) {
+        const basePrice = Number(base.price_per_hour || 0);
+        if (!(basePrice > 0)) continue;
+        const rhelPrice = basePrice + adder;
+        if (!Number.isFinite(rhelPrice) || rhelPrice <= 0) continue;
 
-      const key = `sku_${++counter}`;
-      gcp_price_list[key] = {
-        region: REGION,
-        machine_type: base.machine_type,
-        os: "RHEL",
-        price_per_hour: rhelPrice,
-        vcpu: base.vcpu,
-        memory_gb: base.memory_gb,
-        __src: (base.__src || "catalog") + "+rhel"
-      };
-      addedRhel++;
+        const key = `sku_${++counter}`;
+        gcp_price_list[key] = {
+          region: REGION,
+          machine_type: base.machine_type,
+          os: "RHEL",
+          price_per_hour: rhelPrice,
+          vcpu: base.vcpu,
+          memory_gb: base.memory_gb,
+          __src: (base.__src || "catalog") + "+rhel(addon)"
+        };
+        addedRhel++;
+        continue;
+      }
+
+      // No per-instance adder found for this machine type
+      missingAdders++;
     }
-    console.log(`[GCP] Synthesized RHEL rows: ${addedRhel}`);
+
+    console.log(`[GCP] Synthesized RHEL rows (addon): ${addedRhel}, missing-adders:${missingAdders}`);
+
+    // Optional fallback: if you explicitly set GCP_RHEL_RATE_PER_VCPU, synthesize for missing adders
+    if (RHEL_FALLBACK_VCPU > 0 && missingAdders > 0) {
+      let addedFb = 0;
+      for (const base of linuxEntries) {
+        const rhelKey = `${base.machine_type}__${base.region}`;
+        if (existingRhel.has(rhelKey)) continue;
+
+        const mtLower = String(base.machine_type).toLowerCase();
+        if (Number.isFinite(rhelAdders[mtLower]) && rhelAdders[mtLower] > 0) continue; // already handled
+
+        const vcpu = Number(base.vcpu || 0);
+        const basePrice = Number(base.price_per_hour || 0);
+        if (!(vcpu > 0 && basePrice > 0)) continue;
+
+        const rhelPrice = basePrice + (vcpu * RHEL_FALLBACK_VCPU);
+        if (!Number.isFinite(rhelPrice) || rhelPrice <= 0) continue;
+
+        const key = `sku_${++counter}`;
+        gcp_price_list[key] = {
+          region: REGION,
+          machine_type: base.machine_type,
+          os: "RHEL",
+          price_per_hour: rhelPrice,
+          vcpu: base.vcpu,
+          memory_gb: base.memory_gb,
+          __src: (base.__src || "catalog") + `+rhel(fallback:${RHEL_FALLBACK_VCPU})`
+        };
+        addedFb++;
+      }
+      console.log(`[GCP] Synthesized RHEL rows via FALLBACK per‑vCPU: ${addedFb}`);
+    }
   }
 
   if (Object.keys(gcp_price_list).length === 0) {
