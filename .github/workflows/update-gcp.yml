@@ -37,6 +37,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+          # cache: 'npm'     # enable if you ever add npm deps + package-lock.json
 
       # ------------------------------------------------------------
       # jq (for quick validation)
@@ -67,7 +68,7 @@ jobs:
         run: mkdir -p docs/data/gcp
 
       # ------------------------------------------------------------
-      # >>> Run the GCP fetcher (Catalog + fallback + Windows synth)
+      # >>> Run the GCP fetcher (Catalog + fallback + Windows/RHEL synth)
       # ------------------------------------------------------------
       - name: Fetch GCP prices
         run: node scripts/providers/gcp.fetch.js
@@ -86,10 +87,12 @@ jobs:
           # Output path
           OUTPUT_PATH: "docs/data/gcp/gcp.prices.json"
 
-          # Optional debug / knobs (leave commented for simplicity)
-          # GCP_DEBUG_WIN: "1"                 # logs Windows rate resolution
-          # GCP_FORCE_COMPOSE: "1"             # force compose Linux shapes
-          # GCP_WINDOWS_RATE_PER_VCPU: "0.046" # pin Windows Standard per‑vCPU
+          # Optional debug / knobs (uncomment as needed)
+          # GCP_DEBUG_WIN: "1"                  # logs Windows rate resolution
+          # GCP_DEBUG_RHEL: "1"                 # logs RHEL rate resolution
+          # GCP_FORCE_COMPOSE: "1"              # force compose Linux shapes
+          # GCP_WINDOWS_RATE_PER_VCPU: "0.046"  # pin Windows per‑vCPU
+          # GCP_RHEL_RATE_PER_VCPU: "0.060"     # pin RHEL per‑vCPU
 
       # ------------------------------------------------------------
       # Validate the output exists and show quick stats
@@ -105,6 +108,17 @@ jobs:
           jq 'keys' docs/data/gcp/gcp.prices.json | sed 's/^/  /' || true
           echo "Compute array length:"
           jq '.compute | length' docs/data/gcp/gcp.prices.json || true
+
+      # ------------------------------------------------------------
+      # Quick OS counts (Linux/Windows/RHEL) — non-blocking sanity log
+      # ------------------------------------------------------------
+      - name: Show OS counts
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "OS distribution (by rows):"
+          jq -r '.compute[].os' docs/data/gcp/gcp.prices.json \
+            | sort | uniq -c | sed 's/^/  /' || true
 
       # ------------------------------------------------------------
       # Upload artifact for the orchestrator
