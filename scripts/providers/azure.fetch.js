@@ -20,7 +20,7 @@ const {
   normalizeAzureInstanceName,
   isAzureArmInstance,
   isBurstableAzure,
-  isPlainAzureRhel, // <-- ADDED: RHEL detector
+  isPlainAzureRhel, // <-- RHEL detector
 
   // Existing helpers
   getResourceSkusMap,
@@ -76,7 +76,7 @@ async function main() {
   const rows = [];
   for (const it of retail) {
     // Require PRIMARY meters (prevent secondary meters from winning)
-    if (it?.isPrimaryMeterRegion !== true) continue; // <-- IMPORTANT
+    if (it?.isPrimaryMeterRegion !== true) continue;
 
     // Exclude discounted/alt offers by text (defense-in-depth)
     const blob = [
@@ -90,11 +90,21 @@ async function main() {
     if (/savings\s*plan/i.test(blob)) continue;
     if (/\bahb\b|hybrid\s*benefit/i.test(blob)) continue;
 
+    // ---------------- DEBUG LOGGING ----------------
+    if (/red\s*hat/.test(blob)) {
+      console.log("[DEBUG] Potential RHEL SKU →",
+        "productName:", it.productName,
+        "| skuName:", it.skuName,
+        "| meterName:", it.meterName,
+        "| armSkuName:", it.armSkuName
+      );
+    }
+
     // Hourly price only
     const price = extractRetailHourlyUSD(it);
     if (!(price > 0)) continue;
 
-    // Use full name, do NOT split (prevents collapsing D2s v5 -> D2s)
+    // Use full name, do NOT split
     const instRaw = it.armSkuName || it.skuName || "";
     if (!instRaw) continue;
 
@@ -105,21 +115,18 @@ async function main() {
     // Exclude burstable at source (B-series)
     if (isBurstableAzure(instance)) continue;
 
-    // ---------------- RHEL FIRST (ADDED) ----------------
-    // Plain RHEL PAYG (no BYOS/AHUB/SAP/SQL/HA). Comes as first-class compute SKU on Azure.
+    // ---------------- RHEL FIRST ----------------
     let os;
     if (isPlainAzureRhel(it)) {
       os = "RHEL";
-      // No uplift synthesis on Azure — price is native for RHEL SKUs.
     } else {
-      // ---------------- Existing OS eligibility (UNTOUCHED) ----------------
       const cls = getRetailOsInfo(it);
       os = cls.os;
       if (os === "Linux") {
-        if (!isLinuxRetailEligible(it)) continue;       // free Linux only
+        if (!isLinuxRetailEligible(it)) continue;
       } else if (os === "Windows") {
-        if (!isWindowsRetailEligible(it)) continue;     // license-included, no SQL/DevTest/BYOL/preinstalled
-        if (isAzureArmInstance(instance)) continue;     // block ARM (Bpsv2 / Dpsv5 / Dpldsv5 / Epsv5)
+        if (!isWindowsRetailEligible(it)) continue;
+        if (isAzureArmInstance(instance)) continue;
       } else {
         continue;
       }
@@ -157,12 +164,11 @@ async function main() {
   }
 
   const meta = {
-    os: ["Linux", "RHEL", "Windows"], // <-- ADDED: include RHEL in meta
+    os: ["Linux", "RHEL", "Windows"],
     vcpu: uniqSortedNums(cheapest.map(x => x.vcpu)),
     ram:  uniqSortedNums(cheapest.map(x => x.ram))
   };
 
-  // Storage (monthly) — UI converts to hourly
   const storage = {
     region: REGION,
     ssd_monthly: { 128: 9.6, 256: 19.2 },
