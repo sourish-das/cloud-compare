@@ -101,6 +101,12 @@ async function fetchGcpPrices() {
     console.log("[GCP] No RHEL per-instance adders discovered in Catalog for this region.");
   }
 
+  // Debug: show sample of rhelAdders when requested
+  if (process.env.GCP_DEBUG_RHEL === "1") {
+    const sample = Object.entries(rhelAdders).slice(0, 40).map(([k, v]) => ({ machine: k, price: v }));
+    console.log("[GCP][RHEL] addon map sample:", JSON.stringify(sample, null, 2));
+  }
+
   // RHEL fallback per-vCPU rate: prefer explicit env override, else use library default
   const RHEL_FALLBACK_VCPU = Number(process.env.GCP_RHEL_RATE_PER_VCPU || 0) || Number(RHEL_FALLBACK_RATE_PER_VCPU || 0);
   if (RHEL_FALLBACK_VCPU > 0) {
@@ -301,8 +307,15 @@ async function fetchGcpPrices() {
       const rhelKey = `${base.machine_type}__${base.region}`;
       if (existingRhel.has(rhelKey)) continue;
 
-      const mtLower = String(base.machine_type).toLowerCase();
-      const adder = rhelAdders[mtLower];
+      // Normalize lookup key to lowercase-hyphenated form
+      const mtKey = String(base.machine_type).toLowerCase().replace(/_/g, "-");
+      let adder = rhelAdders[mtKey];
+
+      // Also try underscore form just in case (defensive)
+      if (adder === undefined) {
+        const mtKeyUnderscore = mtKey.replace(/-/g, "_");
+        adder = rhelAdders[mtKeyUnderscore];
+      }
 
       if (Number.isFinite(adder) && adder > 0) {
         const basePrice = Number(base.price_per_hour || 0);
@@ -321,6 +334,9 @@ async function fetchGcpPrices() {
           __src: (base.__src || "catalog") + "+rhel(addon)"
         };
         addedRhel++;
+        if (process.env.GCP_DEBUG_RHEL === "1") {
+          console.log(`[GCP][RHEL] using adder ${adder} for ${base.machine_type} (${base.vcpu} vCPU) -> $${rhelPrice.toFixed(6)}/hr`);
+        }
         continue;
       }
 
@@ -337,8 +353,8 @@ async function fetchGcpPrices() {
         const rhelKey = `${base.machine_type}__${base.region}`;
         if (existingRhel.has(rhelKey)) continue;
 
-        const mtLower = String(base.machine_type).toLowerCase();
-        if (Number.isFinite(rhelAdders[mtLower]) && rhelAdders[mtLower] > 0) continue; // already handled
+        const mtKey = String(base.machine_type).toLowerCase().replace(/_/g, "-");
+        if (Number.isFinite(rhelAdders[mtKey]) && rhelAdders[mtKey] > 0) continue; // already handled
 
         const vcpu = Number(base.vcpu || 0);
         const basePrice = Number(base.price_per_hour || 0);
@@ -358,6 +374,9 @@ async function fetchGcpPrices() {
           __src: (base.__src || "catalog") + `+rhel(fallback:${RHEL_FALLBACK_VCPU})`
         };
         addedFb++;
+        if (process.env.GCP_DEBUG_RHEL === "1") {
+          console.log(`[GCP][RHEL] using fallback ${RHEL_FALLBACK_VCPU.toFixed(6)}/vCPU for ${base.machine_type} (${vcpu} vCPU) -> $${rhelPrice.toFixed(6)}/hr`);
+        }
       }
       console.log(`[GCP] Synthesized RHEL rows via FALLBACK per‑vCPU: ${addedFb}`);
     }
