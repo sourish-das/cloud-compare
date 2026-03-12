@@ -366,16 +366,7 @@ export function findBestGcp(list, vcpu, ram, os, family) {
 //
 // ---------------- OCI FINDER (arrays‑first, processor-aware) — UPDATED FOR RHEL ----------------
 //
-// Signature: findBestOci(ociCompute, vcpu, ram, os, options)
-//   options = { processor: "auto"|"amd"|"arm"|"intel", generation: "auto"|string }
-//
-// Behavior:
-//   - Auto: cheapest across allowed candidates.
-//   - Windows: exclude ARM always.
-//   - RHEL: allowed on ARM; adds BYOS/PAYG uplift per vCPU if provided.
-//   - If processor is set, restrict to that arch; if generation is set, restrict to that gen.
-//   - Returns the single cheapest candidate; tie-break by gen label.
-
+// 
 export function findBestOci(ociCompute, vcpu, ram, os, options = {}) {
   if (!ociCompute || typeof ociCompute !== "object")
     throw new Error("OCI pricing block is missing (prices.json.oci)");
@@ -463,11 +454,20 @@ export function findBestOci(ociCompute, vcpu, ram, os, options = {}) {
     throw new Error(`No OCI candidates for processor=${proc}`);
   }
 
-  // Sort cheapest first; tie-break by gen label (alphabetical)
-  candidates.sort((a, b) =>
-    a.pricePerHourUSD - b.pricePerHourUSD ||
-    String(a.gen || "zzz").localeCompare(String(b.gen || "zzz"))
-  );
+  // SPEC-FIRST selection: minimize spec distance (vcpu + ram), price as tie-breaker
+  let best = null;
+  let bestScore = Infinity;
 
-  return candidates[0];
+  for (const c of candidates) {
+    // distance() is shared helper in matchers.js
+    const score = distance(c.vcpu, v) + distance(c.ram, m);
+    const tieBreaker = Number(c.pricePerHourUSD ?? Infinity);
+
+    if (score < bestScore || (score === bestScore && tieBreaker < (best?.pricePerHourUSD ?? Infinity))) {
+      best = c;
+      bestScore = score;
+    }
+  }
+
+  return best;
 }
