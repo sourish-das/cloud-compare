@@ -105,6 +105,15 @@ function deriveVcpuRamFromType(mt) {
 }
 
 /**
+ * Normalize machine type token to canonical lookup key
+ * Returns lowercase hyphenated token like "c4a-standard-1"
+ */
+function normalizeMachineTypeToken(mt) {
+  if (!mt) return "";
+  return String(mt).toLowerCase().replace(/_/g, "-");
+}
+
+/**
  * Region/geo matching for Catalog SKUs.
  * Accepts exact region, 'global', and 'us' for any 'us-*'.
  */
@@ -233,6 +242,11 @@ function buildWindowsCoreRate(allSkus, region) {
 
 /* ============================================================
  * RHEL per‑instance image adder resolver (preferred)
+ *
+ * Notes
+ * - Relax matching to include SKUs that clearly target RHEL image adders
+ *   even if they omit the literal words "instance" or "vm".
+ * - Store keys in canonical lowercase-hyphenated form for reliable lookup.
  * ============================================================ */
 function buildRhelPerInstanceAdders(allSkus, region) {
   const map = Object.create(null);
@@ -251,22 +265,40 @@ function buildRhelPerInstanceAdders(allSkus, region) {
     if (!/(rhel|red\s*hat)/.test(name)) continue;
     if (/(byol|sles|suse|windows|sql|sap|gpu|local ssd|persistent disk|commitment|spot|preemptible)/.test(name)) continue;
 
-    // Per-instance wording (we want image adders that mention Instance/VM)
-    if (!/\b(instance|vm)\b/.test(name)) continue;
-
     // Extract machine type token (predefined)
     const mt = inferMachineType(sku);
-    if (!mt) continue;
+    if (!mt) {
+      // If inferMachineType fails, attempt to extract a token-like substring as a fallback
+      const fallbackMatch = name.match(/\b([a-z0-9]+-(standard|highmem|highcpu|ultramem|megamem)-\d+)\b/i);
+      if (fallbackMatch) {
+        // normalize fallback token
+        const f = String(fallbackMatch[1]).toLowerCase();
+        // continue with f as mt
+        // set mt variable for downstream logic
+        // eslint-disable-next-line no-var
+        var mtFallback = f;
+      }
+    }
+
+    const mtToken = mt || mtFallback || null;
+    if (!mtToken) continue;
 
     const price = extractHourlyPrice(sku.pricingInfo);
     if (!(price > 0)) continue;
 
+    // Canonical key
+    const key = normalizeMachineTypeToken(mtToken);
+
     // Keep lowest adder if multiple SKUs match same machine type
-    if (!map[mt] || price < map[mt]) map[mt] = price;
+    if (!map[key] || price < map[key]) map[key] = price;
+
+    // Clear fallback var for next iteration
+    mtFallback = undefined;
   }
 
   if (process.env.GCP_DEBUG_RHEL === "1") {
-    console.log("[GCP][RHEL] addon map sample:", JSON.stringify(Object.entries(map).slice(0, 20), null, 2));
+    const sample = Object.entries(map).slice(0, 40).map(([k, v]) => ({ machine: k, price: v }));
+    console.log("[GCP][RHEL] addon map sample:", JSON.stringify(sample, null, 2));
   }
 
   return map;
