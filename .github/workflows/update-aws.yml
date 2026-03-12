@@ -1,8 +1,7 @@
-name: Fetch Azure Prices
+name: Fetch AWS Prices
 
 permissions:
-  contents: read        # provider does not commit; orchestrator will
-  id-token: write       # required for OIDC (azure/login@v2)
+  contents: read          # provider does not commit; orchestrator will
 
 on:
   workflow_call:
@@ -13,11 +12,11 @@ on:
   workflow_dispatch: {}
 
 concurrency:
-  group: provider-azure
+  group: provider-aws
   cancel-in-progress: true
 
 jobs:
-  fetch-azure:
+  fetch-aws:
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -49,108 +48,85 @@ jobs:
           fi
 
       # ------------------------------------------------------------
-      # Azure authentication (OIDC)
+      # Optional: quick probe against AWS Price List (no auth required)
       # ------------------------------------------------------------
-      - name: Azure Login (OIDC)
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-      # ------------------------------------------------------------
-      # Generate ARM (management) token for scripts that call ARM/ResourceSkus
-      # ------------------------------------------------------------
-      - name: Generate ARM Token
-        shell: bash
-        run: |
-          set -euo pipefail
-          ARM_TOKEN=$(az account get-access-token \
-            --resource https://management.azure.com/ \
-            --query accessToken -o tsv)
-          if [[ -z "${ARM_TOKEN}" ]]; then
-            echo "::error::Failed to acquire ARM token via OIDC."
-            exit 1
-          fi
-          echo "ARM_TOKEN=${ARM_TOKEN}" >> "$GITHUB_ENV"
-
-      # ------------------------------------------------------------
-      # Optional: probe that the token works against ARM (diagnostic)
-      # ------------------------------------------------------------
-      - name: Probe ARM (locations list)
+      - name: Probe AWS Price List API (sample)
         shell: bash
         env:
-          SUB_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          ARM_TOKEN: ${{ env.ARM_TOKEN }}
+          AWS_REGION: "us-east-1"
         run: |
           set -euo pipefail
-          CODE=$(curl -s -o /tmp/arm.json -w "%{http_code}" \
-            -H "Authorization: Bearer ${ARM_TOKEN}" \
-            -H "Content-Type: application/json" \
-            "https://management.azure.com/subscriptions/${SUB_ID}/locations?api-version=2020-01-01")
-          echo "ARM probe HTTP: ${CODE}"
+          CODE=$(curl -s -o /tmp/aws-price.json -w "%{http_code}" \
+            "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/current/${AWS_REGION}/index.json")
+          echo "AWS Price List probe HTTP: ${CODE}"
           if [[ "${CODE}" != "200" ]]; then
-            echo "::warning::ARM probe failed (HTTP ${CODE}). The fetch script may still succeed if it uses a different API."
+            echo "::warning::AWS Price List probe failed (HTTP ${CODE}). Continuing..."
           else
-            echo "Probe OK - sample keys:" && jq 'keys' /tmp/arm.json | head -n 20 || true
+            echo "Top-level keys (truncated):"
+            jq 'keys' /tmp/aws-price.json | head -n 20 || true
           fi
 
       # ------------------------------------------------------------
       # Ensure output directory
       # ------------------------------------------------------------
       - name: Ensure output directory
-        run: mkdir -p docs/data/azure
+        run: mkdir -p docs/data/aws
 
       # ------------------------------------------------------------
-      # >>> Run the Azure fetcher (writes to docs/data/azure/azure.prices.json)
+      # >>> Run the AWS fetcher (Windows via catalog; fallback uplift if needed)
       # ------------------------------------------------------------
-      - name: Fetch Azure prices
-        run: node scripts/providers/azure.fetch.js
+      - name: Fetch AWS prices
+        run: node scripts/providers/aws.fetch.js
         env:
-          ARM_TOKEN: ${{ env.ARM_TOKEN }}
-          AZURE_REGION: "eastus"
-          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          OUTPUT_PATH: "docs/data/azure/azure.prices.json"
+          AWS_REGION: "us-east-1"
+          OUTPUT_PATH: "docs/data/aws/aws.prices.json"
+
+          # Optional Windows uplift (default = 0.046)
+          # AWS_WINDOWS_RATE_PER_VCPU: "0.046"
+
+          # NEW: correct RHEL uplift (default fallback in code now ~0.0168)
+          AWS_RHEL_RATE_PER_VCPU: "0.0168"
 
       # ------------------------------------------------------------
-      # Validate output & show quick stats (counts by OS)
+      # Validate the output was created and show quick stats
       # ------------------------------------------------------------
-      - name: Validate Azure output
+      - name: Validate AWS output
         shell: bash
         run: |
           set -euo pipefail
-          test -s docs/data/azure/azure.prices.json
+          test -s docs/data/aws/aws.prices.json
           echo "Output size (bytes):"
-          wc -c docs/data/azure/azure.prices.json
+          wc -c docs/data/aws/aws.prices.json
           echo "Top-level keys:"
-          jq 'keys' docs/data/azure/azure.prices.json | sed 's/^/  /' || true
+          jq 'keys' docs/data/aws/aws.prices.json | sed 's/^/  /' || true
           echo "Compute array length:"
-          jq '.compute | length' docs/data/azure/azure.prices.json || true
+          jq '.compute | length' docs/data/aws/aws.prices.json || true
           echo "Counts by OS:"
-          jq -r '.compute | group_by(.os) | map({os: .[0].os, count: length})' docs/data/azure/azure.prices.json
+          jq -r '.compute | group_by(.os) | map({os: .[0].os, count: length})' docs/data/aws/aws.prices.json
 
       # ------------------------------------------------------------
       # Upload artifact for orchestrator
       # ------------------------------------------------------------
-      - name: Upload Azure pricing JSON (artifact)
+      - name: Upload AWS pricing JSON (artifact)
         uses: actions/upload-artifact@v4
         with:
-          name: azure-prices
-          path: docs/data/azure/azure.prices.json
+          name: aws-prices
+          path: docs/data/aws/aws.prices.json
           if-no-files-found: error
           retention-days: 7
 
       # =========================================
       # OPTIONAL DEBUG MODE — snapshot to docs/data (no direct overwrite)
+      # Enable by setting repo variable: DEBUG_PUBLISH=true
       # =========================================
       - name: Debug Publish to docs/data (optional)
         if: ${{ vars.DEBUG_PUBLISH == 'true' }}
         shell: bash
         run: |
           set -euo pipefail
-          echo "DEBUG MODE ENABLED: Publishing Azure output directly to docs/data/azure"
-          mkdir -p docs/data/azure/_debug
-          cp -f docs/data/azure/azure.prices.json docs/data/azure/_debug/azure.prices.json
+          echo "DEBUG MODE ENABLED: Publishing AWS output directly to docs/data/aws"
+          mkdir -p docs/data/aws/_debug
+          cp -f docs/data/aws/aws.prices.json docs/data/aws/_debug/aws.prices.json
 
       - name: Commit debug provider files (optional)
         if: ${{ vars.DEBUG_PUBLISH == 'true' }}
@@ -164,11 +140,11 @@ jobs:
           git checkout main
           git reset --hard origin/main
 
-          git add -f docs/data/azure/azure.prices.json
+          git add -f docs/data/aws/aws.prices.json
           if git diff --cached --quiet; then
             echo "No changes to commit."
             exit 0
           fi
 
-          git commit -m "Debug publish: Azure pricing update"
+          git commit -m "Debug publish: AWS pricing update"
           git push
