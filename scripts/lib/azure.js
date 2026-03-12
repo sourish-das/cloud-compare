@@ -1,14 +1,97 @@
-// scripts/lib/azure.js (Ampere)
+// scripts/lib/azure.js
+// Helpers for Azure Retail Prices + ResourceSkus enrichment
+
+/**
+ * Build a unified lowercase blob from the main retail fields for string tests.
+ */
+function _blob(productName = "", skuName = "", meterName = "") {
+  return `${productName} ${skuName} ${meterName}`.toLowerCase().trim();
+}
+
+/**
+ * Classify the OS and flags from a Retail Prices item.
+ * Returns { os: "Windows"|"Linux", isPaidLinux, hasSql, isDevTest, isByol, hasPreinstalled }
+ */
+function getRetailOsInfo({ productName = "", skuName = "", meterName = "" } = {}) {
+  const s = _blob(productName, skuName, meterName);
+
+  const isWindows = /windows/.test(s);
+  const hasSql = /sql\s*(server|enterprise|standard|web)/.test(s);
+  const isDevTest = /(dev\/?test|msdn)/.test(s);
+  const isByol = /(byol|hybrid\s*benefit|ahb)/.test(s);
+  const isPaidLinux = /(rhel|red\s*hat|suse|sles|oracle\s*linux|ubuntu\s*pro)/.test(s);
+  const hasPreinstalled =
+    /(sap|sql|mssql|oracle|weblogic|jboss|tomcat|datastax|cloudera|hadoop|mongodb)/.test(s);
+
+  const os = isWindows ? "Windows" : "Linux";
+  return { os, isPaidLinux, hasSql, isDevTest, isByol, hasPreinstalled };
+}
+
+/** Windows eligibility */
+function isWindowsRetailEligible(item) {
+  const { os, hasSql, isDevTest, isByol, hasPreinstalled } = getRetailOsInfo(item);
+  return os === "Windows" && !hasSql && !isDevTest && !isByol && !hasPreinstalled;
+}
+
+/** Linux eligibility */
+function isLinuxRetailEligible(item) {
+  const { os, isPaidLinux, isDevTest } = getRetailOsInfo(item);
+  return os === "Linux" && !isPaidLinux && !isDevTest;
+}
+
+/** Plain RHEL PAYG compute detector */
+function isPlainAzureRhel(item = {}) {
+  const meter = String(item.meterName || "").toLowerCase();
+  if (meter !== "rhel") return false;
+
+  const sku  = String(item.skuName || "").toLowerCase();
+  const prod = String(item.productName || "").toLowerCase();
+  const blob = `${prod} ${sku}`;
+
+  if (/(sap|sql|ha|byos|ahub|hybrid\s*benefit)/.test(blob)) return false;
+  if (!/virtual machines?/.test(prod)) return false;
+
+  return true;
+}
+
+/** Extract hourly USD price */
+function extractRetailHourlyUSD({ retailPrice, unitOfMeasure } = {}) {
+  const n = Number(retailPrice);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  const u = String(unitOfMeasure || "").toLowerCase();
+  if (u && !(u.startsWith("1 hour") || u.startsWith("hour"))) return null;
+  return n;
+}
+
+/** Legacy OS detection */
+function detectOsFromProductName(productName = "") {
+  return /windows/i.test(productName) ? "Windows" : "Linux";
+}
+
+/** Categorize instance family */
+function categorizeByInstanceName(instance = "") {
+  const n = String(instance).toLowerCase();
+  const body = n.startsWith("standard_") ? n.slice(9) : n;
+  const lead = body[0];
+  return lead === "d" ? "general"
+       : lead === "e" ? "memory"
+       : lead === "f" ? "compute"
+       : "other";
+}
+
+/** Azure ARM instance detector (Ampere families) */
+function isAzureArmInstance(instance = "") {
+  const n = String(instance || "").toLowerCase();
   return /standard_b.*psv2|standard_dpsv5|standard_dpldsv5|standard_epsv5/.test(n);
 }
 
-/** Detect Azure burstable (B-series) instances at source. */
+/** Detect burstable B-series */
 function isBurstableAzure(instance = "") {
   const n = String(instance || "").toLowerCase();
   return /^standard_b/.test(n);
 }
 
-/** Normalize instance names: "D2s v5" -> "standard_d2s_v5". */
+/** Normalize instance names */
 function normalizeAzureInstanceName(name = "") {
   const raw = String(name || "").trim();
   if (!raw) return "";
@@ -17,26 +100,20 @@ function normalizeAzureInstanceName(name = "") {
   return s;
 }
 
-/** Convenience: prefer armSkuName; else the full skuName (do NOT split). */
+/** Prefer armSkuName else skuName */
 function fullInstanceFromRetail(it = {}) {
   const instRaw = it.armSkuName || it.skuName || "";
   return normalizeAzureInstanceName(instRaw);
 }
 
-/**
- * True if this is a primary, On‑Demand VM compute meter.
- * We double-check here (cheap) even if the fetcher already filters type=Consumption.
- */
+/** Primary On‑Demand VM compute meter */
 function isPrimaryOnDemandRetailItem(it = {}) {
   const typeOk = String(it.type || "").toLowerCase() === "consumption";
   const primary = it?.isPrimaryMeterRegion === true;
   return typeOk && primary;
 }
 
-/**
- * Build a name->{vcpu,ram} map from ResourceSkus for a given subscription & region.
- * Requires an ARM token with Microsoft.Compute/skus read permissions.
- */
+/** Build ResourceSkus map */
 async function getResourceSkusMap({ subscriptionId, region, armToken }) {
   const map = new Map();
   let next =
@@ -67,34 +144,11 @@ async function getResourceSkusMap({ subscriptionId, region, armToken }) {
   return map;
 }
 
-/**
- * Plain RHEL PAYG compute detector (no BYOS/AHUB, no SAP/SQL/HA bundles).
- * Use for Azure retail prices items to include only "plain RHEL" VM compute meters.
- */
-function isPlainAzureRhel(item = {}) {
-  const meter = String(item.meterName || "").toLowerCase();
-  if (meter !== "rhel") return false;
-
-  const sku  = String(item.skuName || "").toLowerCase();
-  const prod = String(item.productName || "").toLowerCase();
-  const blob = `${prod} ${sku}`;
-
-  // Exclude SQL/SAP/HA/BYOS/AHUB variants
-  if (/(sap|sql|ha|byos|ahub|hybrid\s*benefit)/.test(blob)) return false;
-
-  // Must be a Virtual Machines compute SKU
-  if (!/virtual machines?/.test(prod)) return false;
-
-  return true;
-}
-
-/** Widen series: allow major VM families we care about. */
-function widenAzureSeries(instance) {
+/** Widen series */
+function widenAzureSeries(instance = "") {
   const n = String(instance).toLowerCase();
   const body = n.startsWith("standard_") ? n.slice(9) : n;
   const lead = (body[0] || "").toUpperCase();
-  // Note: We still allow "B" here to keep this utility generic,
-  // but you should call isBurstableAzure() in the FETCHER to exclude B-series at source.
   return ["A","B","D","E","F","L","M","N","H"].includes(lead);
 }
 
@@ -123,99 +177,3 @@ module.exports = {
   // ResourceSkus
   getResourceSkusMap
 };
-``
-// Helpers for Azure Retail Prices + ResourceSkus enrichment
-
-/**
- * Build a unified lowercase blob from the main retail fields for string tests.
- */
-function _blob(productName = "", skuName = "", meterName = "") {
-  return `${productName} ${skuName} ${meterName}`.toLowerCase().trim();
-}
-
-/**
- * Classify the OS and flags from a Retail Prices item.
- * Returns { os: "Windows"|"Linux", isPaidLinux, hasSql, isDevTest, isByol, hasPreinstalled }
- *
- * Notes:
- *  - We only want plain Windows Server (license included), no SQL, no Dev/Test.
- *  - For Linux we only want "free" distros (exclude RHEL/SLES/Ubuntu Pro/Oracle Linux).
- */
-function getRetailOsInfo({ productName = "", skuName = "", meterName = "" } = {}) {
-  const s = _blob(productName, skuName, meterName);
-
-  const isWindows = /windows/.test(s);
-
-  // SQL signals
-  const hasSql = /sql\s*(server|enterprise|standard|web)/.test(s);
-
-  // Dev/Test (non-production) signals
-  const isDevTest = /(dev\/?test|msdn)/.test(s);
-
-  // BYOL / Hybrid Benefit signals
-  const isByol = /(byol|hybrid\s*benefit|ahb)/.test(s);
-
-  // Paid Linux signals (compare only free Linux distros)
-  const isPaidLinux = /(rhel|red\s*hat|suse|sles|oracle\s*linux|ubuntu\s*pro)/.test(s);
-
-  // Preinstalled software (we want plain Windows Server only)
-  const hasPreinstalled =
-    /(sap|sql|mssql|oracle|weblogic|jboss|tomcat|datastax|cloudera|hadoop|mongodb)/.test(s);
-
-  const os = isWindows ? "Windows" : "Linux";
-  return { os, isPaidLinux, hasSql, isDevTest, isByol, hasPreinstalled };
-}
-
-/** Windows eligibility: license-included, no SQL, no Dev/Test, no BYOL, no preinstalled images. */
-function isWindowsRetailEligible(item) {
-  const { os, hasSql, isDevTest, isByol, hasPreinstalled } = getRetailOsInfo(item);
-  if (os !== "Windows") return false;
-  if (hasSql) return false;
-  if (isDevTest) return false;
-  if (isByol) return false;
-  if (hasPreinstalled) return false;
-  return true;
-}
-
-/** Linux eligibility: free distros only (no RHEL/SLES/Ubuntu Pro/Oracle Linux) and no Dev/Test. */
-function isLinuxRetailEligible(item) {
-  const { os, isPaidLinux, isDevTest } = getRetailOsInfo(item);
-  if (os !== "Linux") return false;
-  if (isPaidLinux) return false;
-  if (isDevTest) return false;
-  return true;
-}
-
-/**
- * Extract hourly USD price from Retail item.
- * Defensively ignore entries whose unit isn't hourly (accepts "1 Hour" or "Hour").
- */
-function extractRetailHourlyUSD({ retailPrice, unitOfMeasure } = {}) {
-  const n = Number(retailPrice);
-  if (!Number.isFinite(n) || n <= 0) return null;
-
-  const u = String(unitOfMeasure || "").toLowerCase();
-  // Accept "1 hour" or "hour" variants; exclude per-month/100-hours/etc.
-  if (u && !(u.startsWith("1 hour") || u.startsWith("hour"))) return null;
-  return n;
-}
-
-/** (Legacy) detect OS from product name. Prefer getRetailOsInfo for new code. */
-function detectOsFromProductName(productName = "") {
-  return /windows/i.test(productName) ? "Windows" : "Linux";
-}
-
-/** Simple family tag by first letter (D=general, E=memory, F=compute, else other). */
-function categorizeByInstanceName(instance = "") {
-  const n = String(instance).toLowerCase();
-  const body = n.startsWith("standard_") ? n.slice(9) : n;
-  const lead = body[0];
-  return lead === "d" ? "general"
-       : lead === "e" ? "memory"
-       : lead === "f" ? "compute"
-       : "other";
-}
-
-/** Azure ARM instance detector (block when OS=Windows). */
-function isAzureArmInstance(instance = "") {
-  const n = String(instance || "").toLowerCase();
