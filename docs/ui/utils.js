@@ -19,7 +19,7 @@ export function monthly(ph) {
 
 export function sumSafe(a, b) {
   const na = (a == null || isNaN(a)) ? 0 : Number(a);
-  const nb = (b == null || isNaN(b)) ? 0 : Number(b); // FIX: use b, not a
+  const nb = (b == null || isNaN(b)) ? 0 : Number(b);
   if (a == null && b == null) return null;
   return na + nb;
 }
