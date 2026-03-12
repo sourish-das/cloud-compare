@@ -87,12 +87,16 @@ jobs:
           # Output path
           OUTPUT_PATH: "docs/data/gcp/gcp.prices.json"
 
+          # RHEL fallback: synthesize RHEL rows when Catalog adders are missing
+          # Default: $0.06 per vCPU-hour. Override in repo secrets or workflow_call if desired.
+          GCP_RHEL_RATE_PER_VCPU: "0.060"
+
           # Optional debug / knobs (uncomment as needed)
+          # Enable to log Windows/RHEL discovery details in workflow logs
           # GCP_DEBUG_WIN: "1"                  # logs Windows rate resolution
           # GCP_DEBUG_RHEL: "1"                 # logs RHEL rate resolution
           # GCP_FORCE_COMPOSE: "1"              # force compose Linux shapes
           # GCP_WINDOWS_RATE_PER_VCPU: "0.046"  # pin Windows per‑vCPU
-          # GCP_RHEL_RATE_PER_VCPU: "0.060"     # pin RHEL per‑vCPU
 
       # ------------------------------------------------------------
       # Validate the output exists and show quick stats
