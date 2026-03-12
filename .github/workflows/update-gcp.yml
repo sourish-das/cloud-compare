@@ -62,11 +62,10 @@ jobs:
           OUTPUT_PATH: "docs/data/gcp/gcp.prices.json"
 
           # RHEL fallback: synthesize RHEL rows when Catalog adders are missing
-          # Default: $0.06 per vCPU-hour. Override if you want a different fallback.
+          # Default: $0.06 per vCPU-hour. Override in repo secrets or workflow_call if desired.
           GCP_RHEL_RATE_PER_VCPU: "0.060"
 
-          # Optional debug knobs
-          # Enable to log Windows/RHEL discovery details in workflow logs
+          # Optional debug / knobs
           # GCP_DEBUG_WIN: "1"
           # GCP_DEBUG_RHEL: "1"
           # GCP_FORCE_COMPOSE: "1"
@@ -99,33 +98,3 @@ jobs:
           path: docs/data/gcp/gcp.prices.json
           if-no-files-found: error
           retention-days: 7
-
-      - name: Debug Publish to docs/data (optional)
-        if: ${{ vars.DEBUG_PUBLISH == 'true' }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          echo "DEBUG MODE ENABLED: Snapshotting GCP output under docs/data/gcp/_debug"
-          mkdir -p docs/data/gcp/_debug
-          cp -f docs/data/gcp/gcp.prices.json docs/data/gcp/_debug/gcp.prices.json
-
-      - name: Commit debug provider files (optional)
-        if: ${{ vars.DEBUG_PUBLISH == 'true' }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          git fetch origin main
-          git checkout main
-          git reset --hard origin/main
-
-          git add -f docs/data/gcp/gcp.prices.json
-          if git diff --cached --quiet; then
-            echo "No changes to commit."
-            exit 0
-          fi
-
-          git commit -m "Debug publish: GCP pricing update"
-          git push
