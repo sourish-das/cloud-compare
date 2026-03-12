@@ -1,12 +1,5 @@
 // docs/script.js (4‑provider coordinator - AWS, Azure, GCP, OCI)
-//
-// Responsibilities:
-//  - Hydrate controls (OS / vCPU / RAM) from meta (with safe fallbacks)
-//  - Keep Windows ↔ ARM guardrails consistent in UI
-//  - Coordinate per‑provider "best" match calls (AWS/Azure/GCP/OCI)
-//  - Compute + render storage costs per provider
-//  - Render totals and basic build info
-//  - Ensure RHEL is selectable regardless of meta overwrite order
+// Full drop-in with RHEL-on-OCI notice hidden by default and robust bootstrap handling.
 
 import {
   fmt, monthly, sumSafe, fillSelect, setSelectValue, safeSetText,
@@ -33,7 +26,6 @@ import {
    Provider label maps (centralized)
    ======================================================================== */
 
-// Visible price labels per provider
 const PROVIDER_LABELS = {
   aws:   { price: 'EC2 Price/hr',               monthly: 'EC2 Monthly' },
   azure: { price: 'VM Price/hr',                monthly: 'VM Monthly' },
@@ -41,7 +33,6 @@ const PROVIDER_LABELS = {
   oci:   { price: 'Compute Price/hr',           monthly: 'Compute Monthly' }
 };
 
-// Storage labels per provider (short text that fits in cards)
 const STORAGE_LABELS = {
   aws:   { hr: 'EBS Price/hr',             monthly: 'EBS Monthly' },
   azure: { hr: 'Azure Disk Price/hr',      monthly: 'Azure Disk Monthly' },
@@ -65,8 +56,6 @@ async function loadBuildInfo() {
 
 /* ========================================================================
    Filter visibility
-   - AWS/Azure/GCP use "Family" (already in HTML)
-   - OCI uses "Processor" (Ampere/AMD/Intel)
    ======================================================================== */
 
 function showFamilyFilters() {
@@ -77,7 +66,7 @@ function showFamilyFilters() {
 }
 
 /* ========================================================================
-   Storage helpers (provider pass‑throughs)
+   Storage helpers
    ======================================================================== */
 
 function getAwsStorageMonthly(type, gb) {
@@ -91,8 +80,9 @@ function getAzureStorage(type, gb) {
 function getGcpStorageMonthly(type, gb) {
   return getGcpStorageMonthlyFromCfg(type, gb, STORAGE_CFG.gcp);
 }
+
 /* ========================================================================
-   Windows ↔ Arm guardrails (UI assist; finders also enforce server‑side)
+   Windows ↔ Arm guardrails
    ======================================================================== */
 
 function isArmArchField(obj) {
@@ -192,7 +182,6 @@ function ociLatestGen(linux, processor) {
     if (gens.has(g.toLowerCase())) return g;
   }
 
-  // Fallback: pick max by name (alphabetical)
   return arr
     .map(e => String(e.gen || ""))
     .filter(Boolean)
@@ -202,19 +191,16 @@ function ociLatestGen(linux, processor) {
 
 /* ========================================================================
    Controls hydration from meta (safe fallbacks)
-   - Ensures RHEL is present regardless of data order or late repopulation.
    ======================================================================== */
 
 async function hydrateControlsFromMeta() {
   try {
     const { meta } = await loadPricesAndMeta();
 
-    // OS — use meta.os if present; else fallback to our default list
     const osList = Array.isArray(meta?.os) && meta.os.length
       ? meta.os
       : ["Linux", "RHEL", "Windows"];
 
-    // Render OS list (strings or {value,text})
     fillSelect("os", osList.map(v => {
       const s = (typeof v === "string") ? v : v?.value;
       return {
@@ -226,22 +212,18 @@ async function hydrateControlsFromMeta() {
       };
     }));
 
-    // Safety: guarantee RHEL even if future code repopulates the select
     ensureSelectOption("os", "RHEL", "RHEL (Red Hat Enterprise Linux)");
 
-    // vCPU/RAM — meta or defaults (keep small sets to avoid huge dropdowns)
     const vcpus = (Array.isArray(meta?.vcpu) && meta.vcpu.length) ? meta.vcpu : [1,2,4,8,16];
     const rams  = (Array.isArray(meta?.ram)  && meta.ram.length)  ? meta.ram  : [1,2,4,8,16,32];
 
     fillSelect("cpu", vcpus.map(v => ({ value: v, text: v })));
     fillSelect("ram", rams.map(v  => ({ value: v, text: v })));
 
-    // Defaults — keep Linux for first view (change to "RHEL" if you want it preselected)
     setSelectValue("os",  "Linux");
     setSelectValue("cpu", String(vcpus.includes(2) ? 2 : vcpus[0]));
     setSelectValue("ram", String(rams.includes(4) ? 4 : rams[0]));
   } catch {
-    // Hard fallback if meta cannot be read (offline etc.)
     fillSelect("os", [
       { value: "Linux",   text: "Linux (Open‑source)" },
       { value: "RHEL",    text: "RHEL (Red Hat Enterprise Linux)" },
@@ -255,6 +237,7 @@ async function hydrateControlsFromMeta() {
     setSelectValue("ram","4");
   }
 }
+
 /* ========================================================================
    MAIN compare()
    ======================================================================== */
@@ -265,7 +248,6 @@ export async function compare(resetFamilies = false) {
 
   setStatus("Fetching local prices…");
 
-  // Optional: reset family/processor selectors when user explicitly requested a fresh compare
   if (resetFamilies) {
     ["awsFamily","azFamily","gcpFamily"].forEach(id => {
       const el = document.getElementById(id);
@@ -275,7 +257,6 @@ export async function compare(resetFamilies = false) {
     if (ocip) ocip.value = "auto";
   }
 
-  // Read controls
   const os           = document.getElementById("os")?.value || "Linux";
   const vcpu         = Number(document.getElementById("cpu")?.value ?? 0);
   const ram          = Number(document.getElementById("ram")?.value ?? 0);
@@ -289,7 +270,6 @@ export async function compare(resetFamilies = false) {
   const ociProcEl  = document.getElementById("ociProcessor");
   let ociProcessor = (ociProcEl?.value || "auto").toLowerCase();
 
-  // Windows doesn't run on ARM: force reset (UI assist; finders also enforce)
   if (String(os).toLowerCase() === "windows") {
     const armOpt = ociProcEl?.querySelector('option[value="arm"]');
     if (armOpt) armOpt.disabled = true;
@@ -299,17 +279,13 @@ export async function compare(resetFamilies = false) {
     }
   }
 
-  // Make sure family drop‑downs aren't stuck with ARM-ish strings on Windows
   sanitizeFamiliesForWindows(os);
 
   try {
-    // Reset all cards
     resetCards();
 
-    // Load latest data/meta
     const data = await loadPricesAndMeta();
 
-    // Footer freshness + row counts (best‑effort)
     try {
       const info = await loadBuildInfo();
       const counts = {
@@ -330,7 +306,6 @@ export async function compare(resetFamilies = false) {
       safeSetText("dataInfo","Data: — · Rows — Azure: —, AWS: —, GCP: —, OCI: —");
     }
 
-    // Pre‑filter ARM rows for Windows (finder side still protects)
     const awsList = filterOutArmForWindows(data.aws   || [], "aws",   os);
     const azList  = filterOutArmForWindows(data.azure || [], "azure", os);
     const gcpList = filterOutArmForWindows(data.gcp   || [], "gcp",   os);
@@ -376,19 +351,16 @@ export async function compare(resetFamilies = false) {
     }
 
     /* ---------------- OCI ---------------- */
-    // NOTE: If OS === "RHEL" we intentionally do NOT show an OCI prebuilt RHEL image.
-    // Instead we mark OCI as disabled and show a BYOL/BYOS notice to the user.
     let ociCard;
     try {
       if (String(os).toLowerCase() === "rhel") {
         ociCard = {
           disabled: true,
-          // keep pricePerHourUSD explicitly null so totals render as "—"
           pricePerHourUSD: null,
           message: "OCI does not provide a pre-built RHEL platform image. Use BYOL / BYOS (bring your own license/subscription)."
         };
       } else {
-        const comp   = data.oci;                  // normalized compute block (linux/windows(+rhel uplift))
+        const comp   = data.oci;
         const linux  = comp?.linux || {};
         const latest = (ociProcessor === "auto") ? null : ociLatestGen(linux, ociProcessor);
         const opts   = latest ? { processor: ociProcessor, generation: latest } : { processor: ociProcessor };
@@ -428,13 +400,11 @@ export async function compare(resetFamilies = false) {
     let ociStorageMonthly = getOciStorageMonthlyFromCfg(storageAmtGB, STORAGE_CFG.oci);
     let ociStorageHr      = ociStorageMonthly / HRS_PER_MONTH;
 
-    // If OCI is disabled (RHEL selected), blank OCI storage values so totals remain empty
     if (ociCard?.disabled) {
       ociStorageMonthly = null;
       ociStorageHr = null;
     }
 
-    // Brand the labels (after costs computed, just for consistent flow)
     safeSetText("awsStoragePriceHrLabel", `${STORAGE_LABELS.aws.hr}:`);
     safeSetText("awsStorageMonthlyLabel", `≈ ${STORAGE_LABELS.aws.monthly}:`);
     safeSetText("azStoragePriceHrLabel",  `${STORAGE_LABELS.azure.hr}:`);
@@ -478,7 +448,6 @@ export async function compare(resetFamilies = false) {
     }
 
     /* ---------------- Render OCI card ---------------- */
-    // Use the new disabled/notice flow for RHEL
     const ociNoticeEl = document.getElementById("ociRhelNotice");
     const ociRhelLineEl = document.getElementById("ociRhelLine");
     const ociPanelEl = document.querySelector(".panel--oci");
@@ -493,7 +462,6 @@ export async function compare(resetFamilies = false) {
       if (ociRhelLineEl) { ociRhelLineEl.textContent = ""; ociRhelLineEl.setAttribute("aria-hidden","true"); }
       if (ociPanelEl) ociPanelEl.classList.remove("panel--disabled");
     } else if (ociCard.disabled) {
-      // RHEL selected: show notice and visually disable OCI card
       safeSetText("ociInstance", `<strong>Recommended Machine:</strong> —`, { html: true });
       safeSetText("ociCpu",     `vCPU: —`);
       safeSetText("ociRam",     `RAM: —`);
@@ -501,7 +469,6 @@ export async function compare(resetFamilies = false) {
       safeSetText("ociMonthly", `≈ ${PROVIDER_LABELS.oci.monthly}: —`);
 
       if (ociNoticeEl) {
-        // set text and keep a learn-more link if present in DOM
         ociNoticeEl.textContent = ociCard.message + " ";
         const link = document.getElementById("ociRhelLearnMore");
         if (link) {
@@ -514,7 +481,6 @@ export async function compare(resetFamilies = false) {
       if (ociRhelLineEl) { ociRhelLineEl.textContent = ""; ociRhelLineEl.setAttribute("aria-hidden","true"); }
       if (ociPanelEl) ociPanelEl.classList.add("panel--disabled");
     } else {
-      // Normal OCI rendering
       if (ociNoticeEl) ociNoticeEl.hidden = true;
       if (ociPanelEl) ociPanelEl.classList.remove("panel--disabled");
 
@@ -524,7 +490,6 @@ export async function compare(resetFamilies = false) {
       safeSetText("ociPrice",   `${PROVIDER_LABELS.oci.price}: ${fmt(ociCard.pricePerHourUSD)}`);
       safeSetText("ociMonthly", `≈ ${PROVIDER_LABELS.oci.monthly}: ${fmt(monthly(ociCard.pricePerHourUSD))}`);
 
-      // If breakdown includes rhel uplift (future/optional), surface it
       if (ociCard.breakdown?.rhel_license_per_hour) {
         if (ociRhelLineEl) {
           ociRhelLineEl.textContent = `RHEL license/hr: ${fmt(ociCard.breakdown.rhel_license_per_hour)}`;
@@ -548,7 +513,6 @@ export async function compare(resetFamilies = false) {
     safeSetText("ociStoragePriceHr", fmt(ociStorageHr));
     safeSetText("ociStorageMonthly", fmt(ociStorageMonthly));
 
-    // Azure disk SKU/size note (if the requested size was rounded up)
     if (azDiskSku) {
       const extra = (azDiskGB && azDiskGB !== storageAmtGB)
         ? ` (billed as ${azDiskGB} GB ${storageType.toUpperCase()}, ${azDiskSku})`
@@ -557,7 +521,6 @@ export async function compare(resetFamilies = false) {
     }
 
     /* ---------------- Totals ---------------- */
-    // If OCI is disabled we want totals to render as "—" (null). Ensure ociStorageHr and ociCard.pricePerHourUSD are null in that case.
     const awsTotalHr = sumSafe(awsCard?.pricePerHourUSD, awsStorageHr);
     const azTotalHr  = sumSafe(azCard?.pricePerHourUSD,  azStorageHr);
     const gcpTotalHr = sumSafe(gcpCard?.pricePerHourUSD, gcpStorageHr);
@@ -575,7 +538,6 @@ export async function compare(resetFamilies = false) {
     safeSetText("ociTotalHr",      fmt(ociTotalHr));
     safeSetText("ociTotalMonthly", fmt(ociCard?.disabled ? null : sumSafe(monthly(ociCard?.pricePerHourUSD), ociStorageMonthly)));
 
-    // Done
     showFamilyFilters();
     setStatus("Comparison complete ✓");
   } catch (err) {
@@ -588,7 +550,6 @@ export async function compare(resetFamilies = false) {
   }
 }
 
-// Expose globally for inline onclick="compare(true)"
 window.compare = compare;
 
 /* ========================================================================
@@ -599,9 +560,17 @@ async function bootstrap() {
   try {
     await hydrateControlsFromMeta();
 
+    // Ensure OCI RHEL notice is hidden on boot and whenever OS changes
     const osEl = document.getElementById("os");
+    const ociNoticeInit = document.getElementById("ociRhelNotice");
+    if (ociNoticeInit) ociNoticeInit.hidden = true;
+
     if (osEl) {
-      osEl.addEventListener("change", () => sanitizeFamiliesForWindows(osEl.value));
+      osEl.addEventListener("change", () => {
+        sanitizeFamiliesForWindows(osEl.value);
+        const ociNotice = document.getElementById("ociRhelNotice");
+        if (ociNotice) ociNotice.hidden = true;
+      });
     }
 
     ["awsFamily","azFamily","gcpFamily","ociProcessor"].forEach(id => {
