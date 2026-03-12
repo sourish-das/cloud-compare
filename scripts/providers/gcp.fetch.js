@@ -25,6 +25,7 @@ const {
   listZoneMachineTypes,
   buildSeriesUnitRateMaps,
   buildWindowsCoreRate,
+  buildRhelCoreRate,           // ⬅️ NEW
   // New helpers to keep Windows off Arm & simplify fetchers
   isGcpArmMachineType
 } = require("../lib/gcp");
@@ -89,13 +90,19 @@ async function fetchGcpPrices() {
     console.warn("[GCP] Windows per-vCPU rate not resolved; Windows synthesis will be skipped.");
   }
 
+  // Resolve RHEL license per-vCPU rate (hybrid: Catalog if present; else public/env)
+  const rhelCoreRate = buildRhelCoreRate(allSkus, REGION);
+  if (rhelCoreRate) {
+    console.log(`[GCP] RHEL per-vCPU (license) rate: $${rhelCoreRate.toFixed(6)}/vCPU-hr`);
+  }
+
   // Optional: force composition path via env (ignores lack of per-instance rows)
   const FORCE_COMPOSE = String(process.env.GCP_FORCE_COMPOSE || "").toLowerCase() === "1";
   if (FORCE_COMPOSE) {
     console.log("[GCP] FORCE_COMPOSE=1 → will run composition fallback regardless of per-instance results.");
   }
 
-  // 2) First pass: per‑instance SKUs (Linux + Windows)
+  // 2) First pass: per‑instance SKUs (Linux + Windows + RHEL)
   const gcp_price_list = {};
   let counter = 0;
 
@@ -114,7 +121,11 @@ async function fetchGcpPrices() {
     if (!fam) continue;
 
     const readable = (sku.description || sku.displayName || "");
-    const os    = /windows/i.test(readable) ? "Windows" : "Linux";
+    const lname = readable.toLowerCase();
+    let os = "Linux";
+    if (/windows/.test(lname)) os = "Windows";
+    else if (/(rhel|red\s*hat)/.test(lname)) os = "RHEL"; // ⬅️ detect per-instance RHEL
+
     const price = extractHourlyPrice(sku.pricingInfo);
     if (!(price > 0)) continue;
 
@@ -261,6 +272,42 @@ async function fetchGcpPrices() {
     console.log(`[GCP] Synthesized Windows rows: ${added}`);
   }
 
+  // 5) Synthesize RHEL rows from Linux base + per-vCPU RHEL license (Arm + x86)
+  if (rhelCoreRate) {
+    const linuxEntries = Object.values(gcp_price_list).filter(v => v.os === "Linux");
+    const existingRhel = new Set(
+      Object.values(gcp_price_list)
+        .filter(v => v.os === "RHEL")
+        .map(v => `${v.machine_type}__${v.region}`)
+    );
+    let addedRhel = 0;
+    for (const base of linuxEntries) {
+      const rhelKey = `${base.machine_type}__${base.region}`;
+      if (existingRhel.has(rhelKey)) continue;
+
+      const vcpu = Number(base.vcpu || 0);
+      const basePrice = Number(base.price_per_hour || 0);
+      if (!Number.isFinite(vcpu) || vcpu <= 0) continue;
+      if (!Number.isFinite(basePrice) || basePrice <= 0) continue;
+
+      const rhelPrice = basePrice + (vcpu * rhelCoreRate);
+      if (!Number.isFinite(rhelPrice) || rhelPrice <= 0) continue;
+
+      const key = `sku_${++counter}`;
+      gcp_price_list[key] = {
+        region: REGION,
+        machine_type: base.machine_type,
+        os: "RHEL",
+        price_per_hour: rhelPrice,
+        vcpu: base.vcpu,
+        memory_gb: base.memory_gb,
+        __src: (base.__src || "catalog") + "+rhel"
+      };
+      addedRhel++;
+    }
+    console.log(`[GCP] Synthesized RHEL rows: ${addedRhel}`);
+  }
+
   if (Object.keys(gcp_price_list).length === 0) {
     const sample = allSkus
       .filter(s => (s.category?.resourceFamily === "Compute") && regionMatches(s.serviceRegions, REGION))
@@ -292,7 +339,14 @@ async function main() {
     const category = classifyGcpInstance(instance);
     if (!category) continue;
 
-    const os = item.os && item.os.toLowerCase().includes("win") ? "Windows" : "Linux";
+    // Preserve 'Windows' and 'RHEL' labels; default to Linux otherwise
+    let os = "Linux";
+    if (typeof item.os === "string") {
+      const tag = item.os.toLowerCase();
+      if (tag.includes("win")) os = "Windows";
+      else if (tag.includes("rhel")) os = "RHEL";
+    }
+
     const price = Number(item.price_per_hour);
     if (!Number.isFinite(price) || price <= 0) continue;
 
@@ -335,7 +389,7 @@ async function main() {
   if (warnAndSkipWriteOnEmpty("GCP", cheapest)) return;
 
   const meta = {
-    os: ["Linux", "Windows"],
+    os: ["Linux", "Windows", "RHEL"],
     vcpu: uniqSortedNums(cheapest.map(x => x.vcpu)),
     ram:  uniqSortedNums(cheapest.map(x => x.ram))
   };
