@@ -165,10 +165,4 @@ jobs:
           git reset --hard origin/main
 
           git add -f docs/data/azure/azure.prices.json
-          if git diff --cached --quiet; then
-            echo "No changes to commit."
-            exit 0
-          fi
-
-          git commit -m "Debug publish: Azure pricing update"
-          git push
+          if git diff
