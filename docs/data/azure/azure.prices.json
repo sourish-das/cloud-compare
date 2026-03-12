@@ -2,6 +2,7 @@
   "meta": {
     "os": [
       "Linux",
+      "RHEL",
       "Windows"
     ],
     "vcpu": [
