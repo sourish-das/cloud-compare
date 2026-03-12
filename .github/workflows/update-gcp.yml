@@ -1,8 +1,8 @@
 name: Fetch GCP Prices
 
 permissions:
-  contents: read        # provider does not commit; orchestrator will
-  id-token: write       # required for google-github-actions/auth@v3 (OIDC)
+  contents: read
+  id-token: write
 
 on:
   workflow_call:
@@ -22,26 +22,16 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      # ------------------------------------------------------------
-      # Checkout (read-only)
-      # ------------------------------------------------------------
       - name: Checkout repo (read-only)
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # ------------------------------------------------------------
-      # Node setup (LTS)
-      # ------------------------------------------------------------
       - name: Set up Node (LTS)
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          # cache: 'npm'     # enable if you ever add npm deps + package-lock.json
 
-      # ------------------------------------------------------------
-      # jq (for quick validation)
-      # ------------------------------------------------------------
       - name: Ensure jq
         run: |
           if ! command -v jq >/dev/null 2>&1; then
@@ -49,9 +39,6 @@ jobs:
             sudo apt-get install -y jq
           fi
 
-      # ------------------------------------------------------------
-      # OIDC → short-lived Google Cloud access token
-      # ------------------------------------------------------------
       - name: Google OIDC Auth
         id: auth
         uses: google-github-actions/auth@v3
@@ -61,46 +48,30 @@ jobs:
           service_account: ${{ secrets.GCP_WIF_SA_EMAIL }}
           token_format: access_token
 
-      # ------------------------------------------------------------
-      # Ensure output directory
-      # ------------------------------------------------------------
       - name: Ensure output directory
         run: mkdir -p docs/data/gcp
 
-      # ------------------------------------------------------------
-      # >>> Run the GCP fetcher (Catalog + fallback + Windows/RHEL synth)
-      # ------------------------------------------------------------
       - name: Fetch GCP prices
         run: node scripts/providers/gcp.fetch.js
         env:
-          # Region & currency (adjust if needed)
           GCP_REGION: "us-east1"
           GCP_CURRENCY: "USD"
-
-          # Project + access token for FULL-mode fallback & API calls
           GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
           GCLOUD_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
-
-          # Optional: Catalog API key (script prefers OAuth if present)
           GCP_PRICE_API_KEY: ${{ secrets.GCP_PRICE_API_KEY }}
-
-          # Output path
           OUTPUT_PATH: "docs/data/gcp/gcp.prices.json"
 
           # RHEL fallback: synthesize RHEL rows when Catalog adders are missing
-          # Default: $0.06 per vCPU-hour. Override in repo secrets or workflow_call if desired.
+          # Default: $0.06 per vCPU-hour. Override if you want a different fallback.
           GCP_RHEL_RATE_PER_VCPU: "0.060"
 
-          # Optional debug / knobs (uncomment as needed)
+          # Optional debug knobs
           # Enable to log Windows/RHEL discovery details in workflow logs
-          # GCP_DEBUG_WIN: "1"                  # logs Windows rate resolution
-          # GCP_DEBUG_RHEL: "1"                 # logs RHEL rate resolution
-          # GCP_FORCE_COMPOSE: "1"              # force compose Linux shapes
-          # GCP_WINDOWS_RATE_PER_VCPU: "0.046"  # pin Windows per‑vCPU
+          # GCP_DEBUG_WIN: "1"
+          # GCP_DEBUG_RHEL: "1"
+          # GCP_FORCE_COMPOSE: "1"
+          # GCP_WINDOWS_RATE_PER_VCPU: "0.046"
 
-      # ------------------------------------------------------------
-      # Validate the output exists and show quick stats
-      # ------------------------------------------------------------
       - name: Validate GCP output
         shell: bash
         run: |
@@ -113,9 +84,6 @@ jobs:
           echo "Compute array length:"
           jq '.compute | length' docs/data/gcp/gcp.prices.json || true
 
-      # ------------------------------------------------------------
-      # Quick OS counts (Linux/Windows/RHEL) — non-blocking sanity log
-      # ------------------------------------------------------------
       - name: Show OS counts
         shell: bash
         run: |
@@ -124,9 +92,6 @@ jobs:
           jq -r '.compute[].os' docs/data/gcp/gcp.prices.json \
             | sort | uniq -c | sed 's/^/  /' || true
 
-      # ------------------------------------------------------------
-      # Upload artifact for the orchestrator
-      # ------------------------------------------------------------
       - name: Upload GCP pricing JSON (artifact)
         uses: actions/upload-artifact@v4
         with:
@@ -135,10 +100,6 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-      # =========================================
-      # OPTIONAL DEBUG MODE — snapshot to docs/data (no direct overwrite)
-      # Enable by setting repo variable: DEBUG_PUBLISH=true
-      # =========================================
       - name: Debug Publish to docs/data (optional)
         if: ${{ vars.DEBUG_PUBLISH == 'true' }}
         shell: bash
