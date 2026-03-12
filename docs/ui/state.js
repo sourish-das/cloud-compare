@@ -6,11 +6,13 @@ export const API_BASE = "./data/prices.json";
 /**
  * Default dropdown meta used if the aggregated file omits/sparsely defines meta.
  * We keep these as STRINGS so the UI can bind directly to option values.
+ *
+ * NOTE: vcpu and ram here are intentionally authoritative for the UI.
  */
 export const FALLBACK_META = {
   os:   ["Linux", "RHEL", "Windows"], // RHEL added
-  vcpu: [1, 2, 4, 8, 16],
-  ram:  [1, 2, 4, 8, 16, 32]
+  vcpu: [1, 2, 4, 6, 8, 12, 18, 24],
+  ram:  [1, 2, 4, 8, 16, 32, 64, 128]
 };
 
 // In-memory storage pricing defaults
@@ -161,10 +163,11 @@ export async function loadPricesAndMeta() {
     ? coerceOsList(FALLBACK_META.os)
     : ["Linux", "RHEL", "Windows"];
 
+  // **ENFORCE** the UI dropdowns to the requested fixed sets.
   const normMeta = {
     os:   fromFileOs.length ? fromFileOs : fallbackOs,
-    vcpu: Array.isArray(meta.vcpu) && meta.vcpu.length ? meta.vcpu : FALLBACK_META.vcpu,
-    ram:  Array.isArray(meta.ram)  && meta.ram.length  ? meta.ram  : FALLBACK_META.ram
+    vcpu: FALLBACK_META.vcpu,
+    ram:  FALLBACK_META.ram
   };
 
   // ---- Optional QoL: prime OCI RHEL uplift for BYOS (if present) ----
