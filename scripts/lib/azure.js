@@ -42,13 +42,17 @@ function isLinuxRetailEligible(item) {
 /** Plain RHEL PAYG compute detector */
 function isPlainAzureRhel(item = {}) {
   const meter = String(item.meterName || "").toLowerCase();
-  if (meter !== "rhel") return false;
+  const sku   = String(item.skuName || "").toLowerCase();
+  const prod  = String(item.productName || "").toLowerCase();
+  const blob  = `${prod} ${sku} ${meter}`;
 
-  const sku  = String(item.skuName || "").toLowerCase();
-  const prod = String(item.productName || "").toLowerCase();
-  const blob = `${prod} ${sku}`;
+  // Must mention RHEL explicitly
+  if (!/(rhel|red\s*hat\s*enterprise\s*linux)/.test(blob)) return false;
 
+  // Exclude SQL/SAP/HA/BYOS/AHUB variants
   if (/(sap|sql|ha|byos|ahub|hybrid\s*benefit)/.test(blob)) return false;
+
+  // Must be a Virtual Machines compute SKU
   if (!/virtual machines?/.test(prod)) return false;
 
   return true;
