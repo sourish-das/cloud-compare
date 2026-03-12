@@ -7,16 +7,23 @@ const path = require("path");
  */
 function atomicWrite(filePath, dataObj) {
   const dir = path.dirname(filePath);
-  const tmp = path.join(dir, path.basename(filePath).replace(/\.json$/, ".tmp.json"));
+  const tmp = path.join(dir, `${path.basename(filePath)}.tmp-${process.pid}`);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(tmp, JSON.stringify(dataObj, null, 2));
-  fs.renameSync(tmp, filePath);
+  try {
+    fs.writeFileSync(tmp, JSON.stringify(dataObj, null, 2), { encoding: "utf8" });
+    fs.renameSync(tmp, filePath);
+  } catch (err) {
+    // best-effort cleanup of tmp file
+    try { if (fs.existsSync(tmp)) fs.unlinkSync(tmp); } catch (e) {}
+    throw err;
+  }
 }
 
 /**
  * Safe JSON.parse with fallback.
  */
 function safeJSON(str, fallback = {}) {
+  if (str == null) return fallback;
   try { return JSON.parse(String(str)); } catch { return fallback; }
 }
 
@@ -24,7 +31,7 @@ function safeJSON(str, fallback = {}) {
  * Unique + sorted numeric array.
  */
 function uniqSortedNums(arr) {
-  return [...new Set(arr.filter(Number.isFinite))].sort((a, b) => a - b);
+  return [...new Set((arr || []).filter(Number.isFinite))].sort((a, b) => a - b);
 }
 
 /**
@@ -32,10 +39,18 @@ function uniqSortedNums(arr) {
  */
 function dedupeCheapestByKey(list, keyFn) {
   const map = new Map();
-  for (const row of list) {
+  for (const row of (list || [])) {
     const k = keyFn(row);
-    if (!map.has(k) || row.pricePerHourUSD < map.get(k).pricePerHourUSD) {
+    const price = Number(row.pricePerHourUSD);
+    if (!map.has(k)) {
       map.set(k, row);
+    } else {
+      const existing = map.get(k);
+      const existingPrice = Number(existing.pricePerHourUSD);
+      if (Number.isFinite(price) && (!Number.isFinite(existingPrice) || price < existingPrice)) {
+        map.set(k, row);
+      }
+      // if equal, keep existing (stable)
     }
   }
   return [...map.values()];
