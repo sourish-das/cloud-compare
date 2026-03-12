@@ -25,8 +25,9 @@ const {
   listZoneMachineTypes,
   buildSeriesUnitRateMaps,
   buildWindowsCoreRate,
-  // RHEL per-instance adders (preferred)
+  // RHEL per-instance adders (preferred) + fallback constant
   buildRhelPerInstanceAdders,
+  RHEL_FALLBACK_RATE_PER_VCPU,
   // New helpers to keep Windows off Arm & simplify fetchers
   isGcpArmMachineType
 } = require("../lib/gcp");
@@ -100,10 +101,12 @@ async function fetchGcpPrices() {
     console.log("[GCP] No RHEL per-instance adders discovered in Catalog for this region.");
   }
 
-  // Optional fallback: per-vCPU env rate (only used if you explicitly enable it)
-  const RHEL_FALLBACK_VCPU = Number(process.env.GCP_RHEL_RATE_PER_VCPU || 0) || 0;
+  // RHEL fallback per-vCPU rate: prefer explicit env override, else use library default
+  const RHEL_FALLBACK_VCPU = Number(process.env.GCP_RHEL_RATE_PER_VCPU || 0) || Number(RHEL_FALLBACK_RATE_PER_VCPU || 0);
   if (RHEL_FALLBACK_VCPU > 0) {
-    console.log(`[GCP] RHEL fallback per-vCPU rate enabled: $${RHEL_FALLBACK_VCPU.toFixed(6)}/vCPU-hr`);
+    console.log(`[GCP] RHEL fallback per-vCPU rate in use: $${RHEL_FALLBACK_VCPU.toFixed(6)}/vCPU-hr`);
+  } else {
+    console.log("[GCP] No RHEL fallback per-vCPU rate configured; RHEL synthesis will only use per-instance adders if present.");
   }
 
   // Optional: force composition path via env (ignores lack of per-instance rows)
@@ -327,7 +330,7 @@ async function fetchGcpPrices() {
 
     console.log(`[GCP] Synthesized RHEL rows (addon): ${addedRhel}, missing-adders:${missingAdders}`);
 
-    // Optional fallback: if you explicitly set GCP_RHEL_RATE_PER_VCPU, synthesize for missing adders
+    // Optional fallback: if you explicitly set GCP_RHEL_RATE_PER_VCPU or library default is present, synthesize for missing adders
     if (RHEL_FALLBACK_VCPU > 0 && missingAdders > 0) {
       let addedFb = 0;
       for (const base of linuxEntries) {
