@@ -426,17 +426,30 @@ azCard = z ? {
       safeSetText("awsPrice",   `${PROVIDER_LABELS.aws.price}: ${fmt(awsCard.pricePerHourUSD)}`);
       safeSetText("awsMonthly", `≈ ${PROVIDER_LABELS.aws.monthly}: ${fmt(monthly(awsCard.pricePerHourUSD))}`);
     }
+  
+/* ---------------- Render Azure card ---------------- */
+if (!azCard || azCard.error) {
+  safeSetText(
+    "azInstance",
+    `<strong>Recommended VM Size:</strong> Error: ${azCard?.error ?? "No match"}`,
+    { html: true }
+  );
+} else {
+  const azDisplay = azCard.displayInstance || azCard.instance;
+  const seriesHtml = azCard.seriesName
+    ? ` <span class="badge-series" title="Azure series">${azCard.seriesName}</span>`
+    : "";
 
-    /* ---------------- Render Azure card ---------------- */
-    if (!azCard || azCard.error) {
-      safeSetText("azInstance", `<strong>Recommended VM Size:</strong> Error: ${azCard?.error ?? "No match"}`, { html: true });
-    } else {
-      safeSetText("azInstance", `<strong>Recommended VM Size:</strong> ${azCard.instance} (${azCard.region})`, { html: true });
-      safeSetText("azCpu",     `vCPU: ${azCard.vcpu}`);
-      safeSetText("azRam",     `RAM: ${azCard.ram} GB`);
-      safeSetText("azPrice",   `${PROVIDER_LABELS.azure.price}: ${fmt(azCard.pricePerHourUSD)}`);
-      safeSetText("azMonthly", `≈ ${PROVIDER_LABELS.azure.monthly}: ${fmt(monthly(azCard.pricePerHourUSD))}`);
-    }
+  safeSetText(
+    "azInstance",
+    `<strong>Recommended VM Size:</strong> ${azDisplay} (${azCard.region})${seriesHtml}`,
+    { html: true }
+  );
+  safeSetText("azCpu",     `vCPU: ${azCard.vcpu}`);
+  safeSetText("azRam",     `RAM: ${azCard.ram} GB`);
+  safeSetText("azPrice",   `${PROVIDER_LABELS.azure.price}: ${fmt(azCard.pricePerHourUSD)}`);
+  safeSetText("azMonthly", `≈ ${PROVIDER_LABELS.azure.monthly}: ${fmt(monthly(azCard.pricePerHourUSD))}`);
+}
 
     /* ---------------- Render GCP card ---------------- */
     if (!gcpCard || gcpCard.error) {
