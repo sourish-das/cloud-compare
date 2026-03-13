@@ -11,10 +11,10 @@ const base = require("./azure");
 function getRetailOsInfoExt({ productName = "", skuName = "", meterName = "" } = {}) {
   const s = `${productName} ${skuName} ${meterName}`.toLowerCase();
 
-  // Start from base classifier
+  // Start from base classifier (preserves your existing guards & logic)
   const info = base.getRetailOsInfo({ productName, skuName, meterName });
 
-  // Add granular paid-Linux flags
+  // Add granular paid-Linux flags for variant-specific filtering
   const isRhel        = /(rhel|red\s*hat)/.test(s);
   const isSles        = /(suse|sles)/.test(s);
   const isUbuntuPro   = /ubuntu\s*pro/.test(s);
@@ -32,7 +32,8 @@ function getRetailOsInfoExt({ productName = "", skuName = "", meterName = "" } =
 }
 
 module.exports = {
+  // Export everything from the base lib (normalization, naming helpers, ResourceSkus, etc.)
   ...base,
-  // Override only this one
+  // Override only this one function for the test path
   getRetailOsInfo: getRetailOsInfoExt
 };
