@@ -173,6 +173,83 @@ function widenAzureSeries(instance) {
   return ["A","B","D","E","F","L","M","N","H"].includes(lead);
 }
 
+/* ============================================================
+ * UI-friendly naming helpers
+ * ============================================================*/
+
+/**
+ * Friendly display for UI: "standard_d2s_v5" -> "Standard D2s v5"
+ * Preserves sub-series letters (s / as / ads / ls / pls / …).
+ */
+function azureDisplayNameFromNormalized(instance = "") {
+  if (!instance) return "";
+  let s = String(instance);
+  if (s.startsWith("standard_")) s = s.slice(9);
+
+  // tokens like: ["d2s","v5"] or ["d2as","v6"] or ["f4","v2"]
+  const parts = s.split("_").filter(Boolean);
+  if (parts.length === 0) return "Standard";
+
+  const capFirst = (t) => (t ? t[0].toUpperCase() + t.slice(1) : t);
+
+  if (parts.length === 1) {
+    return `Standard ${capFirst(parts[0])}`;
+  }
+  // Join everything except last part (usually generation) as size token
+  const gen = parts[parts.length - 1].toLowerCase();                  // v5, v6
+  const size = parts.slice(0, parts.length - 1).join("").toLowerCase(); // d2s, d2as
+  return `Standard ${capFirst(size)} ${gen}`;
+}
+
+/**
+ * Concise grouping label: "standard_d2as_v6" -> "D-as v6", "standard_f4_v2" -> "F v2"
+ * Useful for badges/filters.
+ */
+function azureSeriesFromNormalized(instance = "") {
+  if (!instance) return null;
+  const s = String(instance).toLowerCase().replace(/^standard_/, "");
+  const parts = s.split("_").filter(Boolean);
+  const gen = (parts.find(p => /^v\d+/i.test(p)) || "").toLowerCase(); // v5/v6
+
+  const base = parts[0] || "";
+  const m = /^([a-z])(\d+)([a-z]+)?/i.exec(base);
+  if (!m) return gen || null;
+
+  const fam = m[1].toUpperCase();          // D/E/F/…
+  const sub = (m[3] || "").toLowerCase();  // s / as / ads / ls / …
+  const subLabel = sub ? `-${sub}` : "";
+  return `${fam}${subLabel} ${gen || ""}`.trim();
+}
+
+/**
+ * Azure-calculator-style series label: "standard_d2als_v6" -> "Dalsv6-series"
+ * Matches how Azure lists series in the Pricing Calculator.
+ */
+function azureSeriesNameFromNormalized(instance = "") {
+  if (!instance) return null;
+
+  let s = String(instance).toLowerCase();
+  if (s.startsWith("standard_")) s = s.slice(9);
+
+  // Example tokens: ["d2als", "v6"]
+  const parts = s.split("_").filter(Boolean);
+  if (parts.length === 0) return null;
+
+  const base = parts[0];          // e.g., d2als
+  const gen  = parts[1] || "";    // v6
+
+  // Extract family + sub-series (letters after the size digits)
+  // Pattern: first letter = family, numbers = size, trailing letters = sub-series
+  const m = /^([a-z])(\d+)([a-z]+)?/.exec(base);
+  if (!m) return null;
+
+  const fam = m[1].toUpperCase();       // D / E / F / M ...
+  const sub = (m[3] || "").toLowerCase();  // s / as / ads / als / ls / ...
+
+  const series = sub ? `${fam}${sub}${gen}` : `${fam}${gen}`;
+  return `${series}-series`;
+}
+
 module.exports = {
   // OS & retail classifiers
   getRetailOsInfo,
@@ -195,5 +272,10 @@ module.exports = {
   isPrimaryOnDemandRetailItem,
 
   // ResourceSkus
-  getResourceSkusMap
+  getResourceSkusMap,
+
+  // UI naming helpers
+  azureDisplayNameFromNormalized,
+  azureSeriesFromNormalized,
+  azureSeriesNameFromNormalized
 };
