@@ -174,80 +174,76 @@ function widenAzureSeries(instance) {
 }
 
 /* ============================================================
- * UI-friendly naming helpers
+ * UI-friendly naming helpers (robust for multi-letter families)
  * ============================================================*/
 
 /**
- * Friendly display for UI: "standard_d2s_v5" -> "Standard D2s v5"
- * Preserves sub-series letters (s / as / ads / ls / pls / …).
+ * Internal: split normalized instance into {family, sizeNum, sub, gen}
+ * Examples:
+ *   "d2s_v5"    -> { family:"d",  sizeNum:"2", sub:"s",   gen:"v5" }
+ *   "ec2as_v6"  -> { family:"ec", sizeNum:"2", sub:"as",  gen:"v6" }
+ *   "e4ads_v6"  -> { family:"e",  sizeNum:"4", sub:"ads", gen:"v6" }
+ *   "ls8_v3"    -> { family:"ls", sizeNum:"8", sub:"",    gen:"v3" }
  */
+function _parseAzureInstanceParts(instance = "") {
+  const s = String(instance).toLowerCase().replace(/^standard_/, "");
+  const parts = s.split("_").filter(Boolean);
+  const base = parts[0] || "";
+  const gen  = (parts.find(p => /^v\d+$/i.test(p)) || "").toLowerCase();
+
+  // family = 1+ letters, size = digits, sub = 0+ letters
+  const m = /^([a-z]+?)(\d+)([a-z]+)?$/.exec(base);
+  if (!m) return { family: "", sizeNum: "", sub: "", gen };
+  return { family: m[1] || "", sizeNum: m[2] || "", sub: m[3] || "", gen };
+}
+
+/** Friendly display for UI: "standard_ec2as_v6" -> "Standard EC2as v6" */
 function azureDisplayNameFromNormalized(instance = "") {
   if (!instance) return "";
   let s = String(instance);
   if (s.startsWith("standard_")) s = s.slice(9);
 
-  // tokens like: ["d2s","v5"] or ["d2as","v6"] or ["f4","v2"]
-  const parts = s.split("_").filter(Boolean);
-  if (parts.length === 0) return "Standard";
-
-  const capFirst = (t) => (t ? t[0].toUpperCase() + t.slice(1) : t);
-
-  if (parts.length === 1) {
-    return `Standard ${capFirst(parts[0])}`;
+  const { family, sizeNum, sub, gen } = _parseAzureInstanceParts(instance);
+  if (!family || !sizeNum) {
+    // Fallback (old behavior) if parse fails
+    const parts = s.split("_").filter(Boolean);
+    const capFirst = (t) => (t ? t[0].toUpperCase() + t.slice(1) : t);
+    if (parts.length === 0) return "Standard";
+    if (parts.length === 1) return `Standard ${capFirst(parts[0])}`;
+    const last = parts[parts.length - 1].toLowerCase();
+    const size = parts.slice(0, parts.length - 1).join("").toLowerCase();
+    return `Standard ${capFirst(size)} ${last}`;
   }
-  // Join everything except last part (usually generation) as size token
-  const gen = parts[parts.length - 1].toLowerCase();                  // v5, v6
-  const size = parts.slice(0, parts.length - 1).join("").toLowerCase(); // d2s, d2as
-  return `Standard ${capFirst(size)} ${gen}`;
+
+  const familyUC = family.toUpperCase(); // EC / DC / LS / D / E / F ...
+  const sizeStr  = `${familyUC}${sizeNum}${sub || ""}`;
+  return gen ? `Standard ${sizeStr} ${gen}` : `Standard ${sizeStr}`;
 }
 
 /**
- * Concise grouping label: "standard_d2as_v6" -> "D-as v6", "standard_f4_v2" -> "F v2"
- * Useful for badges/filters.
+ * Concise grouping label (badge):
+ *   "standard_ec2as_v6" -> "EC-as v6"
+ *   "standard_d2s_v5"   -> "D-s v5"
  */
 function azureSeriesFromNormalized(instance = "") {
-  if (!instance) return null;
-  const s = String(instance).toLowerCase().replace(/^standard_/, "");
-  const parts = s.split("_").filter(Boolean);
-  const gen = (parts.find(p => /^v\d+/i.test(p)) || "").toLowerCase(); // v5/v6
-
-  const base = parts[0] || "";
-  const m = /^([a-z])(\d+)([a-z]+)?/i.exec(base);
-  if (!m) return gen || null;
-
-  const fam = m[1].toUpperCase();          // D/E/F/…
-  const sub = (m[3] || "").toLowerCase();  // s / as / ads / ls / …
-  const subLabel = sub ? `-${sub}` : "";
-  return `${fam}${subLabel} ${gen || ""}`.trim();
+  const { family, sub, gen } = _parseAzureInstanceParts(instance);
+  if (!family) return gen || null;
+  const famUC = family.toUpperCase();
+  const subLabel = sub ? `-${sub.toLowerCase()}` : "";
+  return `${famUC}${subLabel} ${gen || ""}`.trim();
 }
 
 /**
- * Azure-calculator-style series label: "standard_d2als_v6" -> "Dalsv6-series"
- * Matches how Azure lists series in the Pricing Calculator.
+ * Azure-calculator-style series label:
+ *   "standard_ec2as_v6" -> "ECasv6-series"
+ *   "standard_d2s_v5"   -> "Dsv5-series"
  */
 function azureSeriesNameFromNormalized(instance = "") {
-  if (!instance) return null;
-
-  let s = String(instance).toLowerCase();
-  if (s.startsWith("standard_")) s = s.slice(9);
-
-  // Example tokens: ["d2als", "v6"]
-  const parts = s.split("_").filter(Boolean);
-  if (parts.length === 0) return null;
-
-  const base = parts[0];          // e.g., d2als
-  const gen  = parts[1] || "";    // v6
-
-  // Extract family + sub-series (letters after the size digits)
-  // Pattern: first letter = family, numbers = size, trailing letters = sub-series
-  const m = /^([a-z])(\d+)([a-z]+)?/.exec(base);
-  if (!m) return null;
-
-  const fam = m[1].toUpperCase();       // D / E / F / M ...
-  const sub = (m[3] || "").toLowerCase();  // s / as / ads / als / ls / ...
-
-  const series = sub ? `${fam}${sub}${gen}` : `${fam}${gen}`;
-  return `${series}-series`;
+  const { family, sub, gen } = _parseAzureInstanceParts(instance);
+  if (!family) return gen ? `${gen}-series` : null;
+  const famUC = family.toUpperCase();
+  const seriesCore = `${famUC}${(sub || "").toLowerCase()}${gen || ""}`;
+  return `${seriesCore}-series`;
 }
 
 module.exports = {
