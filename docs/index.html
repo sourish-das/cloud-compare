@@ -107,10 +107,13 @@
         </div>
       </div>
 
-      <!-- Compare button -->
-      <div>
-        <button id="compareBtn" onclick="compare(true)">Compare</button>
-      </div>
+     <!-- Compare + Export buttons (same grid cell) -->
+<div>
+  <div class="btn-row">
+    <button id="compareBtn" onclick="compare(true)" class="btn-eq">Compare</button>
+    <button id="downloadPdfBtn" type="button" class="btn-eq" disabled title="Run Compare first">Export PDF</button>
+  </div>
+</div>
 
     </div>
 
