@@ -1,5 +1,5 @@
 // scripts/providers/gcp.fetch.js
-"use strict";
+// Node 18+ (global fetch)
 
 const path = require("path");
 const {
@@ -11,166 +11,345 @@ const {
   uniqSortedNums
 } = require("../lib/common");
 
-const gcpLib = require("../lib/gcp");
+const {
+  CE_SERVICE_ID,
+  classifyGcpInstance,
+  extractHourlyPrice,
+  inferMachineType,
+  deriveVcpuRamFromType,
+  regionMatches,
+  isPerInstanceSku,
+  // FULL-mode helpers
+  getAccessTokenFromADC,
+  listRegionZones,
+  listZoneMachineTypes,
+  buildSeriesUnitRateMaps,
+  buildWindowsCoreRate,
+  // New helpers to keep Windows off Arm & simplify fetchers
+  isGcpArmMachineType
+} = require("../lib/gcp");
 
-// Configuration
+// Output & env
 const OUT      = process.env.OUTPUT_PATH || path.join("docs", "data", "gcp", "gcp.prices.json");
 const REGION   = process.env.GCP_REGION   || "us-east1";
 const CURRENCY = process.env.GCP_CURRENCY || "USD";
-const API_KEY  = process.env.GCP_PRICE_API_KEY;   // For Catalog API
-const PROJECT  = process.env.GCP_PROJECT_ID;      // For Compute API
+const API_KEY  = process.env.GCP_PRICE_API_KEY;   // Catalog API (public)
+const PROJECT  = process.env.GCP_PROJECT_ID;      // for Compute API fallback
 
-/**
- * Fetches SKUs from Cloud Billing Catalog API
- */
+// Catalog: list SKUs (paged) — prefer OAuth (Bearer) from OIDC; fall back to API key
 async function listSkus(serviceId, pageToken = "") {
-  const base = `https://cloudbilling.googleapis.com/v1/services/${serviceId}/skus?currencyCode=${encodeURIComponent(CURRENCY)}&pageSize=5000`;
+  const base =
+    `https://cloudbilling.googleapis.com/v1/services/${serviceId}/skus` +
+    `?currencyCode=${encodeURIComponent(CURRENCY)}&pageSize=5000`;
   const url = pageToken ? `${base}&pageToken=${encodeURIComponent(pageToken)}` : base;
 
-  const bearer = process.env.GCLOUD_ACCESS_TOKEN || process.env.GOOGLE_OAUTH_ACCESS_TOKEN || "";
+  const bearer =
+    process.env.GCLOUD_ACCESS_TOKEN ||
+    process.env.GOOGLE_OAUTH_ACCESS_TOKEN ||
+    "";
+
   const headers = bearer ? { Authorization: `Bearer ${bearer}` } : {};
   const finalUrl = bearer ? url : `${url}&key=${API_KEY}`;
+
+  console.log(`[GCP] Catalog auth: ${bearer ? "OAuth(Bearer)" : "API key"}`);
 
   const r = await fetch(finalUrl, { headers });
   if (!r.ok) {
     const txt = await r.text().catch(() => "");
-    throw new Error(`[GCP] Catalog API HTTP ${r.status}: ${txt}`);
+    throw new Error(`[GCP] skus HTTP ${r.status} ${txt}`);
   }
   return await r.json();
 }
 
 async function fetchGcpPrices() {
-  logStart(`[GCP] Fetching PAYG pricing for ${REGION}...`);
+  logStart("[GCP] Fetching PAYG pricing via Catalog API (with FULL-mode fallback)…");
 
-  // 1. Collect all SKUs for the Compute Engine service
+  if (!process.env.GCLOUD_ACCESS_TOKEN && !process.env.GCP_PRICE_API_KEY) {
+    throw new Error("[GCP] No Catalog credentials found (need GCLOUD_ACCESS_TOKEN or GCP_PRICE_API_KEY).");
+  }
+
+  // 1) Pull all SKUs for Compute Engine (Catalog)
   const allSkus = [];
   let pageToken = "";
   do {
-    const data = await listSkus(gcpLib.CE_SERVICE_ID, pageToken);
-    if (data.skus) allSkus.push(...data.skus);
-    pageToken = data.nextPageToken || "";
+    const { skus = [], nextPageToken } = await listSkus(CE_SERVICE_ID, pageToken);
+    allSkus.push(...skus);
+    pageToken = nextPageToken || "";
   } while (pageToken);
 
-  // 2. Build pricing maps using library helpers
-  const linuxSeriesRates = gcpLib.buildSeriesUnitRateMaps(allSkus, REGION);
-  const windowsCoreRate = gcpLib.buildWindowsCoreRate(allSkus, REGION);
+  // Build Linux unit-rate maps (Core/Ram per series) for fallback
+  const linuxSeriesRates = buildSeriesUnitRateMaps(allSkus, REGION);
 
-  console.log(`[GCP] Resolved unit rates for ${Object.keys(linuxSeriesRates).length} series.`);
-  console.log(`[GCP] Windows license rate: $${windowsCoreRate}/vCPU-hr`);
+  // Resolve Windows license per-vCPU rate (hybrid: Catalog if present; else public/env)
+  const windowsCoreRate = buildWindowsCoreRate(allSkus, REGION);
+  if (windowsCoreRate) {
+    console.log(`[GCP] Windows per-vCPU (license) rate: $${windowsCoreRate.toFixed(6)}/vCPU-hr`);
+  } else {
+    // Hybrid resolver returns a fallback when Catalog has no license SKU.
+    console.warn("[GCP] Windows per-vCPU rate not resolved; Windows synthesis will be skipped.");
+  }
 
-  // 3. Get Machine Types from Compute API (Source of Truth for shapes)
+  // Optional: force composition path via env (ignores lack of per-instance rows)
+  const FORCE_COMPOSE = String(process.env.GCP_FORCE_COMPOSE || "").toLowerCase() === "1";
+  if (FORCE_COMPOSE) {
+    console.log("[GCP] FORCE_COMPOSE=1 → will run composition fallback regardless of per-instance results.");
+  }
+
+  // 2) First pass: per‑instance SKUs (Linux + Windows)
   const gcp_price_list = {};
   let counter = 0;
 
-  if (!PROJECT) {
-    throw new Error("[GCP] GCP_PROJECT_ID is required for machine type scanning.");
-  }
+  for (const sku of allSkus) {
+    const cat = sku.category || {};
+    if (cat.resourceFamily !== "Compute") continue;
+    if (cat.usageType && !/OnDemand/i.test(cat.usageType)) continue; // On‑demand only
+    if (!regionMatches(sku.serviceRegions, REGION)) continue;
 
-  const token = await gcpLib.getAccessTokenFromADC();
-  const zones = await gcpLib.listRegionZones(PROJECT, REGION, token);
-  
-  const mtMap = new Map(); // name -> { vcpu, ram }
-  for (const zone of zones) {
-    const mts = await gcpLib.listZoneMachineTypes(PROJECT, zone, token);
-    for (const mt of mts) {
-      if (!mtMap.has(mt.name)) {
-        mtMap.set(mt.name, {
-          vcpu: Number(mt.guestCpus),
-          ram: Number(mt.memoryMb) / 1024
-        });
-      }
+    const mt = inferMachineType(sku);
+    if (!mt) continue;                   // includes exclusion of custom
+    if (!isPerInstanceSku(sku, mt)) continue;
+
+    const instTok = mt.replace(/-/g, "_").toUpperCase();
+    const fam = classifyGcpInstance(instTok);
+    if (!fam) continue;
+
+    const readable = (sku.description || sku.displayName || "");
+    const os    = /windows/i.test(readable) ? "Windows" : "Linux";
+    const price = extractHourlyPrice(sku.pricingInfo);
+    if (!(price > 0)) continue;
+
+    const a = sku.attributes || {};
+    let vcpu = a.vcpu ? Number(a.vcpu) : undefined;
+    let ram  = a.memoryGb ? Number(a.memoryGb) : undefined;
+    if (!vcpu || !ram) {
+      const d = deriveVcpuRamFromType(mt);
+      vcpu = vcpu || d.vcpu;
+      ram  = ram  || d.ram;
     }
+    if (!vcpu || !ram) continue;
+
+    const key = `sku_${++counter}`;
+    gcp_price_list[key] = {
+      region: REGION,
+      machine_type: mt,
+      os,
+      price_per_hour: price,
+      vcpu,
+      memory_gb: ram,
+      __src: "catalog"
+    };
   }
 
-  // 4. Synthesize rows by combining Shapes + Rates
-  for (const [name, hw] of mtMap.entries()) {
-    const instanceTok = name.replace(/-/g, "_").toUpperCase();
-    const category = gcpLib.classifyGcpInstance(instanceTok);
-    if (!category) continue;
+  // 3) Fallback: compose Linux prices using CPU/RAM unit rates + machineTypes.list
+  // Determine which Linux families are missing from the per-instance pass.
+  const entries = Object.values(gcp_price_list).filter(v => v.os === "Linux");
+  const haveLinuxGeneral = entries.some(v => {
+    const tok = v.machine_type.replace(/-/g, "_").toUpperCase();
+    return classifyGcpInstance(tok) === "general";
+  });
+  const haveLinuxCompute = entries.some(v => {
+    const tok = v.machine_type.replace(/-/g, "_").toUpperCase();
+    return classifyGcpInstance(tok) === "compute";
+  });
+  const haveLinuxMemory = entries.some(v => {
+    const tok = v.machine_type.replace(/-/g, "_").toUpperCase();
+    return classifyGcpInstance(tok) === "memory";
+  });
 
-    const series = name.split("-")[0].toLowerCase();
-    const rates = linuxSeriesRates[series];
+  // If per-instance produced nothing, compose ALL families.
+  // Else compose only the families that are missing.
+  const composeGeneral = FORCE_COMPOSE || (entries.length === 0 ? true : !haveLinuxGeneral);
+  const composeCompute = FORCE_COMPOSE || (entries.length === 0 ? true : !haveLinuxCompute);
+  const composeMemory  = FORCE_COMPOSE || (entries.length === 0 ? true : !haveLinuxMemory);
 
-    // Build Linux Row
-    if (rates && rates.core && rates.ram) {
-      const linuxPrice = (hw.vcpu * rates.core) + (hw.ram * rates.ram);
-      
-      const linuxKey = `sku_${++counter}`;
-      gcp_price_list[linuxKey] = {
-        region: REGION,
-        machine_type: name,
-        os: "Linux",
-        price_per_hour: linuxPrice,
-        vcpu: hw.vcpu,
-        memory_gb: hw.ram,
-        __src: "composed"
-      };
+  const NEED_COMPOSE = composeGeneral || composeCompute || composeMemory;
 
-      // Build Windows Row (Skip ARM series)
-      if (windowsCoreRate && !gcpLib.isGcpArmMachineType(name)) {
-        const winPrice = linuxPrice + (hw.vcpu * windowsCoreRate);
-        const winKey = `sku_${++counter}`;
-        gcp_price_list[winKey] = {
+  if (NEED_COMPOSE) {
+    if (!PROJECT) {
+      console.warn("[GCP] Fallback needed but GCP_PROJECT_ID not set; skipping composition.");
+    } else {
+      const token = await getAccessTokenFromADC(); // reads GCLOUD_ACCESS_TOKEN env
+      if (!token) throw new Error("[GCP] Missing OIDC access token in env (GCLOUD_ACCESS_TOKEN).");
+
+      const zones = await listRegionZones(PROJECT, REGION, token);
+      if (!zones.length) {
+        console.warn(`[GCP] No zones found under region prefix '${REGION}-' for project '${PROJECT}'.`);
+      }
+      const mtMap = new Map(); // machine_type -> { vcpu, ramGiB }
+
+      for (const z of zones) {
+        const mts = await listZoneMachineTypes(PROJECT, z, token);
+        for (const mt of mts) {
+          const name = String(mt.name).toLowerCase(); // e.g., n2-standard-4, m2-ultramem-208
+          if (!mtMap.has(name)) {
+            const vcpu   = Number(mt.guestCpus || 0);
+            const ramGiB = Number(mt.memoryMb || 0) / 1024;
+            if (vcpu > 0 && ramGiB > 0) mtMap.set(name, { vcpu, ramGiB });
+          }
+        }
+      }
+
+      for (const [mt, hw] of mtMap.entries()) {
+        const instTok = mt.replace(/-/g, "_").toUpperCase();
+        const fam = classifyGcpInstance(instTok);
+        if (!fam) continue;
+        if (fam === "general" && !composeGeneral) continue;
+        if (fam === "compute" && !composeCompute) continue;
+        if (fam === "memory"  && !composeMemory)  continue;
+
+        // series = token before first dash (e.g., 'n2', 'c3d', 'm2')
+        const series = mt.split("-")[0];
+        const rates  = linuxSeriesRates[series];
+        if (!rates || !rates.core || !rates.ram) continue;
+
+        const price = hw.vcpu * rates.core + hw.ramGiB * rates.ram;
+        if (!(price > 0)) continue;
+
+        const key = `sku_${++counter}`;
+        gcp_price_list[key] = {
           region: REGION,
-          machine_type: name,
-          os: "Windows",
-          price_per_hour: winPrice,
+          machine_type: mt,
+          os: "Linux",
+          price_per_hour: price,
           vcpu: hw.vcpu,
-          memory_gb: hw.ram,
-          __src: "composed+win"
+          memory_gb: hw.ramGiB,
+          __src: "composed"
         };
       }
     }
   }
 
-  logDone(`[GCP] Generated ${Object.keys(gcp_price_list).length} pricing entries.`);
+  // 4) Synthesize Windows rows from Linux base + per-vCPU Windows license (x86 only)
+  if (windowsCoreRate) {
+    const linuxEntries = Object.values(gcp_price_list).filter(v => v.os === "Linux");
+    // map of existing per-instance Windows rows (avoid adding duplicate synthesized if desired)
+    const existingWindows = new Set(
+      Object.values(gcp_price_list)
+        .filter(v => v.os === "Windows")
+        .map(v => `${v.machine_type}__${v.region}`)
+    );
+
+    let added = 0;
+    for (const base of linuxEntries) {
+      // Skip Arm machine types entirely for Windows (e.g., t2a-*, c4a-*, n4a-*, a4x-*)
+      if (isGcpArmMachineType(base.machine_type)) continue;
+
+      // If a Catalog Windows row already exists for the same mt+region, you can skip synthesis
+      const winKey = `${base.machine_type}__${base.region}`;
+      if (existingWindows.has(winKey)) continue;
+
+      const vcpu = Number(base.vcpu || 0);
+      const basePrice = Number(base.price_per_hour || 0);
+      if (!Number.isFinite(vcpu) || vcpu <= 0) continue;
+      if (!Number.isFinite(basePrice) || basePrice <= 0) continue;
+
+      const winPrice = basePrice + (vcpu * windowsCoreRate);
+      if (!Number.isFinite(winPrice) || winPrice <= 0) continue;
+
+      const key = `sku_${++counter}`;
+      gcp_price_list[key] = {
+        region: REGION,
+        machine_type: base.machine_type,
+        os: "Windows",
+        price_per_hour: winPrice,
+        vcpu: base.vcpu,
+        memory_gb: base.memory_gb,
+        __src: (base.__src || "catalog") + "+win"
+      };
+      added++;
+    }
+    console.log(`[GCP] Synthesized Windows rows: ${added}`);
+  }
+
+  if (Object.keys(gcp_price_list).length === 0) {
+    const sample = allSkus
+      .filter(s => (s.category?.resourceFamily === "Compute") && regionMatches(s.serviceRegions, REGION))
+      .slice(0, 15)
+      .map(s => s.description || s.displayName || null);
+    console.warn(
+      `[GCP] DEBUG: 0 rows after per-instance and composition in '${REGION}'. ` +
+      `Sample:\n${JSON.stringify(sample, null, 2)}`
+    );
+  }
+
+  logDone("[GCP] Pricing file loaded");
   return { gcp_price_list };
 }
 
 async function main() {
-  const data = await fetchGcpPrices();
-  const skus = data.gcp_price_list || {};
+  const json = await fetchGcpPrices();
+
   const rows = [];
+  const skus = json.gcp_price_list || {};
 
   for (const key in skus) {
     const item = skus[key];
+    if (!item || typeof item !== "object") continue;
+    if (!item.region || item.region !== REGION) continue;
+    if (!item.machine_type) continue;
+
     const instance = item.machine_type.replace(/-/g, "_");
-    const category = gcpLib.classifyGcpInstance(instance);
+    const category = classifyGcpInstance(instance);
+    if (!category) continue;
+
+    const os = item.os && item.os.toLowerCase().includes("win") ? "Windows" : "Linux";
+    const price = Number(item.price_per_hour);
+    if (!Number.isFinite(price) || price <= 0) continue;
+
+    const vcpu = Number(item.vcpu);
+    const ram  = Number(item.memory_gb);
+    if (!vcpu || !ram) continue;
+
+    // Enrichments for UI/troubleshooting
+    const series = String(item.machine_type).split("-")[0].toLowerCase(); // e.g., n2, c3d, m2
+    const arch = isGcpArmMachineType(item.machine_type) ? "arm" : "x86";
+    const source = item.__src || "catalog";
 
     rows.push({
       instance,
       category,
-      vcpu: item.vcpu,
-      ram: item.memory_gb,
-      pricePerHourUSD: Number(item.price_per_hour.toFixed(6)),
+      vcpu,
+      ram,
+      pricePerHourUSD: price,
       region: REGION,
-      os: item.os,
-      series: item.machine_type.split("-")[0].toLowerCase(),
-      arch: gcpLib.isGcpArmMachineType(item.machine_type) ? "arm" : "x86",
-      source: item.__src
+      os,
+      series,
+      arch,
+      source
     });
   }
 
-  const cheapest = dedupeCheapestByKey(rows, r => `${r.instance}-${r.region}-${r.os}`);
-  
+  const cheapest = dedupeCheapestByKey(
+    rows,
+    r => `${r.instance}-${r.region}-${r.os}`
+  );
+
+  // Quick category counts (nice for logs)
+  const counts = cheapest.reduce((acc, r) => {
+    acc[r.category] = (acc[r.category] || 0) + 1;
+    return acc;
+  }, {});
+  console.log("[GCP] category-counts:", counts, "region:", REGION);
+
+  console.log(`[GCP] collected=${rows.length}, cheapest=${cheapest.length}`);
   if (warnAndSkipWriteOnEmpty("GCP", cheapest)) return;
 
-  const output = {
-    meta: {
-      os: ["Linux", "Windows"],
-      vcpu: uniqSortedNums(cheapest.map(x => x.vcpu)),
-      ram: uniqSortedNums(cheapest.map(x => x.ram))
-    },
-    compute: cheapest,
-    storage: {
-      region: REGION,
-      ssd_per_gb_month: 0.17,
-      hdd_per_gb_month: 0.04
-    }
+  const meta = {
+    os: ["Linux", "Windows"],
+    vcpu: uniqSortedNums(cheapest.map(x => x.vcpu)),
+    ram:  uniqSortedNums(cheapest.map(x => x.ram))
   };
 
-  atomicWrite(OUT, output);
-  console.log(`✅ Successfully wrote ${cheapest.length} rows to ${OUT}`);
+  // Storage (public list prices converted to hourly in UI)
+  const storage = {
+    region: REGION,
+    ssd_per_gb_month: 0.17,
+    hdd_per_gb_month: 0.04
+  };
+
+  const out = { meta, compute: cheapest, storage };
+  atomicWrite(OUT, out);
+  console.log(`✅ Wrote ${OUT}`);
 }
 
 main().catch(e => {
