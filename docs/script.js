@@ -225,95 +225,177 @@ async function hydrateControlsFromMeta() {
    ---- Export results grid to PDF (Option B) ----
    (ADDED: placed just above compare() as requested)
    ======================================================================== */
+
 async function downloadResultsAsPdf() {
+  const fail = (msg, err) => {
+    if (err) console.error("[PDF Export] failed:", err);
+    else console.error("[PDF Export] failed:", msg);
+    alert(msg || "Sorry, PDF export failed. Please try again.");
+  };
+
   try {
     const { jsPDF } = window.jspdf || {};
-    if (!window.html2canvas || !jsPDF) {
-      alert("PDF export is not available. Please try again.");
-      return;
+    if (typeof window.html2canvas !== "function" || !jsPDF) {
+      return fail("PDF export is not available. Please try again.");
     }
 
-    // Capture ONLY the results grid (cards), not the entire page
     const grid = document.querySelector(".results");
-    const titleEl = document.querySelector("h2.app-title");
-    if (!grid) {
-      alert("Nothing to export yet. Please run Compare first.");
-      return;
-    }
+    if (!grid) return fail("Nothing to export yet. Please run Compare first.");
 
-    // Build a clean wrapper: optional title + cloned grid
+    const titleEl = document.querySelector("h2.app-title");
+
     const wrapper = document.createElement("div");
     wrapper.style.padding = "16px";
     wrapper.style.background = "#ffffff";
-    wrapper.style.width = `${grid.clientWidth}px`;
+    wrapper.style.display = "inline-block";
+    wrapper.style.position = "fixed";
+    wrapper.style.left = "-10000px";
 
+    const gridRect = grid.getBoundingClientRect();
+    const targetWidth = Math.max(320, Math.round(gridRect.width || grid.clientWidth || 800));
+    wrapper.style.width = `${targetWidth}px`;
+
+    // Plain text title (no gradients / color-mix)
     if (titleEl) {
-      const t = titleEl.cloneNode(true);
+      const t = document.createElement("h2");
+      t.textContent = titleEl.textContent || "Cloud Cost Comparator";
       t.style.margin = "0 0 12px 0";
+      t.style.fontFamily = "system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
+      t.style.fontWeight = "700";
+      t.style.fontSize = "18px";
+      t.style.lineHeight = "1.2";
+      t.style.color = "#111827";
+      t.style.background = "transparent";
       wrapper.appendChild(t);
     }
+
     const clone = grid.cloneNode(true);
+
+    // Strip <img> to avoid CORS/tainted canvas
+    clone.querySelectorAll("img").forEach(img => {
+      const ph = document.createElement("span");
+      ph.style.display = img.style.display || "inline-block";
+      ph.style.width = (img.width ? img.width + "px" : (img.style.width || "16px"));
+      ph.style.height = (img.height ? img.height + "px" : (img.style.height || "16px"));
+      ph.className = "no-export-img";
+      img.replaceWith(ph);
+    });
+
+    // Add clone first
     wrapper.appendChild(clone);
+
+    // Aggressive override: remove ANY gradient/background images including pseudo elements
+    const styleOverride = document.createElement("style");
+    styleOverride.textContent = `
+      .results, .results *,
+      .results *::before, .results *::after {
+        background: transparent !important;
+        background-image: none !important;
+        -webkit-background-clip: initial !important;
+        background-clip: initial !important;
+        box-shadow: none !important;
+      }
+    `;
+    wrapper.appendChild(styleOverride);
+
     document.body.appendChild(wrapper);
 
-    // High‑DPI render
-    const canvas = await html2canvas(wrapper, {
-      backgroundColor: "#ffffff",
-      scale: 2,
-      useCORS: true
-    });
-    const imgData = canvas.toDataURL("image/png");
+    // Also inline-clear any inline/background from elements in the cloned subtree
+    try {
+      wrapper.querySelectorAll('.results, .results *').forEach(el => {
+        el.style.background = 'transparent';
+        el.style.backgroundImage = 'none';
+        el.style.webkitBackgroundClip = 'initial';
+        el.style.backgroundClip = 'initial';
+        el.style.boxShadow = 'none';
+      });
+    } catch (e) {
+      console.warn('[PDF Export] inline cleanup skipped:', e);
+    }
 
-    // A4 pagination
+    const scale = Math.min(2, Math.max(1, window.devicePixelRatio || 1));
+    let canvas;
+    try {
+      canvas = await html2canvas(wrapper, {
+        backgroundColor: "#ffffff",
+        scale,
+        useCORS: true,
+        foreignObjectRendering: false,
+        ignoreElements: (el) => el.classList?.contains("no-export"),
+      });
+    } catch (e) {
+      document.body.removeChild(wrapper);
+      return fail("Sorry, PDF export failed (capture). Please try again.", e);
+    }
+
+    const cW = Math.max(1, canvas.width || 1);
+    const cH = Math.max(1, canvas.height || 1);
+
+    let imgData;
+    try {
+      imgData = canvas.toDataURL("image/png");
+    } catch (e) {
+      document.body.removeChild(wrapper);
+      return fail("Sorry, PDF export failed (image encoding).", e);
+    }
+
     const pdf = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
     const pageW = pdf.internal.pageSize.getWidth();
     const pageH = pdf.internal.pageSize.getHeight();
     const margin = 24;
     const printableH = pageH - margin * 2;
     const imgW = pageW - margin * 2;
-    const ratio = imgW / canvas.width;
-    const imgH = canvas.height * ratio;
 
-    if (imgH <= printableH) {
-      pdf.addImage(imgData, "PNG", margin, margin, imgW, imgH);
-    } else {
-      // Multi‑page slice
-      const pageCanvas = document.createElement("canvas");
-      pageCanvas.width = canvas.width;
-      pageCanvas.height = Math.round(printableH / ratio);
-      const pageCtx = pageCanvas.getContext("2d");
+    const ratio = imgW / cW;
+    const imgH = cH * ratio;
 
-      let srcY = 0;
-      let remaining = imgH;
+    try {
+      if (imgH <= printableH) {
+        pdf.addImage(imgData, "PNG", margin, margin, imgW, imgH);
+      } else {
+        const slicePx = Math.max(1, Math.floor(printableH / ratio));
+        const pageCanvas = document.createElement("canvas");
+        pageCanvas.width = cW;
+        pageCanvas.height = slicePx;
+        const pageCtx = pageCanvas.getContext("2d");
 
-      while (remaining > 0) {
-        pageCtx.clearRect(0, 0, pageCanvas.width, pageCanvas.height);
-        pageCtx.drawImage(
-          canvas,
-          0, srcY, pageCanvas.width, pageCanvas.height, // src
-          0, 0, pageCanvas.width, pageCanvas.height      // dst
-        );
-        const pageImg = pageCanvas.toDataURL("image/png");
-        pdf.addImage(pageImg, "PNG", margin, margin, imgW, printableH);
-        remaining -= printableH;
-        srcY += pageCanvas.height;
-        if (remaining > 0) pdf.addPage();
+        let srcY = 0;
+        let remaining = cH;
+
+        while (remaining > 0) {
+          pageCtx.clearRect(0, 0, pageCanvas.width, pageCanvas.height);
+          pageCtx.drawImage(
+            canvas,
+            0, srcY, cW, slicePx,
+            0, 0, cW, slicePx
+          );
+          const pageImg = pageCanvas.toDataURL("image/png");
+          pdf.addImage(pageImg, "PNG", margin, margin, imgW, printableH);
+          remaining -= slicePx;
+          srcY += slicePx;
+          if (remaining > 0) pdf.addPage();
+        }
       }
+    } catch (e) {
+      document.body.removeChild(wrapper);
+      return fail("Sorry, PDF export failed (pagination).", e);
     }
 
-    // Cleanup
     document.body.removeChild(wrapper);
 
-    // Filename including the current selection
     const os = document.getElementById("os")?.value || "OS";
     const v  = document.getElementById("cpu")?.value || "";
     const m  = document.getElementById("ram")?.value || "";
-    pdf.save(`cloud-compare_${os}_${v}vCPU_${m}GB.pdf`);
+    try {
+      pdf.save(`cloud-compare_${os}_${v}vCPU_${m}GB.pdf`);
+    } catch (e) {
+      return fail("Sorry, PDF export failed (save).", e);
+    }
   } catch (err) {
-    console.error("[PDF Export] failed:", err);
-    alert("Sorry, PDF export failed. Please try again.");
+    return fail("Sorry, PDF export failed. Please try again.", err);
   }
 }
+
 
 /* ========================================================================
    MAIN compare()
