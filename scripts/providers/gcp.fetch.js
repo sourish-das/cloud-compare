@@ -1,482 +1,212 @@
-// scripts/lib/gcp.js
-// Helpers for GCP Retail Prices + ResourceSkus enrichment
+// scripts/providers/gcp.fetch.js
+// Node 18+ (global fetch)
 "use strict";
 
-/**
- * Compute Engine service id for Catalog API (public SKUs).
- * Example: services/6F81-5844-456A
- */
-const CE_SERVICE_ID = "6F81-5844-456A";
-
-/* ============================================================
- * Family policy across clouds (strict mapping requested)
- * ============================================================ */
-const GCP_SERIES_ALLOW = {
-  general: ["C4D", "C4A", "C4", "N4", "N4D", "N4A", "C3", "C3D", "T2D", "T2A", "N2", "N2D", "N1", "E2"],
-  compute: ["C2", "C2D", "H3", "H4D"],
-  memory:  ["M1", "M2", "M3", "M4", "X4"]
-};
-
-// Arm-identifying series (keep in sync with UI/matchers)
-const ARM_SERIES = new Set(["t2a", "c4a", "n4a", "a4x"]);
-
-// IMPORTANT: Do NOT map STANDARD here. We decide STANDARD by series.
-const CLASS_TO_CATEGORY = {
-  HIGHCPU:  "compute",
-  HIGHMEM:  "memory",
-  ULTRAMEM: "memory",
-  MEGAMEM:  "memory"
-};
-
-const GCP_EXAMPLE_INSTANCES = {
-  general: ["c4-standard-4", "c4a-standard-4", "c4d-standard-4", "n4-standard-4", "n2-standard-4"],
-  compute: ["c2-standard-4", "c2d-standard-4", "h3-standard-4", "h4d-standard-4"],
-  memory:  ["m1-ultramem-40", "m2-ultramem-208", "m3-megamem-64", "m4-ultramem-40", "x4-megamem-64"]
-};
-
-/* ---------------------------
- * Classification & parsing
- * --------------------------- */
-
-function inferMachineType(sku) {
-  const attrs = sku?.attributes || {};
-  if (attrs.machineType) {
-    const mt = String(attrs.machineType).toLowerCase();
-    if (/^custom-/.test(mt)) return null; // exclude custom
-    return mt;
-  }
-  const s = String(sku?.description || sku?.displayName || "").toLowerCase();
-  // tokens include the series we care about
-  const re = /\b(m1|m2|m3|m4|x4|h4d|h3|c2d|c2|c3d|c3|c4d|c4a|c4|n4d|n4a|n4|n2d|n2|n1|e2|t2a|t2d)-(standard|highmem|highcpu|ultramem|megamem)-(\d+)\b/;
-  const m = s.match(re);
-  if (!m) return null;
-  return `${m[1]}-${m[2]}-${m[3]}`; // predefined only
-}
-
-function extractHourlyPrice(pricingInfo) {
-  for (const p of (pricingInfo || [])) {
-    const unit = p?.pricingExpression?.tieredRates?.[0]?.unitPrice;
-    if (!unit) continue;
-    const price = Number(unit.units || 0) + Number(unit.nanos || 0) / 1e9;
-    if (price > 0) return price;
-  }
-  return null;
-}
-
-/**
- * Derive vCPU/RAM from a predefined machine type string
- *
- * Realistic mapping used:
- *  - STANDARD -> 4 GiB per vCPU
- *  - HIGHMEM / ULTRAMEM / MEGAMEM -> 8 GiB per vCPU
- *  - HIGHCPU -> 2 GiB per vCPU
- * Memory-optimized series (M/X) avoid guessing RAM.
- */
-function deriveVcpuRamFromType(mt) {
-  if (!mt) return { vcpu: undefined, ram: undefined };
-  if (/^custom-/.test(mt)) return { vcpu: undefined, ram: undefined }; // exclude custom
-  const m = mt.match(/^(m1|m2|m3|m4|x4|h4d|h3|c2d|c2|c3d|c3|c4d|c4a|c4|n4d|n4a|n4|n2d|n2|n1|e2|t2a|t2d)-(standard|highmem|highcpu|ultramem|megamem)-(\d+)$/i);
-  if (!m) return { vcpu: undefined, ram: undefined };
-  const series = m[1].toLowerCase();
-  const cls = m[2].toLowerCase();
-  const vcpu = Number(m[3]);
-  if (!vcpu) return { vcpu: undefined, ram: undefined };
-
-  // Memory-optimized series: do not guess RAM (leave undefined)
-  if (series.startsWith("m") || series.startsWith("x")) return { vcpu, ram: undefined };
-
-  // STANDARD: 4 GiB per vCPU
-  if (cls.startsWith("standard")) return { vcpu, ram: vcpu * 4 };
-
-  // HIGHMEM / ULTRAMEM / MEGAMEM: 8 GiB per vCPU
-  if (cls.startsWith("highmem") || cls.startsWith("ultramem") || cls.startsWith("megamem")) {
-    return { vcpu, ram: vcpu * 8 };
-  }
-
-  // HIGHCPU: 2 GiB per vCPU
-  if (cls.startsWith("highcpu")) return { vcpu, ram: vcpu * 2 };
-
-  return { vcpu, ram: undefined };
-}
-
-/**
- * Region/geo matching for Catalog SKUs.
- * Accepts exact region, 'global', and 'us' for any 'us-*'.
- */
-function regionMatches(serviceRegions, region) {
-  const want = String(region || "").toLowerCase();
-  const set = new Set((serviceRegions || []).map(r => String(r).toLowerCase()));
-  if (set.has(want)) return true;
-  if (set.has("global")) return true;
-  if (want.startsWith("us-") && set.has("us")) return true;
-  return false;
-}
-
-function isPerInstanceSku(sku, machineType) {
-  const name = String(sku?.description || sku?.displayName || "");
-  if (!machineType) return false;
-  if (/^custom-/.test(machineType)) return false; // exclude custom
-  if (/\b(Core|vCPU|Ram|Memory|Sole\s*Tenancy|Sole\s*Tenant)\b/i.test(name)) return false; // unit or ST
-  const hasInstanceNoun = /\b(Instance|VM)\b/i.test(name);
-  const includesType = name.toLowerCase().includes(String(machineType).toLowerCase());
-  return hasInstanceNoun && includesType;
-}
-
-/**
- * Parse Catalog SKUs into { series: { core, ram } } map (Linux unit rates).
- * IMPORTANT: Do NOT require "instance|vm" — M-series unit SKUs often omit those words.
- */
-function parseSeriesUnitRate(sku) {
-  const name = (sku.description || sku.displayName || "").toLowerCase();
-  // Exclude Windows license SKUs (we handle those separately)
-  if (/windows.*license|license.*windows/i.test(name)) return null;
-
-  const m = name.match(
-    /\b(m1|m2|m3|m4|x4|h4d|h3|n1|n2d|n2|n4|e2|t2a|t2d|c2d|c2|c3d|c3|c4d|c4|c4a|c2)\b.*\b(core|vcpu|ram|memory|ultramem|megamem)\b/i
-  );
-  if (!m) return null;
-
-  const series = m[1].toLowerCase();
-  const kindRaw = m[2].toLowerCase();
-  const kind = /(ram|memory|ultramem|megamem)/.test(kindRaw) ? "ram" : "core";
-
-  const price = extractHourlyPrice(sku.pricingInfo);
-  if (!(price > 0)) return null;
-  return { series, kind, price };
-}
-
-function buildSeriesUnitRateMaps(allSkus, region) {
-  const maps = {};
-  for (const sku of (allSkus || [])) {
-    const cat = sku?.category || {};
-    if (cat.resourceFamily !== "Compute") continue;
-    if (cat.usageType && !/OnDemand/i.test(cat.usageType)) continue; // On‑demand only
-    if (!regionMatches(sku.serviceRegions, region)) continue;
-    const info = parseSeriesUnitRate(sku);
-    if (!info) continue;
-    if (!maps[info.series]) maps[info.series] = {};
-    maps[info.series][info.kind] = info.price;
-  }
-  return maps;
-}
-
-/* ============================================================
- * Windows per‑vCPU license resolver (Windows Standard)
- * ============================================================ */
-const WINDOWS_STANDARD_FALLBACK_RATE =
-  Number(process.env.GCP_WINDOWS_RATE_PER_VCPU || 0) || 0.046;
-
-function buildWindowsCoreRate(allSkus, region) {
-  const inRegion = (sku) => {
-    const cat = sku?.category || {};
-    if (cat.resourceFamily !== "Compute") return false;
-    if (cat.usageType && !/OnDemand/i.test(cat.usageType)) return false; // on‑demand only
-    return regionMatches(sku.serviceRegions, region);
-  };
-
-  // Exclusions that are never the Windows Server license core SKU
-  const BAD = /(byol|ram|memory|gpu|sole\s*tenan|local ssd|persistent disk|commitment|spot|preemptible|sles|rhel|sql|windows\s*(7|8|10|11))/i;
-
-  const candidates = [];
-
-  // Pass 1: strict — require windows + (license|licensing|core|vcpu)
-  for (const sku of (allSkus || [])) {
-    if (!inRegion(sku)) continue;
-    const name = (sku.description || sku.displayName || "").toLowerCase();
-    if (!/windows/.test(name)) continue;
-    if (!/(license|licensing|core|vcpu)/.test(name)) continue;
-    if (BAD.test(name)) continue;
-
-    const price = extractHourlyPrice(sku.pricingInfo);
-    if (price && price > 0) candidates.push({ price, name });
-  }
-
-  // Pass 2: relaxed — accept "paid/on‑demand/windows server" phrasing if strict found nothing
-  if (candidates.length === 0) {
-    for (const sku of (allSkus || [])) {
-      if (!inRegion(sku)) continue;
-      const name = (sku.description || sku.displayName || "").toLowerCase();
-      if (!/windows/.test(name)) continue;
-      if (BAD.test(name)) continue;
-      if (!/(paid|on-?demand|windows\s*server)/.test(name)) continue;
-
-      const price = extractHourlyPrice(sku.pricingInfo);
-      if (price && price > 0) candidates.push({ price, name });
-    }
-  }
-
-  if (process.env.GCP_DEBUG_WIN === "1") {
-    const sample = candidates
-      .slice(0, 10)
-      .map(c => ({ price: c.price, name: c.name }))
-      .sort((a, b) => a.price - b.price);
-    console.log("[GCP][WIN] candidate SKUs (sample):", JSON.stringify(sample, null, 2));
-  }
-
-  // Catalog candidate → pick the lowest positive price
-  if (candidates.length > 0) {
-    candidates.sort((a, b) => a.price - b.price);
-    return candidates[0].price;
-  }
-
-  // No Catalog license SKU in tenant → fallback to public/env Standard rate
-  if (process.env.GCP_DEBUG_WIN === "1") {
-    console.log(`[GCP][WIN] No Catalog license SKU found in '${region}'. Using fallback Standard rate $${WINDOWS_STANDARD_FALLBACK_RATE}/vCPU-hr`);
-  }
-  return WINDOWS_STANDARD_FALLBACK_RATE;
-}
-
-/* ============================================================
- * RHEL per‑instance image adder resolver (preferred)
- * ============================================================ */
-function buildRhelPerInstanceAdders(allSkus, region) {
-  const map = Object.create(null);
-  const inRegion = (sku) => {
-    const cat = sku?.category || {};
-    if (cat.resourceFamily !== "Compute") return false;
-    if (cat.usageType && !/OnDemand/i.test(cat.usageType)) return false;
-    return regionMatches(sku.serviceRegions, region);
-  };
-
-  for (const sku of (allSkus || [])) {
-    if (!inRegion(sku)) continue;
-    const name = String(sku.description || sku.displayName || "").toLowerCase();
-
-    // Must be RHEL premium image; exclude BYOL/variants and unrelated SKUs
-    if (!/(rhel|red\s*hat)/.test(name)) continue;
-    if (/(byol|sles|suse|windows|sql|sap|gpu|local ssd|persistent disk|commitment|spot|preemptible)/.test(name)) continue;
-
-    // Per-instance wording (we want image adders that mention Instance/VM)
-    if (!/\b(instance|vm)\b/.test(name)) continue;
-
-    // Extract machine type token (predefined)
-    const mt = inferMachineType(sku);
-    if (!mt) continue;
-
-    const price = extractHourlyPrice(sku.pricingInfo);
-    if (!(price > 0)) continue;
-
-    // Keep lowest adder if multiple SKUs match same machine type
-    const key = String(mt).toLowerCase();
-    if (!map[key] || price < map[key]) map[key] = price;
-  }
-
-  if (process.env.GCP_DEBUG_RHEL === "1") {
-    console.log("[GCP][RHEL] addon map sample:", JSON.stringify(Object.entries(map).slice(0, 20), null, 2));
-  }
-
-  return map;
-}
-
-/* ============================================================
- * OS classification (Linux, Windows, RHEL only)
- * ============================================================ */
-function classifyOsFromSku(sku) {
-  const name = (sku.description || sku.displayName || "").toLowerCase();
-
-  if (/windows/.test(name)) return "Windows";
-
-  if (/red\s*hat\s*enterprise\s*linux/i.test(name) || /\brhel\b/.test(name)) {
-    // Exclude SAP/HA/Extended Lifecycle variants
-    if (/sap|ha|update\s*services|extended\s*life/i.test(name)) return "Linux";
-    return "RHEL";
-  }
-
-  return "Linux";
-}
-
-/* ============================================================
- * Family classification (STRICT)
- * ============================================================ */
-function classifyGcpInstance(instance) {
-  if (!instance) return null;
-  const raw = String(instance);
-  if (/^custom-/i.test(raw)) return null; // exclude custom
-
-  // Normalize token: SERIES_CLASS_COUNT (e.g., N2_STANDARD_4)
-  const tok = raw.toUpperCase().replace(/-/g, "_");
-  const m = tok.match(/^([A-Z0-9]+)_(STANDARD|HIGHCPU|HIGHMEM|ULTRAMEM|MEGAMEM)_(\d+)$/);
-  if (!m) return null;
-
-  const series = m[1]; // e.g., N2, C4, M2
-  const cls = m[2];    // STANDARD, HIGHCPU, HIGHMEM, etc.
-
-  // Strict rules:
-  // 1) Non-standard classes only map when the series belongs to the matching allow list.
-  if (cls === "HIGHCPU") {
-    if (GCP_SERIES_ALLOW.compute.includes(series)) return "compute";
-    return null;
-  }
-  if (cls === "HIGHMEM" || cls === "ULTRAMEM" || cls === "MEGAMEM") {
-    if (GCP_SERIES_ALLOW.memory.includes(series)) return "memory";
-    return null;
-  }
-
-  // 2) STANDARD class: decide strictly by series membership only
-  if (GCP_SERIES_ALLOW.compute.includes(series)) return "compute";
-  if (GCP_SERIES_ALLOW.memory.includes(series))  return "memory";
-  if (GCP_SERIES_ALLOW.general.includes(series)) return "general";
-
-  // If series not recognized, return null (exclude from recommendations)
-  return null;
-}
-
-function getGcpAllowedPrefixes(category) {
-  return (GCP_SERIES_ALLOW[category] || []).map(s => s.toUpperCase());
-}
-
-/* ============================================================
- * Arm detection helpers
- * ============================================================ */
-function isGcpArmSeries(series) {
-  if (!series) return false;
-  return ARM_SERIES.has(String(series).toLowerCase());
-}
-
-function isGcpArmMachineType(machineType) {
-  if (!machineType) return false;
-  const m = String(machineType).toLowerCase().match(/^([a-z0-9]+)-[a-z]+[a-z0-9]*-\d+$/);
-  if (!m) return false;
-  return isGcpArmSeries(m[1]);
-}
-
-/* ============================================================
- * Base price computation (Linux) from series unit-rate maps
- * ============================================================ */
-function computeBaseHourlyFromUnitMaps(machineType, unitMaps) {
-  if (!machineType || !unitMaps) return { price: null, vcpu: undefined, ram: undefined };
-
-  const { vcpu, ram } = deriveVcpuRamFromType(machineType);
-  if (!Number.isFinite(vcpu) || !Number.isFinite(ram)) {
-    return { price: null, vcpu, ram };
-  }
-
-  const series = String(machineType).toLowerCase().split("-")[0];
-  const rates = unitMaps[series];
-  if (!rates) return { price: null, vcpu, ram };
-
-  const core = Number(rates.core);
-  const mem  = Number(rates.ram);
-  if (!Number.isFinite(core) || !Number.isFinite(mem)) {
-    return { price: null, vcpu, ram };
-  }
-
-  const price = (vcpu * core) + (ram * mem);
-  return { price, vcpu, ram };
-}
-
-/* ============================================================
- * Utility: normalize machine type for display
- * ============================================================ */
-function normalizeMachineTypeDisplay(name) {
-  if (name == null) return "";
-  return String(name).replace(/_/g, "-");
-}
-
-/* ============================================================
- * FULL-mode helpers (Compute API via OIDC)
- * ============================================================ */
-async function getAccessTokenFromADC() {
-  const token =
-    process.env.GCLOUD_ACCESS_TOKEN ||
-    process.env.GOOGLE_OAUTH_ACCESS_TOKEN || "";
-  if (!token) {
-    throw new Error(
-      "[GCP] No access token found in env. Ensure your workflow passes steps.auth.outputs.access_token to GCLOUD_ACCESS_TOKEN."
-    );
-  }
-  return token;
-}
-
-async function listRegionZones(projectId, region, accessToken) {
-  const url = `https://compute.googleapis.com/compute/v1/projects/${projectId}/zones`;
-  const zones = [];
-  let pageToken = "";
-  while (true) {
-    const pageUrl = pageToken ? `${url}?pageToken=${encodeURIComponent(pageToken)}` : url;
-    const r = await fetch(pageUrl, { headers: { Authorization: `Bearer ${accessToken}` } });
-    if (!r.ok) {
-      const txt = await r.text().catch(() => "");
-      throw new Error(`[GCP] zones.list HTTP ${r.status} ${txt}`);
-    }
-    const j = await r.json();
-    for (const z of j.items || []) {
-      const name = String(z.name || "").toLowerCase();
-      if (name.startsWith(`${region.toLowerCase()}-`)) zones.push(z.name);
-    }
-    if (!j.nextPageToken) break;
-    pageToken = j.nextPageToken;
-  }
-  return zones;
-}
-
-async function listZoneMachineTypes(projectId, zone, accessToken) {
-  const url = `https://compute.googleapis.com/compute/v1/projects/${projectId}/zones/${zone}/machineTypes`;
-  const mts = [];
-  let pageToken = "";
-  while (true) {
-    const pageUrl = pageToken ? `${url}?pageToken=${encodeURIComponent(pageToken)}` : url;
-    const r = await fetch(pageUrl, { headers: { Authorization: `Bearer ${accessToken}` } });
-    if (!r.ok) {
-      const txt = await r.text().catch(() => "");
-      throw new Error(`[GCP] machineTypes.list HTTP ${r.status} ${txt}`);
-    }
-    const j = await r.json();
-    for (const mt of j.items || []) {
-      const name = String(mt.name || "");
-      if (/^custom-/i.test(name)) continue; // exclude custom
-      if (!/^[a-z0-9]+-[a-z]+[a-z0-9]*-\d+$/i.test(name)) continue; // predefined shapes only
-      mts.push({ name, guestCpus: mt.guestCpus, memoryMb: mt.memoryMb });
-    }
-    if (!j.nextPageToken) break;
-    pageToken = j.nextPageToken;
-  }
-  return mts;
-}
-
-/* ============================================================
- * RHEL fallback constant (exported)
- * ============================================================ */
-const RHEL_FALLBACK_RATE_PER_VCPU =
-  Number(process.env.GCP_RHEL_RATE_PER_VCPU || 0) || 0.06;
-
-/* ============================================================
- * Exports
- * ============================================================ */
-module.exports = {
+const path = require("path");
+const {
+  atomicWrite,
+  dedupeCheapestByKey,
+  warnAndSkipWriteOnEmpty,
+  logStart,
+  logDone,
+  uniqSortedNums
+} = require("../lib/common");
+
+const {
   CE_SERVICE_ID,
-
-  // Classification & family
   classifyGcpInstance,
-  classifyOsFromSku,
-  getGcpAllowedPrefixes: (c) => (GCP_SERIES_ALLOW[c] || []).map(s => s.toUpperCase()),
-
-  // Pricing helpers
   extractHourlyPrice,
   inferMachineType,
   deriveVcpuRamFromType,
-  buildSeriesUnitRateMaps,
-  computeBaseHourlyFromUnitMaps,
-
-  // License resolvers
-  buildWindowsCoreRate,
-  WINDOWS_STANDARD_FALLBACK_RATE,
-  buildRhelPerInstanceAdders,
-  RHEL_FALLBACK_RATE_PER_VCPU,
-
-  // Region / zone helpers
   regionMatches,
+  isPerInstanceSku,
+  // FULL-mode helpers
   getAccessTokenFromADC,
   listRegionZones,
   listZoneMachineTypes,
+  buildSeriesUnitRateMaps,
+  buildWindowsCoreRate,
+  // RHEL per-instance adders (preferred) + fallback constant
+  buildRhelPerInstanceAdders,
+  RHEL_FALLBACK_RATE_PER_VCPU,
+  calculateRhelPrice, // Using the new tiered logic from lib
+  isGcpArmMachineType
+} = require("../lib/gcp");
 
-  // Arm helpers
-  isGcpArmSeries,
-  isGcpArmMachineType,
+// Output & env
+const OUT      = process.env.OUTPUT_PATH || path.join("docs", "data", "gcp", "gcp.prices.json");
+const REGION   = process.env.GCP_REGION   || "us-east1";
+const CURRENCY = process.env.GCP_CURRENCY || "USD";
+const API_KEY  = process.env.GCP_PRICE_API_KEY;   // Catalog API (public)
+const PROJECT  = process.env.GCP_PROJECT_ID;      // for Compute API fallback
 
-  // UI / display helper
-  normalizeMachineTypeDisplay,
+async function listSkus(serviceId, pageToken = "") {
+  const base = `https://cloudbilling.googleapis.com/v1/services/${serviceId}/skus?currencyCode=${encodeURIComponent(CURRENCY)}&pageSize=5000`;
+  const url = pageToken ? `${base}&pageToken=${encodeURIComponent(pageToken)}` : base;
 
-  // Examples & constants
-  GCP_EXAMPLE_INSTANCES
-};
+  const bearer = process.env.GCLOUD_ACCESS_TOKEN || process.env.GOOGLE_OAUTH_ACCESS_TOKEN || "";
+  const headers = bearer ? { Authorization: `Bearer ${bearer}` } : {};
+  const finalUrl = bearer ? url : `${url}&key=${API_KEY}`;
+
+  const r = await fetch(finalUrl, { headers });
+  if (!r.ok) {
+    const txt = await r.text().catch(() => "");
+    throw new Error(`[GCP] skus HTTP ${r.status} ${txt}`);
+  }
+  return await r.json();
+}
+
+async function fetchGcpPrices() {
+  logStart("[GCP] Fetching PAYG pricing with Dynamic Mapping and Tiered RHEL...");
+
+  if (!process.env.GCLOUD_ACCESS_TOKEN && !process.env.GCP_PRICE_API_KEY) {
+    throw new Error("[GCP] No Catalog credentials found.");
+  }
+
+  const allSkus = [];
+  let pageToken = "";
+  do {
+    const { skus = [], nextPageToken } = await listSkus(CE_SERVICE_ID, pageToken);
+    allSkus.push(...skus);
+    pageToken = nextPageToken || "";
+  } while (pageToken);
+
+  const linuxSeriesRates = buildSeriesUnitRateMaps(allSkus, REGION);
+  const windowsCoreRate = buildWindowsCoreRate(allSkus, REGION);
+  const rhelAdders = buildRhelPerInstanceAdders(allSkus, REGION) || {};
+
+  const gcp_price_list = {};
+  let counter = 0;
+
+  // 1) Catalog Pass (Per-instance Linux/Win/RHEL)
+  for (const sku of allSkus) {
+    if (!regionMatches(sku.serviceRegions, REGION)) continue;
+    const mt = inferMachineType(sku);
+    if (!mt || !isPerInstanceSku(sku, mt)) continue;
+
+    // Use our dynamic mapping check
+    const instTok = mt.replace(/-/g, "_").toUpperCase();
+    if (!classifyGcpInstance(instTok)) continue;
+
+    const readable = (sku.description || sku.displayName || "").toLowerCase();
+    let os = "Linux";
+    if (/windows/.test(readable)) os = "Windows";
+    else if (/(rhel|red\s*hat)/.test(readable)) os = "RHEL";
+
+    const price = extractHourlyPrice(sku.pricingInfo);
+    const { vcpu, ram } = deriveVcpuRamFromType(mt);
+    if (!(price > 0) || !vcpu || !ram) continue;
+
+    const key = `sku_${++counter}`;
+    gcp_price_list[key] = {
+      region: REGION, machine_type: mt, os, price_per_hour: price,
+      vcpu, memory_gb: ram, __src: "catalog"
+    };
+  }
+
+  // 2) Composition Pass (Missing shapes via Compute API)
+  if (PROJECT) {
+    const token = await getAccessTokenFromADC().catch(() => null);
+    if (token) {
+      const zones = await listRegionZones(PROJECT, REGION, token);
+      const mtMap = new Map();
+
+      for (const z of zones) {
+        const mts = await listZoneMachineTypes(PROJECT, z, token);
+        for (const mtObj of mts) {
+          if (!mtMap.has(mtObj.name)) {
+            mtMap.set(mtObj.name, { vcpu: mtObj.guestCpus, ram: mtObj.memoryMb / 1024 });
+          }
+        }
+      }
+
+      for (const [mt, hw] of mtMap.entries()) {
+        const instTok = mt.replace(/-/g, "_").toUpperCase();
+        if (!classifyGcpInstance(instTok)) continue;
+
+        const series = mt.split("-")[0];
+        const rates = linuxSeriesRates[series];
+        if (!rates || !rates.core || !rates.ram) continue;
+
+        const baseLinuxPrice = (hw.vcpu * rates.core) + (hw.ram * rates.ram);
+        const lKey = `sku_c_${++counter}`;
+        gcp_price_list[lKey] = {
+          region: REGION, machine_type: mt, os: "Linux",
+          price_per_hour: baseLinuxPrice, vcpu: hw.vcpu, memory_gb: hw.ram, __src: "composed"
+        };
+
+        // RHEL Synthesis: Priority 1: Per-instance adder, Priority 2: Tiered 2026 logic
+        const mtKey = mt.toLowerCase().replace(/_/g, "-");
+        const adder = rhelAdders[mtKey];
+        let rhelPrice;
+        
+        if (Number.isFinite(adder) && adder > 0) {
+          rhelPrice = baseLinuxPrice + adder;
+        } else {
+          rhelPrice = calculateRhelPrice(baseLinuxPrice, hw.vcpu);
+        }
+
+        const rKey = `sku_r_${++counter}`;
+        gcp_price_list[rKey] = {
+          region: REGION, machine_type: mt, os: "RHEL",
+          price_per_hour: rhelPrice, vcpu: hw.vcpu, memory_gb: hw.ram, __src: "composed+rhel"
+        };
+
+        // Windows Synthesis
+        if (windowsCoreRate && !isGcpArmMachineType(mt)) {
+          const wKey = `sku_w_${++counter}`;
+          gcp_price_list[wKey] = {
+            region: REGION, machine_type: mt, os: "Windows",
+            price_per_hour: baseLinuxPrice + (hw.vcpu * windowsCoreRate),
+            vcpu: hw.vcpu, memory_gb: hw.ram, __src: "composed+win"
+          };
+        }
+      }
+    }
+  }
+
+  logDone("[GCP] Pricing data collected.");
+  return { gcp_price_list };
+}
+
+async function main() {
+  const json = await fetchGcpPrices();
+  const rows = [];
+
+  for (const key in json.gcp_price_list) {
+    const item = json.gcp_price_list[key];
+    const instTok = item.machine_type.replace(/-/g, "_").toUpperCase();
+    const category = classifyGcpInstance(instTok);
+    if (!category) continue;
+
+    rows.push({
+      instance: item.machine_type,
+      category,
+      vcpu: item.vcpu,
+      ram: item.memory_gb,
+      pricePerHourUSD: item.price_per_hour,
+      region: REGION,
+      os: item.os,
+      series: item.machine_type.split("-")[0].toLowerCase(),
+      arch: isGcpArmMachineType(item.machine_type) ? "arm" : "x86",
+      source: item.__src
+    });
+  }
+
+  const cheapest = dedupeCheapestByKey(rows, r => `${r.instance}-${r.region}-${r.os}`);
+  
+  const out = {
+    meta: {
+      os: ["Linux", "Windows", "RHEL"],
+      vcpu: uniqSortedNums(cheapest.map(x => x.vcpu)),
+      ram: uniqSortedNums(cheapest.map(x => x.ram))
+    },
+    compute: cheapest,
+    storage: { region: REGION, ssd_per_gb_month: 0.17, hdd_per_gb_month: 0.04 }
+  };
+
+  atomicWrite(OUT, out);
+  console.log(`✅ Wrote ${cheapest.length} rows to ${OUT}`);
+}
+
+main().catch(e => { console.error(e); process.exit(1); });
