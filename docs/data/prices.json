@@ -38,6 +38,7 @@
       120,
       128,
       144,
+      160,
       176,
       180,
       192,
@@ -53,55 +54,74 @@
     ],
     "ram": [
       1.7,
+      1.7998046875,
       2,
+      3,
       3.5,
+      3.599609375,
       3.75,
       4,
       5.25,
       6,
       7,
+      7.2001953125,
       7.5,
       8,
       10.5,
       12,
+      13,
       14,
+      14.400390625,
       15,
       15.25,
       16,
       17.1,
       21,
       24,
+      26,
       28,
+      28.7998046875,
       30,
       30.5,
       31,
       32,
       34.2,
       42,
+      44,
       48,
+      52,
       55,
       56,
+      57.599609375,
+      59,
       60,
       61,
       62,
+      63,
       64,
       68.4,
       72,
+      80,
       84,
+      86.400390625,
       88,
       90,
       96,
+      104,
       110,
       112,
+      118,
       120,
       122,
       124,
+      126,
       128,
       140,
       144,
       160,
       168,
       176,
+      177,
       180,
       186,
       192,
@@ -118,9 +138,12 @@
       320,
       336,
       352,
+      354,
       360,
       372,
+      378,
       384,
+      416,
       432,
       437.5,
       440,
@@ -132,40 +155,52 @@
       512,
       540,
       576,
+      624,
       640,
       672,
       704,
+      708,
       720,
       744,
       756,
       768,
+      864,
       875,
       880,
       896,
       900,
+      961,
       974,
       976,
       1008,
       1024,
       1080,
+      1116,
       1344,
       1397,
       1408,
+      1433.599609375,
       1440,
       1488,
+      1512,
       1536,
       1792,
       1800,
       1832,
       1900,
+      1922,
       1946,
       1952,
       2048,
+      2232,
       2794,
       2850,
+      2880,
       2976,
+      3024,
       3072,
       3800,
+      3844,
       3892,
       3904,
       4096,
@@ -47487,7 +47522,7 @@
   ],
   "gcp": [
     {
-      "instance": "c2d-highcpu-112",
+      "instance": "c2d_highcpu_112",
       "category": "compute",
       "vcpu": 112,
       "ram": 224,
@@ -47499,7 +47534,7 @@
       "source": "composed"
     },
     {
-      "instance": "c2d-highcpu-16",
+      "instance": "c2d_highcpu_16",
       "category": "compute",
       "vcpu": 16,
       "ram": 32,
@@ -47511,7 +47546,7 @@
       "source": "composed"
     },
     {
-      "instance": "c2d-highcpu-2",
+      "instance": "c2d_highcpu_2",
       "category": "compute",
       "vcpu": 2,
       "ram": 4,
@@ -47523,7 +47558,7 @@
       "source": "composed"
     },
     {
-      "instance": "c2d-highcpu-32",
+      "instance": "c2d_highcpu_32",
       "category": "compute",
       "vcpu": 32,
       "ram": 64,
@@ -47535,7 +47570,7 @@
       "source": "composed"
     },
     {
-      "instance": "c2d-highcpu-4",
+      "instance": "c2d_highcpu_4",
       "category": "compute",
       "vcpu": 4,
       "ram": 8,
@@ -47547,7 +47582,7 @@
       "source": "composed"
     },
     {
-      "instance": "c2d-highcpu-56",
+      "instance": "c2d_highcpu_56",
       "category": "compute",
       "vcpu": 56,
       "ram": 112,
@@ -47559,7 +47594,7 @@
       "source": "composed"
     },
     {
-      "instance": "c2d-highcpu-8",
+      "instance": "c2d_highcpu_8",
       "category": "compute",
       "vcpu": 8,
       "ram": 16,
@@ -47571,7 +47606,91 @@
       "source": "composed"
     },
     {
-      "instance": "c2d-standard-112",
+      "instance": "c2d_highmem_112",
+      "category": "memory",
+      "vcpu": 112,
+      "ram": 896,
+      "pricePerHourUSD": 6.858319999999999,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c2d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c2d_highmem_16",
+      "category": "memory",
+      "vcpu": 16,
+      "ram": 128,
+      "pricePerHourUSD": 0.97976,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c2d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c2d_highmem_2",
+      "category": "memory",
+      "vcpu": 2,
+      "ram": 16,
+      "pricePerHourUSD": 0.12247,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c2d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c2d_highmem_32",
+      "category": "memory",
+      "vcpu": 32,
+      "ram": 256,
+      "pricePerHourUSD": 1.95952,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c2d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c2d_highmem_4",
+      "category": "memory",
+      "vcpu": 4,
+      "ram": 32,
+      "pricePerHourUSD": 0.24494,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c2d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c2d_highmem_56",
+      "category": "memory",
+      "vcpu": 56,
+      "ram": 448,
+      "pricePerHourUSD": 3.4291599999999995,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c2d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c2d_highmem_8",
+      "category": "memory",
+      "vcpu": 8,
+      "ram": 64,
+      "pricePerHourUSD": 0.48988,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c2d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c2d_standard_112",
       "category": "compute",
       "vcpu": 112,
       "ram": 448,
@@ -47583,7 +47702,7 @@
       "source": "composed"
     },
     {
-      "instance": "c2d-standard-16",
+      "instance": "c2d_standard_16",
       "category": "compute",
       "vcpu": 16,
       "ram": 64,
@@ -47595,7 +47714,7 @@
       "source": "composed"
     },
     {
-      "instance": "c2d-standard-2",
+      "instance": "c2d_standard_2",
       "category": "compute",
       "vcpu": 2,
       "ram": 8,
@@ -47607,7 +47726,7 @@
       "source": "composed"
     },
     {
-      "instance": "c2d-standard-32",
+      "instance": "c2d_standard_32",
       "category": "compute",
       "vcpu": 32,
       "ram": 128,
@@ -47619,7 +47738,7 @@
       "source": "composed"
     },
     {
-      "instance": "c2d-standard-4",
+      "instance": "c2d_standard_4",
       "category": "compute",
       "vcpu": 4,
       "ram": 16,
@@ -47631,7 +47750,7 @@
       "source": "composed"
     },
     {
-      "instance": "c2d-standard-56",
+      "instance": "c2d_standard_56",
       "category": "compute",
       "vcpu": 56,
       "ram": 224,
@@ -47643,7 +47762,7 @@
       "source": "composed"
     },
     {
-      "instance": "c2d-standard-8",
+      "instance": "c2d_standard_8",
       "category": "compute",
       "vcpu": 8,
       "ram": 32,
@@ -47655,8 +47774,152 @@
       "source": "composed"
     },
     {
-      "instance": "c3-standard-176",
-      "category": "general",
+      "instance": "c3_highcpu_176",
+      "category": "compute",
+      "vcpu": 176,
+      "ram": 352,
+      "pricePerHourUSD": 7.484576,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c3",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c3_highcpu_22",
+      "category": "compute",
+      "vcpu": 22,
+      "ram": 44,
+      "pricePerHourUSD": 0.935572,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c3",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c3_highcpu_4",
+      "category": "compute",
+      "vcpu": 4,
+      "ram": 8,
+      "pricePerHourUSD": 0.170104,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c3",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c3_highcpu_44",
+      "category": "compute",
+      "vcpu": 44,
+      "ram": 88,
+      "pricePerHourUSD": 1.871144,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c3",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c3_highcpu_8",
+      "category": "compute",
+      "vcpu": 8,
+      "ram": 16,
+      "pricePerHourUSD": 0.340208,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c3",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c3_highcpu_88",
+      "category": "compute",
+      "vcpu": 88,
+      "ram": 176,
+      "pricePerHourUSD": 3.742288,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c3",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c3_highmem_176",
+      "category": "memory",
+      "vcpu": 176,
+      "ram": 1408,
+      "pricePerHourUSD": 11.643104,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c3",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c3_highmem_22",
+      "category": "memory",
+      "vcpu": 22,
+      "ram": 176,
+      "pricePerHourUSD": 1.455388,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c3",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c3_highmem_4",
+      "category": "memory",
+      "vcpu": 4,
+      "ram": 32,
+      "pricePerHourUSD": 0.26461599999999996,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c3",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c3_highmem_44",
+      "category": "memory",
+      "vcpu": 44,
+      "ram": 352,
+      "pricePerHourUSD": 2.910776,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c3",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c3_highmem_8",
+      "category": "memory",
+      "vcpu": 8,
+      "ram": 64,
+      "pricePerHourUSD": 0.5292319999999999,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c3",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c3_highmem_88",
+      "category": "memory",
+      "vcpu": 88,
+      "ram": 704,
+      "pricePerHourUSD": 5.821552,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c3",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c3_standard_176",
+      "category": "compute",
       "vcpu": 176,
       "ram": 704,
       "pricePerHourUSD": 8.870752,
@@ -47667,8 +47930,8 @@
       "source": "composed"
     },
     {
-      "instance": "c3-standard-22",
-      "category": "general",
+      "instance": "c3_standard_22",
+      "category": "compute",
       "vcpu": 22,
       "ram": 88,
       "pricePerHourUSD": 1.108844,
@@ -47679,8 +47942,8 @@
       "source": "composed"
     },
     {
-      "instance": "c3-standard-4",
-      "category": "general",
+      "instance": "c3_standard_4",
+      "category": "compute",
       "vcpu": 4,
       "ram": 16,
       "pricePerHourUSD": 0.201608,
@@ -47691,8 +47954,8 @@
       "source": "composed"
     },
     {
-      "instance": "c3-standard-44",
-      "category": "general",
+      "instance": "c3_standard_44",
+      "category": "compute",
       "vcpu": 44,
       "ram": 176,
       "pricePerHourUSD": 2.217688,
@@ -47703,8 +47966,8 @@
       "source": "composed"
     },
     {
-      "instance": "c3-standard-8",
-      "category": "general",
+      "instance": "c3_standard_8",
+      "category": "compute",
       "vcpu": 8,
       "ram": 32,
       "pricePerHourUSD": 0.403216,
@@ -47715,8 +47978,8 @@
       "source": "composed"
     },
     {
-      "instance": "c3-standard-88",
-      "category": "general",
+      "instance": "c3_standard_88",
+      "category": "compute",
       "vcpu": 88,
       "ram": 352,
       "pricePerHourUSD": 4.435376,
@@ -47727,8 +47990,200 @@
       "source": "composed"
     },
     {
-      "instance": "c3d-standard-16",
-      "category": "general",
+      "instance": "c3d_highcpu_16",
+      "category": "compute",
+      "vcpu": 16,
+      "ram": 32,
+      "pricePerHourUSD": 0.599696,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c3d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c3d_highcpu_180",
+      "category": "compute",
+      "vcpu": 180,
+      "ram": 354,
+      "pricePerHourUSD": 6.722826,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c3d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c3d_highcpu_30",
+      "category": "compute",
+      "vcpu": 30,
+      "ram": 59,
+      "pricePerHourUSD": 1.120471,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c3d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c3d_highcpu_360",
+      "category": "compute",
+      "vcpu": 360,
+      "ram": 708,
+      "pricePerHourUSD": 13.445652,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c3d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c3d_highcpu_4",
+      "category": "compute",
+      "vcpu": 4,
+      "ram": 8,
+      "pricePerHourUSD": 0.149924,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c3d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c3d_highcpu_60",
+      "category": "compute",
+      "vcpu": 60,
+      "ram": 118,
+      "pricePerHourUSD": 2.240942,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c3d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c3d_highcpu_8",
+      "category": "compute",
+      "vcpu": 8,
+      "ram": 16,
+      "pricePerHourUSD": 0.299848,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c3d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c3d_highcpu_90",
+      "category": "compute",
+      "vcpu": 90,
+      "ram": 177,
+      "pricePerHourUSD": 3.361413,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c3d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c3d_highmem_16",
+      "category": "memory",
+      "vcpu": 16,
+      "ram": 128,
+      "pricePerHourUSD": 0.97976,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c3d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c3d_highmem_180",
+      "category": "memory",
+      "vcpu": 180,
+      "ram": 1440,
+      "pricePerHourUSD": 11.0223,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c3d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c3d_highmem_30",
+      "category": "memory",
+      "vcpu": 30,
+      "ram": 240,
+      "pricePerHourUSD": 1.83705,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c3d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c3d_highmem_360",
+      "category": "memory",
+      "vcpu": 360,
+      "ram": 2880,
+      "pricePerHourUSD": 22.0446,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c3d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c3d_highmem_4",
+      "category": "memory",
+      "vcpu": 4,
+      "ram": 32,
+      "pricePerHourUSD": 0.24494,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c3d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c3d_highmem_60",
+      "category": "memory",
+      "vcpu": 60,
+      "ram": 480,
+      "pricePerHourUSD": 3.6741,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c3d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c3d_highmem_8",
+      "category": "memory",
+      "vcpu": 8,
+      "ram": 64,
+      "pricePerHourUSD": 0.48988,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c3d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c3d_highmem_90",
+      "category": "memory",
+      "vcpu": 90,
+      "ram": 720,
+      "pricePerHourUSD": 5.51115,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c3d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c3d_standard_16",
+      "category": "compute",
       "vcpu": 16,
       "ram": 64,
       "pricePerHourUSD": 0.7263839999999999,
@@ -47739,8 +48194,8 @@
       "source": "composed"
     },
     {
-      "instance": "c3d-standard-180",
-      "category": "general",
+      "instance": "c3d_standard_180",
+      "category": "compute",
       "vcpu": 180,
       "ram": 720,
       "pricePerHourUSD": 8.17182,
@@ -47751,8 +48206,8 @@
       "source": "composed"
     },
     {
-      "instance": "c3d-standard-30",
-      "category": "general",
+      "instance": "c3d_standard_30",
+      "category": "compute",
       "vcpu": 30,
       "ram": 120,
       "pricePerHourUSD": 1.36197,
@@ -47763,8 +48218,8 @@
       "source": "composed"
     },
     {
-      "instance": "c3d-standard-360",
-      "category": "general",
+      "instance": "c3d_standard_360",
+      "category": "compute",
       "vcpu": 360,
       "ram": 1440,
       "pricePerHourUSD": 16.34364,
@@ -47775,8 +48230,8 @@
       "source": "composed"
     },
     {
-      "instance": "c3d-standard-4",
-      "category": "general",
+      "instance": "c3d_standard_4",
+      "category": "compute",
       "vcpu": 4,
       "ram": 16,
       "pricePerHourUSD": 0.18159599999999998,
@@ -47787,8 +48242,8 @@
       "source": "composed"
     },
     {
-      "instance": "c3d-standard-60",
-      "category": "general",
+      "instance": "c3d_standard_60",
+      "category": "compute",
       "vcpu": 60,
       "ram": 240,
       "pricePerHourUSD": 2.72394,
@@ -47799,8 +48254,8 @@
       "source": "composed"
     },
     {
-      "instance": "c3d-standard-8",
-      "category": "general",
+      "instance": "c3d_standard_8",
+      "category": "compute",
       "vcpu": 8,
       "ram": 32,
       "pricePerHourUSD": 0.36319199999999996,
@@ -47811,8 +48266,8 @@
       "source": "composed"
     },
     {
-      "instance": "c3d-standard-90",
-      "category": "general",
+      "instance": "c3d_standard_90",
+      "category": "compute",
       "vcpu": 90,
       "ram": 360,
       "pricePerHourUSD": 4.08591,
@@ -47823,8 +48278,272 @@
       "source": "composed"
     },
     {
-      "instance": "c4-standard-144",
-      "category": "general",
+      "instance": "c4_highcpu_144",
+      "category": "compute",
+      "vcpu": 144,
+      "ram": 288,
+      "pricePerHourUSD": 1.633104,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4_highcpu_16",
+      "category": "compute",
+      "vcpu": 16,
+      "ram": 32,
+      "pricePerHourUSD": 0.181456,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4_highcpu_192",
+      "category": "compute",
+      "vcpu": 192,
+      "ram": 384,
+      "pricePerHourUSD": 2.177472,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4_highcpu_2",
+      "category": "compute",
+      "vcpu": 2,
+      "ram": 4,
+      "pricePerHourUSD": 0.022682,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4_highcpu_24",
+      "category": "compute",
+      "vcpu": 24,
+      "ram": 48,
+      "pricePerHourUSD": 0.272184,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4_highcpu_288",
+      "category": "compute",
+      "vcpu": 288,
+      "ram": 576,
+      "pricePerHourUSD": 3.266208,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4_highcpu_32",
+      "category": "compute",
+      "vcpu": 32,
+      "ram": 64,
+      "pricePerHourUSD": 0.362912,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4_highcpu_4",
+      "category": "compute",
+      "vcpu": 4,
+      "ram": 8,
+      "pricePerHourUSD": 0.045364,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4_highcpu_48",
+      "category": "compute",
+      "vcpu": 48,
+      "ram": 96,
+      "pricePerHourUSD": 0.544368,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4_highcpu_8",
+      "category": "compute",
+      "vcpu": 8,
+      "ram": 16,
+      "pricePerHourUSD": 0.090728,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4_highcpu_96",
+      "category": "compute",
+      "vcpu": 96,
+      "ram": 192,
+      "pricePerHourUSD": 1.088736,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4_highmem_144",
+      "category": "memory",
+      "vcpu": 144,
+      "ram": 1116,
+      "pricePerHourUSD": 4.893768,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4_highmem_16",
+      "category": "memory",
+      "vcpu": 16,
+      "ram": 124,
+      "pricePerHourUSD": 0.543752,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4_highmem_192",
+      "category": "memory",
+      "vcpu": 192,
+      "ram": 1488,
+      "pricePerHourUSD": 6.525023999999999,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4_highmem_2",
+      "category": "memory",
+      "vcpu": 2,
+      "ram": 15,
+      "pricePerHourUSD": 0.066,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4_highmem_24",
+      "category": "memory",
+      "vcpu": 24,
+      "ram": 186,
+      "pricePerHourUSD": 0.8156279999999999,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4_highmem_288",
+      "category": "memory",
+      "vcpu": 288,
+      "ram": 2232,
+      "pricePerHourUSD": 9.787536,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4_highmem_32",
+      "category": "memory",
+      "vcpu": 32,
+      "ram": 248,
+      "pricePerHourUSD": 1.087504,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4_highmem_4",
+      "category": "memory",
+      "vcpu": 4,
+      "ram": 31,
+      "pricePerHourUSD": 0.135938,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4_highmem_48",
+      "category": "memory",
+      "vcpu": 48,
+      "ram": 372,
+      "pricePerHourUSD": 1.6312559999999998,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4_highmem_8",
+      "category": "memory",
+      "vcpu": 8,
+      "ram": 62,
+      "pricePerHourUSD": 0.271876,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4_highmem_96",
+      "category": "memory",
+      "vcpu": 96,
+      "ram": 744,
+      "pricePerHourUSD": 3.2625119999999996,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4_standard_144",
+      "category": "compute",
       "vcpu": 144,
       "ram": 540,
       "pricePerHourUSD": 2.6254799999999996,
@@ -47835,8 +48554,8 @@
       "source": "composed"
     },
     {
-      "instance": "c4-standard-16",
-      "category": "general",
+      "instance": "c4_standard_16",
+      "category": "compute",
       "vcpu": 16,
       "ram": 60,
       "pricePerHourUSD": 0.29172,
@@ -47847,8 +48566,8 @@
       "source": "composed"
     },
     {
-      "instance": "c4-standard-192",
-      "category": "general",
+      "instance": "c4_standard_192",
+      "category": "compute",
       "vcpu": 192,
       "ram": 720,
       "pricePerHourUSD": 3.5006399999999998,
@@ -47859,8 +48578,8 @@
       "source": "composed"
     },
     {
-      "instance": "c4-standard-2",
-      "category": "general",
+      "instance": "c4_standard_2",
+      "category": "compute",
       "vcpu": 2,
       "ram": 7,
       "pricePerHourUSD": 0.034496,
@@ -47871,8 +48590,8 @@
       "source": "composed"
     },
     {
-      "instance": "c4-standard-24",
-      "category": "general",
+      "instance": "c4_standard_24",
+      "category": "compute",
       "vcpu": 24,
       "ram": 90,
       "pricePerHourUSD": 0.43757999999999997,
@@ -47883,8 +48602,8 @@
       "source": "composed"
     },
     {
-      "instance": "c4-standard-288",
-      "category": "general",
+      "instance": "c4_standard_288",
+      "category": "compute",
       "vcpu": 288,
       "ram": 1080,
       "pricePerHourUSD": 5.250959999999999,
@@ -47895,8 +48614,8 @@
       "source": "composed"
     },
     {
-      "instance": "c4-standard-32",
-      "category": "general",
+      "instance": "c4_standard_32",
+      "category": "compute",
       "vcpu": 32,
       "ram": 120,
       "pricePerHourUSD": 0.58344,
@@ -47907,8 +48626,8 @@
       "source": "composed"
     },
     {
-      "instance": "c4-standard-4",
-      "category": "general",
+      "instance": "c4_standard_4",
+      "category": "compute",
       "vcpu": 4,
       "ram": 15,
       "pricePerHourUSD": 0.07293,
@@ -47919,8 +48638,8 @@
       "source": "composed"
     },
     {
-      "instance": "c4-standard-48",
-      "category": "general",
+      "instance": "c4_standard_48",
+      "category": "compute",
       "vcpu": 48,
       "ram": 180,
       "pricePerHourUSD": 0.8751599999999999,
@@ -47931,8 +48650,8 @@
       "source": "composed"
     },
     {
-      "instance": "c4-standard-8",
-      "category": "general",
+      "instance": "c4_standard_8",
+      "category": "compute",
       "vcpu": 8,
       "ram": 30,
       "pricePerHourUSD": 0.14586,
@@ -47943,8 +48662,8 @@
       "source": "composed"
     },
     {
-      "instance": "c4-standard-96",
-      "category": "general",
+      "instance": "c4_standard_96",
+      "category": "compute",
       "vcpu": 96,
       "ram": 360,
       "pricePerHourUSD": 1.7503199999999999,
@@ -47955,8 +48674,224 @@
       "source": "composed"
     },
     {
-      "instance": "c4a-standard-1",
-      "category": "general",
+      "instance": "c4a_highcpu_1",
+      "category": "compute",
+      "vcpu": 1,
+      "ram": 2,
+      "pricePerHourUSD": 0.03156,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4a",
+      "arch": "arm",
+      "source": "composed"
+    },
+    {
+      "instance": "c4a_highcpu_16",
+      "category": "compute",
+      "vcpu": 16,
+      "ram": 32,
+      "pricePerHourUSD": 0.50496,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4a",
+      "arch": "arm",
+      "source": "composed"
+    },
+    {
+      "instance": "c4a_highcpu_2",
+      "category": "compute",
+      "vcpu": 2,
+      "ram": 4,
+      "pricePerHourUSD": 0.06312,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4a",
+      "arch": "arm",
+      "source": "composed"
+    },
+    {
+      "instance": "c4a_highcpu_32",
+      "category": "compute",
+      "vcpu": 32,
+      "ram": 64,
+      "pricePerHourUSD": 1.00992,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4a",
+      "arch": "arm",
+      "source": "composed"
+    },
+    {
+      "instance": "c4a_highcpu_4",
+      "category": "compute",
+      "vcpu": 4,
+      "ram": 8,
+      "pricePerHourUSD": 0.12624,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4a",
+      "arch": "arm",
+      "source": "composed"
+    },
+    {
+      "instance": "c4a_highcpu_48",
+      "category": "compute",
+      "vcpu": 48,
+      "ram": 96,
+      "pricePerHourUSD": 1.51488,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4a",
+      "arch": "arm",
+      "source": "composed"
+    },
+    {
+      "instance": "c4a_highcpu_64",
+      "category": "compute",
+      "vcpu": 64,
+      "ram": 128,
+      "pricePerHourUSD": 2.01984,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4a",
+      "arch": "arm",
+      "source": "composed"
+    },
+    {
+      "instance": "c4a_highcpu_72",
+      "category": "compute",
+      "vcpu": 72,
+      "ram": 144,
+      "pricePerHourUSD": 2.2723199999999997,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4a",
+      "arch": "arm",
+      "source": "composed"
+    },
+    {
+      "instance": "c4a_highcpu_8",
+      "category": "compute",
+      "vcpu": 8,
+      "ram": 16,
+      "pricePerHourUSD": 0.25248,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4a",
+      "arch": "arm",
+      "source": "composed"
+    },
+    {
+      "instance": "c4a_highmem_1",
+      "category": "memory",
+      "vcpu": 1,
+      "ram": 8,
+      "pricePerHourUSD": 0.033659999999999995,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4a",
+      "arch": "arm",
+      "source": "composed"
+    },
+    {
+      "instance": "c4a_highmem_16",
+      "category": "memory",
+      "vcpu": 16,
+      "ram": 128,
+      "pricePerHourUSD": 0.5385599999999999,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4a",
+      "arch": "arm",
+      "source": "composed"
+    },
+    {
+      "instance": "c4a_highmem_2",
+      "category": "memory",
+      "vcpu": 2,
+      "ram": 16,
+      "pricePerHourUSD": 0.06731999999999999,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4a",
+      "arch": "arm",
+      "source": "composed"
+    },
+    {
+      "instance": "c4a_highmem_32",
+      "category": "memory",
+      "vcpu": 32,
+      "ram": 256,
+      "pricePerHourUSD": 1.0771199999999999,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4a",
+      "arch": "arm",
+      "source": "composed"
+    },
+    {
+      "instance": "c4a_highmem_4",
+      "category": "memory",
+      "vcpu": 4,
+      "ram": 32,
+      "pricePerHourUSD": 0.13463999999999998,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4a",
+      "arch": "arm",
+      "source": "composed"
+    },
+    {
+      "instance": "c4a_highmem_48",
+      "category": "memory",
+      "vcpu": 48,
+      "ram": 384,
+      "pricePerHourUSD": 1.61568,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4a",
+      "arch": "arm",
+      "source": "composed"
+    },
+    {
+      "instance": "c4a_highmem_64",
+      "category": "memory",
+      "vcpu": 64,
+      "ram": 512,
+      "pricePerHourUSD": 2.1542399999999997,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4a",
+      "arch": "arm",
+      "source": "composed"
+    },
+    {
+      "instance": "c4a_highmem_72",
+      "category": "memory",
+      "vcpu": 72,
+      "ram": 576,
+      "pricePerHourUSD": 2.42352,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4a",
+      "arch": "arm",
+      "source": "composed"
+    },
+    {
+      "instance": "c4a_highmem_8",
+      "category": "memory",
+      "vcpu": 8,
+      "ram": 64,
+      "pricePerHourUSD": 0.26927999999999996,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4a",
+      "arch": "arm",
+      "source": "composed"
+    },
+    {
+      "instance": "c4a_standard_1",
+      "category": "compute",
       "vcpu": 1,
       "ram": 4,
       "pricePerHourUSD": 0.03226,
@@ -47967,8 +48902,8 @@
       "source": "composed"
     },
     {
-      "instance": "c4a-standard-16",
-      "category": "general",
+      "instance": "c4a_standard_16",
+      "category": "compute",
       "vcpu": 16,
       "ram": 64,
       "pricePerHourUSD": 0.51616,
@@ -47979,8 +48914,8 @@
       "source": "composed"
     },
     {
-      "instance": "c4a-standard-2",
-      "category": "general",
+      "instance": "c4a_standard_2",
+      "category": "compute",
       "vcpu": 2,
       "ram": 8,
       "pricePerHourUSD": 0.06452,
@@ -47991,8 +48926,8 @@
       "source": "composed"
     },
     {
-      "instance": "c4a-standard-32",
-      "category": "general",
+      "instance": "c4a_standard_32",
+      "category": "compute",
       "vcpu": 32,
       "ram": 128,
       "pricePerHourUSD": 1.03232,
@@ -48003,8 +48938,8 @@
       "source": "composed"
     },
     {
-      "instance": "c4a-standard-4",
-      "category": "general",
+      "instance": "c4a_standard_4",
+      "category": "compute",
       "vcpu": 4,
       "ram": 16,
       "pricePerHourUSD": 0.12904,
@@ -48015,8 +48950,8 @@
       "source": "composed"
     },
     {
-      "instance": "c4a-standard-48",
-      "category": "general",
+      "instance": "c4a_standard_48",
+      "category": "compute",
       "vcpu": 48,
       "ram": 192,
       "pricePerHourUSD": 1.5484799999999999,
@@ -48027,8 +48962,8 @@
       "source": "composed"
     },
     {
-      "instance": "c4a-standard-64",
-      "category": "general",
+      "instance": "c4a_standard_64",
+      "category": "compute",
       "vcpu": 64,
       "ram": 256,
       "pricePerHourUSD": 2.06464,
@@ -48039,8 +48974,8 @@
       "source": "composed"
     },
     {
-      "instance": "c4a-standard-72",
-      "category": "general",
+      "instance": "c4a_standard_72",
+      "category": "compute",
       "vcpu": 72,
       "ram": 288,
       "pricePerHourUSD": 2.32272,
@@ -48051,8 +48986,8 @@
       "source": "composed"
     },
     {
-      "instance": "c4a-standard-8",
-      "category": "general",
+      "instance": "c4a_standard_8",
+      "category": "compute",
       "vcpu": 8,
       "ram": 32,
       "pricePerHourUSD": 0.25808,
@@ -48063,8 +48998,248 @@
       "source": "composed"
     },
     {
-      "instance": "c4d-standard-16",
-      "category": "general",
+      "instance": "c4d_highcpu_16",
+      "category": "compute",
+      "vcpu": 16,
+      "ram": 30,
+      "pricePerHourUSD": 0.5337435800000001,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4d_highcpu_192",
+      "category": "compute",
+      "vcpu": 192,
+      "ram": 360,
+      "pricePerHourUSD": 6.404922960000001,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4d_highcpu_2",
+      "category": "compute",
+      "vcpu": 2,
+      "ram": 3,
+      "pricePerHourUSD": 0.066455758,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4d_highcpu_32",
+      "category": "compute",
+      "vcpu": 32,
+      "ram": 60,
+      "pricePerHourUSD": 1.0674871600000002,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4d_highcpu_384",
+      "category": "compute",
+      "vcpu": 384,
+      "ram": 720,
+      "pricePerHourUSD": 12.809845920000003,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4d_highcpu_4",
+      "category": "compute",
+      "vcpu": 4,
+      "ram": 7,
+      "pricePerHourUSD": 0.13326110200000002,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4d_highcpu_48",
+      "category": "compute",
+      "vcpu": 48,
+      "ram": 90,
+      "pricePerHourUSD": 1.6012307400000003,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4d_highcpu_64",
+      "category": "compute",
+      "vcpu": 64,
+      "ram": 120,
+      "pricePerHourUSD": 2.1349743200000004,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4d_highcpu_8",
+      "category": "compute",
+      "vcpu": 8,
+      "ram": 15,
+      "pricePerHourUSD": 0.26687179000000005,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4d_highcpu_96",
+      "category": "compute",
+      "vcpu": 96,
+      "ram": 180,
+      "pricePerHourUSD": 3.2024614800000006,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4d_highmem_16",
+      "category": "memory",
+      "vcpu": 16,
+      "ram": 126,
+      "pricePerHourUSD": 0.567303836,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4d_highmem_192",
+      "category": "memory",
+      "vcpu": 192,
+      "ram": 1512,
+      "pricePerHourUSD": 6.807646032000001,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4d_highmem_2",
+      "category": "memory",
+      "vcpu": 2,
+      "ram": 15,
+      "pricePerHourUSD": 0.07065079,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4d_highmem_32",
+      "category": "memory",
+      "vcpu": 32,
+      "ram": 252,
+      "pricePerHourUSD": 1.134607672,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4d_highmem_384",
+      "category": "memory",
+      "vcpu": 384,
+      "ram": 3024,
+      "pricePerHourUSD": 13.615292064000002,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4d_highmem_4",
+      "category": "memory",
+      "vcpu": 4,
+      "ram": 31,
+      "pricePerHourUSD": 0.14165116600000002,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4d_highmem_48",
+      "category": "memory",
+      "vcpu": 48,
+      "ram": 378,
+      "pricePerHourUSD": 1.7019115080000002,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4d_highmem_64",
+      "category": "memory",
+      "vcpu": 64,
+      "ram": 504,
+      "pricePerHourUSD": 2.269215344,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4d_highmem_8",
+      "category": "memory",
+      "vcpu": 8,
+      "ram": 63,
+      "pricePerHourUSD": 0.283651918,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4d_highmem_96",
+      "category": "memory",
+      "vcpu": 96,
+      "ram": 756,
+      "pricePerHourUSD": 3.4038230160000005,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "c4d_standard_16",
+      "category": "compute",
       "vcpu": 16,
       "ram": 62,
       "pricePerHourUSD": 0.5449303320000001,
@@ -48075,8 +49250,8 @@
       "source": "composed"
     },
     {
-      "instance": "c4d-standard-192",
-      "category": "general",
+      "instance": "c4d_standard_192",
+      "category": "compute",
       "vcpu": 192,
       "ram": 744,
       "pricePerHourUSD": 6.539163984000001,
@@ -48087,8 +49262,8 @@
       "source": "composed"
     },
     {
-      "instance": "c4d-standard-2",
-      "category": "general",
+      "instance": "c4d_standard_2",
+      "category": "compute",
       "vcpu": 2,
       "ram": 7,
       "pricePerHourUSD": 0.06785410200000001,
@@ -48099,8 +49274,8 @@
       "source": "composed"
     },
     {
-      "instance": "c4d-standard-32",
-      "category": "general",
+      "instance": "c4d_standard_32",
+      "category": "compute",
       "vcpu": 32,
       "ram": 124,
       "pricePerHourUSD": 1.0898606640000001,
@@ -48111,8 +49286,8 @@
       "source": "composed"
     },
     {
-      "instance": "c4d-standard-384",
-      "category": "general",
+      "instance": "c4d_standard_384",
+      "category": "compute",
       "vcpu": 384,
       "ram": 1488,
       "pricePerHourUSD": 13.078327968000002,
@@ -48123,8 +49298,8 @@
       "source": "composed"
     },
     {
-      "instance": "c4d-standard-4",
-      "category": "general",
+      "instance": "c4d_standard_4",
+      "category": "compute",
       "vcpu": 4,
       "ram": 15,
       "pricePerHourUSD": 0.13605779,
@@ -48135,8 +49310,8 @@
       "source": "composed"
     },
     {
-      "instance": "c4d-standard-48",
-      "category": "general",
+      "instance": "c4d_standard_48",
+      "category": "compute",
       "vcpu": 48,
       "ram": 186,
       "pricePerHourUSD": 1.6347909960000002,
@@ -48147,8 +49322,8 @@
       "source": "composed"
     },
     {
-      "instance": "c4d-standard-64",
-      "category": "general",
+      "instance": "c4d_standard_64",
+      "category": "compute",
       "vcpu": 64,
       "ram": 248,
       "pricePerHourUSD": 2.1797213280000003,
@@ -48159,8 +49334,8 @@
       "source": "composed"
     },
     {
-      "instance": "c4d-standard-8",
-      "category": "general",
+      "instance": "c4d_standard_8",
+      "category": "compute",
       "vcpu": 8,
       "ram": 31,
       "pricePerHourUSD": 0.27246516600000004,
@@ -48171,8 +49346,8 @@
       "source": "composed"
     },
     {
-      "instance": "c4d-standard-96",
-      "category": "general",
+      "instance": "c4d_standard_96",
+      "category": "compute",
       "vcpu": 96,
       "ram": 372,
       "pricePerHourUSD": 3.2695819920000004,
@@ -48183,7 +49358,115 @@
       "source": "composed"
     },
     {
-      "instance": "e2-standard-16",
+      "instance": "e2_highcpu_16",
+      "category": "compute",
+      "vcpu": 16,
+      "ram": 16,
+      "pricePerHourUSD": 0.39576192,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "e2",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "e2_highcpu_2",
+      "category": "compute",
+      "vcpu": 2,
+      "ram": 2,
+      "pricePerHourUSD": 0.04947024,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "e2",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "e2_highcpu_32",
+      "category": "compute",
+      "vcpu": 32,
+      "ram": 32,
+      "pricePerHourUSD": 0.79152384,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "e2",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "e2_highcpu_4",
+      "category": "compute",
+      "vcpu": 4,
+      "ram": 4,
+      "pricePerHourUSD": 0.09894048,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "e2",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "e2_highcpu_8",
+      "category": "compute",
+      "vcpu": 8,
+      "ram": 8,
+      "pricePerHourUSD": 0.19788096,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "e2",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "e2_highmem_16",
+      "category": "memory",
+      "vcpu": 16,
+      "ram": 128,
+      "pricePerHourUSD": 0.7231972799999999,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "e2",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "e2_highmem_2",
+      "category": "memory",
+      "vcpu": 2,
+      "ram": 16,
+      "pricePerHourUSD": 0.09039965999999999,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "e2",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "e2_highmem_4",
+      "category": "memory",
+      "vcpu": 4,
+      "ram": 32,
+      "pricePerHourUSD": 0.18079931999999999,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "e2",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "e2_highmem_8",
+      "category": "memory",
+      "vcpu": 8,
+      "ram": 64,
+      "pricePerHourUSD": 0.36159863999999997,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "e2",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "e2_standard_16",
       "category": "general",
       "vcpu": 16,
       "ram": 64,
@@ -48195,7 +49478,7 @@
       "source": "composed"
     },
     {
-      "instance": "e2-standard-2",
+      "instance": "e2_standard_2",
       "category": "general",
       "vcpu": 2,
       "ram": 8,
@@ -48207,7 +49490,7 @@
       "source": "composed"
     },
     {
-      "instance": "e2-standard-32",
+      "instance": "e2_standard_32",
       "category": "general",
       "vcpu": 32,
       "ram": 128,
@@ -48219,7 +49502,7 @@
       "source": "composed"
     },
     {
-      "instance": "e2-standard-4",
+      "instance": "e2_standard_4",
       "category": "general",
       "vcpu": 4,
       "ram": 16,
@@ -48231,7 +49514,7 @@
       "source": "composed"
     },
     {
-      "instance": "e2-standard-8",
+      "instance": "e2_standard_8",
       "category": "general",
       "vcpu": 8,
       "ram": 32,
@@ -48243,7 +49526,7 @@
       "source": "composed"
     },
     {
-      "instance": "m3-megamem-128",
+      "instance": "m3_megamem_128",
       "category": "memory",
       "vcpu": 128,
       "ram": 1952,
@@ -48255,7 +49538,7 @@
       "source": "composed"
     },
     {
-      "instance": "m3-megamem-64",
+      "instance": "m3_megamem_64",
       "category": "memory",
       "vcpu": 64,
       "ram": 976,
@@ -48267,7 +49550,7 @@
       "source": "composed"
     },
     {
-      "instance": "m3-ultramem-128",
+      "instance": "m3_ultramem_128",
       "category": "memory",
       "vcpu": 128,
       "ram": 3904,
@@ -48279,7 +49562,7 @@
       "source": "composed"
     },
     {
-      "instance": "m3-ultramem-32",
+      "instance": "m3_ultramem_32",
       "category": "memory",
       "vcpu": 32,
       "ram": 976,
@@ -48291,7 +49574,7 @@
       "source": "composed"
     },
     {
-      "instance": "m3-ultramem-64",
+      "instance": "m3_ultramem_64",
       "category": "memory",
       "vcpu": 64,
       "ram": 1952,
@@ -48303,7 +49586,7 @@
       "source": "composed"
     },
     {
-      "instance": "m4-megamem-112",
+      "instance": "m4_megamem_112",
       "category": "memory",
       "vcpu": 112,
       "ram": 1488,
@@ -48315,7 +49598,7 @@
       "source": "composed"
     },
     {
-      "instance": "m4-megamem-224",
+      "instance": "m4_megamem_224",
       "category": "memory",
       "vcpu": 224,
       "ram": 2976,
@@ -48327,7 +49610,7 @@
       "source": "composed"
     },
     {
-      "instance": "m4-megamem-28",
+      "instance": "m4_megamem_28",
       "category": "memory",
       "vcpu": 28,
       "ram": 372,
@@ -48339,7 +49622,7 @@
       "source": "composed"
     },
     {
-      "instance": "m4-megamem-56",
+      "instance": "m4_megamem_56",
       "category": "memory",
       "vcpu": 56,
       "ram": 744,
@@ -48351,7 +49634,7 @@
       "source": "composed"
     },
     {
-      "instance": "m4-ultramem-112",
+      "instance": "m4_ultramem_112",
       "category": "memory",
       "vcpu": 112,
       "ram": 2976,
@@ -48363,7 +49646,7 @@
       "source": "composed"
     },
     {
-      "instance": "m4-ultramem-224",
+      "instance": "m4_ultramem_224",
       "category": "memory",
       "vcpu": 224,
       "ram": 5952,
@@ -48375,7 +49658,7 @@
       "source": "composed"
     },
     {
-      "instance": "m4-ultramem-56",
+      "instance": "m4_ultramem_56",
       "category": "memory",
       "vcpu": 56,
       "ram": 1488,
@@ -48387,7 +49670,187 @@
       "source": "composed"
     },
     {
-      "instance": "n1-standard-1",
+      "instance": "n1_highcpu_16",
+      "category": "compute",
+      "vcpu": 16,
+      "ram": 14.400390625,
+      "pricePerHourUSD": 0.566790455078125,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n1",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n1_highcpu_2",
+      "category": "compute",
+      "vcpu": 2,
+      "ram": 1.7998046875,
+      "pricePerHourUSD": 0.0708477724609375,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n1",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n1_highcpu_32",
+      "category": "compute",
+      "vcpu": 32,
+      "ram": 28.7998046875,
+      "pricePerHourUSD": 1.1335767724609376,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n1",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n1_highcpu_4",
+      "category": "compute",
+      "vcpu": 4,
+      "ram": 3.599609375,
+      "pricePerHourUSD": 0.141695544921875,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n1",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n1_highcpu_64",
+      "category": "compute",
+      "vcpu": 64,
+      "ram": 57.599609375,
+      "pricePerHourUSD": 2.267153544921875,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n1",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n1_highcpu_8",
+      "category": "compute",
+      "vcpu": 8,
+      "ram": 7.2001953125,
+      "pricePerHourUSD": 0.2833952275390625,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n1",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n1_highcpu_96",
+      "category": "compute",
+      "vcpu": 96,
+      "ram": 86.400390625,
+      "pricePerHourUSD": 3.400734455078125,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n1",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n1_highmem_16",
+      "category": "memory",
+      "vcpu": 16,
+      "ram": 104,
+      "pricePerHourUSD": 0.946424,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n1",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n1_highmem_2",
+      "category": "memory",
+      "vcpu": 2,
+      "ram": 13,
+      "pricePerHourUSD": 0.118303,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n1",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n1_highmem_32",
+      "category": "memory",
+      "vcpu": 32,
+      "ram": 208,
+      "pricePerHourUSD": 1.892848,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n1",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n1_highmem_4",
+      "category": "memory",
+      "vcpu": 4,
+      "ram": 26,
+      "pricePerHourUSD": 0.236606,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n1",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n1_highmem_64",
+      "category": "memory",
+      "vcpu": 64,
+      "ram": 416,
+      "pricePerHourUSD": 3.785696,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n1",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n1_highmem_8",
+      "category": "memory",
+      "vcpu": 8,
+      "ram": 52,
+      "pricePerHourUSD": 0.473212,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n1",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n1_highmem_96",
+      "category": "memory",
+      "vcpu": 96,
+      "ram": 624,
+      "pricePerHourUSD": 5.6785440000000005,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n1",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n1_megamem_96",
+      "category": "memory",
+      "vcpu": 96,
+      "ram": 1433.599609375,
+      "pricePerHourUSD": 9.108817544921877,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n1",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n1_standard_1",
       "category": "general",
       "vcpu": 1,
       "ram": 3.75,
@@ -48399,7 +49862,7 @@
       "source": "composed"
     },
     {
-      "instance": "n1-standard-16",
+      "instance": "n1_standard_16",
       "category": "general",
       "vcpu": 16,
       "ram": 60,
@@ -48411,7 +49874,7 @@
       "source": "composed"
     },
     {
-      "instance": "n1-standard-2",
+      "instance": "n1_standard_2",
       "category": "general",
       "vcpu": 2,
       "ram": 7.5,
@@ -48423,7 +49886,7 @@
       "source": "composed"
     },
     {
-      "instance": "n1-standard-32",
+      "instance": "n1_standard_32",
       "category": "general",
       "vcpu": 32,
       "ram": 120,
@@ -48435,7 +49898,7 @@
       "source": "composed"
     },
     {
-      "instance": "n1-standard-4",
+      "instance": "n1_standard_4",
       "category": "general",
       "vcpu": 4,
       "ram": 15,
@@ -48447,7 +49910,7 @@
       "source": "composed"
     },
     {
-      "instance": "n1-standard-64",
+      "instance": "n1_standard_64",
       "category": "general",
       "vcpu": 64,
       "ram": 240,
@@ -48459,7 +49922,7 @@
       "source": "composed"
     },
     {
-      "instance": "n1-standard-8",
+      "instance": "n1_standard_8",
       "category": "general",
       "vcpu": 8,
       "ram": 30,
@@ -48471,7 +49934,7 @@
       "source": "composed"
     },
     {
-      "instance": "n1-standard-96",
+      "instance": "n1_standard_96",
       "category": "general",
       "vcpu": 96,
       "ram": 360,
@@ -48483,7 +49946,271 @@
       "source": "composed"
     },
     {
-      "instance": "n2-standard-128",
+      "instance": "n1_ultramem_160",
+      "category": "memory",
+      "vcpu": 160,
+      "ram": 3844,
+      "pricePerHourUSD": 21.344788,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n1",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n1_ultramem_40",
+      "category": "memory",
+      "vcpu": 40,
+      "ram": 961,
+      "pricePerHourUSD": 5.336197,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n1",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n1_ultramem_80",
+      "category": "memory",
+      "vcpu": 80,
+      "ram": 1922,
+      "pricePerHourUSD": 10.672394,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n1",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2_highcpu_16",
+      "category": "compute",
+      "vcpu": 16,
+      "ram": 16,
+      "pricePerHourUSD": 0.658576,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2_highcpu_2",
+      "category": "compute",
+      "vcpu": 2,
+      "ram": 2,
+      "pricePerHourUSD": 0.082322,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2_highcpu_32",
+      "category": "compute",
+      "vcpu": 32,
+      "ram": 32,
+      "pricePerHourUSD": 1.317152,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2_highcpu_4",
+      "category": "compute",
+      "vcpu": 4,
+      "ram": 4,
+      "pricePerHourUSD": 0.164644,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2_highcpu_48",
+      "category": "compute",
+      "vcpu": 48,
+      "ram": 48,
+      "pricePerHourUSD": 1.975728,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2_highcpu_64",
+      "category": "compute",
+      "vcpu": 64,
+      "ram": 64,
+      "pricePerHourUSD": 2.634304,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2_highcpu_8",
+      "category": "compute",
+      "vcpu": 8,
+      "ram": 8,
+      "pricePerHourUSD": 0.329288,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2_highcpu_80",
+      "category": "compute",
+      "vcpu": 80,
+      "ram": 80,
+      "pricePerHourUSD": 3.2928800000000003,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2_highcpu_96",
+      "category": "compute",
+      "vcpu": 96,
+      "ram": 96,
+      "pricePerHourUSD": 3.951456,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2_highmem_128",
+      "category": "memory",
+      "vcpu": 128,
+      "ram": 864,
+      "pricePerHourUSD": 12.297407999999999,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2_highmem_16",
+      "category": "memory",
+      "vcpu": 16,
+      "ram": 128,
+      "pricePerHourUSD": 1.728176,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2_highmem_2",
+      "category": "memory",
+      "vcpu": 2,
+      "ram": 16,
+      "pricePerHourUSD": 0.216022,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2_highmem_32",
+      "category": "memory",
+      "vcpu": 32,
+      "ram": 256,
+      "pricePerHourUSD": 3.456352,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2_highmem_4",
+      "category": "memory",
+      "vcpu": 4,
+      "ram": 32,
+      "pricePerHourUSD": 0.432044,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2_highmem_48",
+      "category": "memory",
+      "vcpu": 48,
+      "ram": 384,
+      "pricePerHourUSD": 5.184528,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2_highmem_64",
+      "category": "memory",
+      "vcpu": 64,
+      "ram": 512,
+      "pricePerHourUSD": 6.912704,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2_highmem_8",
+      "category": "memory",
+      "vcpu": 8,
+      "ram": 64,
+      "pricePerHourUSD": 0.864088,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2_highmem_80",
+      "category": "memory",
+      "vcpu": 80,
+      "ram": 640,
+      "pricePerHourUSD": 8.64088,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2_highmem_96",
+      "category": "memory",
+      "vcpu": 96,
+      "ram": 768,
+      "pricePerHourUSD": 10.369056,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2_standard_128",
       "category": "general",
       "vcpu": 128,
       "ram": 512,
@@ -48495,7 +50222,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2-standard-16",
+      "instance": "n2_standard_16",
       "category": "general",
       "vcpu": 16,
       "ram": 64,
@@ -48507,7 +50234,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2-standard-2",
+      "instance": "n2_standard_2",
       "category": "general",
       "vcpu": 2,
       "ram": 8,
@@ -48519,7 +50246,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2-standard-32",
+      "instance": "n2_standard_32",
       "category": "general",
       "vcpu": 32,
       "ram": 128,
@@ -48531,7 +50258,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2-standard-4",
+      "instance": "n2_standard_4",
       "category": "general",
       "vcpu": 4,
       "ram": 16,
@@ -48543,7 +50270,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2-standard-48",
+      "instance": "n2_standard_48",
       "category": "general",
       "vcpu": 48,
       "ram": 192,
@@ -48555,7 +50282,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2-standard-64",
+      "instance": "n2_standard_64",
       "category": "general",
       "vcpu": 64,
       "ram": 256,
@@ -48567,7 +50294,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2-standard-8",
+      "instance": "n2_standard_8",
       "category": "general",
       "vcpu": 8,
       "ram": 32,
@@ -48579,7 +50306,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2-standard-80",
+      "instance": "n2_standard_80",
       "category": "general",
       "vcpu": 80,
       "ram": 320,
@@ -48591,7 +50318,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2-standard-96",
+      "instance": "n2_standard_96",
       "category": "general",
       "vcpu": 96,
       "ram": 384,
@@ -48603,7 +50330,247 @@
       "source": "composed"
     },
     {
-      "instance": "n2d-standard-128",
+      "instance": "n2d_highcpu_128",
+      "category": "compute",
+      "vcpu": 128,
+      "ram": 128,
+      "pricePerHourUSD": 3.6382079999999997,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2d_highcpu_16",
+      "category": "compute",
+      "vcpu": 16,
+      "ram": 16,
+      "pricePerHourUSD": 0.45477599999999996,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2d_highcpu_2",
+      "category": "compute",
+      "vcpu": 2,
+      "ram": 2,
+      "pricePerHourUSD": 0.056846999999999995,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2d_highcpu_224",
+      "category": "compute",
+      "vcpu": 224,
+      "ram": 224,
+      "pricePerHourUSD": 6.366864,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2d_highcpu_32",
+      "category": "compute",
+      "vcpu": 32,
+      "ram": 32,
+      "pricePerHourUSD": 0.9095519999999999,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2d_highcpu_4",
+      "category": "compute",
+      "vcpu": 4,
+      "ram": 4,
+      "pricePerHourUSD": 0.11369399999999999,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2d_highcpu_48",
+      "category": "compute",
+      "vcpu": 48,
+      "ram": 48,
+      "pricePerHourUSD": 1.364328,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2d_highcpu_64",
+      "category": "compute",
+      "vcpu": 64,
+      "ram": 64,
+      "pricePerHourUSD": 1.8191039999999998,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2d_highcpu_8",
+      "category": "compute",
+      "vcpu": 8,
+      "ram": 8,
+      "pricePerHourUSD": 0.22738799999999998,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2d_highcpu_80",
+      "category": "compute",
+      "vcpu": 80,
+      "ram": 80,
+      "pricePerHourUSD": 2.27388,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2d_highcpu_96",
+      "category": "compute",
+      "vcpu": 96,
+      "ram": 96,
+      "pricePerHourUSD": 2.728656,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2d_highmem_16",
+      "category": "memory",
+      "vcpu": 16,
+      "ram": 128,
+      "pricePerHourUSD": 0.557984,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2d_highmem_2",
+      "category": "memory",
+      "vcpu": 2,
+      "ram": 16,
+      "pricePerHourUSD": 0.069748,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2d_highmem_32",
+      "category": "memory",
+      "vcpu": 32,
+      "ram": 256,
+      "pricePerHourUSD": 1.115968,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2d_highmem_4",
+      "category": "memory",
+      "vcpu": 4,
+      "ram": 32,
+      "pricePerHourUSD": 0.139496,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2d_highmem_48",
+      "category": "memory",
+      "vcpu": 48,
+      "ram": 384,
+      "pricePerHourUSD": 1.6739519999999999,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2d_highmem_64",
+      "category": "memory",
+      "vcpu": 64,
+      "ram": 512,
+      "pricePerHourUSD": 2.231936,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2d_highmem_8",
+      "category": "memory",
+      "vcpu": 8,
+      "ram": 64,
+      "pricePerHourUSD": 0.278992,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2d_highmem_80",
+      "category": "memory",
+      "vcpu": 80,
+      "ram": 640,
+      "pricePerHourUSD": 2.78992,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2d_highmem_96",
+      "category": "memory",
+      "vcpu": 96,
+      "ram": 768,
+      "pricePerHourUSD": 3.3479039999999998,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n2d_standard_128",
       "category": "general",
       "vcpu": 128,
       "ram": 512,
@@ -48615,7 +50582,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d-standard-16",
+      "instance": "n2d_standard_16",
       "category": "general",
       "vcpu": 16,
       "ram": 64,
@@ -48627,7 +50594,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d-standard-2",
+      "instance": "n2d_standard_2",
       "category": "general",
       "vcpu": 2,
       "ram": 8,
@@ -48639,7 +50606,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d-standard-224",
+      "instance": "n2d_standard_224",
       "category": "general",
       "vcpu": 224,
       "ram": 896,
@@ -48651,7 +50618,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d-standard-32",
+      "instance": "n2d_standard_32",
       "category": "general",
       "vcpu": 32,
       "ram": 128,
@@ -48663,7 +50630,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d-standard-4",
+      "instance": "n2d_standard_4",
       "category": "general",
       "vcpu": 4,
       "ram": 16,
@@ -48675,7 +50642,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d-standard-48",
+      "instance": "n2d_standard_48",
       "category": "general",
       "vcpu": 48,
       "ram": 192,
@@ -48687,7 +50654,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d-standard-64",
+      "instance": "n2d_standard_64",
       "category": "general",
       "vcpu": 64,
       "ram": 256,
@@ -48699,7 +50666,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d-standard-8",
+      "instance": "n2d_standard_8",
       "category": "general",
       "vcpu": 8,
       "ram": 32,
@@ -48711,7 +50678,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d-standard-80",
+      "instance": "n2d_standard_80",
       "category": "general",
       "vcpu": 80,
       "ram": 320,
@@ -48723,7 +50690,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d-standard-96",
+      "instance": "n2d_standard_96",
       "category": "general",
       "vcpu": 96,
       "ram": 384,
@@ -48735,7 +50702,199 @@
       "source": "composed"
     },
     {
-      "instance": "n4-standard-16",
+      "instance": "n4_highcpu_16",
+      "category": "compute",
+      "vcpu": 16,
+      "ram": 32,
+      "pricePerHourUSD": 0.642944,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n4",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n4_highcpu_2",
+      "category": "compute",
+      "vcpu": 2,
+      "ram": 4,
+      "pricePerHourUSD": 0.080368,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n4",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n4_highcpu_32",
+      "category": "compute",
+      "vcpu": 32,
+      "ram": 64,
+      "pricePerHourUSD": 1.285888,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n4",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n4_highcpu_4",
+      "category": "compute",
+      "vcpu": 4,
+      "ram": 8,
+      "pricePerHourUSD": 0.160736,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n4",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n4_highcpu_48",
+      "category": "compute",
+      "vcpu": 48,
+      "ram": 96,
+      "pricePerHourUSD": 1.928832,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n4",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n4_highcpu_64",
+      "category": "compute",
+      "vcpu": 64,
+      "ram": 128,
+      "pricePerHourUSD": 2.571776,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n4",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n4_highcpu_8",
+      "category": "compute",
+      "vcpu": 8,
+      "ram": 16,
+      "pricePerHourUSD": 0.321472,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n4",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n4_highcpu_80",
+      "category": "compute",
+      "vcpu": 80,
+      "ram": 160,
+      "pricePerHourUSD": 3.21472,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n4",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n4_highmem_16",
+      "category": "memory",
+      "vcpu": 16,
+      "ram": 128,
+      "pricePerHourUSD": 0.999776,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n4",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n4_highmem_2",
+      "category": "memory",
+      "vcpu": 2,
+      "ram": 16,
+      "pricePerHourUSD": 0.124972,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n4",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n4_highmem_32",
+      "category": "memory",
+      "vcpu": 32,
+      "ram": 256,
+      "pricePerHourUSD": 1.999552,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n4",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n4_highmem_4",
+      "category": "memory",
+      "vcpu": 4,
+      "ram": 32,
+      "pricePerHourUSD": 0.249944,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n4",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n4_highmem_48",
+      "category": "memory",
+      "vcpu": 48,
+      "ram": 384,
+      "pricePerHourUSD": 2.999328,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n4",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n4_highmem_64",
+      "category": "memory",
+      "vcpu": 64,
+      "ram": 512,
+      "pricePerHourUSD": 3.999104,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n4",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n4_highmem_8",
+      "category": "memory",
+      "vcpu": 8,
+      "ram": 64,
+      "pricePerHourUSD": 0.499888,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n4",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n4_highmem_80",
+      "category": "memory",
+      "vcpu": 80,
+      "ram": 640,
+      "pricePerHourUSD": 4.99888,
+      "region": "us-east1",
+      "os": "Linux",
+      "series": "n4",
+      "arch": "x86",
+      "source": "composed"
+    },
+    {
+      "instance": "n4_standard_16",
       "category": "general",
       "vcpu": 16,
       "ram": 64,
@@ -48747,7 +50906,7 @@
       "source": "composed"
     },
     {
-      "instance": "n4-standard-2",
+      "instance": "n4_standard_2",
       "category": "general",
       "vcpu": 2,
       "ram": 8,
@@ -48759,7 +50918,7 @@
       "source": "composed"
     },
     {
-      "instance": "n4-standard-32",
+      "instance": "n4_standard_32",
       "category": "general",
       "vcpu": 32,
       "ram": 128,
@@ -48771,7 +50930,7 @@
       "source": "composed"
     },
     {
-      "instance": "n4-standard-4",
+      "instance": "n4_standard_4",
       "category": "general",
       "vcpu": 4,
       "ram": 16,
@@ -48783,7 +50942,7 @@
       "source": "composed"
     },
     {
-      "instance": "n4-standard-48",
+      "instance": "n4_standard_48",
       "category": "general",
       "vcpu": 48,
       "ram": 192,
@@ -48795,7 +50954,7 @@
       "source": "composed"
     },
     {
-      "instance": "n4-standard-64",
+      "instance": "n4_standard_64",
       "category": "general",
       "vcpu": 64,
       "ram": 256,
@@ -48807,7 +50966,7 @@
       "source": "composed"
     },
     {
-      "instance": "n4-standard-8",
+      "instance": "n4_standard_8",
       "category": "general",
       "vcpu": 8,
       "ram": 32,
@@ -48819,7 +50978,7 @@
       "source": "composed"
     },
     {
-      "instance": "n4-standard-80",
+      "instance": "n4_standard_80",
       "category": "general",
       "vcpu": 80,
       "ram": 320,
@@ -48831,7 +50990,7 @@
       "source": "composed"
     },
     {
-      "instance": "t2d-standard-1",
+      "instance": "t2d_standard_1",
       "category": "general",
       "vcpu": 1,
       "ram": 4,
@@ -48843,7 +51002,7 @@
       "source": "composed"
     },
     {
-      "instance": "t2d-standard-16",
+      "instance": "t2d_standard_16",
       "category": "general",
       "vcpu": 16,
       "ram": 64,
@@ -48855,7 +51014,7 @@
       "source": "composed"
     },
     {
-      "instance": "t2d-standard-2",
+      "instance": "t2d_standard_2",
       "category": "general",
       "vcpu": 2,
       "ram": 8,
@@ -48867,7 +51026,7 @@
       "source": "composed"
     },
     {
-      "instance": "t2d-standard-32",
+      "instance": "t2d_standard_32",
       "category": "general",
       "vcpu": 32,
       "ram": 128,
@@ -48879,7 +51038,7 @@
       "source": "composed"
     },
     {
-      "instance": "t2d-standard-4",
+      "instance": "t2d_standard_4",
       "category": "general",
       "vcpu": 4,
       "ram": 16,
@@ -48891,7 +51050,7 @@
       "source": "composed"
     },
     {
-      "instance": "t2d-standard-48",
+      "instance": "t2d_standard_48",
       "category": "general",
       "vcpu": 48,
       "ram": 192,
@@ -48903,7 +51062,7 @@
       "source": "composed"
     },
     {
-      "instance": "t2d-standard-60",
+      "instance": "t2d_standard_60",
       "category": "general",
       "vcpu": 60,
       "ram": 240,
@@ -48915,7 +51074,7 @@
       "source": "composed"
     },
     {
-      "instance": "t2d-standard-8",
+      "instance": "t2d_standard_8",
       "category": "general",
       "vcpu": 8,
       "ram": 32,
@@ -48927,7 +51086,7 @@
       "source": "composed"
     },
     {
-      "instance": "c2d-highcpu-112",
+      "instance": "c2d_highcpu_112",
       "category": "compute",
       "vcpu": 112,
       "ram": 224,
@@ -48939,7 +51098,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c2d-highcpu-16",
+      "instance": "c2d_highcpu_16",
       "category": "compute",
       "vcpu": 16,
       "ram": 32,
@@ -48951,7 +51110,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c2d-highcpu-2",
+      "instance": "c2d_highcpu_2",
       "category": "compute",
       "vcpu": 2,
       "ram": 4,
@@ -48963,7 +51122,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c2d-highcpu-32",
+      "instance": "c2d_highcpu_32",
       "category": "compute",
       "vcpu": 32,
       "ram": 64,
@@ -48975,7 +51134,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c2d-highcpu-4",
+      "instance": "c2d_highcpu_4",
       "category": "compute",
       "vcpu": 4,
       "ram": 8,
@@ -48987,7 +51146,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c2d-highcpu-56",
+      "instance": "c2d_highcpu_56",
       "category": "compute",
       "vcpu": 56,
       "ram": 112,
@@ -48999,7 +51158,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c2d-highcpu-8",
+      "instance": "c2d_highcpu_8",
       "category": "compute",
       "vcpu": 8,
       "ram": 16,
@@ -49011,7 +51170,91 @@
       "source": "composed+win"
     },
     {
-      "instance": "c2d-standard-112",
+      "instance": "c2d_highmem_112",
+      "category": "memory",
+      "vcpu": 112,
+      "ram": 896,
+      "pricePerHourUSD": 12.01032,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c2d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c2d_highmem_16",
+      "category": "memory",
+      "vcpu": 16,
+      "ram": 128,
+      "pricePerHourUSD": 1.71576,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c2d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c2d_highmem_2",
+      "category": "memory",
+      "vcpu": 2,
+      "ram": 16,
+      "pricePerHourUSD": 0.21447,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c2d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c2d_highmem_32",
+      "category": "memory",
+      "vcpu": 32,
+      "ram": 256,
+      "pricePerHourUSD": 3.43152,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c2d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c2d_highmem_4",
+      "category": "memory",
+      "vcpu": 4,
+      "ram": 32,
+      "pricePerHourUSD": 0.42894,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c2d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c2d_highmem_56",
+      "category": "memory",
+      "vcpu": 56,
+      "ram": 448,
+      "pricePerHourUSD": 6.00516,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c2d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c2d_highmem_8",
+      "category": "memory",
+      "vcpu": 8,
+      "ram": 64,
+      "pricePerHourUSD": 0.85788,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c2d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c2d_standard_112",
       "category": "compute",
       "vcpu": 112,
       "ram": 448,
@@ -49023,7 +51266,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c2d-standard-16",
+      "instance": "c2d_standard_16",
       "category": "compute",
       "vcpu": 16,
       "ram": 64,
@@ -49035,7 +51278,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c2d-standard-2",
+      "instance": "c2d_standard_2",
       "category": "compute",
       "vcpu": 2,
       "ram": 8,
@@ -49047,7 +51290,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c2d-standard-32",
+      "instance": "c2d_standard_32",
       "category": "compute",
       "vcpu": 32,
       "ram": 128,
@@ -49059,7 +51302,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c2d-standard-4",
+      "instance": "c2d_standard_4",
       "category": "compute",
       "vcpu": 4,
       "ram": 16,
@@ -49071,7 +51314,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c2d-standard-56",
+      "instance": "c2d_standard_56",
       "category": "compute",
       "vcpu": 56,
       "ram": 224,
@@ -49083,7 +51326,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c2d-standard-8",
+      "instance": "c2d_standard_8",
       "category": "compute",
       "vcpu": 8,
       "ram": 32,
@@ -49095,8 +51338,152 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3-standard-176",
-      "category": "general",
+      "instance": "c3_highcpu_176",
+      "category": "compute",
+      "vcpu": 176,
+      "ram": 352,
+      "pricePerHourUSD": 15.580576,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c3",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c3_highcpu_22",
+      "category": "compute",
+      "vcpu": 22,
+      "ram": 44,
+      "pricePerHourUSD": 1.947572,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c3",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c3_highcpu_4",
+      "category": "compute",
+      "vcpu": 4,
+      "ram": 8,
+      "pricePerHourUSD": 0.354104,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c3",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c3_highcpu_44",
+      "category": "compute",
+      "vcpu": 44,
+      "ram": 88,
+      "pricePerHourUSD": 3.895144,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c3",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c3_highcpu_8",
+      "category": "compute",
+      "vcpu": 8,
+      "ram": 16,
+      "pricePerHourUSD": 0.708208,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c3",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c3_highcpu_88",
+      "category": "compute",
+      "vcpu": 88,
+      "ram": 176,
+      "pricePerHourUSD": 7.790288,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c3",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c3_highmem_176",
+      "category": "memory",
+      "vcpu": 176,
+      "ram": 1408,
+      "pricePerHourUSD": 19.739103999999998,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c3",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c3_highmem_22",
+      "category": "memory",
+      "vcpu": 22,
+      "ram": 176,
+      "pricePerHourUSD": 2.4673879999999997,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c3",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c3_highmem_4",
+      "category": "memory",
+      "vcpu": 4,
+      "ram": 32,
+      "pricePerHourUSD": 0.44861599999999996,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c3",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c3_highmem_44",
+      "category": "memory",
+      "vcpu": 44,
+      "ram": 352,
+      "pricePerHourUSD": 4.934775999999999,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c3",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c3_highmem_8",
+      "category": "memory",
+      "vcpu": 8,
+      "ram": 64,
+      "pricePerHourUSD": 0.8972319999999999,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c3",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c3_highmem_88",
+      "category": "memory",
+      "vcpu": 88,
+      "ram": 704,
+      "pricePerHourUSD": 9.869551999999999,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c3",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c3_standard_176",
+      "category": "compute",
       "vcpu": 176,
       "ram": 704,
       "pricePerHourUSD": 16.966752,
@@ -49107,8 +51494,8 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3-standard-22",
-      "category": "general",
+      "instance": "c3_standard_22",
+      "category": "compute",
       "vcpu": 22,
       "ram": 88,
       "pricePerHourUSD": 2.120844,
@@ -49119,8 +51506,8 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3-standard-4",
-      "category": "general",
+      "instance": "c3_standard_4",
+      "category": "compute",
       "vcpu": 4,
       "ram": 16,
       "pricePerHourUSD": 0.385608,
@@ -49131,8 +51518,8 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3-standard-44",
-      "category": "general",
+      "instance": "c3_standard_44",
+      "category": "compute",
       "vcpu": 44,
       "ram": 176,
       "pricePerHourUSD": 4.241688,
@@ -49143,8 +51530,8 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3-standard-8",
-      "category": "general",
+      "instance": "c3_standard_8",
+      "category": "compute",
       "vcpu": 8,
       "ram": 32,
       "pricePerHourUSD": 0.771216,
@@ -49155,8 +51542,8 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3-standard-88",
-      "category": "general",
+      "instance": "c3_standard_88",
+      "category": "compute",
       "vcpu": 88,
       "ram": 352,
       "pricePerHourUSD": 8.483376,
@@ -49167,8 +51554,200 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3d-standard-16",
-      "category": "general",
+      "instance": "c3d_highcpu_16",
+      "category": "compute",
+      "vcpu": 16,
+      "ram": 32,
+      "pricePerHourUSD": 1.335696,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c3d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c3d_highcpu_180",
+      "category": "compute",
+      "vcpu": 180,
+      "ram": 354,
+      "pricePerHourUSD": 15.002825999999999,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c3d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c3d_highcpu_30",
+      "category": "compute",
+      "vcpu": 30,
+      "ram": 59,
+      "pricePerHourUSD": 2.500471,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c3d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c3d_highcpu_360",
+      "category": "compute",
+      "vcpu": 360,
+      "ram": 708,
+      "pricePerHourUSD": 30.005651999999998,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c3d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c3d_highcpu_4",
+      "category": "compute",
+      "vcpu": 4,
+      "ram": 8,
+      "pricePerHourUSD": 0.333924,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c3d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c3d_highcpu_60",
+      "category": "compute",
+      "vcpu": 60,
+      "ram": 118,
+      "pricePerHourUSD": 5.000942,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c3d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c3d_highcpu_8",
+      "category": "compute",
+      "vcpu": 8,
+      "ram": 16,
+      "pricePerHourUSD": 0.667848,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c3d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c3d_highcpu_90",
+      "category": "compute",
+      "vcpu": 90,
+      "ram": 177,
+      "pricePerHourUSD": 7.501412999999999,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c3d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c3d_highmem_16",
+      "category": "memory",
+      "vcpu": 16,
+      "ram": 128,
+      "pricePerHourUSD": 1.71576,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c3d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c3d_highmem_180",
+      "category": "memory",
+      "vcpu": 180,
+      "ram": 1440,
+      "pricePerHourUSD": 19.3023,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c3d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c3d_highmem_30",
+      "category": "memory",
+      "vcpu": 30,
+      "ram": 240,
+      "pricePerHourUSD": 3.21705,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c3d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c3d_highmem_360",
+      "category": "memory",
+      "vcpu": 360,
+      "ram": 2880,
+      "pricePerHourUSD": 38.6046,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c3d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c3d_highmem_4",
+      "category": "memory",
+      "vcpu": 4,
+      "ram": 32,
+      "pricePerHourUSD": 0.42894,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c3d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c3d_highmem_60",
+      "category": "memory",
+      "vcpu": 60,
+      "ram": 480,
+      "pricePerHourUSD": 6.4341,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c3d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c3d_highmem_8",
+      "category": "memory",
+      "vcpu": 8,
+      "ram": 64,
+      "pricePerHourUSD": 0.85788,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c3d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c3d_highmem_90",
+      "category": "memory",
+      "vcpu": 90,
+      "ram": 720,
+      "pricePerHourUSD": 9.65115,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c3d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c3d_standard_16",
+      "category": "compute",
       "vcpu": 16,
       "ram": 64,
       "pricePerHourUSD": 1.462384,
@@ -49179,8 +51758,8 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3d-standard-180",
-      "category": "general",
+      "instance": "c3d_standard_180",
+      "category": "compute",
       "vcpu": 180,
       "ram": 720,
       "pricePerHourUSD": 16.451819999999998,
@@ -49191,8 +51770,8 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3d-standard-30",
-      "category": "general",
+      "instance": "c3d_standard_30",
+      "category": "compute",
       "vcpu": 30,
       "ram": 120,
       "pricePerHourUSD": 2.74197,
@@ -49203,8 +51782,8 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3d-standard-360",
-      "category": "general",
+      "instance": "c3d_standard_360",
+      "category": "compute",
       "vcpu": 360,
       "ram": 1440,
       "pricePerHourUSD": 32.903639999999996,
@@ -49215,8 +51794,8 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3d-standard-4",
-      "category": "general",
+      "instance": "c3d_standard_4",
+      "category": "compute",
       "vcpu": 4,
       "ram": 16,
       "pricePerHourUSD": 0.365596,
@@ -49227,8 +51806,8 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3d-standard-60",
-      "category": "general",
+      "instance": "c3d_standard_60",
+      "category": "compute",
       "vcpu": 60,
       "ram": 240,
       "pricePerHourUSD": 5.48394,
@@ -49239,8 +51818,8 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3d-standard-8",
-      "category": "general",
+      "instance": "c3d_standard_8",
+      "category": "compute",
       "vcpu": 8,
       "ram": 32,
       "pricePerHourUSD": 0.731192,
@@ -49251,8 +51830,8 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3d-standard-90",
-      "category": "general",
+      "instance": "c3d_standard_90",
+      "category": "compute",
       "vcpu": 90,
       "ram": 360,
       "pricePerHourUSD": 8.225909999999999,
@@ -49263,8 +51842,272 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4-standard-144",
-      "category": "general",
+      "instance": "c4_highcpu_144",
+      "category": "compute",
+      "vcpu": 144,
+      "ram": 288,
+      "pricePerHourUSD": 8.257104,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4_highcpu_16",
+      "category": "compute",
+      "vcpu": 16,
+      "ram": 32,
+      "pricePerHourUSD": 0.917456,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4_highcpu_192",
+      "category": "compute",
+      "vcpu": 192,
+      "ram": 384,
+      "pricePerHourUSD": 11.009472,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4_highcpu_2",
+      "category": "compute",
+      "vcpu": 2,
+      "ram": 4,
+      "pricePerHourUSD": 0.114682,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4_highcpu_24",
+      "category": "compute",
+      "vcpu": 24,
+      "ram": 48,
+      "pricePerHourUSD": 1.376184,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4_highcpu_288",
+      "category": "compute",
+      "vcpu": 288,
+      "ram": 576,
+      "pricePerHourUSD": 16.514208,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4_highcpu_32",
+      "category": "compute",
+      "vcpu": 32,
+      "ram": 64,
+      "pricePerHourUSD": 1.834912,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4_highcpu_4",
+      "category": "compute",
+      "vcpu": 4,
+      "ram": 8,
+      "pricePerHourUSD": 0.229364,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4_highcpu_48",
+      "category": "compute",
+      "vcpu": 48,
+      "ram": 96,
+      "pricePerHourUSD": 2.752368,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4_highcpu_8",
+      "category": "compute",
+      "vcpu": 8,
+      "ram": 16,
+      "pricePerHourUSD": 0.458728,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4_highcpu_96",
+      "category": "compute",
+      "vcpu": 96,
+      "ram": 192,
+      "pricePerHourUSD": 5.504736,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4_highmem_144",
+      "category": "memory",
+      "vcpu": 144,
+      "ram": 1116,
+      "pricePerHourUSD": 11.517768,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4_highmem_16",
+      "category": "memory",
+      "vcpu": 16,
+      "ram": 124,
+      "pricePerHourUSD": 1.279752,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4_highmem_192",
+      "category": "memory",
+      "vcpu": 192,
+      "ram": 1488,
+      "pricePerHourUSD": 15.357024,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4_highmem_2",
+      "category": "memory",
+      "vcpu": 2,
+      "ram": 15,
+      "pricePerHourUSD": 0.158,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4_highmem_24",
+      "category": "memory",
+      "vcpu": 24,
+      "ram": 186,
+      "pricePerHourUSD": 1.919628,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4_highmem_288",
+      "category": "memory",
+      "vcpu": 288,
+      "ram": 2232,
+      "pricePerHourUSD": 23.035536,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4_highmem_32",
+      "category": "memory",
+      "vcpu": 32,
+      "ram": 248,
+      "pricePerHourUSD": 2.559504,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4_highmem_4",
+      "category": "memory",
+      "vcpu": 4,
+      "ram": 31,
+      "pricePerHourUSD": 0.319938,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4_highmem_48",
+      "category": "memory",
+      "vcpu": 48,
+      "ram": 372,
+      "pricePerHourUSD": 3.839256,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4_highmem_8",
+      "category": "memory",
+      "vcpu": 8,
+      "ram": 62,
+      "pricePerHourUSD": 0.639876,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4_highmem_96",
+      "category": "memory",
+      "vcpu": 96,
+      "ram": 744,
+      "pricePerHourUSD": 7.678512,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4_standard_144",
+      "category": "compute",
       "vcpu": 144,
       "ram": 540,
       "pricePerHourUSD": 9.249479999999998,
@@ -49275,8 +52118,8 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4-standard-16",
-      "category": "general",
+      "instance": "c4_standard_16",
+      "category": "compute",
       "vcpu": 16,
       "ram": 60,
       "pricePerHourUSD": 1.02772,
@@ -49287,8 +52130,8 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4-standard-192",
-      "category": "general",
+      "instance": "c4_standard_192",
+      "category": "compute",
       "vcpu": 192,
       "ram": 720,
       "pricePerHourUSD": 12.332640000000001,
@@ -49299,8 +52142,8 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4-standard-2",
-      "category": "general",
+      "instance": "c4_standard_2",
+      "category": "compute",
       "vcpu": 2,
       "ram": 7,
       "pricePerHourUSD": 0.126496,
@@ -49311,8 +52154,8 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4-standard-24",
-      "category": "general",
+      "instance": "c4_standard_24",
+      "category": "compute",
       "vcpu": 24,
       "ram": 90,
       "pricePerHourUSD": 1.5415800000000002,
@@ -49323,8 +52166,8 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4-standard-288",
-      "category": "general",
+      "instance": "c4_standard_288",
+      "category": "compute",
       "vcpu": 288,
       "ram": 1080,
       "pricePerHourUSD": 18.498959999999997,
@@ -49335,8 +52178,8 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4-standard-32",
-      "category": "general",
+      "instance": "c4_standard_32",
+      "category": "compute",
       "vcpu": 32,
       "ram": 120,
       "pricePerHourUSD": 2.05544,
@@ -49347,8 +52190,8 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4-standard-4",
-      "category": "general",
+      "instance": "c4_standard_4",
+      "category": "compute",
       "vcpu": 4,
       "ram": 15,
       "pricePerHourUSD": 0.25693,
@@ -49359,8 +52202,8 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4-standard-48",
-      "category": "general",
+      "instance": "c4_standard_48",
+      "category": "compute",
       "vcpu": 48,
       "ram": 180,
       "pricePerHourUSD": 3.0831600000000003,
@@ -49371,8 +52214,8 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4-standard-8",
-      "category": "general",
+      "instance": "c4_standard_8",
+      "category": "compute",
       "vcpu": 8,
       "ram": 30,
       "pricePerHourUSD": 0.51386,
@@ -49383,8 +52226,8 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4-standard-96",
-      "category": "general",
+      "instance": "c4_standard_96",
+      "category": "compute",
       "vcpu": 96,
       "ram": 360,
       "pricePerHourUSD": 6.166320000000001,
@@ -49395,8 +52238,248 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d-standard-16",
-      "category": "general",
+      "instance": "c4d_highcpu_16",
+      "category": "compute",
+      "vcpu": 16,
+      "ram": 30,
+      "pricePerHourUSD": 1.26974358,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4d_highcpu_192",
+      "category": "compute",
+      "vcpu": 192,
+      "ram": 360,
+      "pricePerHourUSD": 15.236922960000001,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4d_highcpu_2",
+      "category": "compute",
+      "vcpu": 2,
+      "ram": 3,
+      "pricePerHourUSD": 0.158455758,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4d_highcpu_32",
+      "category": "compute",
+      "vcpu": 32,
+      "ram": 60,
+      "pricePerHourUSD": 2.53948716,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4d_highcpu_384",
+      "category": "compute",
+      "vcpu": 384,
+      "ram": 720,
+      "pricePerHourUSD": 30.473845920000002,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4d_highcpu_4",
+      "category": "compute",
+      "vcpu": 4,
+      "ram": 7,
+      "pricePerHourUSD": 0.317261102,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4d_highcpu_48",
+      "category": "compute",
+      "vcpu": 48,
+      "ram": 90,
+      "pricePerHourUSD": 3.8092307400000003,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4d_highcpu_64",
+      "category": "compute",
+      "vcpu": 64,
+      "ram": 120,
+      "pricePerHourUSD": 5.07897432,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4d_highcpu_8",
+      "category": "compute",
+      "vcpu": 8,
+      "ram": 15,
+      "pricePerHourUSD": 0.63487179,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4d_highcpu_96",
+      "category": "compute",
+      "vcpu": 96,
+      "ram": 180,
+      "pricePerHourUSD": 7.618461480000001,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4d_highmem_16",
+      "category": "memory",
+      "vcpu": 16,
+      "ram": 126,
+      "pricePerHourUSD": 1.303303836,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4d_highmem_192",
+      "category": "memory",
+      "vcpu": 192,
+      "ram": 1512,
+      "pricePerHourUSD": 15.639646032000002,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4d_highmem_2",
+      "category": "memory",
+      "vcpu": 2,
+      "ram": 15,
+      "pricePerHourUSD": 0.16265079,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4d_highmem_32",
+      "category": "memory",
+      "vcpu": 32,
+      "ram": 252,
+      "pricePerHourUSD": 2.606607672,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4d_highmem_384",
+      "category": "memory",
+      "vcpu": 384,
+      "ram": 3024,
+      "pricePerHourUSD": 31.279292064000003,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4d_highmem_4",
+      "category": "memory",
+      "vcpu": 4,
+      "ram": 31,
+      "pricePerHourUSD": 0.325651166,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4d_highmem_48",
+      "category": "memory",
+      "vcpu": 48,
+      "ram": 378,
+      "pricePerHourUSD": 3.9099115080000004,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4d_highmem_64",
+      "category": "memory",
+      "vcpu": 64,
+      "ram": 504,
+      "pricePerHourUSD": 5.213215344,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4d_highmem_8",
+      "category": "memory",
+      "vcpu": 8,
+      "ram": 63,
+      "pricePerHourUSD": 0.651651918,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4d_highmem_96",
+      "category": "memory",
+      "vcpu": 96,
+      "ram": 756,
+      "pricePerHourUSD": 7.819823016000001,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "c4d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "c4d_standard_16",
+      "category": "compute",
       "vcpu": 16,
       "ram": 62,
       "pricePerHourUSD": 1.280930332,
@@ -49407,8 +52490,8 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d-standard-192",
-      "category": "general",
+      "instance": "c4d_standard_192",
+      "category": "compute",
       "vcpu": 192,
       "ram": 744,
       "pricePerHourUSD": 15.371163984000003,
@@ -49419,8 +52502,8 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d-standard-2",
-      "category": "general",
+      "instance": "c4d_standard_2",
+      "category": "compute",
       "vcpu": 2,
       "ram": 7,
       "pricePerHourUSD": 0.159854102,
@@ -49431,8 +52514,8 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d-standard-32",
-      "category": "general",
+      "instance": "c4d_standard_32",
+      "category": "compute",
       "vcpu": 32,
       "ram": 124,
       "pricePerHourUSD": 2.561860664,
@@ -49443,8 +52526,8 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d-standard-384",
-      "category": "general",
+      "instance": "c4d_standard_384",
+      "category": "compute",
       "vcpu": 384,
       "ram": 1488,
       "pricePerHourUSD": 30.742327968000005,
@@ -49455,8 +52538,8 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d-standard-4",
-      "category": "general",
+      "instance": "c4d_standard_4",
+      "category": "compute",
       "vcpu": 4,
       "ram": 15,
       "pricePerHourUSD": 0.32005779,
@@ -49467,8 +52550,8 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d-standard-48",
-      "category": "general",
+      "instance": "c4d_standard_48",
+      "category": "compute",
       "vcpu": 48,
       "ram": 186,
       "pricePerHourUSD": 3.8427909960000006,
@@ -49479,8 +52562,8 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d-standard-64",
-      "category": "general",
+      "instance": "c4d_standard_64",
+      "category": "compute",
       "vcpu": 64,
       "ram": 248,
       "pricePerHourUSD": 5.123721328,
@@ -49491,8 +52574,8 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d-standard-8",
-      "category": "general",
+      "instance": "c4d_standard_8",
+      "category": "compute",
       "vcpu": 8,
       "ram": 31,
       "pricePerHourUSD": 0.640465166,
@@ -49503,8 +52586,8 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d-standard-96",
-      "category": "general",
+      "instance": "c4d_standard_96",
+      "category": "compute",
       "vcpu": 96,
       "ram": 372,
       "pricePerHourUSD": 7.685581992000001,
@@ -49515,7 +52598,115 @@
       "source": "composed+win"
     },
     {
-      "instance": "e2-standard-16",
+      "instance": "e2_highcpu_16",
+      "category": "compute",
+      "vcpu": 16,
+      "ram": 16,
+      "pricePerHourUSD": 1.13176192,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "e2",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "e2_highcpu_2",
+      "category": "compute",
+      "vcpu": 2,
+      "ram": 2,
+      "pricePerHourUSD": 0.14147024,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "e2",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "e2_highcpu_32",
+      "category": "compute",
+      "vcpu": 32,
+      "ram": 32,
+      "pricePerHourUSD": 2.26352384,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "e2",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "e2_highcpu_4",
+      "category": "compute",
+      "vcpu": 4,
+      "ram": 4,
+      "pricePerHourUSD": 0.28294048,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "e2",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "e2_highcpu_8",
+      "category": "compute",
+      "vcpu": 8,
+      "ram": 8,
+      "pricePerHourUSD": 0.56588096,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "e2",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "e2_highmem_16",
+      "category": "memory",
+      "vcpu": 16,
+      "ram": 128,
+      "pricePerHourUSD": 1.45919728,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "e2",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "e2_highmem_2",
+      "category": "memory",
+      "vcpu": 2,
+      "ram": 16,
+      "pricePerHourUSD": 0.18239966,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "e2",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "e2_highmem_4",
+      "category": "memory",
+      "vcpu": 4,
+      "ram": 32,
+      "pricePerHourUSD": 0.36479932,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "e2",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "e2_highmem_8",
+      "category": "memory",
+      "vcpu": 8,
+      "ram": 64,
+      "pricePerHourUSD": 0.72959864,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "e2",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "e2_standard_16",
       "category": "general",
       "vcpu": 16,
       "ram": 64,
@@ -49527,7 +52718,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "e2-standard-2",
+      "instance": "e2_standard_2",
       "category": "general",
       "vcpu": 2,
       "ram": 8,
@@ -49539,7 +52730,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "e2-standard-32",
+      "instance": "e2_standard_32",
       "category": "general",
       "vcpu": 32,
       "ram": 128,
@@ -49551,7 +52742,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "e2-standard-4",
+      "instance": "e2_standard_4",
       "category": "general",
       "vcpu": 4,
       "ram": 16,
@@ -49563,7 +52754,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "e2-standard-8",
+      "instance": "e2_standard_8",
       "category": "general",
       "vcpu": 8,
       "ram": 32,
@@ -49575,7 +52766,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "m3-megamem-128",
+      "instance": "m3_megamem_128",
       "category": "memory",
       "vcpu": 128,
       "ram": 1952,
@@ -49587,7 +52778,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "m3-megamem-64",
+      "instance": "m3_megamem_64",
       "category": "memory",
       "vcpu": 64,
       "ram": 976,
@@ -49599,7 +52790,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "m3-ultramem-128",
+      "instance": "m3_ultramem_128",
       "category": "memory",
       "vcpu": 128,
       "ram": 3904,
@@ -49611,7 +52802,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "m3-ultramem-32",
+      "instance": "m3_ultramem_32",
       "category": "memory",
       "vcpu": 32,
       "ram": 976,
@@ -49623,7 +52814,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "m3-ultramem-64",
+      "instance": "m3_ultramem_64",
       "category": "memory",
       "vcpu": 64,
       "ram": 1952,
@@ -49635,7 +52826,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "m4-megamem-112",
+      "instance": "m4_megamem_112",
       "category": "memory",
       "vcpu": 112,
       "ram": 1488,
@@ -49647,7 +52838,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "m4-megamem-224",
+      "instance": "m4_megamem_224",
       "category": "memory",
       "vcpu": 224,
       "ram": 2976,
@@ -49659,7 +52850,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "m4-megamem-28",
+      "instance": "m4_megamem_28",
       "category": "memory",
       "vcpu": 28,
       "ram": 372,
@@ -49671,7 +52862,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "m4-megamem-56",
+      "instance": "m4_megamem_56",
       "category": "memory",
       "vcpu": 56,
       "ram": 744,
@@ -49683,7 +52874,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "m4-ultramem-112",
+      "instance": "m4_ultramem_112",
       "category": "memory",
       "vcpu": 112,
       "ram": 2976,
@@ -49695,7 +52886,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "m4-ultramem-224",
+      "instance": "m4_ultramem_224",
       "category": "memory",
       "vcpu": 224,
       "ram": 5952,
@@ -49707,7 +52898,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "m4-ultramem-56",
+      "instance": "m4_ultramem_56",
       "category": "memory",
       "vcpu": 56,
       "ram": 1488,
@@ -49719,7 +52910,187 @@
       "source": "composed+win"
     },
     {
-      "instance": "n1-standard-1",
+      "instance": "n1_highcpu_16",
+      "category": "compute",
+      "vcpu": 16,
+      "ram": 14.400390625,
+      "pricePerHourUSD": 1.3027904550781249,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n1",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n1_highcpu_2",
+      "category": "compute",
+      "vcpu": 2,
+      "ram": 1.7998046875,
+      "pricePerHourUSD": 0.1628477724609375,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n1",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n1_highcpu_32",
+      "category": "compute",
+      "vcpu": 32,
+      "ram": 28.7998046875,
+      "pricePerHourUSD": 2.6055767724609376,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n1",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n1_highcpu_4",
+      "category": "compute",
+      "vcpu": 4,
+      "ram": 3.599609375,
+      "pricePerHourUSD": 0.325695544921875,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n1",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n1_highcpu_64",
+      "category": "compute",
+      "vcpu": 64,
+      "ram": 57.599609375,
+      "pricePerHourUSD": 5.211153544921875,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n1",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n1_highcpu_8",
+      "category": "compute",
+      "vcpu": 8,
+      "ram": 7.2001953125,
+      "pricePerHourUSD": 0.6513952275390624,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n1",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n1_highcpu_96",
+      "category": "compute",
+      "vcpu": 96,
+      "ram": 86.400390625,
+      "pricePerHourUSD": 7.816734455078125,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n1",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n1_highmem_16",
+      "category": "memory",
+      "vcpu": 16,
+      "ram": 104,
+      "pricePerHourUSD": 1.6824240000000001,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n1",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n1_highmem_2",
+      "category": "memory",
+      "vcpu": 2,
+      "ram": 13,
+      "pricePerHourUSD": 0.21030300000000002,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n1",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n1_highmem_32",
+      "category": "memory",
+      "vcpu": 32,
+      "ram": 208,
+      "pricePerHourUSD": 3.3648480000000003,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n1",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n1_highmem_4",
+      "category": "memory",
+      "vcpu": 4,
+      "ram": 26,
+      "pricePerHourUSD": 0.42060600000000004,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n1",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n1_highmem_64",
+      "category": "memory",
+      "vcpu": 64,
+      "ram": 416,
+      "pricePerHourUSD": 6.729696000000001,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n1",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n1_highmem_8",
+      "category": "memory",
+      "vcpu": 8,
+      "ram": 52,
+      "pricePerHourUSD": 0.8412120000000001,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n1",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n1_highmem_96",
+      "category": "memory",
+      "vcpu": 96,
+      "ram": 624,
+      "pricePerHourUSD": 10.094544,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n1",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n1_megamem_96",
+      "category": "memory",
+      "vcpu": 96,
+      "ram": 1433.599609375,
+      "pricePerHourUSD": 13.524817544921877,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n1",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n1_standard_1",
       "category": "general",
       "vcpu": 1,
       "ram": 3.75,
@@ -49731,7 +53102,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n1-standard-16",
+      "instance": "n1_standard_16",
       "category": "general",
       "vcpu": 16,
       "ram": 60,
@@ -49743,7 +53114,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n1-standard-2",
+      "instance": "n1_standard_2",
       "category": "general",
       "vcpu": 2,
       "ram": 7.5,
@@ -49755,7 +53126,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n1-standard-32",
+      "instance": "n1_standard_32",
       "category": "general",
       "vcpu": 32,
       "ram": 120,
@@ -49767,7 +53138,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n1-standard-4",
+      "instance": "n1_standard_4",
       "category": "general",
       "vcpu": 4,
       "ram": 15,
@@ -49779,7 +53150,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n1-standard-64",
+      "instance": "n1_standard_64",
       "category": "general",
       "vcpu": 64,
       "ram": 240,
@@ -49791,7 +53162,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n1-standard-8",
+      "instance": "n1_standard_8",
       "category": "general",
       "vcpu": 8,
       "ram": 30,
@@ -49803,7 +53174,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n1-standard-96",
+      "instance": "n1_standard_96",
       "category": "general",
       "vcpu": 96,
       "ram": 360,
@@ -49815,7 +53186,271 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2-standard-128",
+      "instance": "n1_ultramem_160",
+      "category": "memory",
+      "vcpu": 160,
+      "ram": 3844,
+      "pricePerHourUSD": 28.704788,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n1",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n1_ultramem_40",
+      "category": "memory",
+      "vcpu": 40,
+      "ram": 961,
+      "pricePerHourUSD": 7.176197,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n1",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n1_ultramem_80",
+      "category": "memory",
+      "vcpu": 80,
+      "ram": 1922,
+      "pricePerHourUSD": 14.352394,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n1",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2_highcpu_16",
+      "category": "compute",
+      "vcpu": 16,
+      "ram": 16,
+      "pricePerHourUSD": 1.394576,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2_highcpu_2",
+      "category": "compute",
+      "vcpu": 2,
+      "ram": 2,
+      "pricePerHourUSD": 0.174322,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2_highcpu_32",
+      "category": "compute",
+      "vcpu": 32,
+      "ram": 32,
+      "pricePerHourUSD": 2.789152,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2_highcpu_4",
+      "category": "compute",
+      "vcpu": 4,
+      "ram": 4,
+      "pricePerHourUSD": 0.348644,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2_highcpu_48",
+      "category": "compute",
+      "vcpu": 48,
+      "ram": 48,
+      "pricePerHourUSD": 4.183728,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2_highcpu_64",
+      "category": "compute",
+      "vcpu": 64,
+      "ram": 64,
+      "pricePerHourUSD": 5.578304,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2_highcpu_8",
+      "category": "compute",
+      "vcpu": 8,
+      "ram": 8,
+      "pricePerHourUSD": 0.697288,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2_highcpu_80",
+      "category": "compute",
+      "vcpu": 80,
+      "ram": 80,
+      "pricePerHourUSD": 6.97288,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2_highcpu_96",
+      "category": "compute",
+      "vcpu": 96,
+      "ram": 96,
+      "pricePerHourUSD": 8.367456,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2_highmem_128",
+      "category": "memory",
+      "vcpu": 128,
+      "ram": 864,
+      "pricePerHourUSD": 18.185408,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2_highmem_16",
+      "category": "memory",
+      "vcpu": 16,
+      "ram": 128,
+      "pricePerHourUSD": 2.464176,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2_highmem_2",
+      "category": "memory",
+      "vcpu": 2,
+      "ram": 16,
+      "pricePerHourUSD": 0.308022,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2_highmem_32",
+      "category": "memory",
+      "vcpu": 32,
+      "ram": 256,
+      "pricePerHourUSD": 4.928352,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2_highmem_4",
+      "category": "memory",
+      "vcpu": 4,
+      "ram": 32,
+      "pricePerHourUSD": 0.616044,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2_highmem_48",
+      "category": "memory",
+      "vcpu": 48,
+      "ram": 384,
+      "pricePerHourUSD": 7.392528,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2_highmem_64",
+      "category": "memory",
+      "vcpu": 64,
+      "ram": 512,
+      "pricePerHourUSD": 9.856704,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2_highmem_8",
+      "category": "memory",
+      "vcpu": 8,
+      "ram": 64,
+      "pricePerHourUSD": 1.232088,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2_highmem_80",
+      "category": "memory",
+      "vcpu": 80,
+      "ram": 640,
+      "pricePerHourUSD": 12.320879999999999,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2_highmem_96",
+      "category": "memory",
+      "vcpu": 96,
+      "ram": 768,
+      "pricePerHourUSD": 14.785056,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2_standard_128",
       "category": "general",
       "vcpu": 128,
       "ram": 512,
@@ -49827,7 +53462,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2-standard-16",
+      "instance": "n2_standard_16",
       "category": "general",
       "vcpu": 16,
       "ram": 64,
@@ -49839,7 +53474,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2-standard-2",
+      "instance": "n2_standard_2",
       "category": "general",
       "vcpu": 2,
       "ram": 8,
@@ -49851,7 +53486,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2-standard-32",
+      "instance": "n2_standard_32",
       "category": "general",
       "vcpu": 32,
       "ram": 128,
@@ -49863,7 +53498,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2-standard-4",
+      "instance": "n2_standard_4",
       "category": "general",
       "vcpu": 4,
       "ram": 16,
@@ -49875,7 +53510,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2-standard-48",
+      "instance": "n2_standard_48",
       "category": "general",
       "vcpu": 48,
       "ram": 192,
@@ -49887,7 +53522,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2-standard-64",
+      "instance": "n2_standard_64",
       "category": "general",
       "vcpu": 64,
       "ram": 256,
@@ -49899,7 +53534,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2-standard-8",
+      "instance": "n2_standard_8",
       "category": "general",
       "vcpu": 8,
       "ram": 32,
@@ -49911,7 +53546,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2-standard-80",
+      "instance": "n2_standard_80",
       "category": "general",
       "vcpu": 80,
       "ram": 320,
@@ -49923,7 +53558,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2-standard-96",
+      "instance": "n2_standard_96",
       "category": "general",
       "vcpu": 96,
       "ram": 384,
@@ -49935,7 +53570,247 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d-standard-128",
+      "instance": "n2d_highcpu_128",
+      "category": "compute",
+      "vcpu": 128,
+      "ram": 128,
+      "pricePerHourUSD": 9.526208,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2d_highcpu_16",
+      "category": "compute",
+      "vcpu": 16,
+      "ram": 16,
+      "pricePerHourUSD": 1.190776,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2d_highcpu_2",
+      "category": "compute",
+      "vcpu": 2,
+      "ram": 2,
+      "pricePerHourUSD": 0.148847,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2d_highcpu_224",
+      "category": "compute",
+      "vcpu": 224,
+      "ram": 224,
+      "pricePerHourUSD": 16.670864,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2d_highcpu_32",
+      "category": "compute",
+      "vcpu": 32,
+      "ram": 32,
+      "pricePerHourUSD": 2.381552,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2d_highcpu_4",
+      "category": "compute",
+      "vcpu": 4,
+      "ram": 4,
+      "pricePerHourUSD": 0.297694,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2d_highcpu_48",
+      "category": "compute",
+      "vcpu": 48,
+      "ram": 48,
+      "pricePerHourUSD": 3.572328,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2d_highcpu_64",
+      "category": "compute",
+      "vcpu": 64,
+      "ram": 64,
+      "pricePerHourUSD": 4.763104,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2d_highcpu_8",
+      "category": "compute",
+      "vcpu": 8,
+      "ram": 8,
+      "pricePerHourUSD": 0.595388,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2d_highcpu_80",
+      "category": "compute",
+      "vcpu": 80,
+      "ram": 80,
+      "pricePerHourUSD": 5.95388,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2d_highcpu_96",
+      "category": "compute",
+      "vcpu": 96,
+      "ram": 96,
+      "pricePerHourUSD": 7.144656,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2d_highmem_16",
+      "category": "memory",
+      "vcpu": 16,
+      "ram": 128,
+      "pricePerHourUSD": 1.293984,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2d_highmem_2",
+      "category": "memory",
+      "vcpu": 2,
+      "ram": 16,
+      "pricePerHourUSD": 0.161748,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2d_highmem_32",
+      "category": "memory",
+      "vcpu": 32,
+      "ram": 256,
+      "pricePerHourUSD": 2.587968,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2d_highmem_4",
+      "category": "memory",
+      "vcpu": 4,
+      "ram": 32,
+      "pricePerHourUSD": 0.323496,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2d_highmem_48",
+      "category": "memory",
+      "vcpu": 48,
+      "ram": 384,
+      "pricePerHourUSD": 3.881952,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2d_highmem_64",
+      "category": "memory",
+      "vcpu": 64,
+      "ram": 512,
+      "pricePerHourUSD": 5.175936,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2d_highmem_8",
+      "category": "memory",
+      "vcpu": 8,
+      "ram": 64,
+      "pricePerHourUSD": 0.646992,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2d_highmem_80",
+      "category": "memory",
+      "vcpu": 80,
+      "ram": 640,
+      "pricePerHourUSD": 6.46992,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2d_highmem_96",
+      "category": "memory",
+      "vcpu": 96,
+      "ram": 768,
+      "pricePerHourUSD": 7.763904,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n2d",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n2d_standard_128",
       "category": "general",
       "vcpu": 128,
       "ram": 512,
@@ -49947,7 +53822,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d-standard-16",
+      "instance": "n2d_standard_16",
       "category": "general",
       "vcpu": 16,
       "ram": 64,
@@ -49959,7 +53834,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d-standard-2",
+      "instance": "n2d_standard_2",
       "category": "general",
       "vcpu": 2,
       "ram": 8,
@@ -49971,7 +53846,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d-standard-224",
+      "instance": "n2d_standard_224",
       "category": "general",
       "vcpu": 224,
       "ram": 896,
@@ -49983,7 +53858,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d-standard-32",
+      "instance": "n2d_standard_32",
       "category": "general",
       "vcpu": 32,
       "ram": 128,
@@ -49995,7 +53870,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d-standard-4",
+      "instance": "n2d_standard_4",
       "category": "general",
       "vcpu": 4,
       "ram": 16,
@@ -50007,7 +53882,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d-standard-48",
+      "instance": "n2d_standard_48",
       "category": "general",
       "vcpu": 48,
       "ram": 192,
@@ -50019,7 +53894,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d-standard-64",
+      "instance": "n2d_standard_64",
       "category": "general",
       "vcpu": 64,
       "ram": 256,
@@ -50031,7 +53906,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d-standard-8",
+      "instance": "n2d_standard_8",
       "category": "general",
       "vcpu": 8,
       "ram": 32,
@@ -50043,7 +53918,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d-standard-80",
+      "instance": "n2d_standard_80",
       "category": "general",
       "vcpu": 80,
       "ram": 320,
@@ -50055,7 +53930,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d-standard-96",
+      "instance": "n2d_standard_96",
       "category": "general",
       "vcpu": 96,
       "ram": 384,
@@ -50067,7 +53942,199 @@
       "source": "composed+win"
     },
     {
-      "instance": "n4-standard-16",
+      "instance": "n4_highcpu_16",
+      "category": "compute",
+      "vcpu": 16,
+      "ram": 32,
+      "pricePerHourUSD": 1.378944,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n4",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n4_highcpu_2",
+      "category": "compute",
+      "vcpu": 2,
+      "ram": 4,
+      "pricePerHourUSD": 0.172368,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n4",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n4_highcpu_32",
+      "category": "compute",
+      "vcpu": 32,
+      "ram": 64,
+      "pricePerHourUSD": 2.757888,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n4",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n4_highcpu_4",
+      "category": "compute",
+      "vcpu": 4,
+      "ram": 8,
+      "pricePerHourUSD": 0.344736,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n4",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n4_highcpu_48",
+      "category": "compute",
+      "vcpu": 48,
+      "ram": 96,
+      "pricePerHourUSD": 4.136832,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n4",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n4_highcpu_64",
+      "category": "compute",
+      "vcpu": 64,
+      "ram": 128,
+      "pricePerHourUSD": 5.515776,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n4",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n4_highcpu_8",
+      "category": "compute",
+      "vcpu": 8,
+      "ram": 16,
+      "pricePerHourUSD": 0.689472,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n4",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n4_highcpu_80",
+      "category": "compute",
+      "vcpu": 80,
+      "ram": 160,
+      "pricePerHourUSD": 6.8947199999999995,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n4",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n4_highmem_16",
+      "category": "memory",
+      "vcpu": 16,
+      "ram": 128,
+      "pricePerHourUSD": 1.735776,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n4",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n4_highmem_2",
+      "category": "memory",
+      "vcpu": 2,
+      "ram": 16,
+      "pricePerHourUSD": 0.216972,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n4",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n4_highmem_32",
+      "category": "memory",
+      "vcpu": 32,
+      "ram": 256,
+      "pricePerHourUSD": 3.471552,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n4",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n4_highmem_4",
+      "category": "memory",
+      "vcpu": 4,
+      "ram": 32,
+      "pricePerHourUSD": 0.433944,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n4",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n4_highmem_48",
+      "category": "memory",
+      "vcpu": 48,
+      "ram": 384,
+      "pricePerHourUSD": 5.207328,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n4",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n4_highmem_64",
+      "category": "memory",
+      "vcpu": 64,
+      "ram": 512,
+      "pricePerHourUSD": 6.943104,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n4",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n4_highmem_8",
+      "category": "memory",
+      "vcpu": 8,
+      "ram": 64,
+      "pricePerHourUSD": 0.867888,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n4",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n4_highmem_80",
+      "category": "memory",
+      "vcpu": 80,
+      "ram": 640,
+      "pricePerHourUSD": 8.67888,
+      "region": "us-east1",
+      "os": "Windows",
+      "series": "n4",
+      "arch": "x86",
+      "source": "composed+win"
+    },
+    {
+      "instance": "n4_standard_16",
       "category": "general",
       "vcpu": 16,
       "ram": 64,
@@ -50079,7 +54146,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n4-standard-2",
+      "instance": "n4_standard_2",
       "category": "general",
       "vcpu": 2,
       "ram": 8,
@@ -50091,7 +54158,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n4-standard-32",
+      "instance": "n4_standard_32",
       "category": "general",
       "vcpu": 32,
       "ram": 128,
@@ -50103,7 +54170,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n4-standard-4",
+      "instance": "n4_standard_4",
       "category": "general",
       "vcpu": 4,
       "ram": 16,
@@ -50115,7 +54182,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n4-standard-48",
+      "instance": "n4_standard_48",
       "category": "general",
       "vcpu": 48,
       "ram": 192,
@@ -50127,7 +54194,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n4-standard-64",
+      "instance": "n4_standard_64",
       "category": "general",
       "vcpu": 64,
       "ram": 256,
@@ -50139,7 +54206,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n4-standard-8",
+      "instance": "n4_standard_8",
       "category": "general",
       "vcpu": 8,
       "ram": 32,
@@ -50151,7 +54218,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n4-standard-80",
+      "instance": "n4_standard_80",
       "category": "general",
       "vcpu": 80,
       "ram": 320,
@@ -50163,7 +54230,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "t2d-standard-1",
+      "instance": "t2d_standard_1",
       "category": "general",
       "vcpu": 1,
       "ram": 4,
@@ -50175,7 +54242,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "t2d-standard-16",
+      "instance": "t2d_standard_16",
       "category": "general",
       "vcpu": 16,
       "ram": 64,
@@ -50187,7 +54254,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "t2d-standard-2",
+      "instance": "t2d_standard_2",
       "category": "general",
       "vcpu": 2,
       "ram": 8,
@@ -50199,7 +54266,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "t2d-standard-32",
+      "instance": "t2d_standard_32",
       "category": "general",
       "vcpu": 32,
       "ram": 128,
@@ -50211,7 +54278,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "t2d-standard-4",
+      "instance": "t2d_standard_4",
       "category": "general",
       "vcpu": 4,
       "ram": 16,
@@ -50223,7 +54290,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "t2d-standard-48",
+      "instance": "t2d_standard_48",
       "category": "general",
       "vcpu": 48,
       "ram": 192,
@@ -50235,7 +54302,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "t2d-standard-60",
+      "instance": "t2d_standard_60",
       "category": "general",
       "vcpu": 60,
       "ram": 240,
@@ -50247,7 +54314,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "t2d-standard-8",
+      "instance": "t2d_standard_8",
       "category": "general",
       "vcpu": 8,
       "ram": 32,
@@ -50257,1446 +54324,6 @@
       "series": "t2d",
       "arch": "x86",
       "source": "composed+win"
-    },
-    {
-      "instance": "c2d-highcpu-112",
-      "category": "compute",
-      "vcpu": 112,
-      "ram": 224,
-      "pricePerHourUSD": 10.917872,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c2d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c2d-highcpu-16",
-      "category": "compute",
-      "vcpu": 16,
-      "ram": 32,
-      "pricePerHourUSD": 1.559696,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c2d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c2d-highcpu-2",
-      "category": "compute",
-      "vcpu": 2,
-      "ram": 4,
-      "pricePerHourUSD": 0.194962,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c2d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c2d-highcpu-32",
-      "category": "compute",
-      "vcpu": 32,
-      "ram": 64,
-      "pricePerHourUSD": 3.119392,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c2d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c2d-highcpu-4",
-      "category": "compute",
-      "vcpu": 4,
-      "ram": 8,
-      "pricePerHourUSD": 0.389924,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c2d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c2d-highcpu-56",
-      "category": "compute",
-      "vcpu": 56,
-      "ram": 112,
-      "pricePerHourUSD": 5.458936,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c2d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c2d-highcpu-8",
-      "category": "compute",
-      "vcpu": 8,
-      "ram": 16,
-      "pricePerHourUSD": 0.779848,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c2d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c2d-standard-112",
-      "category": "compute",
-      "vcpu": 112,
-      "ram": 448,
-      "pricePerHourUSD": 11.804687999999999,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c2d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c2d-standard-16",
-      "category": "compute",
-      "vcpu": 16,
-      "ram": 64,
-      "pricePerHourUSD": 1.6863839999999999,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c2d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c2d-standard-2",
-      "category": "compute",
-      "vcpu": 2,
-      "ram": 8,
-      "pricePerHourUSD": 0.21079799999999999,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c2d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c2d-standard-32",
-      "category": "compute",
-      "vcpu": 32,
-      "ram": 128,
-      "pricePerHourUSD": 3.3727679999999998,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c2d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c2d-standard-4",
-      "category": "compute",
-      "vcpu": 4,
-      "ram": 16,
-      "pricePerHourUSD": 0.42159599999999997,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c2d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c2d-standard-56",
-      "category": "compute",
-      "vcpu": 56,
-      "ram": 224,
-      "pricePerHourUSD": 5.902343999999999,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c2d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c2d-standard-8",
-      "category": "compute",
-      "vcpu": 8,
-      "ram": 32,
-      "pricePerHourUSD": 0.8431919999999999,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c2d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c3-standard-176",
-      "category": "general",
-      "vcpu": 176,
-      "ram": 704,
-      "pricePerHourUSD": 19.430752,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c3",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c3-standard-22",
-      "category": "general",
-      "vcpu": 22,
-      "ram": 88,
-      "pricePerHourUSD": 2.428844,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c3",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c3-standard-4",
-      "category": "general",
-      "vcpu": 4,
-      "ram": 16,
-      "pricePerHourUSD": 0.441608,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c3",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c3-standard-44",
-      "category": "general",
-      "vcpu": 44,
-      "ram": 176,
-      "pricePerHourUSD": 4.857688,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c3",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c3-standard-8",
-      "category": "general",
-      "vcpu": 8,
-      "ram": 32,
-      "pricePerHourUSD": 0.883216,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c3",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c3-standard-88",
-      "category": "general",
-      "vcpu": 88,
-      "ram": 352,
-      "pricePerHourUSD": 9.715376,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c3",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c3d-standard-16",
-      "category": "general",
-      "vcpu": 16,
-      "ram": 64,
-      "pricePerHourUSD": 1.6863839999999999,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c3d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c3d-standard-180",
-      "category": "general",
-      "vcpu": 180,
-      "ram": 720,
-      "pricePerHourUSD": 18.97182,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c3d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c3d-standard-30",
-      "category": "general",
-      "vcpu": 30,
-      "ram": 120,
-      "pricePerHourUSD": 3.1619699999999997,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c3d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c3d-standard-360",
-      "category": "general",
-      "vcpu": 360,
-      "ram": 1440,
-      "pricePerHourUSD": 37.94364,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c3d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c3d-standard-4",
-      "category": "general",
-      "vcpu": 4,
-      "ram": 16,
-      "pricePerHourUSD": 0.42159599999999997,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c3d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c3d-standard-60",
-      "category": "general",
-      "vcpu": 60,
-      "ram": 240,
-      "pricePerHourUSD": 6.3239399999999995,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c3d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c3d-standard-8",
-      "category": "general",
-      "vcpu": 8,
-      "ram": 32,
-      "pricePerHourUSD": 0.8431919999999999,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c3d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c3d-standard-90",
-      "category": "general",
-      "vcpu": 90,
-      "ram": 360,
-      "pricePerHourUSD": 9.48591,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c3d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c4-standard-144",
-      "category": "general",
-      "vcpu": 144,
-      "ram": 540,
-      "pricePerHourUSD": 11.26548,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c4",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c4-standard-16",
-      "category": "general",
-      "vcpu": 16,
-      "ram": 60,
-      "pricePerHourUSD": 1.25172,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c4",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c4-standard-192",
-      "category": "general",
-      "vcpu": 192,
-      "ram": 720,
-      "pricePerHourUSD": 15.02064,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c4",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c4-standard-2",
-      "category": "general",
-      "vcpu": 2,
-      "ram": 7,
-      "pricePerHourUSD": 0.154496,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c4",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c4-standard-24",
-      "category": "general",
-      "vcpu": 24,
-      "ram": 90,
-      "pricePerHourUSD": 1.87758,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c4",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c4-standard-288",
-      "category": "general",
-      "vcpu": 288,
-      "ram": 1080,
-      "pricePerHourUSD": 22.53096,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c4",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c4-standard-32",
-      "category": "general",
-      "vcpu": 32,
-      "ram": 120,
-      "pricePerHourUSD": 2.50344,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c4",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c4-standard-4",
-      "category": "general",
-      "vcpu": 4,
-      "ram": 15,
-      "pricePerHourUSD": 0.31293,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c4",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c4-standard-48",
-      "category": "general",
-      "vcpu": 48,
-      "ram": 180,
-      "pricePerHourUSD": 3.75516,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c4",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c4-standard-8",
-      "category": "general",
-      "vcpu": 8,
-      "ram": 30,
-      "pricePerHourUSD": 0.62586,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c4",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c4-standard-96",
-      "category": "general",
-      "vcpu": 96,
-      "ram": 360,
-      "pricePerHourUSD": 7.51032,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c4",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c4a-standard-1",
-      "category": "general",
-      "vcpu": 1,
-      "ram": 4,
-      "pricePerHourUSD": 0.09226,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c4a",
-      "arch": "arm",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c4a-standard-16",
-      "category": "general",
-      "vcpu": 16,
-      "ram": 64,
-      "pricePerHourUSD": 1.47616,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c4a",
-      "arch": "arm",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c4a-standard-2",
-      "category": "general",
-      "vcpu": 2,
-      "ram": 8,
-      "pricePerHourUSD": 0.18452,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c4a",
-      "arch": "arm",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c4a-standard-32",
-      "category": "general",
-      "vcpu": 32,
-      "ram": 128,
-      "pricePerHourUSD": 2.95232,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c4a",
-      "arch": "arm",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c4a-standard-4",
-      "category": "general",
-      "vcpu": 4,
-      "ram": 16,
-      "pricePerHourUSD": 0.36904,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c4a",
-      "arch": "arm",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c4a-standard-48",
-      "category": "general",
-      "vcpu": 48,
-      "ram": 192,
-      "pricePerHourUSD": 4.4284799999999995,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c4a",
-      "arch": "arm",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c4a-standard-64",
-      "category": "general",
-      "vcpu": 64,
-      "ram": 256,
-      "pricePerHourUSD": 5.90464,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c4a",
-      "arch": "arm",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c4a-standard-72",
-      "category": "general",
-      "vcpu": 72,
-      "ram": 288,
-      "pricePerHourUSD": 6.642720000000001,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c4a",
-      "arch": "arm",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c4a-standard-8",
-      "category": "general",
-      "vcpu": 8,
-      "ram": 32,
-      "pricePerHourUSD": 0.73808,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c4a",
-      "arch": "arm",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c4d-standard-16",
-      "category": "general",
-      "vcpu": 16,
-      "ram": 62,
-      "pricePerHourUSD": 1.504930332,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c4d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c4d-standard-192",
-      "category": "general",
-      "vcpu": 192,
-      "ram": 744,
-      "pricePerHourUSD": 18.059163984,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c4d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c4d-standard-2",
-      "category": "general",
-      "vcpu": 2,
-      "ram": 7,
-      "pricePerHourUSD": 0.18785410200000002,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c4d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c4d-standard-32",
-      "category": "general",
-      "vcpu": 32,
-      "ram": 124,
-      "pricePerHourUSD": 3.009860664,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c4d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c4d-standard-384",
-      "category": "general",
-      "vcpu": 384,
-      "ram": 1488,
-      "pricePerHourUSD": 36.118327968,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c4d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c4d-standard-4",
-      "category": "general",
-      "vcpu": 4,
-      "ram": 15,
-      "pricePerHourUSD": 0.37605779,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c4d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c4d-standard-48",
-      "category": "general",
-      "vcpu": 48,
-      "ram": 186,
-      "pricePerHourUSD": 4.514790996,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c4d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c4d-standard-64",
-      "category": "general",
-      "vcpu": 64,
-      "ram": 248,
-      "pricePerHourUSD": 6.019721328,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c4d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c4d-standard-8",
-      "category": "general",
-      "vcpu": 8,
-      "ram": 31,
-      "pricePerHourUSD": 0.752465166,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c4d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "c4d-standard-96",
-      "category": "general",
-      "vcpu": 96,
-      "ram": 372,
-      "pricePerHourUSD": 9.029581992,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "c4d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "e2-standard-16",
-      "category": "general",
-      "vcpu": 16,
-      "ram": 64,
-      "pricePerHourUSD": 1.4960913599999999,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "e2",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "e2-standard-2",
-      "category": "general",
-      "vcpu": 2,
-      "ram": 8,
-      "pricePerHourUSD": 0.18701141999999998,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "e2",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "e2-standard-32",
-      "category": "general",
-      "vcpu": 32,
-      "ram": 128,
-      "pricePerHourUSD": 2.9921827199999997,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "e2",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "e2-standard-4",
-      "category": "general",
-      "vcpu": 4,
-      "ram": 16,
-      "pricePerHourUSD": 0.37402283999999997,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "e2",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "e2-standard-8",
-      "category": "general",
-      "vcpu": 8,
-      "ram": 32,
-      "pricePerHourUSD": 0.7480456799999999,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "e2",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "m3-megamem-128",
-      "category": "memory",
-      "vcpu": 128,
-      "ram": 1952,
-      "pricePerHourUSD": 22.0896,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "m3",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "m3-megamem-64",
-      "category": "memory",
-      "vcpu": 64,
-      "ram": 976,
-      "pricePerHourUSD": 11.0448,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "m3",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "m3-ultramem-128",
-      "category": "memory",
-      "vcpu": 128,
-      "ram": 3904,
-      "pricePerHourUSD": 32.0448,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "m3",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "m3-ultramem-32",
-      "category": "memory",
-      "vcpu": 32,
-      "ram": 976,
-      "pricePerHourUSD": 8.0112,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "m3",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "m3-ultramem-64",
-      "category": "memory",
-      "vcpu": 64,
-      "ram": 1952,
-      "pricePerHourUSD": 16.0224,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "m3",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "m4-megamem-112",
-      "category": "memory",
-      "vcpu": 112,
-      "ram": 1488,
-      "pricePerHourUSD": 13.724873599999999,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "m4",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "m4-megamem-224",
-      "category": "memory",
-      "vcpu": 224,
-      "ram": 2976,
-      "pricePerHourUSD": 27.449747199999997,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "m4",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "m4-megamem-28",
-      "category": "memory",
-      "vcpu": 28,
-      "ram": 372,
-      "pricePerHourUSD": 3.4312183999999997,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "m4",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "m4-megamem-56",
-      "category": "memory",
-      "vcpu": 56,
-      "ram": 744,
-      "pricePerHourUSD": 6.862436799999999,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "m4",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "m4-ultramem-112",
-      "category": "memory",
-      "vcpu": 112,
-      "ram": 2976,
-      "pricePerHourUSD": 20.5250336,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "m4",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "m4-ultramem-224",
-      "category": "memory",
-      "vcpu": 224,
-      "ram": 5952,
-      "pricePerHourUSD": 41.0500672,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "m4",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "m4-ultramem-56",
-      "category": "memory",
-      "vcpu": 56,
-      "ram": 1488,
-      "pricePerHourUSD": 10.2625168,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "m4",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "n1-standard-1",
-      "category": "general",
-      "vcpu": 1,
-      "ram": 3.75,
-      "pricePerHourUSD": 0.10749975,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "n1",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "n1-standard-16",
-      "category": "general",
-      "vcpu": 16,
-      "ram": 60,
-      "pricePerHourUSD": 1.719996,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "n1",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "n1-standard-2",
-      "category": "general",
-      "vcpu": 2,
-      "ram": 7.5,
-      "pricePerHourUSD": 0.2149995,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "n1",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "n1-standard-32",
-      "category": "general",
-      "vcpu": 32,
-      "ram": 120,
-      "pricePerHourUSD": 3.439992,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "n1",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "n1-standard-4",
-      "category": "general",
-      "vcpu": 4,
-      "ram": 15,
-      "pricePerHourUSD": 0.429999,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "n1",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "n1-standard-64",
-      "category": "general",
-      "vcpu": 64,
-      "ram": 240,
-      "pricePerHourUSD": 6.879984,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "n1",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "n1-standard-8",
-      "category": "general",
-      "vcpu": 8,
-      "ram": 30,
-      "pricePerHourUSD": 0.859998,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "n1",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "n1-standard-96",
-      "category": "general",
-      "vcpu": 96,
-      "ram": 360,
-      "pricePerHourUSD": 10.319976,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "n1",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "n2-standard-128",
-      "category": "general",
-      "vcpu": 128,
-      "ram": 512,
-      "pricePerHourUSD": 16.615808,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "n2",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "n2-standard-16",
-      "category": "general",
-      "vcpu": 16,
-      "ram": 64,
-      "pricePerHourUSD": 2.076976,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "n2",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "n2-standard-2",
-      "category": "general",
-      "vcpu": 2,
-      "ram": 8,
-      "pricePerHourUSD": 0.259622,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "n2",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "n2-standard-32",
-      "category": "general",
-      "vcpu": 32,
-      "ram": 128,
-      "pricePerHourUSD": 4.153952,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "n2",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "n2-standard-4",
-      "category": "general",
-      "vcpu": 4,
-      "ram": 16,
-      "pricePerHourUSD": 0.519244,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "n2",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "n2-standard-48",
-      "category": "general",
-      "vcpu": 48,
-      "ram": 192,
-      "pricePerHourUSD": 6.230928,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "n2",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "n2-standard-64",
-      "category": "general",
-      "vcpu": 64,
-      "ram": 256,
-      "pricePerHourUSD": 8.307904,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "n2",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "n2-standard-8",
-      "category": "general",
-      "vcpu": 8,
-      "ram": 32,
-      "pricePerHourUSD": 1.038488,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "n2",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "n2-standard-80",
-      "category": "general",
-      "vcpu": 80,
-      "ram": 320,
-      "pricePerHourUSD": 10.384879999999999,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "n2",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "n2-standard-96",
-      "category": "general",
-      "vcpu": 96,
-      "ram": 384,
-      "pricePerHourUSD": 12.461856,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "n2",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "n2d-standard-128",
-      "category": "general",
-      "vcpu": 128,
-      "ram": 512,
-      "pricePerHourUSD": 11.672063999999999,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "n2d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "n2d-standard-16",
-      "category": "general",
-      "vcpu": 16,
-      "ram": 64,
-      "pricePerHourUSD": 1.4590079999999999,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "n2d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "n2d-standard-2",
-      "category": "general",
-      "vcpu": 2,
-      "ram": 8,
-      "pricePerHourUSD": 0.18237599999999998,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "n2d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "n2d-standard-224",
-      "category": "general",
-      "vcpu": 224,
-      "ram": 896,
-      "pricePerHourUSD": 20.426112,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "n2d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "n2d-standard-32",
-      "category": "general",
-      "vcpu": 32,
-      "ram": 128,
-      "pricePerHourUSD": 2.9180159999999997,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "n2d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "n2d-standard-4",
-      "category": "general",
-      "vcpu": 4,
-      "ram": 16,
-      "pricePerHourUSD": 0.36475199999999997,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "n2d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "n2d-standard-48",
-      "category": "general",
-      "vcpu": 48,
-      "ram": 192,
-      "pricePerHourUSD": 4.377024,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "n2d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "n2d-standard-64",
-      "category": "general",
-      "vcpu": 64,
-      "ram": 256,
-      "pricePerHourUSD": 5.836031999999999,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "n2d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "n2d-standard-8",
-      "category": "general",
-      "vcpu": 8,
-      "ram": 32,
-      "pricePerHourUSD": 0.7295039999999999,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "n2d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "n2d-standard-80",
-      "category": "general",
-      "vcpu": 80,
-      "ram": 320,
-      "pricePerHourUSD": 7.29504,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "n2d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "n2d-standard-96",
-      "category": "general",
-      "vcpu": 96,
-      "ram": 384,
-      "pricePerHourUSD": 8.754048,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "n2d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "n4-standard-16",
-      "category": "general",
-      "vcpu": 16,
-      "ram": 64,
-      "pricePerHourUSD": 1.7218879999999999,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "n4",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "n4-standard-2",
-      "category": "general",
-      "vcpu": 2,
-      "ram": 8,
-      "pricePerHourUSD": 0.21523599999999998,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "n4",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "n4-standard-32",
-      "category": "general",
-      "vcpu": 32,
-      "ram": 128,
-      "pricePerHourUSD": 3.4437759999999997,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "n4",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "n4-standard-4",
-      "category": "general",
-      "vcpu": 4,
-      "ram": 16,
-      "pricePerHourUSD": 0.43047199999999997,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "n4",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "n4-standard-48",
-      "category": "general",
-      "vcpu": 48,
-      "ram": 192,
-      "pricePerHourUSD": 5.165664,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "n4",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "n4-standard-64",
-      "category": "general",
-      "vcpu": 64,
-      "ram": 256,
-      "pricePerHourUSD": 6.8875519999999995,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "n4",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "n4-standard-8",
-      "category": "general",
-      "vcpu": 8,
-      "ram": 32,
-      "pricePerHourUSD": 0.8609439999999999,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "n4",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "n4-standard-80",
-      "category": "general",
-      "vcpu": 80,
-      "ram": 320,
-      "pricePerHourUSD": 8.60944,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "n4",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "t2d-standard-1",
-      "category": "general",
-      "vcpu": 1,
-      "ram": 4,
-      "pricePerHourUSD": 0.102246,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "t2d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "t2d-standard-16",
-      "category": "general",
-      "vcpu": 16,
-      "ram": 64,
-      "pricePerHourUSD": 1.635936,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "t2d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "t2d-standard-2",
-      "category": "general",
-      "vcpu": 2,
-      "ram": 8,
-      "pricePerHourUSD": 0.204492,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "t2d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "t2d-standard-32",
-      "category": "general",
-      "vcpu": 32,
-      "ram": 128,
-      "pricePerHourUSD": 3.271872,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "t2d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "t2d-standard-4",
-      "category": "general",
-      "vcpu": 4,
-      "ram": 16,
-      "pricePerHourUSD": 0.408984,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "t2d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "t2d-standard-48",
-      "category": "general",
-      "vcpu": 48,
-      "ram": 192,
-      "pricePerHourUSD": 4.907807999999999,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "t2d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "t2d-standard-60",
-      "category": "general",
-      "vcpu": 60,
-      "ram": 240,
-      "pricePerHourUSD": 6.13476,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "t2d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
-    },
-    {
-      "instance": "t2d-standard-8",
-      "category": "general",
-      "vcpu": 8,
-      "ram": 32,
-      "pricePerHourUSD": 0.817968,
-      "region": "us-east1",
-      "os": "RHEL",
-      "series": "t2d",
-      "arch": "x86",
-      "source": "composed+rhel(fallback:0.06)"
     }
   ],
   "oci": {
