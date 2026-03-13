@@ -24,7 +24,12 @@ const {
   // Existing helpers
   getResourceSkusMap,
   categorizeByInstanceName,
-  widenAzureSeries
+  widenAzureSeries,
+
+  // NEW: UI naming helpers
+  azureDisplayNameFromNormalized,
+  azureSeriesFromNormalized,
+  azureSeriesNameFromNormalized
 } = require("../lib/azure");
 
 // Write to docs/data by default (workflow can override)
@@ -117,6 +122,11 @@ async function main() {
 
     rows.push({
       instance,
+      // NEW: UI-friendly fields
+      displayInstance: azureDisplayNameFromNormalized(instance),
+      series: azureSeriesFromNormalized(instance),
+      seriesName: azureSeriesNameFromNormalized(instance),
+
       pricePerHourUSD: price,
       region: REGION,
       os,
