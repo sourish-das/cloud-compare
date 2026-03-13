@@ -1,8 +1,8 @@
 name: Fetch GCP Prices
 
 permissions:
-  contents: write      # Required if DEBUG_PUBLISH is true to commit files
-  id-token: write      # Required for google-github-actions/auth@v3 (OIDC)
+  contents: read        # provider does not commit; orchestrator will
+  id-token: write       # required for google-github-actions/auth@v3 (OIDC)
 
 on:
   workflow_call:
@@ -23,9 +23,9 @@ jobs:
 
     steps:
       # ------------------------------------------------------------
-      # Checkout
+      # Checkout (read-only)
       # ------------------------------------------------------------
-      - name: Checkout repo
+      - name: Checkout repo (read-only)
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -67,43 +67,44 @@ jobs:
         run: mkdir -p docs/data/gcp
 
       # ------------------------------------------------------------
-      # Run the GCP fetcher
+      # >>> Run the GCP fetcher (Catalog + fallback + Windows synth)
       # ------------------------------------------------------------
       - name: Fetch GCP prices
         run: node scripts/providers/gcp.fetch.js
         env:
+          # Region & currency (adjust if needed)
           GCP_REGION: "us-east1"
           GCP_CURRENCY: "USD"
+
+          # Project + access token for FULL-mode fallback & API calls
           GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
           GCLOUD_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+
+          # Optional: Catalog API key (script prefers OAuth if present)
           GCP_PRICE_API_KEY: ${{ secrets.GCP_PRICE_API_KEY }}
+
+          # Output path
           OUTPUT_PATH: "docs/data/gcp/gcp.prices.json"
-          
-          # Use Tiered RHEL synthesis (0.06/0.13) by leaving rate empty
-          # Enable debug logs for visibility in GH Action logs
-          GCP_DEBUG_RHEL: "1" 
+
+          # Optional debug / knobs (leave commented for simplicity)
+          # GCP_DEBUG_WIN: "1"                 # logs Windows rate resolution
+          # GCP_FORCE_COMPOSE: "1"             # force compose Linux shapes
+          # GCP_WINDOWS_RATE_PER_VCPU: "0.046" # pin Windows Standard per‑vCPU
 
       # ------------------------------------------------------------
-      # Validate output and show stats
+      # Validate the output exists and show quick stats
       # ------------------------------------------------------------
       - name: Validate GCP output
         shell: bash
         run: |
           set -euo pipefail
-          FILE="docs/data/gcp/gcp.prices.json"
-          test -s $FILE
-          
+          test -s docs/data/gcp/gcp.prices.json
           echo "Output size (bytes):"
-          wc -c $FILE
-          
+          wc -c docs/data/gcp/gcp.prices.json
           echo "Top-level keys:"
-          jq 'keys' $FILE | sed 's/^/  /'
-          
+          jq 'keys' docs/data/gcp/gcp.prices.json | sed 's/^/  /' || true
           echo "Compute array length:"
-          jq '.compute | length' $FILE
-          
-          echo "OS distribution (by rows):"
-          jq -r '.compute[].os' $FILE | sort | uniq -c | sed 's/^/  /'
+          jq '.compute | length' docs/data/gcp/gcp.prices.json || true
 
       # ------------------------------------------------------------
       # Upload artifact for the orchestrator
@@ -117,30 +118,35 @@ jobs:
           retention-days: 7
 
       # =========================================
-      # DEBUG MODE — Direct commit to main if enabled
+      # OPTIONAL DEBUG MODE — snapshot to docs/data (no direct overwrite)
+      # Enable by setting repo variable: DEBUG_PUBLISH=true
       # =========================================
-      - name: Debug Publish to docs/data
+      - name: Debug Publish to docs/data (optional)
         if: ${{ vars.DEBUG_PUBLISH == 'true' }}
         shell: bash
         run: |
           set -euo pipefail
-          echo "DEBUG MODE ENABLED: Committing GCP output directly to main"
-          
-          git config user.name "github-actions[bot]"
+          echo "DEBUG MODE ENABLED: Snapshotting GCP output under docs/data/gcp/_debug"
+          mkdir -p docs/data/gcp/_debug
+          cp -f docs/data/gcp/gcp.prices.json docs/data/gcp/_debug/gcp.prices.json
+
+      - name: Commit debug provider files (optional)
+        if: ${{ vars.DEBUG_PUBLISH == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           git fetch origin main
           git checkout main
-          
-          # Copy to final location
-          cp -f docs/data/gcp/gcp.prices.json docs/data/gcp/gcp.prices.json
-          
-          git add docs/data/gcp/gcp.prices.json
-          
+          git reset --hard origin/main
+
+          git add -f docs/data/gcp/gcp.prices.json
           if git diff --cached --quiet; then
             echo "No changes to commit."
             exit 0
           fi
 
-          git commit -m "Debug publish: GCP pricing update [skip ci]"
-          git push origin main
+          git commit -m "Debug publish: GCP pricing update"
+          git push
