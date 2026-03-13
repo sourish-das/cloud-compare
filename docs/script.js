@@ -326,14 +326,16 @@ export async function compare(resetFamilies = false) {
     let azCard;
     try {
       const z = findBestAzure(azList, vcpu, ram, os, familyAz);
-      azCard = z ? {
-        instance: z.instance,
-        vcpu: z.vcpu ?? vcpu,
-        ram:  z.ram  ?? ram,
-        pricePerHourUSD: z.pricePerHourUSD,
-        region: z.region,
-        os
-      } : null;
+azCard = z ? {
+  instance: z.instance,
+  displayInstance: z.displayInstance || z.instance,      // NEW
+  seriesName: z.seriesName || z.series || "",            // NEW (Azure-calculator-style; fallback to concise)
+  vcpu: z.vcpu ?? vcpu,
+  ram: z.ram ?? ram,
+  pricePerHourUSD: z.pricePerHourUSD,
+  region: z.region,
+  os
+} : null;
     } catch (e) {
       azCard = { error: e.message };
     }
