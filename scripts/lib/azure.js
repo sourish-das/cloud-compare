@@ -129,9 +129,61 @@ function isPrimaryOnDemandRetailItem(it = {}) {
   return typeOk && primary;
 }
 
+/* ============================================================
+ * ResourceSkus enrichment
+ *  - Adds a cross-walk so "ECasv6-2" also maps to "standard_ec2as_v6"
+ *    fixing vCPU/RAM enrichment for multi-letter families.
+ * ============================================================*/
+
+/**
+ * Try to convert an Azure ResourceSkus size name (e.g., "ECasv6-2")
+ * into your normalized instance key (e.g., "standard_ec2as_v6").
+ *
+ * Pattern: <lettersFull><vX>-<size>
+ *   lettersFull = family + (optional) sub-suffix (s|as|ads|als|ls|pls|ps)
+ *   vX          = generation (v2|v3|v5|v6...)
+ *   size        = numeric size
+ *
+ * Examples:
+ *   ECasv6-2  -> standard_ec2as_v6
+ *   Dsv5-4    -> standard_d4s_v5
+ *   Lsv3-8    -> standard_ls8_v3
+ *   Fv2-4     -> standard_f4_v2
+ */
+function _normalizedFromSkuName(skuName = "") {
+  const m = /^([a-z]+)(v\d+)\-(\d+)$/i.exec(String(skuName).trim());
+  if (!m) return null;
+
+  const lettersFull = m[1].toLowerCase(); // e.g., 'ecas', 'ds', 'ls', 'f'
+  const gen         = m[2].toLowerCase(); // 'v6', 'v5', 'v3', 'v2'
+  const sizeNum     = m[3];               // '2', '4', '8', ...
+
+  // Known Azure sub-suffixes frequently used
+  const KNOWN_SUBS = ["ads", "als", "pls", "ls", "as", "s"]; // order matters (longer first)
+
+  let sub = "";
+  let family = lettersFull;
+  for (const suf of KNOWN_SUBS) {
+    if (lettersFull.endsWith(suf)) {
+      sub = suf;                                 // e.g., 'as'
+      family = lettersFull.slice(0, -suf.length); // e.g., 'ec'
+      break;
+    }
+  }
+
+  // Build "ec2as" or "d4s" or "ls8"
+  const base = `${family}${sizeNum}${sub}`;       // family + size + sub
+  return `standard_${base}_${gen}`.toLowerCase(); // standard_ec2as_v6
+}
+
 /**
  * Build a name->{vcpu,ram} map from ResourceSkus for a given subscription & region.
  * Requires an ARM token with Microsoft.Compute/skus read permissions.
+ *
+ * NOTE: We now set TWO keys for each entry:
+ *   1) raw sku.name (lowercased), e.g., "ecasv6-2"
+ *   2) normalized key, e.g., "standard_ec2as_v6"
+ * so that later lookups by vm.instance (normalized) succeed.
  */
 async function getResourceSkusMap({ subscriptionId, region, armToken }) {
   const map = new Map();
@@ -149,11 +201,18 @@ async function getResourceSkusMap({ subscriptionId, region, armToken }) {
     const j = await res.json();
     for (const sku of (j.value || [])) {
       if (sku.resourceType !== "virtualMachines") continue;
+
       const caps = Object.fromEntries((sku.capabilities || []).map(x => [x.name, x.value]));
-      const v = caps.vCPUs ? Number(caps.vCPUs) : null;
-      const m = caps.MemoryGB ? Number(caps.MemoryGB) : null;
-      if (v || m) {
-        map.set(String(sku.name).toLowerCase(), { vcpu: v, ram: m });
+      const v = caps.vCPUs    ? Number(caps.vCPUs)    : null;
+      const mGB = caps.MemoryGB ? Number(caps.MemoryGB) : null;
+
+      if (v || mGB) {
+        const rawKey  = String(sku.name || "").toLowerCase();     // e.g., "ecasv6-2"
+        const normKey = _normalizedFromSkuName(sku.name || "");   // e.g., "standard_ec2as_v6" or null
+
+        const entry = { vcpu: v, ram: mGB };
+        if (rawKey)  map.set(rawKey, entry);
+        if (normKey) map.set(normKey, entry);
       }
     }
     next = j.nextLink || null;
