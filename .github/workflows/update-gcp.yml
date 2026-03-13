@@ -1,8 +1,8 @@
 name: Fetch GCP Prices
 
 permissions:
-  contents: read
-  id-token: write
+  contents: write      # Required if DEBUG_PUBLISH is true to commit files
+  id-token: write      # Required for google-github-actions/auth@v3 (OIDC)
 
 on:
   workflow_call:
@@ -22,16 +22,25 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      - name: Checkout repo (read-only)
+      # ------------------------------------------------------------
+      # Checkout
+      # ------------------------------------------------------------
+      - name: Checkout repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      # ------------------------------------------------------------
+      # Node setup (LTS)
+      # ------------------------------------------------------------
       - name: Set up Node (LTS)
         uses: actions/setup-node@v4
         with:
           node-version: "20"
 
+      # ------------------------------------------------------------
+      # jq (for quick validation)
+      # ------------------------------------------------------------
       - name: Ensure jq
         run: |
           if ! command -v jq >/dev/null 2>&1; then
@@ -39,6 +48,9 @@ jobs:
             sudo apt-get install -y jq
           fi
 
+      # ------------------------------------------------------------
+      # OIDC → short-lived Google Cloud access token
+      # ------------------------------------------------------------
       - name: Google OIDC Auth
         id: auth
         uses: google-github-actions/auth@v3
@@ -48,9 +60,15 @@ jobs:
           service_account: ${{ secrets.GCP_WIF_SA_EMAIL }}
           token_format: access_token
 
+      # ------------------------------------------------------------
+      # Ensure output directory
+      # ------------------------------------------------------------
       - name: Ensure output directory
         run: mkdir -p docs/data/gcp
 
+      # ------------------------------------------------------------
+      # Run the GCP fetcher
+      # ------------------------------------------------------------
       - name: Fetch GCP prices
         run: node scripts/providers/gcp.fetch.js
         env:
@@ -60,37 +78,36 @@ jobs:
           GCLOUD_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
           GCP_PRICE_API_KEY: ${{ secrets.GCP_PRICE_API_KEY }}
           OUTPUT_PATH: "docs/data/gcp/gcp.prices.json"
+          
+          # Use Tiered RHEL synthesis (0.06/0.13) by leaving rate empty
+          # Enable debug logs for visibility in GH Action logs
+          GCP_DEBUG_RHEL: "1" 
 
-          # RHEL fallback: synthesize RHEL rows when Catalog adders are missing
-          # Default: $0.06 per vCPU-hour. Override in repo secrets or workflow_call if desired.
-          GCP_RHEL_RATE_PER_VCPU: "0.060"
-
-          # Optional debug / knobs
-          # GCP_DEBUG_WIN: "1"
-          # GCP_DEBUG_RHEL: "1"
-          # GCP_FORCE_COMPOSE: "1"
-          # GCP_WINDOWS_RATE_PER_VCPU: "0.046"
-
+      # ------------------------------------------------------------
+      # Validate output and show stats
+      # ------------------------------------------------------------
       - name: Validate GCP output
         shell: bash
         run: |
           set -euo pipefail
-          test -s docs/data/gcp/gcp.prices.json
+          FILE="docs/data/gcp/gcp.prices.json"
+          test -s $FILE
+          
           echo "Output size (bytes):"
-          wc -c docs/data/gcp/gcp.prices.json
+          wc -c $FILE
+          
           echo "Top-level keys:"
-          jq 'keys' docs/data/gcp/gcp.prices.json | sed 's/^/  /' || true
+          jq 'keys' $FILE | sed 's/^/  /'
+          
           echo "Compute array length:"
-          jq '.compute | length' docs/data/gcp/gcp.prices.json || true
-
-      - name: Show OS counts
-        shell: bash
-        run: |
-          set -euo pipefail
+          jq '.compute | length' $FILE
+          
           echo "OS distribution (by rows):"
-          jq -r '.compute[].os' docs/data/gcp/gcp.prices.json \
-            | sort | uniq -c | sed 's/^/  /' || true
+          jq -r '.compute[].os' $FILE | sort | uniq -c | sed 's/^/  /'
 
+      # ------------------------------------------------------------
+      # Upload artifact for the orchestrator
+      # ------------------------------------------------------------
       - name: Upload GCP pricing JSON (artifact)
         uses: actions/upload-artifact@v4
         with:
@@ -98,3 +115,32 @@ jobs:
           path: docs/data/gcp/gcp.prices.json
           if-no-files-found: error
           retention-days: 7
+
+      # =========================================
+      # DEBUG MODE — Direct commit to main if enabled
+      # =========================================
+      - name: Debug Publish to docs/data
+        if: ${{ vars.DEBUG_PUBLISH == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "DEBUG MODE ENABLED: Committing GCP output directly to main"
+          
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git fetch origin main
+          git checkout main
+          
+          # Copy to final location
+          cp -f docs/data/gcp/gcp.prices.json docs/data/gcp/gcp.prices.json
+          
+          git add docs/data/gcp/gcp.prices.json
+          
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git commit -m "Debug publish: GCP pricing update [skip ci]"
+          git push origin main
