@@ -209,6 +209,24 @@ button:disabled {
   background: transparent;
 }
 
+/* ========================== NEW ==========================
+   Azure/GLOBAL: small badge to display VM series name
+   (e.g., "Dasv6-series") next to the recommended size.
+   Safe to use for other providers if needed.
+   ====================================================== */
+.badge-series {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 6px;
+  font-size: 12px;
+  line-height: 16px;
+  border-radius: 4px;
+  background: #eef3ff;
+  color: #1f4fe0;
+  border: 1px solid #d6e0ff;
+  white-space: nowrap;
+}
+
 /* ======================================================
    FAMILY FILTERS
    ====================================================== */
