@@ -1,6 +1,7 @@
 // scripts/providers/azure.fetch.rhel.test.js
 // Node 18+ (global fetch) — Isolated test fetcher for Azure RHEL SKUs
 
+const fs = require("fs");
 const path = require("path");
 const {
   atomicWrite,
@@ -15,8 +16,8 @@ const {
 const {
   // Classifiers & helpers (inherited from main + overridden getRetailOsInfo)
   getRetailOsInfo,
-  isWindowsRetailEligible,
-  isLinuxRetailEligible,
+  isWindowsRetailEligible,           // unused in RHEL-only path, kept for parity
+  isLinuxRetailEligible,             // unused here, we filter specific paid Linux variant
   extractRetailHourlyUSD,
   normalizeAzureInstanceName,
   isAzureArmInstance,
@@ -40,13 +41,18 @@ const LINUX_VARIANT = String(process.env.AZURE_LINUX_VARIANT || "rhel").toLowerC
 async function fetchWithRetry(url, retries = 6) {
   for (let i = 0; i < retries; i++) {
     try {
-      const res = await fetch(url);
+      const res = await fetch(url, {
+        headers: {
+          "User-Agent": "cloud-compare/azure-rhel-test (+https://github.com/sourish-das/cloud-compare)"
+        }
+      });
       if (res.ok) return res.json();
       console.warn(`[Azure:RHEL-TEST] Retail HTTP ${res.status} on attempt ${i + 1}/${retries}`);
     } catch (err) {
       console.warn(`[Azure:RHEL-TEST] Retail error on attempt ${i + 1}/${retries} → ${err.message}`);
     }
-    await new Promise(res => setTimeout(res, 1500 * Math.pow(2, i)));
+    const delay = Math.min(1000 * Math.pow(2, i), 10000); // 1s, 2s, 4s, 8s, 10s cap
+    await new Promise(res => setTimeout(res, delay));
   }
   throw new Error(`[Azure:RHEL-TEST] Retail failed after ${retries} retries → ${url}`);
 }
@@ -67,6 +73,9 @@ async function fetchRetailPrices() {
     items.push(...(j.Items || []));
     next = j.NextPageLink || null;
     pages++;
+    if (pages % 5 === 0) {
+      console.log(`[Azure:RHEL-TEST] paged=${pages}, accumulated=${items.length}`);
+    }
   }
 
   logDone(`[Azure:RHEL-TEST] Retail count=${items.length}`);
@@ -109,28 +118,21 @@ async function main() {
     // Exclude burstable at source (B-series)
     if (isBurstableAzure(instance)) continue;
 
-    // OS eligibility
+    // OS eligibility (RHEL-only in this test)
     const osInfo = getRetailOsInfo(it);
-    const { os } = osInfo;
+    if (osInfo.os !== "Linux") continue;
 
-    if (os === "Linux") {
-      // Test path: include only paid Linux for the selected variant (default: RHEL)
-      if (LINUX_VARIANT === "rhel") {
-        if (!osInfo.isRhel) continue;
-      } else if (LINUX_VARIANT === "sles") {
-        if (!osInfo.isSles) continue;
-      } else if (LINUX_VARIANT === "ubuntu-pro") {
-        if (!osInfo.isUbuntuPro) continue;
-      } else if (LINUX_VARIANT === "oracle") {
-        if (!osInfo.isOracleLinux) continue;
-      } else {
-        // Explicitly skip free Linux in this test
-        continue;
-      }
-    } else if (os === "Windows") {
-      if (!isWindowsRetailEligible(it)) continue;
-      if (isAzureArmInstance(instance)) continue; // block ARM for Windows
+    // Variant filtering (default: RHEL)
+    if (LINUX_VARIANT === "rhel") {
+      if (!osInfo.isRhel) continue;
+    } else if (LINUX_VARIANT === "sles") {
+      if (!osInfo.isSles) continue;
+    } else if (LINUX_VARIANT === "ubuntu-pro") {
+      if (!osInfo.isUbuntuPro) continue;
+    } else if (LINUX_VARIANT === "oracle") {
+      if (!osInfo.isOracleLinux) continue;
     } else {
+      // Explicitly skip free Linux in this test
       continue;
     }
 
@@ -142,10 +144,51 @@ async function main() {
 
       pricePerHourUSD: price,
       region: REGION,
-      os,
-      linuxVariant: (os === "Linux" ? LINUX_VARIANT : undefined),
+      os: "Linux",
+      linuxVariant: LINUX_VARIANT,
       source: "retail"
     });
   }
 
-  // Deduplicate by (instance, region, os) — safe here since this file has only RHEL
+  // Deduplicate by (instance, region, os) — safe here since this file has only paid Linux
+  const cheapest = dedupeCheapestByKey(rows, r => `${r.instance}-${r.region}-${r.os}`);
+  const countsByOs = cheapest.reduce((a, r) => (a[r.os] = (a[r.os] || 0) + 1, a), {});
+  console.log(`[Azure:RHEL-TEST] collected=${rows.length}, cheapest=${cheapest.length}, byOS=`, countsByOs);
+  if (warnAndSkipWriteOnEmpty("Azure:RHEL-TEST", cheapest)) return;
+
+  // Enrich with ResourceSkus if available (uses same ARM token + cross-walk)
+  const subscriptionId = process.env.AZURE_SUBSCRIPTION_ID;
+  const armToken = process.env.ARM_TOKEN;
+
+  const skuMap =
+    subscriptionId && armToken
+      ? await getResourceSkusMap({ subscriptionId, region: REGION, armToken })
+      : new Map();
+
+  for (const vm of cheapest) {
+    const spec = skuMap.get(String(vm.instance).toLowerCase());
+    vm.vcpu = (spec?.vcpu ?? null);
+    vm.ram  = (spec?.ram  ?? null);
+    vm.category = categorizeByInstanceName(vm.instance);
+  }
+
+  const meta = {
+    os: ["Linux"],              // rows are Linux (paid variant)
+    linuxVariant: LINUX_VARIANT,
+    vcpu: uniqSortedNums(cheapest.map(x => x.vcpu)),
+    ram:  uniqSortedNums(cheapest.map(x => x.ram))
+  };
+
+  // Safety: ensure directory exists (workflow already makes it; keep robust)
+  try { fs.mkdirSync(path.dirname(OUT), { recursive: true }); } catch {}
+
+  const out = { meta, compute: cheapest /*, storage: undefined */ };
+  atomicWrite(OUT, out);
+  console.log(`✅ Wrote ${OUT}`);
+}
+
+main().catch(e => {
+  console.error(e);
+  process.exit(1);
+});
+``
