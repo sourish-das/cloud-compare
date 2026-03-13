@@ -5,6 +5,7 @@
   <title>Cloud Price Compare (AWS vs Azure vs GCP vs OCI)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="style.css" />
+  <meta name="description" content="Compare on‑demand VM & storage prices across AWS, Azure, GCP, and OCI with a clean results export to PDF." />
 </head>
 
 <body>
@@ -43,7 +44,7 @@
           <div class="info-pop__content">
             <strong>OS selection</strong><br />
             • <em>Linux (Open‑source)</em>: Standard Linux VM rates (no OS license).<br />
-            • <em>RHEL</em>: Red Hat Enterprise Linux — License Uplift or BYOL may apply depending on cloud provider/config.<br />
+            • <em>RHEL</em>: Red Hat Enterprise Linux — License uplift or BYOL may apply depending on cloud provider/config.<br />
             • <em>Windows</em>: Windows PAYG (license included).
           </div>
         </div>
@@ -107,13 +108,13 @@
         </div>
       </div>
 
-     <!-- Compare + Export buttons (same grid cell) -->
-<div>
-  <div class="btn-row">
-    <button id="compareBtn" onclick="compare(true)" class="btn-eq">Compare</button>
-    <button id="downloadPdfBtn" type="button" class="btn-eq" disabled title="Run Compare first">Export PDF</button>
-  </div>
-</div>
+      <!-- Compare + Export buttons (same grid cell) -->
+      <div>
+        <div class="btn-row">
+          <button id="compareBtn" type="button" class="btn-eq" onclick="compare(true)">Compare</button>
+          <button id="downloadPdfBtn" type="button" class="btn-eq" disabled title="Run Compare first">Export PDF</button>
+        </div>
+      </div>
 
     </div>
 
@@ -261,109 +262,113 @@
     <!-- ===========================
          OCI PANEL
     ============================ -->
-  <div class="panel panel--oci">
-  <h3 class="inline-flex">
-    OCI Compute
-    <!-- Info button (opens tooltip below, anchored to this button) -->
-    <button
-      type="button"
-      class="info-btn"
-      id="ociInfoBtn"
-      aria-label="How OCI pricing works"
-      aria-expanded="false"
-      aria-controls="ociInfoTip"
-      title="How OCI pricing works">i</button>
-  </h3>
+    <div class="panel panel--oci">
+      <h3 class="inline-flex">
+        OCI Compute
+        <!-- Info button (opens tooltip below, anchored to this button) -->
+        <button
+          type="button"
+          class="info-btn"
+          id="ociInfoBtn"
+          aria-label="How OCI pricing works"
+          aria-expanded="false"
+          aria-controls="ociInfoTip"
+          title="How OCI pricing works">i</button>
+      </h3>
 
-  <!-- NEW: Processor selector (replaces 'Family') -->
-  <div class="family-filter" id="ociProcessorWrap" style="display:none;">
-    <label for="ociProcessor">Processor</label>
-    <select id="ociProcessor" aria-label="OCI processor">
-      <option value="auto" selected>Auto (Recommended)</option>
-      <option value="amd">AMD</option>
-      <option value="arm">Ampere</option>
-      <option value="intel">Intel</option>
-    </select>
-  </div>
+      <!-- NEW: Processor selector (replaces 'Family') -->
+      <div class="family-filter" id="ociProcessorWrap" style="display:none;">
+        <label for="ociProcessor">Processor</label>
+        <select id="ociProcessor" aria-label="OCI processor">
+          <option value="auto" selected>Auto (Recommended)</option>
+          <option value="amd">AMD</option>
+          <option value="arm">Ampere</option>
+          <option value="intel">Intel</option>
+        </select>
+      </div>
 
-  <!-- RHEL notice (shown when OS = RHEL). Hidden by default; script will toggle `hidden`. -->
-  <div id="ociRhelNotice"
-       class="oci-rhel-notice"
-       role="status"
-       aria-live="polite"
-       hidden
-       tabindex="-1">
-    <strong>RHEL on OCI</strong> — OCI does not provide a pre-built RHEL platform image. Use BYOL / BYOS (bring your own license/subscription).
-    <a id="ociRhelLearnMore" href="https://www.oracle.com/cloud/marketplace/" target="_blank" rel="noopener noreferrer">Learn more</a>
-  </div>
+      <!-- RHEL notice (shown when OS = RHEL). Hidden by default; script will toggle `hidden`. -->
+      <div id="ociRhelNotice"
+           class="oci-rhel-notice"
+           role="status"
+           aria-live="polite"
+           hidden
+           tabindex="-1">
+        <strong>RHEL on OCI</strong> — OCI does not provide a pre-built RHEL platform image. Use BYOL / BYOS (bring your own license/subscription).
+        <a id="ociRhelLearnMore" href="https://www.oracle.com/cloud/marketplace/" target="_blank" rel="noopener noreferrer">Learn more</a>
+      </div>
 
-  <!-- Optional: small line to show RHEL uplift if you later compute an estimate -->
-  <div id="ociRhelLine" class="oci-rhel-line" aria-hidden="true"></div>
+      <!-- Optional: small line to show RHEL uplift if you later compute an estimate -->
+      <div id="ociRhelLine" class="oci-rhel-line" aria-hidden="true"></div>
 
-  <p id="ociInstance"><strong>Recommended Machine:</strong> –</p>
-  <p id="ociCpu">vCPU: –</p>
-  <p id="ociRam">RAM: –</p>
-  <p class="muted" id="ociStorageSel">Storage: –</p>
+      <p id="ociInstance"><strong>Recommended Machine:</strong> –</p>
+      <p id="ociCpu">vCPU: –</p>
+      <p id="ociRam">RAM: –</p>
+      <p class="muted" id="ociStorageSel">Storage: –</p>
 
-  <p id="ociPrice">Price/hr: –</p>
-  <p id="ociMonthly">≈ Monthly: –</p>
+      <p id="ociPrice">Price/hr: –</p>
+      <p id="ociMonthly">≈ Monthly: –</p>
 
-  <div class="split">
-    <span class="label" id="ociStoragePriceHrLabel">Storage Price/hr:</span>
-    <span id="ociStoragePriceHr">–</span>
-  </div>
-  <div class="split">
-    <span class="label" id="ociStorageMonthlyLabel">≈ Storage Monthly:</span>
-    <span id="ociStorageMonthly">–</span>
-  </div>
+      <div class="split">
+        <span class="label" id="ociStoragePriceHrLabel">Storage Price/hr:</span>
+        <span id="ociStoragePriceHr">–</span>
+      </div>
+      <div class="split">
+        <span class="label" id="ociStorageMonthlyLabel">≈ Storage Monthly:</span>
+        <span id="ociStorageMonthly">–</span>
+      </div>
 
-  <hr class="divider" />
+      <hr class="divider" />
 
-  <div class="split total">
-    <span class="label">Total Price/hr:</span>
-    <span id="ociTotalHr">–</span>
-  </div>
-  <div class="split total">
-    <span class="label">≈ Total Monthly:</span>
-    <span id="ociTotalMonthly">–</span>
-  </div>
-</div>
-
-      <!-- OCI Info tooltip content (anchored, not modal) -->
-      <div class="info-pop" id="ociInfoTip" role="tooltip" aria-hidden="true">
-        <div class="info-pop__arrow"></div>
-        <div class="info-pop__content">
-          <button class="info-pop__close" aria-label="Close">×</button>
-          <strong>OCI Compute — How Pricing Works</strong><br /><br />
-
-          <strong>• OCPU model</strong><br />
-          OCI prices compute using OCPUs.<br />
-          <em>x86 (AMD/Intel):</em> 1 OCPU = <strong>2 vCPUs</strong><br />
-          <em>Ampere ARM:</em> 1 OCPU = <strong>1 vCPU</strong><br /><br />
-
-          <strong>• Flex shape billing</strong><br />
-          OCI Flex shapes bill CPU and memory separately:<br />
-          <strong>Total Price = (OCPU/hr × rate) + (RAM GB/hr × rate)</strong><br />
-          This gives highly configurable instances.<br /><br />
-
-          <strong>• Processor selection</strong><br />
-          <em>Auto:</em> returns the <strong>cheapest</strong> instance across all processors<br />
-          <em>AMD:</em> selects the latest AMD E‑series generation (e.g., E6)<br />
-          <em>Ampere:</em> selects the latest ARM A‑series generation (e.g., A4)<br />
-          <em>Intel:</em> selects the latest Standard3/Optimized3 generation<br />
-          Then picks the <strong>cheapest shape</strong> within that generation.<br /><br />
-
-          <strong>• Windows note</strong><br />
-          Windows licensing is added per vCPU/hr.<br />
-          Windows <strong>does not run</strong> on Ampere shapes.
-        </div>
+      <div class="split total">
+        <span class="label">Total Price/hr:</span>
+        <span id="ociTotalHr">–</span>
+      </div>
+      <div class="split total">
+        <span class="label">≈ Total Monthly:</span>
+        <span id="ociTotalMonthly">–</span>
       </div>
     </div>
-  </div>
- 
-<!-- PDF libraries (lightweight CDNs) -->
-https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js</script>
-https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js</script>
+
+    <!-- OCI Info tooltip content (anchored, not modal) -->
+    <div class="info-pop" id="ociInfoTip" role="tooltip" aria-hidden="true">
+      <div class="info-pop__arrow"></div>
+      <div class="info-pop__content">
+        <button class="info-pop__close" aria-label="Close" type="button">×</button>
+        <strong>OCI Compute — How Pricing Works</strong><br /><br />
+
+        <strong>• OCPU model</strong><br />
+        OCI prices compute using OCPUs.<br />
+        <em>x86 (AMD/Intel):</em> 1 OCPU = <strong>2 vCPUs</strong><br />
+        <em>Ampere ARM:</em> 1 OCPU = <strong>1 vCPU</strong><br /><br />
+
+        <strong>• Flex shape billing</strong><br />
+        OCI Flex shapes bill CPU and memory separately:<br />
+        <strong>Total Price = (OCPU/hr × rate) + (RAM GB/hr × rate)</strong><br />
+        This gives highly configurable instances.<br /><br />
+
+        <strong>• Processor selection</strong><br />
+        <em>Auto:</em> returns the <strong>cheapest</strong> instance across all processors<br />
+        <em>AMD:</em> selects the latest AMD E‑series generation (e.g., E6)<br />
+        <em>Ampere:</em> selects the latest ARM A‑series generation (e.g., A4)<br />
+        <em>Intel:</em> selects the latest Standard3/Optimized3 generation<br />
+        Then picks the <strong>cheapest shape</strong> within that generation.<br /><br />
+
+        <strong>• Windows note</strong><br />
+        Windows licensing is added per vCPU/hr.
+        Windows <strong>does not run</strong> on Ampere shapes.
+      </div>
+    </div>
+
+  </div> <!-- /.results -->
+
+  <noscript>
+    <div class="muted" style="margin:16px 0">JavaScript is required to use the comparator and export to PDF.</div>
+  </noscript>
+
+  <!-- PDF libraries (lightweight CDNs) -->
+  <script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
   <!-- IMPORTANT: load the coordinator as an ES module -->
   <script type="module" src="./script.js"></script>
