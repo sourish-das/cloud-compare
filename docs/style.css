@@ -87,8 +87,10 @@ h2 {
   box-shadow:var(--shadow); 
 }
 
+/* Base grid – overridden by “equal widths” block below */
 .filters .row {
   display:grid;
+  /* Original template replaced by equal-widths definition below */
   grid-template-columns: repeat(5, 1fr) auto;
   gap:12px;
   align-items:end;
@@ -253,11 +255,9 @@ button:disabled {
   background: transparent;
 }
 
-/* ========================== NEW ==========================
-   Azure/GLOBAL: small badge to display VM series name
-   (e.g., "Dasv6-series") next to the recommended size.
-   Safe to use for other providers if needed.
-   ====================================================== */
+/* ==========================
+   Azure/GLOBAL: series badge
+   ========================== */
 .badge-series {
   display: inline-block;
   margin-left: 6px;
@@ -321,7 +321,7 @@ button:disabled {
   box-shadow:none;
 }
 
-/* Make sure the small info button keeps its tiny size within the filter bar */
+/* Keep the tiny info button tiny in the filter bar */
 .filters .label-with-info .info-btn {
   width:12px;
   height:12px;
@@ -429,7 +429,7 @@ select option[disabled] {
 }
 
 /* ======================================================
-   RHEL ON OCI NOTICE (inline banner) and disabled card styles
+   RHEL ON OCI NOTICE + disabled card styles
    ====================================================== */
 
 /* Inline notice shown in the OCI card when OS = RHEL
@@ -508,21 +508,75 @@ select option[disabled] {
 }
 
 /* ======================================================
-   RESPONSIVE SAFETY
+   FILTER BAR: equal widths (ADDED)
+   - OS stays natural width (auto)
+   - vCPU, RAM, Storage(GB), StorageType -> 160px each
+   - Buttons (Compare + Export) share 200px column
    ====================================================== */
+
+/* Desktop / wide screens */
+.filters .row {
+  /* Columns:  [ OS | vCPU | RAM | Storage | StorageType | Buttons ] */
+  grid-template-columns:
+    auto   /* OS: keep natural width */
+    160px  /* vCPU  */
+    160px  /* RAM   */
+    160px  /* Storage(GB) */
+    160px  /* Storage Type */
+    200px; /* Buttons group (Compare + Export sit inside) */
+}
+
+/* Prevent selects from stretching beyond their column */
+.filters .row select {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Buttons group: keep the two buttons on one line */
+.btn-row {
+  display: inline-flex;
+  width: 100%; /* occupy the whole buttons column */
+  gap: 8px;
+}
+
+/* Equal buttons inside the group */
+.btn-row .btn-eq {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 40px; /* matches select height */
+  padding: 0 12px;
+}
+
+/* -------------------------
+   Responsive fallbacks
+   ------------------------- */
+
+/* Medium screens: allow 3 columns/row so controls wrap nicely */
 @media (max-width: 1100px) {
   .filters .row {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: 1fr 1fr 1fr; /* 3 columns; cells will wrap */
   }
+  .btn-row { width: auto; }
+}
+
+/* Small screens: stack vertically */
+@media (max-width: 640px) {
+  .filters .row {
+    grid-template-columns: 1fr; /* single column */
+  }
+  .btn-row { width: 100%; }
+}
+
+/* ======================================================
+   RESPONSIVE SAFETY (results/grid fallbacks)
+   ====================================================== */
+@media (max-width: 1100px) {
   .results {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 640px) {
-  .filters .row {
-    grid-template-columns: 1fr;
-  }
   .results {
     grid-template-columns: 1fr;
   }
