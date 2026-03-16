@@ -73,7 +73,7 @@ jobs:
         run: mkdir -p docs/data/aws
 
       # ------------------------------------------------------------
-      # >>> Run the AWS fetcher (Windows via catalog; fallback uplift if needed)
+      # >>> Run the AWS fetcher (Windows via catalog; learn RHEL uplift; fallback if needed)
       # ------------------------------------------------------------
       - name: Fetch AWS prices
         run: node scripts/providers/aws.fetch.js
@@ -81,10 +81,25 @@ jobs:
           AWS_REGION: "us-east-1"
           OUTPUT_PATH: "docs/data/aws/aws.prices.json"
 
-          # Optional Windows uplift (default = 0.046)
+          # Optional Windows uplift (defaults to 0.046 if not set)
           # AWS_WINDOWS_RATE_PER_VCPU: "0.046"
 
-          # NEW: correct RHEL uplift (default fallback in code now ~0.0168)
+          # ---------------------------
+          # RHEL UPLIFT FALLBACK(s)
+          # ---------------------------
+          # Preferred (more granular): region- and/or arch-aware map.
+          # If the fetcher *learns* per-arch uplift this run, it will set
+          # AWS_RHEL_RATE_PER_VCPU_MAP internally for synthesis; this env is only
+          # used when there is nothing to learn in this run.
+          #
+          # Examples:
+          #   '{"us-east-1":0.0159,"_default":0.0168}'
+          #   '{"_arm":0.0159,"_x86":0.0162}'           # arch-specific
+          #   '{"us-east-1":0.0159,"_arm":0.0159,"_x86":0.0162,"_default":0.0168}'
+          #
+          # AWS_RHEL_RATE_PER_VCPU_MAP: '{"us-east-1":0.0159,"_default":0.0168}'
+
+          # Simpler single-number fallback (used only if MAP not set and nothing learned)
           AWS_RHEL_RATE_PER_VCPU: "0.0168"
 
       # ------------------------------------------------------------
