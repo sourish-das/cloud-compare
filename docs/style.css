@@ -11,7 +11,7 @@
 /* === Google logo-inspired provider accents (override defaults) === */
 :root {
   --aws:    #4285F4; /* Blue    */
-  --azure: #EA4335; /* Red     */
+  --azure: #EA4335; /* Red      */
   --gcp:    #FBBC05; /* Yellow  */
   --oci:    #34A853; /* Green   */
 }
@@ -42,10 +42,10 @@ h2 {
 
 /* Centered pill header */
 .app-title--pill {
-  display: block;              /* ensures perfect centering */
-  width: fit-content;          /* shrink to exact pill width */
-  margin-left: auto;           /* center horizontally */
-  margin-right: auto;          /* center horizontally */
+  display: block;               /* ensures perfect centering */
+  width: fit-content;           /* shrink to exact pill width */
+  margin-left: auto;            /* center horizontally */
+  margin-right: auto;           /* center horizontally */
   padding: 8px 18px;
   border-radius: 999px;
 
@@ -561,5 +561,66 @@ select option[disabled] {
 @media (max-width: 640px) {
   .results {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ======================================================
+   PROFESSIONAL PDF EXPORT OVERRIDES
+   ====================================================== */
+@media print {
+  /* 1. Page & Background */
+  @page { margin: 1cm; size: auto; }
+  body { 
+    background: #fff !important; 
+    padding-top: 20px !important; 
+  }
+
+  /* 2. Hide Interactive Elements */
+  .btn-row, 
+  .info-btn,
+  .status,
+  .family-filter select { 
+    display: none !important; 
+  }
+
+  /* 3. Lock Spacing */
+  .app-title { 
+    margin-bottom: 40px !important; 
+  }
+  .filters { 
+    box-shadow: none !important; 
+    border: 1px solid #eee !important; 
+    margin-bottom: 40px !important;
+    padding: 20px !important;
+  }
+
+  /* 4. Card Polish */
+  .results { 
+    gap: 12px !important; 
+  }
+  .panel { 
+    box-shadow: none !important; 
+    border: 1px solid #e5e7eb !important; 
+    break-inside: avoid; /* Prevents cards from splitting across pages */
+    min-height: auto !important;
+    padding: 18px !important;
+  }
+
+  /* 5. Typography for PDF Clarity */
+  .panel h3 { 
+    font-size: 1.2rem !important; 
+    background: transparent !important; /* Cleaner for printing */
+    padding: 0 !important;
+  }
+  .total { 
+    border-top: 2px solid #333 !important; /* Solid line is sharper in PDF */
+    margin-top: 15px !important;
+    padding-top: 10px !important;
+  }
+  
+  /* Ensure colors show up in PDF exports */
+  * { 
+    -webkit-print-color-adjust: exact !important; 
+    print-color-adjust: exact !important; 
   }
 }
