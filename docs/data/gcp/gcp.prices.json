@@ -6945,7 +6945,8 @@
   ],
   "storage": {
     "region": "us-east1",
-    "ssd_per_gb_month": 0.17,
-    "hdd_per_gb_month": 0.04
+    "ssd_per_gb_month": 0.1,
+    "hdd_per_gb_month": 0.04,
+    "hdd_free_gb_per_month": 30
   }
 }
