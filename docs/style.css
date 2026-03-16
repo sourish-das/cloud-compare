@@ -565,72 +565,69 @@ select option[disabled] {
 }
 
 /* ======================================================
-   PROFESSIONAL PDF EXPORT OVERRIDES (STABLE ALIGNMENT)
+   STABLE PDF EXPORT: FIXES FAMILY & PROCESSOR BOXES
    ====================================================== */
 @media print {
-  @page { margin: 1cm; size: auto; }
+  @page { margin: 1.2cm; size: auto; }
   
   body { 
     background: #fff !important; 
-    padding-top: 15px !important; 
     -webkit-print-color-adjust: exact !important; 
     print-color-adjust: exact !important; 
   }
 
-  /* 1. Remove all interactive clutter */
-  .btn-row, .info-btn, .status, .info-pop, .info-pop--modal, .sr-only { 
+  /* 1. Hide the interactive buttons and tooltips */
+  .btn-row, .info-btn, .status, .info-pop, .info-pop--modal { 
     display: none !important; 
   }
 
-  /* 2. Fix the Header Pill Background visibility */
-  .app-title--pill {
-    background: #f8fafc !important;
-    border: 1px solid #e2e8f0 !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-
-  /* 3. FIX FAMILY/PROCESSOR BOXES ALIGNMENT */
-  /* This forces the label and the selection box to align properly */
+  /* 2. Fix the "Odd" Family/Processor Alignment */
+  /* Force label and box to stay side-by-side */
   .family-filter, 
   .panel .label-with-info {
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
-    gap: 8px !important;
-    margin: 8px 0 !important;
+    gap: 10px !important;
+    margin-bottom: 12px !important;
   }
 
-  /* Force the dropdown to look like a clean text field in PDF */
+  /* Force the select box to look like a professional field */
   .family-filter select,
   .panel select {
-    appearance: none !important;
-    -webkit-appearance: none !important;
     display: inline-block !important;
-    border: 1px solid #d1d5db !important;
-    background: #ffffff !important;
-    padding: 3px 8px !important;
+    visibility: visible !important;
+    appearance: none !important; /* Removes the browser arrow */
+    -webkit-appearance: none !important;
+    border: 1px solid #ccc !important;
+    background-color: #fcfcfc !important;
+    padding: 4px 8px !important;
     border-radius: 4px !important;
     font-size: 13px !important;
-    color: #374151 !important;
-    width: 100% !important; /* Ensures the box doesn't collapse */
-    max-width: 180px !important;
-    min-width: 120px !important;
+    color: #333 !important;
+    /* This prevents the "collapsed" look from your screenshots */
+    width: 160px !important; 
+    min-width: 160px !important;
   }
 
-  /* 4. Results Grid Preservation */
+  /* 3. Force 4-Column Layout on Page */
   .results { 
-    display: flex !important;
-    flex-direction: row !important;
-    gap: 10px !important;
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 12px !important;
   }
 
   .panel { 
-    flex: 1 !important;
     box-shadow: none !important; 
     border: 1px solid #e5e7eb !important; 
     break-inside: avoid;
-    padding: 12px !important;
-    min-height: auto !important;
+    padding: 14px !important;
+  }
+
+  /* 4. Fix Title Background */
+  .app-title--pill {
+    background: #f8fafc !important;
+    border: 1px solid #cbd5e1 !important;
+    padding: 10px 20px !important;
   }
 }
