@@ -92,6 +92,49 @@ function isWindowsLicenseIncluded(attrs) {
   return true;
 }
 
+/**
+ * Learn median per‑vCPU RHEL uplift from rows that have BOTH Linux and RHEL
+ * for the same (instance, region). Separate buckets for ARM and x86.
+ */
+function deriveRegionUplifts(rows) {
+  const pairs = { arm: [], x86: [] };
+
+  // Group by (instance, region)
+  const byKey = new Map();
+  for (const r of rows) {
+    const k = `${r.instance}||${r.region}`;
+    if (!byKey.has(k)) byKey.set(k, []);
+    byKey.get(k).push(r);
+  }
+
+  for (const [, arr] of byKey) {
+    const linux = arr.find(x => String(x.os).toLowerCase() === "linux");
+    const rhel  = arr.find(x => String(x.os).toLowerCase() === "rhel");
+    if (!linux || !rhel) continue;
+
+    const v = Number(linux.vcpu);
+    const pL = Number(linux.pricePerHourUSD);
+    const pR = Number(rhel.pricePerHourUSD);
+    if (!Number.isFinite(v) || v <= 0 || !Number.isFinite(pL) || !Number.isFinite(pR) || pR <= pL) continue;
+
+    const inst = String(linux.instance || "").toLowerCase();
+    const isArm = /^t4g/.test(inst) || /^c[6-9]g/.test(inst) || /^m[6-9]g/.test(inst) || /^r[6-9]g/.test(inst);
+    const bucket = isArm ? "arm" : "x86";
+
+    const uplift = (pR - pL) / v; // $/vCPU/hr
+    if (uplift > 0 && uplift < 0.1) pairs[bucket].push(uplift);
+  }
+
+  const median = (arr) => {
+    if (!arr.length) return null;
+    const s = arr.slice().sort((a, b) => a - b);
+    const i = Math.floor(s.length / 2);
+    return (s.length % 2) ? s[i] : (s[i - 1] + s[i]) / 2;
+  };
+
+  return { arm: median(pairs.arm), x86: median(pairs.x86) };
+}
+
 async function main() {
   const j = await fetchAwsIndex();
 
@@ -148,6 +191,24 @@ async function main() {
     });
   }
 
+  // --- Learn region uplift(s) from any Linux+RHEL pairs (ARM / x86)
+  try {
+    const learned = deriveRegionUplifts(rows);
+    if (learned.arm != null || learned.x86 != null) {
+      const rateMap = {};
+      rateMap[REGION] = null;              // region entry not used when arch keys exist
+      if (learned.arm != null) rateMap._arm = learned.arm;
+      if (learned.x86 != null) rateMap._x86 = learned.x86;
+
+      process.env.AWS_RHEL_RATE_PER_VCPU_MAP = JSON.stringify(rateMap);
+      console.log(`[AWS] Learned RHEL uplift(s):`, learned);
+    } else {
+      console.log(`[AWS] No Linux+RHEL pairs found to learn uplift this run.`);
+    }
+  } catch (e) {
+    console.warn(`[AWS] Failed to learn RHEL uplift:`, e?.message || e);
+  }
+
   // Synthesize Windows rows (if missing)
   const beforeWin = rows.filter(r => r.os === "Windows").length;
   if (beforeWin === 0) {
@@ -155,7 +216,7 @@ async function main() {
     console.log(`[AWS] Windows rows missing; synthesized ${added} rows.`);
   }
 
-  // Synthesize RHEL rows (if missing)
+  // Synthesize RHEL rows (if missing) — will use learned rates when present
   const beforeRhel = rows.filter(r => r.os === "RHEL").length;
   if (beforeRhel === 0) {
     const added = synthesizeAwsRhelRows(rows);
@@ -176,7 +237,10 @@ async function main() {
     return acc;
   }, {});
 
-  console.log(`[AWS] collected=${rows.length}, hardened=${hardened.length}, cheapest=${cheapest.length}, byOS=`, countsByOs);
+  console.log(
+    `[AWS] collected=${rows.length}, hardened=${hardened.length}, cheapest=${cheapest.length}, byOS=`,
+    countsByOs
+  );
 
   if (warnAndSkipWriteOnEmpty("AWS", cheapest)) return;
 
