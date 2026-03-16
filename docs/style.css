@@ -565,93 +565,75 @@ select option[disabled] {
 }
 
 /* ======================================================
-   PROFESSIONAL PDF EXPORT OVERRIDES (FIXED SELECTORS)
+   PROFESSIONAL PDF EXPORT OVERRIDES (STABLE ALIGNMENT)
    ====================================================== */
 @media print {
-  @page { margin: 1.2cm; size: auto; }
+  @page { margin: 1cm; size: auto; }
   
   body { 
     background: #fff !important; 
-    padding-top: 20px !important; 
-  }
-
-  /* 1. Force background colors & gradients */
-  * { 
+    padding-top: 15px !important; 
     -webkit-print-color-adjust: exact !important; 
     print-color-adjust: exact !important; 
   }
 
-  /* 2. Hide specific interactive elements */
-  .btn-row, 
-  .info-btn, 
-  .status, 
-  .info-pop, 
-  .info-pop--modal { 
+  /* 1. Remove all interactive clutter */
+  .btn-row, .info-btn, .status, .info-pop, .info-pop--modal, .sr-only { 
     display: none !important; 
   }
 
-  /* 3. Header spacing */
-  .app-title { margin-bottom: 50px !important; }
-  .app-title--pill { border: 1px solid #ddd !important; }
+  /* 2. Fix the Header Pill Background */
+  .app-title--pill {
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    -webkit-print-color-adjust: exact !important;
+  }
 
-  /* 4. Fix selectors inside cards (Family/Processor) */
+  /* 3. FIX FAMILY/PROCESSOR BOXES */
+  /* This forces the label and the "dropdown" to sit on one line properly */
   .family-filter, 
-  .panel select {
-    display: inline-block !important;
-    width: auto !important;
-    min-width: 140px !important;
-    max-width: 100% !important;
-    border: 1px solid #ccc !important;
-    background: #fff !important;
-    padding: 2px 6px !important;
-    border-radius: 4px !important;
-    appearance: auto !important; /* Restore standard dropdown look for PDF */
-    -webkit-appearance: auto !important;
-    font-size: 13px !important;
-    vertical-align: middle !important;
-    margin-left: 5px !important;
-  }
-
-  /* Ensure labels stay aligned with fixed selectors */
-  .family-filter label, 
-  .panel .label {
-    display: inline-block !important;
-    margin-bottom: 0 !important;
-    font-size: 14px !important;
-  }
-
-  /* 5. Filters area */
-  .filters { 
-    box-shadow: none !important; 
-    border: 1px solid #eee !important; 
-    margin-bottom: 40px !important;
-  }
-
-  /* 6. Card Grid for PDF (Forces 4 columns if possible) */
-  .results { 
+  .panel .label-with-info {
     display: flex !important;
     flex-direction: row !important;
-    gap: 12px !important; 
+    align-items: center !important;
+    gap: 8px !important;
+    margin: 8px 0 !important;
+  }
+
+  /* Style the select to look like a clean text box in PDF */
+  .family-filter select,
+  .panel select {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    display: inline-block !important;
+    border: 1px solid #d1d5db !important;
+    background: #ffffff !important;
+    padding: 3px 8px !important;
+    border-radius: 4px !important;
+    font-size: 13px !important;
+    color: #374151 !important;
+    flex: 1 !important; /* Makes it fill remaining space nicely */
+    min-width: 120px !important;
+  }
+
+  /* 4. Force 4-Column Layout on Paper */
+  .results { 
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 10px !important;
   }
 
   .panel { 
     box-shadow: none !important; 
     border: 1px solid #e5e7eb !important; 
     break-inside: avoid;
+    padding: 12px !important;
     min-height: auto !important;
-    padding: 15px !important;
-    flex: 1 !important;
-  }
-
-  .panel h3 { 
-    background: transparent !important; 
-    padding: 0 !important;
-    margin-bottom: 15px !important;
   }
 
   .total { 
-    border-top: 2px solid #333 !important;
-    margin-top: 15px !important;
-    padding-top: 10px !important;
+    border-top: 2px solid #111 !important; 
+    margin-top: 12px !important;
+    padding-top: 8px !important;
   }
 }
