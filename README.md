@@ -132,5 +132,3 @@ MIT (add your preferred license if different).
 - Thanks to contributors and reviewers.
 
 ---
-
-> _Generated on 2026-03-16T08:28:32.988774Z_
