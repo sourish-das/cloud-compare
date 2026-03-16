@@ -1,4 +1,9 @@
+# .github/workflows/update-gcp-linux.yml  (or your fetch-gcp-linux workflow)
 name: Fetch GCP Prices (Linux-only, parallel)
+
+env:
+  # Optional: run JS actions under Node 24 now (silence deprecation warning)
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 permissions:
   contents: read
@@ -21,28 +26,29 @@ jobs:
     timeout-minutes: 40
 
     steps:
-      - name: Checkout repo (read-only)
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Set up Node (LTS)
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20'   # OK; actions will run under Node 24 due to env flag above
 
-      - name: Ensure jq (for quick validation)
+      - name: Ensure jq
         run: |
           if ! command -v jq >/dev/null 2>&1; then
             sudo apt-get update -y
             sudo apt-get install -y jq
           fi
 
-      # --- GCP auth for discovery (Compute API) ---
+      # ✅ FIX: supply exactly one auth method (here: credentials_json)
       - name: Auth to Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          credentials_json: ${{ secrets.GCP_SA_KEY }}   # <-- REQUIRED
+          export_environment_variables: true
+          cleanup_credentials: true
+          access_token_scopes: https://www.googleapis.com/auth/cloud-platform
 
       - name: Setup gcloud
         uses: google-github-actions/setup-gcloud@v2
@@ -55,17 +61,22 @@ jobs:
           mkdir -p data
           mkdir -p docs/data/gcp
 
-      # --- Fetch discovery + catalog (Linux-only inputs) ---
       - name: Fetch GCP discovery & catalog (parallel path)
         run: node scripts/providers/gcp.linux.fetch.js
         env:
+          # 👇 Your project ID for discovery calls
           GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+
+          # Region(s)
           GCP_REGIONS: "us-east1"
+
+          # 👇 API key for the Cloud Billing Catalog API (public pricing)
           GCP_BILLING_API_KEY: ${{ secrets.GCP_BILLING_API_KEY }}
+
+          # Output files (parallel artifacts)
           GCP_MACHINE_TYPES_FILE: "data/gcp-linux-machine-types.json"
           GCP_CATALOG_FILE: "data/gcp-linux-catalog.json"
 
-      # --- Compose Linux-only validation output ---
       - name: Compose GCP Linux base (validation JSON)
         run: node scripts/gcp.linux.js
         env:
@@ -74,20 +85,15 @@ jobs:
           GCP_CATALOG_FILE: "data/gcp-linux-catalog.json"
           GCP_OUTPUT_FILE: "docs/data/gcp/gcp.linux.prices.json"
 
-      # --- Validate presence and show quick stats ---
       - name: Validate validation-output
-        shell: bash
         run: |
           set -euo pipefail
           test -s docs/data/gcp/gcp.linux.prices.json
-          echo "Output size:"
-          wc -c docs/data/gcp/gcp.linux.prices.json
-          echo "Sample (us-east1, Linux):"
-          jq -r '.[] | select(.region=="us-east1") | .instance' docs/data/gcp/gcp.linux.prices.json | head -n 15
           echo "Count (Linux rows):"
-          jq '[.[] | select(.os=="Linux")] | length' docs/data/gcp/gcp.linux.prices.json || true
+          jq '[.[] | select(.os=="Linux")] | length' docs/data/gcp/gcp.linux.prices.json
+          echo "Probes (us-east1):"
+          jq -r '.[] | select(.region=="us-east1" and .os=="Linux" and (.instance=="n2d-standard-4" or .instance=="c2d-standard-4")) | "\(.instance) => \(.pricePerHourUSD)"' docs/data/gcp/gcp.linux.prices.json
 
-      # --- Upload artifact for orchestrator / manual inspection ---
       - name: Upload GCP Linux validation JSON (artifact)
         uses: actions/upload-artifact@v4
         with:
@@ -95,29 +101,3 @@ jobs:
           path: docs/data/gcp/gcp.linux.prices.json
           if-no-files-found: error
           retention-days: 7
-
-      # --- Optional debug publish (does NOT overwrite canonical files) ---
-      - name: Debug Publish to docs/data (optional)
-        if: ${{ vars.DEBUG_PUBLISH == 'true' }}
-        run: |
-          set -euo pipefail
-          echo "DEBUG MODE ENABLED: Publishing parallel GCP Linux output directly"
-          mkdir -p docs/data/gcp/_debug
-          cp -f docs/data/gcp/gcp.linux.prices.json docs/data/gcp/_debug/gcp.linux.prices.json
-
-      - name: Commit debug provider files (optional)
-        if: ${{ vars.DEBUG_PUBLISH == 'true' }}
-        run: |
-          set -euo pipefail
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git fetch origin main
-          git checkout main
-          git reset --hard origin/main
-          git add -f docs/data/gcp/_debug/gcp.linux.prices.json
-          if git diff --cached --quiet; then
-            echo "No changes to commit."
-            exit 0
-          fi
-          git commit -m "Debug publish: GCP Linux validation pricing (parallel path)"
-          git push
