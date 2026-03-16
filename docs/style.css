@@ -16,41 +16,65 @@
 
 body {
   margin: 0;
+  padding-top: 50px; /* Forces space from top of address bar */
   font-family: system-ui, -apple-system, sans-serif;
   color: var(--text);
   background: var(--bg);
 }
 
-/* --- Fixed Spacing for Header and Address Bar --- */
+/* --- Header Spacing --- */
 .app-title { 
   text-align: center; 
-  margin: 40px auto 24px; /* Added more top and bottom space */
-  color: #111827; 
+  margin: 0 auto 40px !important; /* Forces 40px space below the title */
 }
 
 .app-title--pill {
-  display: block; width: fit-content; margin: 0 auto; padding: 10px 22px;
-  border-radius: 999px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  display: inline-block; /* Changed from block to inline-block for better centering control */
+  padding: 12px 28px;
+  border-radius: 999px; 
+  border: 1px solid rgba(0,0,0,0.08); 
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
   background: linear-gradient(90deg, 
     color-mix(in srgb, var(--aws) 12%, white) 0%, color-mix(in srgb, var(--azure) 12%, white) 33%, 
     color-mix(in srgb, var(--gcp) 12%, white) 66%, color-mix(in srgb, var(--oci) 12%, white) 100%);
 }
 
-/* --- Fixed Filter Bar Spacing --- */
+/* --- Filter Bar Spacing --- */
 .filters { 
   background: var(--panel); 
-  margin: 0 auto 30px; /* Increased bottom margin for breathing room */
-  padding: 20px; 
-  max-width: 1200px; border-radius: 8px; box-shadow: var(--shadow); 
+  margin: 0 auto 50px !important; /* Increased to 50px to ensure gap above cards */
+  padding: 24px; 
+  max-width: 1200px; 
+  border-radius: 8px; 
+  box-shadow: var(--shadow); 
 }
 
 .filters .row { display: grid; grid-template-columns: auto repeat(4, 160px) 200px; gap: 12px; align-items: end; }
-.filters .row > div { display: flex; flex-direction: column; min-width: 0; }
 
-label, .label-with-info { font-weight: 600; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 8px; font-size: 14px; }
+/* --- Fixed Circle "i" Button --- */
+.info-btn { 
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px !important; 
+  height: 16px !important; 
+  min-width: 16px !important; /* Prevents horizontal squishing */
+  min-height: 16px !important; /* Prevents vertical squishing */
+  
+  border-radius: 50% !important; 
+  border: 1px solid #2563eb; 
+  background: #fff; 
+  color: #2563eb; 
+  font-size: 10px; 
+  font-weight: bold;
+  line-height: 1; 
+  cursor: pointer;
+  margin-left: 4px;
+  vertical-align: middle;
+}
 
-/* --- Inputs --- */
-.filters select, .filters .btn-eq { height: 40px; }
+/* --- Inputs & Results --- */
+.filters select, .filters .btn-eq { height: 42px; }
 .filters select {
   appearance: none; border: 1px solid #ccc; border-radius: 6px; padding: 0 32px 0 10px; cursor: pointer; 
   background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23666'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E") no-repeat right 10px center / 16px;
@@ -58,49 +82,20 @@ label, .label-with-info { font-weight: 600; display: inline-flex; align-items: c
 
 .btn-row { display: inline-flex; gap: 8px; width: 100%; }
 button {
-  padding: 0 16px; border-radius: 6px; color: #fff; border: 1px solid #1c50bd; cursor: pointer; display: flex; align-items: center; justify-content: center; white-space: nowrap; transition: filter 0.2s;
+  padding: 0 16px; border-radius: 6px; color: #fff; border: 1px solid #1c50bd; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: filter 0.2s;
   background: linear-gradient(180deg, #2b79ff 0%, #1e5bd6 100%);
 }
 
-/* --- Results Cards --- */
-.results { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; max-width: 1200px; margin: 0 auto 40px; }
-.panel { background: var(--panel); padding: 16px; border-radius: 8px; box-shadow: var(--shadow); min-height: 340px; transition: transform .2s; }
+.results { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; max-width: 1200px; margin: 0 auto 60px; }
+.panel { background: var(--panel); padding: 18px; border-radius: 8px; box-shadow: var(--shadow); min-height: 340px; }
 
 .panel h3 { margin: 0 0 12px; display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 1.1rem; }
-.panel p { margin: 6px 0; font-size: 0.9rem; }
-.split { display: flex; justify-content: space-between; font-size: 0.9rem; margin: 5px 0; }
-.total { font-weight: 700; border-top: 1px dashed #e5e7eb; padding-top: 10px; margin-top: 10px; }
-.total span:last-child { color: var(--total); }
-
-/* Provider Accents */
 .panel--aws { border-top: 4px solid var(--aws); } .panel--aws h3 { color: var(--aws); }
 .panel--azure { border-top: 4px solid var(--azure); } .panel--azure h3 { color: var(--azure); }
-.panel--gcp { border-top: 4px solid var(--gcp); }
-.panel--gcp h3 { color: #C49000; background: linear-gradient(90deg, rgba(251,188,5,0.08), transparent); }
+.panel--gcp { border-top: 4px solid var(--gcp); } .panel--gcp h3 { color: #C49000; }
 .panel--oci { border-top: 4px solid var(--oci); } .panel--oci h3 { color: var(--oci); }
 
-/* --- Fixed "i" Button (No more ovals!) --- */
-.info-btn { 
-  width: 14px; 
-  height: 14px; 
-  aspect-ratio: 1 / 1; /* Forces it to stay round */
-  font-size: 9px; 
-  border-radius: 50%; 
-  border: 1px solid #2563eb; 
-  background: #fff; 
-  color: #2563eb; 
-  display: inline-flex; 
-  align-items: center; 
-  justify-content: center; 
-  cursor: pointer;
-  flex-shrink: 0; /* Prevents squishing in flex rows */
-}
-
-/* Tooltips & Notices */
-.info-pop { position: absolute; z-index: 1000; min-width: 280px; padding: 12px; background: #2b2b2b; color: #fff; border-radius: 4px; display: none; }
-.info-pop[aria-hidden="false"] { display: block; }
-.oci-rhel-notice { background: #fff4f4; border: 1px solid #f5c2c2; color: #7a1f1f; padding: 10px; border-radius: 6px; display: none; font-size: 13px; }
-.panel--disabled { opacity: 0.6; pointer-events: none; filter: grayscale(1); }
+.total { font-weight: 700; border-top: 1px dashed #e5e7eb; padding-top: 10px; margin-top: 10px; color: var(--total); }
 
 @media (max-width: 1100px) {
   .filters .row { grid-template-columns: 1fr 1fr 1fr; }
