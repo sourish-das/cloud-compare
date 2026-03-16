@@ -31,8 +31,10 @@ export let STORAGE_CFG = {
   },
   gcp: {
     region: "us-east1",
-    ssd_per_gb_month: 0.17,   // PD-SSD typical retail
-    hdd_per_gb_month: 0.04    // PD-Standard typical retail
+    // Updated defaults: Balanced PD SSD, Standard HDD, and the HDD 30 GiB-month free band
+    ssd_per_gb_month: 0.10,
+    hdd_per_gb_month: 0.04,
+    hdd_free_gb_per_month: 30
   },
   oci: {
     region: "us-ashburn-1",
@@ -145,6 +147,10 @@ export async function loadPricesAndMeta() {
       ),
       hdd_per_gb_month: Number(
         incomingStorage.gcp?.hdd_per_gb_month ?? STORAGE_CFG.gcp.hdd_per_gb_month
+      ),
+      // NEW: merge the one-time free 30 GiB-month band if provided in prices.json
+      hdd_free_gb_per_month: Number(
+        incomingStorage.gcp?.hdd_free_gb_per_month ?? STORAGE_CFG.gcp.hdd_free_gb_per_month
       )
     },
     oci: {
