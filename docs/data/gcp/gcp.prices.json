@@ -139,7 +139,7 @@
   },
   "compute": [
     {
-      "instance": "c2d_highcpu_112",
+      "instance": "c2d-highcpu-112",
       "category": "compute",
       "vcpu": 112,
       "ram": 224,
@@ -151,7 +151,7 @@
       "source": "composed"
     },
     {
-      "instance": "c2d_highcpu_16",
+      "instance": "c2d-highcpu-16",
       "category": "compute",
       "vcpu": 16,
       "ram": 32,
@@ -163,7 +163,7 @@
       "source": "composed"
     },
     {
-      "instance": "c2d_highcpu_2",
+      "instance": "c2d-highcpu-2",
       "category": "compute",
       "vcpu": 2,
       "ram": 4,
@@ -175,7 +175,7 @@
       "source": "composed"
     },
     {
-      "instance": "c2d_highcpu_32",
+      "instance": "c2d-highcpu-32",
       "category": "compute",
       "vcpu": 32,
       "ram": 64,
@@ -187,7 +187,7 @@
       "source": "composed"
     },
     {
-      "instance": "c2d_highcpu_4",
+      "instance": "c2d-highcpu-4",
       "category": "compute",
       "vcpu": 4,
       "ram": 8,
@@ -199,7 +199,7 @@
       "source": "composed"
     },
     {
-      "instance": "c2d_highcpu_56",
+      "instance": "c2d-highcpu-56",
       "category": "compute",
       "vcpu": 56,
       "ram": 112,
@@ -211,7 +211,7 @@
       "source": "composed"
     },
     {
-      "instance": "c2d_highcpu_8",
+      "instance": "c2d-highcpu-8",
       "category": "compute",
       "vcpu": 8,
       "ram": 16,
@@ -223,7 +223,7 @@
       "source": "composed"
     },
     {
-      "instance": "c2d_highmem_112",
+      "instance": "c2d-highmem-112",
       "category": "memory",
       "vcpu": 112,
       "ram": 896,
@@ -235,7 +235,7 @@
       "source": "composed"
     },
     {
-      "instance": "c2d_highmem_16",
+      "instance": "c2d-highmem-16",
       "category": "memory",
       "vcpu": 16,
       "ram": 128,
@@ -247,7 +247,7 @@
       "source": "composed"
     },
     {
-      "instance": "c2d_highmem_2",
+      "instance": "c2d-highmem-2",
       "category": "memory",
       "vcpu": 2,
       "ram": 16,
@@ -259,7 +259,7 @@
       "source": "composed"
     },
     {
-      "instance": "c2d_highmem_32",
+      "instance": "c2d-highmem-32",
       "category": "memory",
       "vcpu": 32,
       "ram": 256,
@@ -271,7 +271,7 @@
       "source": "composed"
     },
     {
-      "instance": "c2d_highmem_4",
+      "instance": "c2d-highmem-4",
       "category": "memory",
       "vcpu": 4,
       "ram": 32,
@@ -283,7 +283,7 @@
       "source": "composed"
     },
     {
-      "instance": "c2d_highmem_56",
+      "instance": "c2d-highmem-56",
       "category": "memory",
       "vcpu": 56,
       "ram": 448,
@@ -295,7 +295,7 @@
       "source": "composed"
     },
     {
-      "instance": "c2d_highmem_8",
+      "instance": "c2d-highmem-8",
       "category": "memory",
       "vcpu": 8,
       "ram": 64,
@@ -307,7 +307,7 @@
       "source": "composed"
     },
     {
-      "instance": "c2d_standard_112",
+      "instance": "c2d-standard-112",
       "category": "compute",
       "vcpu": 112,
       "ram": 448,
@@ -319,7 +319,7 @@
       "source": "composed"
     },
     {
-      "instance": "c2d_standard_16",
+      "instance": "c2d-standard-16",
       "category": "compute",
       "vcpu": 16,
       "ram": 64,
@@ -331,7 +331,7 @@
       "source": "composed"
     },
     {
-      "instance": "c2d_standard_2",
+      "instance": "c2d-standard-2",
       "category": "compute",
       "vcpu": 2,
       "ram": 8,
@@ -343,7 +343,7 @@
       "source": "composed"
     },
     {
-      "instance": "c2d_standard_32",
+      "instance": "c2d-standard-32",
       "category": "compute",
       "vcpu": 32,
       "ram": 128,
@@ -355,7 +355,7 @@
       "source": "composed"
     },
     {
-      "instance": "c2d_standard_4",
+      "instance": "c2d-standard-4",
       "category": "compute",
       "vcpu": 4,
       "ram": 16,
@@ -367,7 +367,7 @@
       "source": "composed"
     },
     {
-      "instance": "c2d_standard_56",
+      "instance": "c2d-standard-56",
       "category": "compute",
       "vcpu": 56,
       "ram": 224,
@@ -379,7 +379,7 @@
       "source": "composed"
     },
     {
-      "instance": "c2d_standard_8",
+      "instance": "c2d-standard-8",
       "category": "compute",
       "vcpu": 8,
       "ram": 32,
@@ -391,7 +391,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3_highcpu_176",
+      "instance": "c3-highcpu-176",
       "category": "compute",
       "vcpu": 176,
       "ram": 352,
@@ -403,7 +403,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3_highcpu_22",
+      "instance": "c3-highcpu-22",
       "category": "compute",
       "vcpu": 22,
       "ram": 44,
@@ -415,7 +415,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3_highcpu_4",
+      "instance": "c3-highcpu-4",
       "category": "compute",
       "vcpu": 4,
       "ram": 8,
@@ -427,7 +427,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3_highcpu_44",
+      "instance": "c3-highcpu-44",
       "category": "compute",
       "vcpu": 44,
       "ram": 88,
@@ -439,7 +439,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3_highcpu_8",
+      "instance": "c3-highcpu-8",
       "category": "compute",
       "vcpu": 8,
       "ram": 16,
@@ -451,7 +451,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3_highcpu_88",
+      "instance": "c3-highcpu-88",
       "category": "compute",
       "vcpu": 88,
       "ram": 176,
@@ -463,7 +463,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3_highmem_176",
+      "instance": "c3-highmem-176",
       "category": "memory",
       "vcpu": 176,
       "ram": 1408,
@@ -475,7 +475,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3_highmem_22",
+      "instance": "c3-highmem-22",
       "category": "memory",
       "vcpu": 22,
       "ram": 176,
@@ -487,7 +487,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3_highmem_4",
+      "instance": "c3-highmem-4",
       "category": "memory",
       "vcpu": 4,
       "ram": 32,
@@ -499,7 +499,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3_highmem_44",
+      "instance": "c3-highmem-44",
       "category": "memory",
       "vcpu": 44,
       "ram": 352,
@@ -511,7 +511,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3_highmem_8",
+      "instance": "c3-highmem-8",
       "category": "memory",
       "vcpu": 8,
       "ram": 64,
@@ -523,7 +523,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3_highmem_88",
+      "instance": "c3-highmem-88",
       "category": "memory",
       "vcpu": 88,
       "ram": 704,
@@ -535,7 +535,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3_standard_176",
+      "instance": "c3-standard-176",
       "category": "compute",
       "vcpu": 176,
       "ram": 704,
@@ -547,7 +547,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3_standard_22",
+      "instance": "c3-standard-22",
       "category": "compute",
       "vcpu": 22,
       "ram": 88,
@@ -559,7 +559,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3_standard_4",
+      "instance": "c3-standard-4",
       "category": "compute",
       "vcpu": 4,
       "ram": 16,
@@ -571,7 +571,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3_standard_44",
+      "instance": "c3-standard-44",
       "category": "compute",
       "vcpu": 44,
       "ram": 176,
@@ -583,7 +583,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3_standard_8",
+      "instance": "c3-standard-8",
       "category": "compute",
       "vcpu": 8,
       "ram": 32,
@@ -595,7 +595,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3_standard_88",
+      "instance": "c3-standard-88",
       "category": "compute",
       "vcpu": 88,
       "ram": 352,
@@ -607,7 +607,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3d_highcpu_16",
+      "instance": "c3d-highcpu-16",
       "category": "compute",
       "vcpu": 16,
       "ram": 32,
@@ -619,7 +619,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3d_highcpu_180",
+      "instance": "c3d-highcpu-180",
       "category": "compute",
       "vcpu": 180,
       "ram": 354,
@@ -631,7 +631,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3d_highcpu_30",
+      "instance": "c3d-highcpu-30",
       "category": "compute",
       "vcpu": 30,
       "ram": 59,
@@ -643,7 +643,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3d_highcpu_360",
+      "instance": "c3d-highcpu-360",
       "category": "compute",
       "vcpu": 360,
       "ram": 708,
@@ -655,7 +655,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3d_highcpu_4",
+      "instance": "c3d-highcpu-4",
       "category": "compute",
       "vcpu": 4,
       "ram": 8,
@@ -667,7 +667,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3d_highcpu_60",
+      "instance": "c3d-highcpu-60",
       "category": "compute",
       "vcpu": 60,
       "ram": 118,
@@ -679,7 +679,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3d_highcpu_8",
+      "instance": "c3d-highcpu-8",
       "category": "compute",
       "vcpu": 8,
       "ram": 16,
@@ -691,7 +691,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3d_highcpu_90",
+      "instance": "c3d-highcpu-90",
       "category": "compute",
       "vcpu": 90,
       "ram": 177,
@@ -703,7 +703,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3d_highmem_16",
+      "instance": "c3d-highmem-16",
       "category": "memory",
       "vcpu": 16,
       "ram": 128,
@@ -715,7 +715,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3d_highmem_180",
+      "instance": "c3d-highmem-180",
       "category": "memory",
       "vcpu": 180,
       "ram": 1440,
@@ -727,7 +727,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3d_highmem_30",
+      "instance": "c3d-highmem-30",
       "category": "memory",
       "vcpu": 30,
       "ram": 240,
@@ -739,7 +739,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3d_highmem_360",
+      "instance": "c3d-highmem-360",
       "category": "memory",
       "vcpu": 360,
       "ram": 2880,
@@ -751,7 +751,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3d_highmem_4",
+      "instance": "c3d-highmem-4",
       "category": "memory",
       "vcpu": 4,
       "ram": 32,
@@ -763,7 +763,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3d_highmem_60",
+      "instance": "c3d-highmem-60",
       "category": "memory",
       "vcpu": 60,
       "ram": 480,
@@ -775,7 +775,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3d_highmem_8",
+      "instance": "c3d-highmem-8",
       "category": "memory",
       "vcpu": 8,
       "ram": 64,
@@ -787,7 +787,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3d_highmem_90",
+      "instance": "c3d-highmem-90",
       "category": "memory",
       "vcpu": 90,
       "ram": 720,
@@ -799,7 +799,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3d_standard_16",
+      "instance": "c3d-standard-16",
       "category": "compute",
       "vcpu": 16,
       "ram": 64,
@@ -811,7 +811,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3d_standard_180",
+      "instance": "c3d-standard-180",
       "category": "compute",
       "vcpu": 180,
       "ram": 720,
@@ -823,7 +823,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3d_standard_30",
+      "instance": "c3d-standard-30",
       "category": "compute",
       "vcpu": 30,
       "ram": 120,
@@ -835,7 +835,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3d_standard_360",
+      "instance": "c3d-standard-360",
       "category": "compute",
       "vcpu": 360,
       "ram": 1440,
@@ -847,7 +847,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3d_standard_4",
+      "instance": "c3d-standard-4",
       "category": "compute",
       "vcpu": 4,
       "ram": 16,
@@ -859,7 +859,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3d_standard_60",
+      "instance": "c3d-standard-60",
       "category": "compute",
       "vcpu": 60,
       "ram": 240,
@@ -871,7 +871,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3d_standard_8",
+      "instance": "c3d-standard-8",
       "category": "compute",
       "vcpu": 8,
       "ram": 32,
@@ -883,7 +883,7 @@
       "source": "composed"
     },
     {
-      "instance": "c3d_standard_90",
+      "instance": "c3d-standard-90",
       "category": "compute",
       "vcpu": 90,
       "ram": 360,
@@ -895,7 +895,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4_highcpu_144",
+      "instance": "c4-highcpu-144",
       "category": "compute",
       "vcpu": 144,
       "ram": 288,
@@ -907,7 +907,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4_highcpu_16",
+      "instance": "c4-highcpu-16",
       "category": "compute",
       "vcpu": 16,
       "ram": 32,
@@ -919,7 +919,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4_highcpu_192",
+      "instance": "c4-highcpu-192",
       "category": "compute",
       "vcpu": 192,
       "ram": 384,
@@ -931,7 +931,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4_highcpu_2",
+      "instance": "c4-highcpu-2",
       "category": "compute",
       "vcpu": 2,
       "ram": 4,
@@ -943,7 +943,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4_highcpu_24",
+      "instance": "c4-highcpu-24",
       "category": "compute",
       "vcpu": 24,
       "ram": 48,
@@ -955,7 +955,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4_highcpu_288",
+      "instance": "c4-highcpu-288",
       "category": "compute",
       "vcpu": 288,
       "ram": 576,
@@ -967,7 +967,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4_highcpu_32",
+      "instance": "c4-highcpu-32",
       "category": "compute",
       "vcpu": 32,
       "ram": 64,
@@ -979,7 +979,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4_highcpu_4",
+      "instance": "c4-highcpu-4",
       "category": "compute",
       "vcpu": 4,
       "ram": 8,
@@ -991,7 +991,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4_highcpu_48",
+      "instance": "c4-highcpu-48",
       "category": "compute",
       "vcpu": 48,
       "ram": 96,
@@ -1003,7 +1003,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4_highcpu_8",
+      "instance": "c4-highcpu-8",
       "category": "compute",
       "vcpu": 8,
       "ram": 16,
@@ -1015,7 +1015,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4_highcpu_96",
+      "instance": "c4-highcpu-96",
       "category": "compute",
       "vcpu": 96,
       "ram": 192,
@@ -1027,7 +1027,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4_highmem_144",
+      "instance": "c4-highmem-144",
       "category": "memory",
       "vcpu": 144,
       "ram": 1116,
@@ -1039,7 +1039,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4_highmem_16",
+      "instance": "c4-highmem-16",
       "category": "memory",
       "vcpu": 16,
       "ram": 124,
@@ -1051,7 +1051,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4_highmem_192",
+      "instance": "c4-highmem-192",
       "category": "memory",
       "vcpu": 192,
       "ram": 1488,
@@ -1063,7 +1063,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4_highmem_2",
+      "instance": "c4-highmem-2",
       "category": "memory",
       "vcpu": 2,
       "ram": 15,
@@ -1075,7 +1075,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4_highmem_24",
+      "instance": "c4-highmem-24",
       "category": "memory",
       "vcpu": 24,
       "ram": 186,
@@ -1087,7 +1087,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4_highmem_288",
+      "instance": "c4-highmem-288",
       "category": "memory",
       "vcpu": 288,
       "ram": 2232,
@@ -1099,7 +1099,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4_highmem_32",
+      "instance": "c4-highmem-32",
       "category": "memory",
       "vcpu": 32,
       "ram": 248,
@@ -1111,7 +1111,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4_highmem_4",
+      "instance": "c4-highmem-4",
       "category": "memory",
       "vcpu": 4,
       "ram": 31,
@@ -1123,7 +1123,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4_highmem_48",
+      "instance": "c4-highmem-48",
       "category": "memory",
       "vcpu": 48,
       "ram": 372,
@@ -1135,7 +1135,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4_highmem_8",
+      "instance": "c4-highmem-8",
       "category": "memory",
       "vcpu": 8,
       "ram": 62,
@@ -1147,7 +1147,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4_highmem_96",
+      "instance": "c4-highmem-96",
       "category": "memory",
       "vcpu": 96,
       "ram": 744,
@@ -1159,7 +1159,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4_standard_144",
+      "instance": "c4-standard-144",
       "category": "compute",
       "vcpu": 144,
       "ram": 540,
@@ -1171,7 +1171,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4_standard_16",
+      "instance": "c4-standard-16",
       "category": "compute",
       "vcpu": 16,
       "ram": 60,
@@ -1183,7 +1183,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4_standard_192",
+      "instance": "c4-standard-192",
       "category": "compute",
       "vcpu": 192,
       "ram": 720,
@@ -1195,7 +1195,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4_standard_2",
+      "instance": "c4-standard-2",
       "category": "compute",
       "vcpu": 2,
       "ram": 7,
@@ -1207,7 +1207,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4_standard_24",
+      "instance": "c4-standard-24",
       "category": "compute",
       "vcpu": 24,
       "ram": 90,
@@ -1219,7 +1219,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4_standard_288",
+      "instance": "c4-standard-288",
       "category": "compute",
       "vcpu": 288,
       "ram": 1080,
@@ -1231,7 +1231,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4_standard_32",
+      "instance": "c4-standard-32",
       "category": "compute",
       "vcpu": 32,
       "ram": 120,
@@ -1243,7 +1243,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4_standard_4",
+      "instance": "c4-standard-4",
       "category": "compute",
       "vcpu": 4,
       "ram": 15,
@@ -1255,7 +1255,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4_standard_48",
+      "instance": "c4-standard-48",
       "category": "compute",
       "vcpu": 48,
       "ram": 180,
@@ -1267,7 +1267,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4_standard_8",
+      "instance": "c4-standard-8",
       "category": "compute",
       "vcpu": 8,
       "ram": 30,
@@ -1279,7 +1279,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4_standard_96",
+      "instance": "c4-standard-96",
       "category": "compute",
       "vcpu": 96,
       "ram": 360,
@@ -1291,7 +1291,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4a_highcpu_1",
+      "instance": "c4a-highcpu-1",
       "category": "compute",
       "vcpu": 1,
       "ram": 2,
@@ -1303,7 +1303,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4a_highcpu_16",
+      "instance": "c4a-highcpu-16",
       "category": "compute",
       "vcpu": 16,
       "ram": 32,
@@ -1315,7 +1315,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4a_highcpu_2",
+      "instance": "c4a-highcpu-2",
       "category": "compute",
       "vcpu": 2,
       "ram": 4,
@@ -1327,7 +1327,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4a_highcpu_32",
+      "instance": "c4a-highcpu-32",
       "category": "compute",
       "vcpu": 32,
       "ram": 64,
@@ -1339,7 +1339,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4a_highcpu_4",
+      "instance": "c4a-highcpu-4",
       "category": "compute",
       "vcpu": 4,
       "ram": 8,
@@ -1351,7 +1351,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4a_highcpu_48",
+      "instance": "c4a-highcpu-48",
       "category": "compute",
       "vcpu": 48,
       "ram": 96,
@@ -1363,7 +1363,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4a_highcpu_64",
+      "instance": "c4a-highcpu-64",
       "category": "compute",
       "vcpu": 64,
       "ram": 128,
@@ -1375,7 +1375,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4a_highcpu_72",
+      "instance": "c4a-highcpu-72",
       "category": "compute",
       "vcpu": 72,
       "ram": 144,
@@ -1387,7 +1387,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4a_highcpu_8",
+      "instance": "c4a-highcpu-8",
       "category": "compute",
       "vcpu": 8,
       "ram": 16,
@@ -1399,7 +1399,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4a_highmem_1",
+      "instance": "c4a-highmem-1",
       "category": "memory",
       "vcpu": 1,
       "ram": 8,
@@ -1411,7 +1411,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4a_highmem_16",
+      "instance": "c4a-highmem-16",
       "category": "memory",
       "vcpu": 16,
       "ram": 128,
@@ -1423,7 +1423,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4a_highmem_2",
+      "instance": "c4a-highmem-2",
       "category": "memory",
       "vcpu": 2,
       "ram": 16,
@@ -1435,7 +1435,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4a_highmem_32",
+      "instance": "c4a-highmem-32",
       "category": "memory",
       "vcpu": 32,
       "ram": 256,
@@ -1447,7 +1447,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4a_highmem_4",
+      "instance": "c4a-highmem-4",
       "category": "memory",
       "vcpu": 4,
       "ram": 32,
@@ -1459,7 +1459,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4a_highmem_48",
+      "instance": "c4a-highmem-48",
       "category": "memory",
       "vcpu": 48,
       "ram": 384,
@@ -1471,7 +1471,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4a_highmem_64",
+      "instance": "c4a-highmem-64",
       "category": "memory",
       "vcpu": 64,
       "ram": 512,
@@ -1483,7 +1483,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4a_highmem_72",
+      "instance": "c4a-highmem-72",
       "category": "memory",
       "vcpu": 72,
       "ram": 576,
@@ -1495,7 +1495,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4a_highmem_8",
+      "instance": "c4a-highmem-8",
       "category": "memory",
       "vcpu": 8,
       "ram": 64,
@@ -1507,7 +1507,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4a_standard_1",
+      "instance": "c4a-standard-1",
       "category": "compute",
       "vcpu": 1,
       "ram": 4,
@@ -1519,7 +1519,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4a_standard_16",
+      "instance": "c4a-standard-16",
       "category": "compute",
       "vcpu": 16,
       "ram": 64,
@@ -1531,7 +1531,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4a_standard_2",
+      "instance": "c4a-standard-2",
       "category": "compute",
       "vcpu": 2,
       "ram": 8,
@@ -1543,7 +1543,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4a_standard_32",
+      "instance": "c4a-standard-32",
       "category": "compute",
       "vcpu": 32,
       "ram": 128,
@@ -1555,7 +1555,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4a_standard_4",
+      "instance": "c4a-standard-4",
       "category": "compute",
       "vcpu": 4,
       "ram": 16,
@@ -1567,7 +1567,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4a_standard_48",
+      "instance": "c4a-standard-48",
       "category": "compute",
       "vcpu": 48,
       "ram": 192,
@@ -1579,7 +1579,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4a_standard_64",
+      "instance": "c4a-standard-64",
       "category": "compute",
       "vcpu": 64,
       "ram": 256,
@@ -1591,7 +1591,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4a_standard_72",
+      "instance": "c4a-standard-72",
       "category": "compute",
       "vcpu": 72,
       "ram": 288,
@@ -1603,7 +1603,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4a_standard_8",
+      "instance": "c4a-standard-8",
       "category": "compute",
       "vcpu": 8,
       "ram": 32,
@@ -1615,7 +1615,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4d_highcpu_16",
+      "instance": "c4d-highcpu-16",
       "category": "compute",
       "vcpu": 16,
       "ram": 30,
@@ -1627,7 +1627,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4d_highcpu_192",
+      "instance": "c4d-highcpu-192",
       "category": "compute",
       "vcpu": 192,
       "ram": 360,
@@ -1639,7 +1639,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4d_highcpu_2",
+      "instance": "c4d-highcpu-2",
       "category": "compute",
       "vcpu": 2,
       "ram": 3,
@@ -1651,7 +1651,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4d_highcpu_32",
+      "instance": "c4d-highcpu-32",
       "category": "compute",
       "vcpu": 32,
       "ram": 60,
@@ -1663,7 +1663,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4d_highcpu_384",
+      "instance": "c4d-highcpu-384",
       "category": "compute",
       "vcpu": 384,
       "ram": 720,
@@ -1675,7 +1675,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4d_highcpu_4",
+      "instance": "c4d-highcpu-4",
       "category": "compute",
       "vcpu": 4,
       "ram": 7,
@@ -1687,7 +1687,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4d_highcpu_48",
+      "instance": "c4d-highcpu-48",
       "category": "compute",
       "vcpu": 48,
       "ram": 90,
@@ -1699,7 +1699,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4d_highcpu_64",
+      "instance": "c4d-highcpu-64",
       "category": "compute",
       "vcpu": 64,
       "ram": 120,
@@ -1711,7 +1711,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4d_highcpu_8",
+      "instance": "c4d-highcpu-8",
       "category": "compute",
       "vcpu": 8,
       "ram": 15,
@@ -1723,7 +1723,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4d_highcpu_96",
+      "instance": "c4d-highcpu-96",
       "category": "compute",
       "vcpu": 96,
       "ram": 180,
@@ -1735,7 +1735,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4d_highmem_16",
+      "instance": "c4d-highmem-16",
       "category": "memory",
       "vcpu": 16,
       "ram": 126,
@@ -1747,7 +1747,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4d_highmem_192",
+      "instance": "c4d-highmem-192",
       "category": "memory",
       "vcpu": 192,
       "ram": 1512,
@@ -1759,7 +1759,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4d_highmem_2",
+      "instance": "c4d-highmem-2",
       "category": "memory",
       "vcpu": 2,
       "ram": 15,
@@ -1771,7 +1771,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4d_highmem_32",
+      "instance": "c4d-highmem-32",
       "category": "memory",
       "vcpu": 32,
       "ram": 252,
@@ -1783,7 +1783,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4d_highmem_384",
+      "instance": "c4d-highmem-384",
       "category": "memory",
       "vcpu": 384,
       "ram": 3024,
@@ -1795,7 +1795,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4d_highmem_4",
+      "instance": "c4d-highmem-4",
       "category": "memory",
       "vcpu": 4,
       "ram": 31,
@@ -1807,7 +1807,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4d_highmem_48",
+      "instance": "c4d-highmem-48",
       "category": "memory",
       "vcpu": 48,
       "ram": 378,
@@ -1819,7 +1819,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4d_highmem_64",
+      "instance": "c4d-highmem-64",
       "category": "memory",
       "vcpu": 64,
       "ram": 504,
@@ -1831,7 +1831,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4d_highmem_8",
+      "instance": "c4d-highmem-8",
       "category": "memory",
       "vcpu": 8,
       "ram": 63,
@@ -1843,7 +1843,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4d_highmem_96",
+      "instance": "c4d-highmem-96",
       "category": "memory",
       "vcpu": 96,
       "ram": 756,
@@ -1855,7 +1855,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4d_standard_16",
+      "instance": "c4d-standard-16",
       "category": "compute",
       "vcpu": 16,
       "ram": 62,
@@ -1867,7 +1867,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4d_standard_192",
+      "instance": "c4d-standard-192",
       "category": "compute",
       "vcpu": 192,
       "ram": 744,
@@ -1879,7 +1879,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4d_standard_2",
+      "instance": "c4d-standard-2",
       "category": "compute",
       "vcpu": 2,
       "ram": 7,
@@ -1891,7 +1891,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4d_standard_32",
+      "instance": "c4d-standard-32",
       "category": "compute",
       "vcpu": 32,
       "ram": 124,
@@ -1903,7 +1903,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4d_standard_384",
+      "instance": "c4d-standard-384",
       "category": "compute",
       "vcpu": 384,
       "ram": 1488,
@@ -1915,7 +1915,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4d_standard_4",
+      "instance": "c4d-standard-4",
       "category": "compute",
       "vcpu": 4,
       "ram": 15,
@@ -1927,7 +1927,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4d_standard_48",
+      "instance": "c4d-standard-48",
       "category": "compute",
       "vcpu": 48,
       "ram": 186,
@@ -1939,7 +1939,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4d_standard_64",
+      "instance": "c4d-standard-64",
       "category": "compute",
       "vcpu": 64,
       "ram": 248,
@@ -1951,7 +1951,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4d_standard_8",
+      "instance": "c4d-standard-8",
       "category": "compute",
       "vcpu": 8,
       "ram": 31,
@@ -1963,7 +1963,7 @@
       "source": "composed"
     },
     {
-      "instance": "c4d_standard_96",
+      "instance": "c4d-standard-96",
       "category": "compute",
       "vcpu": 96,
       "ram": 372,
@@ -1975,7 +1975,7 @@
       "source": "composed"
     },
     {
-      "instance": "e2_highcpu_16",
+      "instance": "e2-highcpu-16",
       "category": "compute",
       "vcpu": 16,
       "ram": 16,
@@ -1987,7 +1987,7 @@
       "source": "composed"
     },
     {
-      "instance": "e2_highcpu_2",
+      "instance": "e2-highcpu-2",
       "category": "compute",
       "vcpu": 2,
       "ram": 2,
@@ -1999,7 +1999,7 @@
       "source": "composed"
     },
     {
-      "instance": "e2_highcpu_32",
+      "instance": "e2-highcpu-32",
       "category": "compute",
       "vcpu": 32,
       "ram": 32,
@@ -2011,7 +2011,7 @@
       "source": "composed"
     },
     {
-      "instance": "e2_highcpu_4",
+      "instance": "e2-highcpu-4",
       "category": "compute",
       "vcpu": 4,
       "ram": 4,
@@ -2023,7 +2023,7 @@
       "source": "composed"
     },
     {
-      "instance": "e2_highcpu_8",
+      "instance": "e2-highcpu-8",
       "category": "compute",
       "vcpu": 8,
       "ram": 8,
@@ -2035,7 +2035,7 @@
       "source": "composed"
     },
     {
-      "instance": "e2_highmem_16",
+      "instance": "e2-highmem-16",
       "category": "memory",
       "vcpu": 16,
       "ram": 128,
@@ -2047,7 +2047,7 @@
       "source": "composed"
     },
     {
-      "instance": "e2_highmem_2",
+      "instance": "e2-highmem-2",
       "category": "memory",
       "vcpu": 2,
       "ram": 16,
@@ -2059,7 +2059,7 @@
       "source": "composed"
     },
     {
-      "instance": "e2_highmem_4",
+      "instance": "e2-highmem-4",
       "category": "memory",
       "vcpu": 4,
       "ram": 32,
@@ -2071,7 +2071,7 @@
       "source": "composed"
     },
     {
-      "instance": "e2_highmem_8",
+      "instance": "e2-highmem-8",
       "category": "memory",
       "vcpu": 8,
       "ram": 64,
@@ -2083,7 +2083,7 @@
       "source": "composed"
     },
     {
-      "instance": "e2_standard_16",
+      "instance": "e2-standard-16",
       "category": "general",
       "vcpu": 16,
       "ram": 64,
@@ -2095,7 +2095,7 @@
       "source": "composed"
     },
     {
-      "instance": "e2_standard_2",
+      "instance": "e2-standard-2",
       "category": "general",
       "vcpu": 2,
       "ram": 8,
@@ -2107,7 +2107,7 @@
       "source": "composed"
     },
     {
-      "instance": "e2_standard_32",
+      "instance": "e2-standard-32",
       "category": "general",
       "vcpu": 32,
       "ram": 128,
@@ -2119,7 +2119,7 @@
       "source": "composed"
     },
     {
-      "instance": "e2_standard_4",
+      "instance": "e2-standard-4",
       "category": "general",
       "vcpu": 4,
       "ram": 16,
@@ -2131,7 +2131,7 @@
       "source": "composed"
     },
     {
-      "instance": "e2_standard_8",
+      "instance": "e2-standard-8",
       "category": "general",
       "vcpu": 8,
       "ram": 32,
@@ -2143,7 +2143,7 @@
       "source": "composed"
     },
     {
-      "instance": "m3_megamem_128",
+      "instance": "m3-megamem-128",
       "category": "memory",
       "vcpu": 128,
       "ram": 1952,
@@ -2155,7 +2155,7 @@
       "source": "composed"
     },
     {
-      "instance": "m3_megamem_64",
+      "instance": "m3-megamem-64",
       "category": "memory",
       "vcpu": 64,
       "ram": 976,
@@ -2167,7 +2167,7 @@
       "source": "composed"
     },
     {
-      "instance": "m3_ultramem_128",
+      "instance": "m3-ultramem-128",
       "category": "memory",
       "vcpu": 128,
       "ram": 3904,
@@ -2179,7 +2179,7 @@
       "source": "composed"
     },
     {
-      "instance": "m3_ultramem_32",
+      "instance": "m3-ultramem-32",
       "category": "memory",
       "vcpu": 32,
       "ram": 976,
@@ -2191,7 +2191,7 @@
       "source": "composed"
     },
     {
-      "instance": "m3_ultramem_64",
+      "instance": "m3-ultramem-64",
       "category": "memory",
       "vcpu": 64,
       "ram": 1952,
@@ -2203,7 +2203,7 @@
       "source": "composed"
     },
     {
-      "instance": "m4_megamem_112",
+      "instance": "m4-megamem-112",
       "category": "memory",
       "vcpu": 112,
       "ram": 1488,
@@ -2215,7 +2215,7 @@
       "source": "composed"
     },
     {
-      "instance": "m4_megamem_224",
+      "instance": "m4-megamem-224",
       "category": "memory",
       "vcpu": 224,
       "ram": 2976,
@@ -2227,7 +2227,7 @@
       "source": "composed"
     },
     {
-      "instance": "m4_megamem_28",
+      "instance": "m4-megamem-28",
       "category": "memory",
       "vcpu": 28,
       "ram": 372,
@@ -2239,7 +2239,7 @@
       "source": "composed"
     },
     {
-      "instance": "m4_megamem_56",
+      "instance": "m4-megamem-56",
       "category": "memory",
       "vcpu": 56,
       "ram": 744,
@@ -2251,7 +2251,7 @@
       "source": "composed"
     },
     {
-      "instance": "m4_ultramem_112",
+      "instance": "m4-ultramem-112",
       "category": "memory",
       "vcpu": 112,
       "ram": 2976,
@@ -2263,7 +2263,7 @@
       "source": "composed"
     },
     {
-      "instance": "m4_ultramem_224",
+      "instance": "m4-ultramem-224",
       "category": "memory",
       "vcpu": 224,
       "ram": 5952,
@@ -2275,7 +2275,7 @@
       "source": "composed"
     },
     {
-      "instance": "m4_ultramem_56",
+      "instance": "m4-ultramem-56",
       "category": "memory",
       "vcpu": 56,
       "ram": 1488,
@@ -2287,7 +2287,7 @@
       "source": "composed"
     },
     {
-      "instance": "n1_highcpu_16",
+      "instance": "n1-highcpu-16",
       "category": "compute",
       "vcpu": 16,
       "ram": 14.400390625,
@@ -2299,7 +2299,7 @@
       "source": "composed"
     },
     {
-      "instance": "n1_highcpu_2",
+      "instance": "n1-highcpu-2",
       "category": "compute",
       "vcpu": 2,
       "ram": 1.7998046875,
@@ -2311,7 +2311,7 @@
       "source": "composed"
     },
     {
-      "instance": "n1_highcpu_32",
+      "instance": "n1-highcpu-32",
       "category": "compute",
       "vcpu": 32,
       "ram": 28.7998046875,
@@ -2323,7 +2323,7 @@
       "source": "composed"
     },
     {
-      "instance": "n1_highcpu_4",
+      "instance": "n1-highcpu-4",
       "category": "compute",
       "vcpu": 4,
       "ram": 3.599609375,
@@ -2335,7 +2335,7 @@
       "source": "composed"
     },
     {
-      "instance": "n1_highcpu_64",
+      "instance": "n1-highcpu-64",
       "category": "compute",
       "vcpu": 64,
       "ram": 57.599609375,
@@ -2347,7 +2347,7 @@
       "source": "composed"
     },
     {
-      "instance": "n1_highcpu_8",
+      "instance": "n1-highcpu-8",
       "category": "compute",
       "vcpu": 8,
       "ram": 7.2001953125,
@@ -2359,7 +2359,7 @@
       "source": "composed"
     },
     {
-      "instance": "n1_highcpu_96",
+      "instance": "n1-highcpu-96",
       "category": "compute",
       "vcpu": 96,
       "ram": 86.400390625,
@@ -2371,7 +2371,7 @@
       "source": "composed"
     },
     {
-      "instance": "n1_highmem_16",
+      "instance": "n1-highmem-16",
       "category": "memory",
       "vcpu": 16,
       "ram": 104,
@@ -2383,7 +2383,7 @@
       "source": "composed"
     },
     {
-      "instance": "n1_highmem_2",
+      "instance": "n1-highmem-2",
       "category": "memory",
       "vcpu": 2,
       "ram": 13,
@@ -2395,7 +2395,7 @@
       "source": "composed"
     },
     {
-      "instance": "n1_highmem_32",
+      "instance": "n1-highmem-32",
       "category": "memory",
       "vcpu": 32,
       "ram": 208,
@@ -2407,7 +2407,7 @@
       "source": "composed"
     },
     {
-      "instance": "n1_highmem_4",
+      "instance": "n1-highmem-4",
       "category": "memory",
       "vcpu": 4,
       "ram": 26,
@@ -2419,7 +2419,7 @@
       "source": "composed"
     },
     {
-      "instance": "n1_highmem_64",
+      "instance": "n1-highmem-64",
       "category": "memory",
       "vcpu": 64,
       "ram": 416,
@@ -2431,7 +2431,7 @@
       "source": "composed"
     },
     {
-      "instance": "n1_highmem_8",
+      "instance": "n1-highmem-8",
       "category": "memory",
       "vcpu": 8,
       "ram": 52,
@@ -2443,7 +2443,7 @@
       "source": "composed"
     },
     {
-      "instance": "n1_highmem_96",
+      "instance": "n1-highmem-96",
       "category": "memory",
       "vcpu": 96,
       "ram": 624,
@@ -2455,7 +2455,7 @@
       "source": "composed"
     },
     {
-      "instance": "n1_megamem_96",
+      "instance": "n1-megamem-96",
       "category": "memory",
       "vcpu": 96,
       "ram": 1433.599609375,
@@ -2467,7 +2467,7 @@
       "source": "composed"
     },
     {
-      "instance": "n1_standard_1",
+      "instance": "n1-standard-1",
       "category": "general",
       "vcpu": 1,
       "ram": 3.75,
@@ -2479,7 +2479,7 @@
       "source": "composed"
     },
     {
-      "instance": "n1_standard_16",
+      "instance": "n1-standard-16",
       "category": "general",
       "vcpu": 16,
       "ram": 60,
@@ -2491,7 +2491,7 @@
       "source": "composed"
     },
     {
-      "instance": "n1_standard_2",
+      "instance": "n1-standard-2",
       "category": "general",
       "vcpu": 2,
       "ram": 7.5,
@@ -2503,7 +2503,7 @@
       "source": "composed"
     },
     {
-      "instance": "n1_standard_32",
+      "instance": "n1-standard-32",
       "category": "general",
       "vcpu": 32,
       "ram": 120,
@@ -2515,7 +2515,7 @@
       "source": "composed"
     },
     {
-      "instance": "n1_standard_4",
+      "instance": "n1-standard-4",
       "category": "general",
       "vcpu": 4,
       "ram": 15,
@@ -2527,7 +2527,7 @@
       "source": "composed"
     },
     {
-      "instance": "n1_standard_64",
+      "instance": "n1-standard-64",
       "category": "general",
       "vcpu": 64,
       "ram": 240,
@@ -2539,7 +2539,7 @@
       "source": "composed"
     },
     {
-      "instance": "n1_standard_8",
+      "instance": "n1-standard-8",
       "category": "general",
       "vcpu": 8,
       "ram": 30,
@@ -2551,7 +2551,7 @@
       "source": "composed"
     },
     {
-      "instance": "n1_standard_96",
+      "instance": "n1-standard-96",
       "category": "general",
       "vcpu": 96,
       "ram": 360,
@@ -2563,7 +2563,7 @@
       "source": "composed"
     },
     {
-      "instance": "n1_ultramem_160",
+      "instance": "n1-ultramem-160",
       "category": "memory",
       "vcpu": 160,
       "ram": 3844,
@@ -2575,7 +2575,7 @@
       "source": "composed"
     },
     {
-      "instance": "n1_ultramem_40",
+      "instance": "n1-ultramem-40",
       "category": "memory",
       "vcpu": 40,
       "ram": 961,
@@ -2587,7 +2587,7 @@
       "source": "composed"
     },
     {
-      "instance": "n1_ultramem_80",
+      "instance": "n1-ultramem-80",
       "category": "memory",
       "vcpu": 80,
       "ram": 1922,
@@ -2599,7 +2599,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2_highcpu_16",
+      "instance": "n2-highcpu-16",
       "category": "compute",
       "vcpu": 16,
       "ram": 16,
@@ -2611,7 +2611,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2_highcpu_2",
+      "instance": "n2-highcpu-2",
       "category": "compute",
       "vcpu": 2,
       "ram": 2,
@@ -2623,7 +2623,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2_highcpu_32",
+      "instance": "n2-highcpu-32",
       "category": "compute",
       "vcpu": 32,
       "ram": 32,
@@ -2635,7 +2635,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2_highcpu_4",
+      "instance": "n2-highcpu-4",
       "category": "compute",
       "vcpu": 4,
       "ram": 4,
@@ -2647,7 +2647,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2_highcpu_48",
+      "instance": "n2-highcpu-48",
       "category": "compute",
       "vcpu": 48,
       "ram": 48,
@@ -2659,7 +2659,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2_highcpu_64",
+      "instance": "n2-highcpu-64",
       "category": "compute",
       "vcpu": 64,
       "ram": 64,
@@ -2671,7 +2671,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2_highcpu_8",
+      "instance": "n2-highcpu-8",
       "category": "compute",
       "vcpu": 8,
       "ram": 8,
@@ -2683,7 +2683,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2_highcpu_80",
+      "instance": "n2-highcpu-80",
       "category": "compute",
       "vcpu": 80,
       "ram": 80,
@@ -2695,7 +2695,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2_highcpu_96",
+      "instance": "n2-highcpu-96",
       "category": "compute",
       "vcpu": 96,
       "ram": 96,
@@ -2707,7 +2707,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2_highmem_128",
+      "instance": "n2-highmem-128",
       "category": "memory",
       "vcpu": 128,
       "ram": 864,
@@ -2719,7 +2719,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2_highmem_16",
+      "instance": "n2-highmem-16",
       "category": "memory",
       "vcpu": 16,
       "ram": 128,
@@ -2731,7 +2731,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2_highmem_2",
+      "instance": "n2-highmem-2",
       "category": "memory",
       "vcpu": 2,
       "ram": 16,
@@ -2743,7 +2743,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2_highmem_32",
+      "instance": "n2-highmem-32",
       "category": "memory",
       "vcpu": 32,
       "ram": 256,
@@ -2755,7 +2755,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2_highmem_4",
+      "instance": "n2-highmem-4",
       "category": "memory",
       "vcpu": 4,
       "ram": 32,
@@ -2767,7 +2767,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2_highmem_48",
+      "instance": "n2-highmem-48",
       "category": "memory",
       "vcpu": 48,
       "ram": 384,
@@ -2779,7 +2779,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2_highmem_64",
+      "instance": "n2-highmem-64",
       "category": "memory",
       "vcpu": 64,
       "ram": 512,
@@ -2791,7 +2791,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2_highmem_8",
+      "instance": "n2-highmem-8",
       "category": "memory",
       "vcpu": 8,
       "ram": 64,
@@ -2803,7 +2803,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2_highmem_80",
+      "instance": "n2-highmem-80",
       "category": "memory",
       "vcpu": 80,
       "ram": 640,
@@ -2815,7 +2815,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2_highmem_96",
+      "instance": "n2-highmem-96",
       "category": "memory",
       "vcpu": 96,
       "ram": 768,
@@ -2827,7 +2827,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2_standard_128",
+      "instance": "n2-standard-128",
       "category": "general",
       "vcpu": 128,
       "ram": 512,
@@ -2839,7 +2839,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2_standard_16",
+      "instance": "n2-standard-16",
       "category": "general",
       "vcpu": 16,
       "ram": 64,
@@ -2851,7 +2851,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2_standard_2",
+      "instance": "n2-standard-2",
       "category": "general",
       "vcpu": 2,
       "ram": 8,
@@ -2863,7 +2863,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2_standard_32",
+      "instance": "n2-standard-32",
       "category": "general",
       "vcpu": 32,
       "ram": 128,
@@ -2875,7 +2875,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2_standard_4",
+      "instance": "n2-standard-4",
       "category": "general",
       "vcpu": 4,
       "ram": 16,
@@ -2887,7 +2887,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2_standard_48",
+      "instance": "n2-standard-48",
       "category": "general",
       "vcpu": 48,
       "ram": 192,
@@ -2899,7 +2899,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2_standard_64",
+      "instance": "n2-standard-64",
       "category": "general",
       "vcpu": 64,
       "ram": 256,
@@ -2911,7 +2911,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2_standard_8",
+      "instance": "n2-standard-8",
       "category": "general",
       "vcpu": 8,
       "ram": 32,
@@ -2923,7 +2923,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2_standard_80",
+      "instance": "n2-standard-80",
       "category": "general",
       "vcpu": 80,
       "ram": 320,
@@ -2935,7 +2935,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2_standard_96",
+      "instance": "n2-standard-96",
       "category": "general",
       "vcpu": 96,
       "ram": 384,
@@ -2947,7 +2947,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d_highcpu_128",
+      "instance": "n2d-highcpu-128",
       "category": "compute",
       "vcpu": 128,
       "ram": 128,
@@ -2959,7 +2959,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d_highcpu_16",
+      "instance": "n2d-highcpu-16",
       "category": "compute",
       "vcpu": 16,
       "ram": 16,
@@ -2971,7 +2971,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d_highcpu_2",
+      "instance": "n2d-highcpu-2",
       "category": "compute",
       "vcpu": 2,
       "ram": 2,
@@ -2983,7 +2983,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d_highcpu_224",
+      "instance": "n2d-highcpu-224",
       "category": "compute",
       "vcpu": 224,
       "ram": 224,
@@ -2995,7 +2995,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d_highcpu_32",
+      "instance": "n2d-highcpu-32",
       "category": "compute",
       "vcpu": 32,
       "ram": 32,
@@ -3007,7 +3007,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d_highcpu_4",
+      "instance": "n2d-highcpu-4",
       "category": "compute",
       "vcpu": 4,
       "ram": 4,
@@ -3019,7 +3019,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d_highcpu_48",
+      "instance": "n2d-highcpu-48",
       "category": "compute",
       "vcpu": 48,
       "ram": 48,
@@ -3031,7 +3031,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d_highcpu_64",
+      "instance": "n2d-highcpu-64",
       "category": "compute",
       "vcpu": 64,
       "ram": 64,
@@ -3043,7 +3043,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d_highcpu_8",
+      "instance": "n2d-highcpu-8",
       "category": "compute",
       "vcpu": 8,
       "ram": 8,
@@ -3055,7 +3055,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d_highcpu_80",
+      "instance": "n2d-highcpu-80",
       "category": "compute",
       "vcpu": 80,
       "ram": 80,
@@ -3067,7 +3067,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d_highcpu_96",
+      "instance": "n2d-highcpu-96",
       "category": "compute",
       "vcpu": 96,
       "ram": 96,
@@ -3079,7 +3079,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d_highmem_16",
+      "instance": "n2d-highmem-16",
       "category": "memory",
       "vcpu": 16,
       "ram": 128,
@@ -3091,7 +3091,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d_highmem_2",
+      "instance": "n2d-highmem-2",
       "category": "memory",
       "vcpu": 2,
       "ram": 16,
@@ -3103,7 +3103,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d_highmem_32",
+      "instance": "n2d-highmem-32",
       "category": "memory",
       "vcpu": 32,
       "ram": 256,
@@ -3115,7 +3115,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d_highmem_4",
+      "instance": "n2d-highmem-4",
       "category": "memory",
       "vcpu": 4,
       "ram": 32,
@@ -3127,7 +3127,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d_highmem_48",
+      "instance": "n2d-highmem-48",
       "category": "memory",
       "vcpu": 48,
       "ram": 384,
@@ -3139,7 +3139,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d_highmem_64",
+      "instance": "n2d-highmem-64",
       "category": "memory",
       "vcpu": 64,
       "ram": 512,
@@ -3151,7 +3151,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d_highmem_8",
+      "instance": "n2d-highmem-8",
       "category": "memory",
       "vcpu": 8,
       "ram": 64,
@@ -3163,7 +3163,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d_highmem_80",
+      "instance": "n2d-highmem-80",
       "category": "memory",
       "vcpu": 80,
       "ram": 640,
@@ -3175,7 +3175,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d_highmem_96",
+      "instance": "n2d-highmem-96",
       "category": "memory",
       "vcpu": 96,
       "ram": 768,
@@ -3187,7 +3187,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d_standard_128",
+      "instance": "n2d-standard-128",
       "category": "general",
       "vcpu": 128,
       "ram": 512,
@@ -3199,7 +3199,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d_standard_16",
+      "instance": "n2d-standard-16",
       "category": "general",
       "vcpu": 16,
       "ram": 64,
@@ -3211,7 +3211,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d_standard_2",
+      "instance": "n2d-standard-2",
       "category": "general",
       "vcpu": 2,
       "ram": 8,
@@ -3223,7 +3223,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d_standard_224",
+      "instance": "n2d-standard-224",
       "category": "general",
       "vcpu": 224,
       "ram": 896,
@@ -3235,7 +3235,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d_standard_32",
+      "instance": "n2d-standard-32",
       "category": "general",
       "vcpu": 32,
       "ram": 128,
@@ -3247,7 +3247,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d_standard_4",
+      "instance": "n2d-standard-4",
       "category": "general",
       "vcpu": 4,
       "ram": 16,
@@ -3259,7 +3259,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d_standard_48",
+      "instance": "n2d-standard-48",
       "category": "general",
       "vcpu": 48,
       "ram": 192,
@@ -3271,7 +3271,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d_standard_64",
+      "instance": "n2d-standard-64",
       "category": "general",
       "vcpu": 64,
       "ram": 256,
@@ -3283,7 +3283,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d_standard_8",
+      "instance": "n2d-standard-8",
       "category": "general",
       "vcpu": 8,
       "ram": 32,
@@ -3295,7 +3295,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d_standard_80",
+      "instance": "n2d-standard-80",
       "category": "general",
       "vcpu": 80,
       "ram": 320,
@@ -3307,7 +3307,7 @@
       "source": "composed"
     },
     {
-      "instance": "n2d_standard_96",
+      "instance": "n2d-standard-96",
       "category": "general",
       "vcpu": 96,
       "ram": 384,
@@ -3319,7 +3319,7 @@
       "source": "composed"
     },
     {
-      "instance": "n4_highcpu_16",
+      "instance": "n4-highcpu-16",
       "category": "compute",
       "vcpu": 16,
       "ram": 32,
@@ -3331,7 +3331,7 @@
       "source": "composed"
     },
     {
-      "instance": "n4_highcpu_2",
+      "instance": "n4-highcpu-2",
       "category": "compute",
       "vcpu": 2,
       "ram": 4,
@@ -3343,7 +3343,7 @@
       "source": "composed"
     },
     {
-      "instance": "n4_highcpu_32",
+      "instance": "n4-highcpu-32",
       "category": "compute",
       "vcpu": 32,
       "ram": 64,
@@ -3355,7 +3355,7 @@
       "source": "composed"
     },
     {
-      "instance": "n4_highcpu_4",
+      "instance": "n4-highcpu-4",
       "category": "compute",
       "vcpu": 4,
       "ram": 8,
@@ -3367,7 +3367,7 @@
       "source": "composed"
     },
     {
-      "instance": "n4_highcpu_48",
+      "instance": "n4-highcpu-48",
       "category": "compute",
       "vcpu": 48,
       "ram": 96,
@@ -3379,7 +3379,7 @@
       "source": "composed"
     },
     {
-      "instance": "n4_highcpu_64",
+      "instance": "n4-highcpu-64",
       "category": "compute",
       "vcpu": 64,
       "ram": 128,
@@ -3391,7 +3391,7 @@
       "source": "composed"
     },
     {
-      "instance": "n4_highcpu_8",
+      "instance": "n4-highcpu-8",
       "category": "compute",
       "vcpu": 8,
       "ram": 16,
@@ -3403,7 +3403,7 @@
       "source": "composed"
     },
     {
-      "instance": "n4_highcpu_80",
+      "instance": "n4-highcpu-80",
       "category": "compute",
       "vcpu": 80,
       "ram": 160,
@@ -3415,7 +3415,7 @@
       "source": "composed"
     },
     {
-      "instance": "n4_highmem_16",
+      "instance": "n4-highmem-16",
       "category": "memory",
       "vcpu": 16,
       "ram": 128,
@@ -3427,7 +3427,7 @@
       "source": "composed"
     },
     {
-      "instance": "n4_highmem_2",
+      "instance": "n4-highmem-2",
       "category": "memory",
       "vcpu": 2,
       "ram": 16,
@@ -3439,7 +3439,7 @@
       "source": "composed"
     },
     {
-      "instance": "n4_highmem_32",
+      "instance": "n4-highmem-32",
       "category": "memory",
       "vcpu": 32,
       "ram": 256,
@@ -3451,7 +3451,7 @@
       "source": "composed"
     },
     {
-      "instance": "n4_highmem_4",
+      "instance": "n4-highmem-4",
       "category": "memory",
       "vcpu": 4,
       "ram": 32,
@@ -3463,7 +3463,7 @@
       "source": "composed"
     },
     {
-      "instance": "n4_highmem_48",
+      "instance": "n4-highmem-48",
       "category": "memory",
       "vcpu": 48,
       "ram": 384,
@@ -3475,7 +3475,7 @@
       "source": "composed"
     },
     {
-      "instance": "n4_highmem_64",
+      "instance": "n4-highmem-64",
       "category": "memory",
       "vcpu": 64,
       "ram": 512,
@@ -3487,7 +3487,7 @@
       "source": "composed"
     },
     {
-      "instance": "n4_highmem_8",
+      "instance": "n4-highmem-8",
       "category": "memory",
       "vcpu": 8,
       "ram": 64,
@@ -3499,7 +3499,7 @@
       "source": "composed"
     },
     {
-      "instance": "n4_highmem_80",
+      "instance": "n4-highmem-80",
       "category": "memory",
       "vcpu": 80,
       "ram": 640,
@@ -3511,7 +3511,7 @@
       "source": "composed"
     },
     {
-      "instance": "n4_standard_16",
+      "instance": "n4-standard-16",
       "category": "general",
       "vcpu": 16,
       "ram": 64,
@@ -3523,7 +3523,7 @@
       "source": "composed"
     },
     {
-      "instance": "n4_standard_2",
+      "instance": "n4-standard-2",
       "category": "general",
       "vcpu": 2,
       "ram": 8,
@@ -3535,7 +3535,7 @@
       "source": "composed"
     },
     {
-      "instance": "n4_standard_32",
+      "instance": "n4-standard-32",
       "category": "general",
       "vcpu": 32,
       "ram": 128,
@@ -3547,7 +3547,7 @@
       "source": "composed"
     },
     {
-      "instance": "n4_standard_4",
+      "instance": "n4-standard-4",
       "category": "general",
       "vcpu": 4,
       "ram": 16,
@@ -3559,7 +3559,7 @@
       "source": "composed"
     },
     {
-      "instance": "n4_standard_48",
+      "instance": "n4-standard-48",
       "category": "general",
       "vcpu": 48,
       "ram": 192,
@@ -3571,7 +3571,7 @@
       "source": "composed"
     },
     {
-      "instance": "n4_standard_64",
+      "instance": "n4-standard-64",
       "category": "general",
       "vcpu": 64,
       "ram": 256,
@@ -3583,7 +3583,7 @@
       "source": "composed"
     },
     {
-      "instance": "n4_standard_8",
+      "instance": "n4-standard-8",
       "category": "general",
       "vcpu": 8,
       "ram": 32,
@@ -3595,7 +3595,7 @@
       "source": "composed"
     },
     {
-      "instance": "n4_standard_80",
+      "instance": "n4-standard-80",
       "category": "general",
       "vcpu": 80,
       "ram": 320,
@@ -3607,7 +3607,7 @@
       "source": "composed"
     },
     {
-      "instance": "t2d_standard_1",
+      "instance": "t2d-standard-1",
       "category": "general",
       "vcpu": 1,
       "ram": 4,
@@ -3619,7 +3619,7 @@
       "source": "composed"
     },
     {
-      "instance": "t2d_standard_16",
+      "instance": "t2d-standard-16",
       "category": "general",
       "vcpu": 16,
       "ram": 64,
@@ -3631,7 +3631,7 @@
       "source": "composed"
     },
     {
-      "instance": "t2d_standard_2",
+      "instance": "t2d-standard-2",
       "category": "general",
       "vcpu": 2,
       "ram": 8,
@@ -3643,7 +3643,7 @@
       "source": "composed"
     },
     {
-      "instance": "t2d_standard_32",
+      "instance": "t2d-standard-32",
       "category": "general",
       "vcpu": 32,
       "ram": 128,
@@ -3655,7 +3655,7 @@
       "source": "composed"
     },
     {
-      "instance": "t2d_standard_4",
+      "instance": "t2d-standard-4",
       "category": "general",
       "vcpu": 4,
       "ram": 16,
@@ -3667,7 +3667,7 @@
       "source": "composed"
     },
     {
-      "instance": "t2d_standard_48",
+      "instance": "t2d-standard-48",
       "category": "general",
       "vcpu": 48,
       "ram": 192,
@@ -3679,7 +3679,7 @@
       "source": "composed"
     },
     {
-      "instance": "t2d_standard_60",
+      "instance": "t2d-standard-60",
       "category": "general",
       "vcpu": 60,
       "ram": 240,
@@ -3691,7 +3691,7 @@
       "source": "composed"
     },
     {
-      "instance": "t2d_standard_8",
+      "instance": "t2d-standard-8",
       "category": "general",
       "vcpu": 8,
       "ram": 32,
@@ -3703,7 +3703,7 @@
       "source": "composed"
     },
     {
-      "instance": "c2d_highcpu_112",
+      "instance": "c2d-highcpu-112",
       "category": "compute",
       "vcpu": 112,
       "ram": 224,
@@ -3715,7 +3715,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c2d_highcpu_16",
+      "instance": "c2d-highcpu-16",
       "category": "compute",
       "vcpu": 16,
       "ram": 32,
@@ -3727,7 +3727,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c2d_highcpu_2",
+      "instance": "c2d-highcpu-2",
       "category": "compute",
       "vcpu": 2,
       "ram": 4,
@@ -3739,7 +3739,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c2d_highcpu_32",
+      "instance": "c2d-highcpu-32",
       "category": "compute",
       "vcpu": 32,
       "ram": 64,
@@ -3751,7 +3751,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c2d_highcpu_4",
+      "instance": "c2d-highcpu-4",
       "category": "compute",
       "vcpu": 4,
       "ram": 8,
@@ -3763,7 +3763,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c2d_highcpu_56",
+      "instance": "c2d-highcpu-56",
       "category": "compute",
       "vcpu": 56,
       "ram": 112,
@@ -3775,7 +3775,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c2d_highcpu_8",
+      "instance": "c2d-highcpu-8",
       "category": "compute",
       "vcpu": 8,
       "ram": 16,
@@ -3787,7 +3787,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c2d_highmem_112",
+      "instance": "c2d-highmem-112",
       "category": "memory",
       "vcpu": 112,
       "ram": 896,
@@ -3799,7 +3799,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c2d_highmem_16",
+      "instance": "c2d-highmem-16",
       "category": "memory",
       "vcpu": 16,
       "ram": 128,
@@ -3811,7 +3811,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c2d_highmem_2",
+      "instance": "c2d-highmem-2",
       "category": "memory",
       "vcpu": 2,
       "ram": 16,
@@ -3823,7 +3823,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c2d_highmem_32",
+      "instance": "c2d-highmem-32",
       "category": "memory",
       "vcpu": 32,
       "ram": 256,
@@ -3835,7 +3835,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c2d_highmem_4",
+      "instance": "c2d-highmem-4",
       "category": "memory",
       "vcpu": 4,
       "ram": 32,
@@ -3847,7 +3847,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c2d_highmem_56",
+      "instance": "c2d-highmem-56",
       "category": "memory",
       "vcpu": 56,
       "ram": 448,
@@ -3859,7 +3859,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c2d_highmem_8",
+      "instance": "c2d-highmem-8",
       "category": "memory",
       "vcpu": 8,
       "ram": 64,
@@ -3871,7 +3871,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c2d_standard_112",
+      "instance": "c2d-standard-112",
       "category": "compute",
       "vcpu": 112,
       "ram": 448,
@@ -3883,7 +3883,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c2d_standard_16",
+      "instance": "c2d-standard-16",
       "category": "compute",
       "vcpu": 16,
       "ram": 64,
@@ -3895,7 +3895,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c2d_standard_2",
+      "instance": "c2d-standard-2",
       "category": "compute",
       "vcpu": 2,
       "ram": 8,
@@ -3907,7 +3907,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c2d_standard_32",
+      "instance": "c2d-standard-32",
       "category": "compute",
       "vcpu": 32,
       "ram": 128,
@@ -3919,7 +3919,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c2d_standard_4",
+      "instance": "c2d-standard-4",
       "category": "compute",
       "vcpu": 4,
       "ram": 16,
@@ -3931,7 +3931,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c2d_standard_56",
+      "instance": "c2d-standard-56",
       "category": "compute",
       "vcpu": 56,
       "ram": 224,
@@ -3943,7 +3943,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c2d_standard_8",
+      "instance": "c2d-standard-8",
       "category": "compute",
       "vcpu": 8,
       "ram": 32,
@@ -3955,7 +3955,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3_highcpu_176",
+      "instance": "c3-highcpu-176",
       "category": "compute",
       "vcpu": 176,
       "ram": 352,
@@ -3967,7 +3967,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3_highcpu_22",
+      "instance": "c3-highcpu-22",
       "category": "compute",
       "vcpu": 22,
       "ram": 44,
@@ -3979,7 +3979,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3_highcpu_4",
+      "instance": "c3-highcpu-4",
       "category": "compute",
       "vcpu": 4,
       "ram": 8,
@@ -3991,7 +3991,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3_highcpu_44",
+      "instance": "c3-highcpu-44",
       "category": "compute",
       "vcpu": 44,
       "ram": 88,
@@ -4003,7 +4003,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3_highcpu_8",
+      "instance": "c3-highcpu-8",
       "category": "compute",
       "vcpu": 8,
       "ram": 16,
@@ -4015,7 +4015,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3_highcpu_88",
+      "instance": "c3-highcpu-88",
       "category": "compute",
       "vcpu": 88,
       "ram": 176,
@@ -4027,7 +4027,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3_highmem_176",
+      "instance": "c3-highmem-176",
       "category": "memory",
       "vcpu": 176,
       "ram": 1408,
@@ -4039,7 +4039,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3_highmem_22",
+      "instance": "c3-highmem-22",
       "category": "memory",
       "vcpu": 22,
       "ram": 176,
@@ -4051,7 +4051,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3_highmem_4",
+      "instance": "c3-highmem-4",
       "category": "memory",
       "vcpu": 4,
       "ram": 32,
@@ -4063,7 +4063,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3_highmem_44",
+      "instance": "c3-highmem-44",
       "category": "memory",
       "vcpu": 44,
       "ram": 352,
@@ -4075,7 +4075,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3_highmem_8",
+      "instance": "c3-highmem-8",
       "category": "memory",
       "vcpu": 8,
       "ram": 64,
@@ -4087,7 +4087,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3_highmem_88",
+      "instance": "c3-highmem-88",
       "category": "memory",
       "vcpu": 88,
       "ram": 704,
@@ -4099,7 +4099,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3_standard_176",
+      "instance": "c3-standard-176",
       "category": "compute",
       "vcpu": 176,
       "ram": 704,
@@ -4111,7 +4111,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3_standard_22",
+      "instance": "c3-standard-22",
       "category": "compute",
       "vcpu": 22,
       "ram": 88,
@@ -4123,7 +4123,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3_standard_4",
+      "instance": "c3-standard-4",
       "category": "compute",
       "vcpu": 4,
       "ram": 16,
@@ -4135,7 +4135,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3_standard_44",
+      "instance": "c3-standard-44",
       "category": "compute",
       "vcpu": 44,
       "ram": 176,
@@ -4147,7 +4147,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3_standard_8",
+      "instance": "c3-standard-8",
       "category": "compute",
       "vcpu": 8,
       "ram": 32,
@@ -4159,7 +4159,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3_standard_88",
+      "instance": "c3-standard-88",
       "category": "compute",
       "vcpu": 88,
       "ram": 352,
@@ -4171,7 +4171,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3d_highcpu_16",
+      "instance": "c3d-highcpu-16",
       "category": "compute",
       "vcpu": 16,
       "ram": 32,
@@ -4183,7 +4183,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3d_highcpu_180",
+      "instance": "c3d-highcpu-180",
       "category": "compute",
       "vcpu": 180,
       "ram": 354,
@@ -4195,7 +4195,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3d_highcpu_30",
+      "instance": "c3d-highcpu-30",
       "category": "compute",
       "vcpu": 30,
       "ram": 59,
@@ -4207,7 +4207,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3d_highcpu_360",
+      "instance": "c3d-highcpu-360",
       "category": "compute",
       "vcpu": 360,
       "ram": 708,
@@ -4219,7 +4219,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3d_highcpu_4",
+      "instance": "c3d-highcpu-4",
       "category": "compute",
       "vcpu": 4,
       "ram": 8,
@@ -4231,7 +4231,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3d_highcpu_60",
+      "instance": "c3d-highcpu-60",
       "category": "compute",
       "vcpu": 60,
       "ram": 118,
@@ -4243,7 +4243,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3d_highcpu_8",
+      "instance": "c3d-highcpu-8",
       "category": "compute",
       "vcpu": 8,
       "ram": 16,
@@ -4255,7 +4255,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3d_highcpu_90",
+      "instance": "c3d-highcpu-90",
       "category": "compute",
       "vcpu": 90,
       "ram": 177,
@@ -4267,7 +4267,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3d_highmem_16",
+      "instance": "c3d-highmem-16",
       "category": "memory",
       "vcpu": 16,
       "ram": 128,
@@ -4279,7 +4279,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3d_highmem_180",
+      "instance": "c3d-highmem-180",
       "category": "memory",
       "vcpu": 180,
       "ram": 1440,
@@ -4291,7 +4291,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3d_highmem_30",
+      "instance": "c3d-highmem-30",
       "category": "memory",
       "vcpu": 30,
       "ram": 240,
@@ -4303,7 +4303,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3d_highmem_360",
+      "instance": "c3d-highmem-360",
       "category": "memory",
       "vcpu": 360,
       "ram": 2880,
@@ -4315,7 +4315,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3d_highmem_4",
+      "instance": "c3d-highmem-4",
       "category": "memory",
       "vcpu": 4,
       "ram": 32,
@@ -4327,7 +4327,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3d_highmem_60",
+      "instance": "c3d-highmem-60",
       "category": "memory",
       "vcpu": 60,
       "ram": 480,
@@ -4339,7 +4339,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3d_highmem_8",
+      "instance": "c3d-highmem-8",
       "category": "memory",
       "vcpu": 8,
       "ram": 64,
@@ -4351,7 +4351,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3d_highmem_90",
+      "instance": "c3d-highmem-90",
       "category": "memory",
       "vcpu": 90,
       "ram": 720,
@@ -4363,7 +4363,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3d_standard_16",
+      "instance": "c3d-standard-16",
       "category": "compute",
       "vcpu": 16,
       "ram": 64,
@@ -4375,7 +4375,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3d_standard_180",
+      "instance": "c3d-standard-180",
       "category": "compute",
       "vcpu": 180,
       "ram": 720,
@@ -4387,7 +4387,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3d_standard_30",
+      "instance": "c3d-standard-30",
       "category": "compute",
       "vcpu": 30,
       "ram": 120,
@@ -4399,7 +4399,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3d_standard_360",
+      "instance": "c3d-standard-360",
       "category": "compute",
       "vcpu": 360,
       "ram": 1440,
@@ -4411,7 +4411,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3d_standard_4",
+      "instance": "c3d-standard-4",
       "category": "compute",
       "vcpu": 4,
       "ram": 16,
@@ -4423,7 +4423,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3d_standard_60",
+      "instance": "c3d-standard-60",
       "category": "compute",
       "vcpu": 60,
       "ram": 240,
@@ -4435,7 +4435,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3d_standard_8",
+      "instance": "c3d-standard-8",
       "category": "compute",
       "vcpu": 8,
       "ram": 32,
@@ -4447,7 +4447,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c3d_standard_90",
+      "instance": "c3d-standard-90",
       "category": "compute",
       "vcpu": 90,
       "ram": 360,
@@ -4459,7 +4459,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4_highcpu_144",
+      "instance": "c4-highcpu-144",
       "category": "compute",
       "vcpu": 144,
       "ram": 288,
@@ -4471,7 +4471,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4_highcpu_16",
+      "instance": "c4-highcpu-16",
       "category": "compute",
       "vcpu": 16,
       "ram": 32,
@@ -4483,7 +4483,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4_highcpu_192",
+      "instance": "c4-highcpu-192",
       "category": "compute",
       "vcpu": 192,
       "ram": 384,
@@ -4495,7 +4495,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4_highcpu_2",
+      "instance": "c4-highcpu-2",
       "category": "compute",
       "vcpu": 2,
       "ram": 4,
@@ -4507,7 +4507,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4_highcpu_24",
+      "instance": "c4-highcpu-24",
       "category": "compute",
       "vcpu": 24,
       "ram": 48,
@@ -4519,7 +4519,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4_highcpu_288",
+      "instance": "c4-highcpu-288",
       "category": "compute",
       "vcpu": 288,
       "ram": 576,
@@ -4531,7 +4531,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4_highcpu_32",
+      "instance": "c4-highcpu-32",
       "category": "compute",
       "vcpu": 32,
       "ram": 64,
@@ -4543,7 +4543,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4_highcpu_4",
+      "instance": "c4-highcpu-4",
       "category": "compute",
       "vcpu": 4,
       "ram": 8,
@@ -4555,7 +4555,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4_highcpu_48",
+      "instance": "c4-highcpu-48",
       "category": "compute",
       "vcpu": 48,
       "ram": 96,
@@ -4567,7 +4567,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4_highcpu_8",
+      "instance": "c4-highcpu-8",
       "category": "compute",
       "vcpu": 8,
       "ram": 16,
@@ -4579,7 +4579,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4_highcpu_96",
+      "instance": "c4-highcpu-96",
       "category": "compute",
       "vcpu": 96,
       "ram": 192,
@@ -4591,7 +4591,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4_highmem_144",
+      "instance": "c4-highmem-144",
       "category": "memory",
       "vcpu": 144,
       "ram": 1116,
@@ -4603,7 +4603,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4_highmem_16",
+      "instance": "c4-highmem-16",
       "category": "memory",
       "vcpu": 16,
       "ram": 124,
@@ -4615,7 +4615,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4_highmem_192",
+      "instance": "c4-highmem-192",
       "category": "memory",
       "vcpu": 192,
       "ram": 1488,
@@ -4627,7 +4627,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4_highmem_2",
+      "instance": "c4-highmem-2",
       "category": "memory",
       "vcpu": 2,
       "ram": 15,
@@ -4639,7 +4639,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4_highmem_24",
+      "instance": "c4-highmem-24",
       "category": "memory",
       "vcpu": 24,
       "ram": 186,
@@ -4651,7 +4651,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4_highmem_288",
+      "instance": "c4-highmem-288",
       "category": "memory",
       "vcpu": 288,
       "ram": 2232,
@@ -4663,7 +4663,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4_highmem_32",
+      "instance": "c4-highmem-32",
       "category": "memory",
       "vcpu": 32,
       "ram": 248,
@@ -4675,7 +4675,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4_highmem_4",
+      "instance": "c4-highmem-4",
       "category": "memory",
       "vcpu": 4,
       "ram": 31,
@@ -4687,7 +4687,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4_highmem_48",
+      "instance": "c4-highmem-48",
       "category": "memory",
       "vcpu": 48,
       "ram": 372,
@@ -4699,7 +4699,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4_highmem_8",
+      "instance": "c4-highmem-8",
       "category": "memory",
       "vcpu": 8,
       "ram": 62,
@@ -4711,7 +4711,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4_highmem_96",
+      "instance": "c4-highmem-96",
       "category": "memory",
       "vcpu": 96,
       "ram": 744,
@@ -4723,7 +4723,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4_standard_144",
+      "instance": "c4-standard-144",
       "category": "compute",
       "vcpu": 144,
       "ram": 540,
@@ -4735,7 +4735,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4_standard_16",
+      "instance": "c4-standard-16",
       "category": "compute",
       "vcpu": 16,
       "ram": 60,
@@ -4747,7 +4747,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4_standard_192",
+      "instance": "c4-standard-192",
       "category": "compute",
       "vcpu": 192,
       "ram": 720,
@@ -4759,7 +4759,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4_standard_2",
+      "instance": "c4-standard-2",
       "category": "compute",
       "vcpu": 2,
       "ram": 7,
@@ -4771,7 +4771,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4_standard_24",
+      "instance": "c4-standard-24",
       "category": "compute",
       "vcpu": 24,
       "ram": 90,
@@ -4783,7 +4783,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4_standard_288",
+      "instance": "c4-standard-288",
       "category": "compute",
       "vcpu": 288,
       "ram": 1080,
@@ -4795,7 +4795,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4_standard_32",
+      "instance": "c4-standard-32",
       "category": "compute",
       "vcpu": 32,
       "ram": 120,
@@ -4807,7 +4807,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4_standard_4",
+      "instance": "c4-standard-4",
       "category": "compute",
       "vcpu": 4,
       "ram": 15,
@@ -4819,7 +4819,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4_standard_48",
+      "instance": "c4-standard-48",
       "category": "compute",
       "vcpu": 48,
       "ram": 180,
@@ -4831,7 +4831,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4_standard_8",
+      "instance": "c4-standard-8",
       "category": "compute",
       "vcpu": 8,
       "ram": 30,
@@ -4843,7 +4843,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4_standard_96",
+      "instance": "c4-standard-96",
       "category": "compute",
       "vcpu": 96,
       "ram": 360,
@@ -4855,7 +4855,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d_highcpu_16",
+      "instance": "c4d-highcpu-16",
       "category": "compute",
       "vcpu": 16,
       "ram": 30,
@@ -4867,7 +4867,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d_highcpu_192",
+      "instance": "c4d-highcpu-192",
       "category": "compute",
       "vcpu": 192,
       "ram": 360,
@@ -4879,7 +4879,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d_highcpu_2",
+      "instance": "c4d-highcpu-2",
       "category": "compute",
       "vcpu": 2,
       "ram": 3,
@@ -4891,7 +4891,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d_highcpu_32",
+      "instance": "c4d-highcpu-32",
       "category": "compute",
       "vcpu": 32,
       "ram": 60,
@@ -4903,7 +4903,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d_highcpu_384",
+      "instance": "c4d-highcpu-384",
       "category": "compute",
       "vcpu": 384,
       "ram": 720,
@@ -4915,7 +4915,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d_highcpu_4",
+      "instance": "c4d-highcpu-4",
       "category": "compute",
       "vcpu": 4,
       "ram": 7,
@@ -4927,7 +4927,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d_highcpu_48",
+      "instance": "c4d-highcpu-48",
       "category": "compute",
       "vcpu": 48,
       "ram": 90,
@@ -4939,7 +4939,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d_highcpu_64",
+      "instance": "c4d-highcpu-64",
       "category": "compute",
       "vcpu": 64,
       "ram": 120,
@@ -4951,7 +4951,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d_highcpu_8",
+      "instance": "c4d-highcpu-8",
       "category": "compute",
       "vcpu": 8,
       "ram": 15,
@@ -4963,7 +4963,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d_highcpu_96",
+      "instance": "c4d-highcpu-96",
       "category": "compute",
       "vcpu": 96,
       "ram": 180,
@@ -4975,7 +4975,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d_highmem_16",
+      "instance": "c4d-highmem-16",
       "category": "memory",
       "vcpu": 16,
       "ram": 126,
@@ -4987,7 +4987,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d_highmem_192",
+      "instance": "c4d-highmem-192",
       "category": "memory",
       "vcpu": 192,
       "ram": 1512,
@@ -4999,7 +4999,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d_highmem_2",
+      "instance": "c4d-highmem-2",
       "category": "memory",
       "vcpu": 2,
       "ram": 15,
@@ -5011,7 +5011,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d_highmem_32",
+      "instance": "c4d-highmem-32",
       "category": "memory",
       "vcpu": 32,
       "ram": 252,
@@ -5023,7 +5023,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d_highmem_384",
+      "instance": "c4d-highmem-384",
       "category": "memory",
       "vcpu": 384,
       "ram": 3024,
@@ -5035,7 +5035,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d_highmem_4",
+      "instance": "c4d-highmem-4",
       "category": "memory",
       "vcpu": 4,
       "ram": 31,
@@ -5047,7 +5047,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d_highmem_48",
+      "instance": "c4d-highmem-48",
       "category": "memory",
       "vcpu": 48,
       "ram": 378,
@@ -5059,7 +5059,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d_highmem_64",
+      "instance": "c4d-highmem-64",
       "category": "memory",
       "vcpu": 64,
       "ram": 504,
@@ -5071,7 +5071,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d_highmem_8",
+      "instance": "c4d-highmem-8",
       "category": "memory",
       "vcpu": 8,
       "ram": 63,
@@ -5083,7 +5083,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d_highmem_96",
+      "instance": "c4d-highmem-96",
       "category": "memory",
       "vcpu": 96,
       "ram": 756,
@@ -5095,7 +5095,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d_standard_16",
+      "instance": "c4d-standard-16",
       "category": "compute",
       "vcpu": 16,
       "ram": 62,
@@ -5107,7 +5107,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d_standard_192",
+      "instance": "c4d-standard-192",
       "category": "compute",
       "vcpu": 192,
       "ram": 744,
@@ -5119,7 +5119,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d_standard_2",
+      "instance": "c4d-standard-2",
       "category": "compute",
       "vcpu": 2,
       "ram": 7,
@@ -5131,7 +5131,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d_standard_32",
+      "instance": "c4d-standard-32",
       "category": "compute",
       "vcpu": 32,
       "ram": 124,
@@ -5143,7 +5143,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d_standard_384",
+      "instance": "c4d-standard-384",
       "category": "compute",
       "vcpu": 384,
       "ram": 1488,
@@ -5155,7 +5155,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d_standard_4",
+      "instance": "c4d-standard-4",
       "category": "compute",
       "vcpu": 4,
       "ram": 15,
@@ -5167,7 +5167,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d_standard_48",
+      "instance": "c4d-standard-48",
       "category": "compute",
       "vcpu": 48,
       "ram": 186,
@@ -5179,7 +5179,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d_standard_64",
+      "instance": "c4d-standard-64",
       "category": "compute",
       "vcpu": 64,
       "ram": 248,
@@ -5191,7 +5191,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d_standard_8",
+      "instance": "c4d-standard-8",
       "category": "compute",
       "vcpu": 8,
       "ram": 31,
@@ -5203,7 +5203,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "c4d_standard_96",
+      "instance": "c4d-standard-96",
       "category": "compute",
       "vcpu": 96,
       "ram": 372,
@@ -5215,7 +5215,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "e2_highcpu_16",
+      "instance": "e2-highcpu-16",
       "category": "compute",
       "vcpu": 16,
       "ram": 16,
@@ -5227,7 +5227,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "e2_highcpu_2",
+      "instance": "e2-highcpu-2",
       "category": "compute",
       "vcpu": 2,
       "ram": 2,
@@ -5239,7 +5239,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "e2_highcpu_32",
+      "instance": "e2-highcpu-32",
       "category": "compute",
       "vcpu": 32,
       "ram": 32,
@@ -5251,7 +5251,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "e2_highcpu_4",
+      "instance": "e2-highcpu-4",
       "category": "compute",
       "vcpu": 4,
       "ram": 4,
@@ -5263,7 +5263,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "e2_highcpu_8",
+      "instance": "e2-highcpu-8",
       "category": "compute",
       "vcpu": 8,
       "ram": 8,
@@ -5275,7 +5275,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "e2_highmem_16",
+      "instance": "e2-highmem-16",
       "category": "memory",
       "vcpu": 16,
       "ram": 128,
@@ -5287,7 +5287,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "e2_highmem_2",
+      "instance": "e2-highmem-2",
       "category": "memory",
       "vcpu": 2,
       "ram": 16,
@@ -5299,7 +5299,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "e2_highmem_4",
+      "instance": "e2-highmem-4",
       "category": "memory",
       "vcpu": 4,
       "ram": 32,
@@ -5311,7 +5311,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "e2_highmem_8",
+      "instance": "e2-highmem-8",
       "category": "memory",
       "vcpu": 8,
       "ram": 64,
@@ -5323,7 +5323,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "e2_standard_16",
+      "instance": "e2-standard-16",
       "category": "general",
       "vcpu": 16,
       "ram": 64,
@@ -5335,7 +5335,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "e2_standard_2",
+      "instance": "e2-standard-2",
       "category": "general",
       "vcpu": 2,
       "ram": 8,
@@ -5347,7 +5347,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "e2_standard_32",
+      "instance": "e2-standard-32",
       "category": "general",
       "vcpu": 32,
       "ram": 128,
@@ -5359,7 +5359,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "e2_standard_4",
+      "instance": "e2-standard-4",
       "category": "general",
       "vcpu": 4,
       "ram": 16,
@@ -5371,7 +5371,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "e2_standard_8",
+      "instance": "e2-standard-8",
       "category": "general",
       "vcpu": 8,
       "ram": 32,
@@ -5383,7 +5383,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "m3_megamem_128",
+      "instance": "m3-megamem-128",
       "category": "memory",
       "vcpu": 128,
       "ram": 1952,
@@ -5395,7 +5395,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "m3_megamem_64",
+      "instance": "m3-megamem-64",
       "category": "memory",
       "vcpu": 64,
       "ram": 976,
@@ -5407,7 +5407,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "m3_ultramem_128",
+      "instance": "m3-ultramem-128",
       "category": "memory",
       "vcpu": 128,
       "ram": 3904,
@@ -5419,7 +5419,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "m3_ultramem_32",
+      "instance": "m3-ultramem-32",
       "category": "memory",
       "vcpu": 32,
       "ram": 976,
@@ -5431,7 +5431,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "m3_ultramem_64",
+      "instance": "m3-ultramem-64",
       "category": "memory",
       "vcpu": 64,
       "ram": 1952,
@@ -5443,7 +5443,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "m4_megamem_112",
+      "instance": "m4-megamem-112",
       "category": "memory",
       "vcpu": 112,
       "ram": 1488,
@@ -5455,7 +5455,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "m4_megamem_224",
+      "instance": "m4-megamem-224",
       "category": "memory",
       "vcpu": 224,
       "ram": 2976,
@@ -5467,7 +5467,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "m4_megamem_28",
+      "instance": "m4-megamem-28",
       "category": "memory",
       "vcpu": 28,
       "ram": 372,
@@ -5479,7 +5479,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "m4_megamem_56",
+      "instance": "m4-megamem-56",
       "category": "memory",
       "vcpu": 56,
       "ram": 744,
@@ -5491,7 +5491,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "m4_ultramem_112",
+      "instance": "m4-ultramem-112",
       "category": "memory",
       "vcpu": 112,
       "ram": 2976,
@@ -5503,7 +5503,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "m4_ultramem_224",
+      "instance": "m4-ultramem-224",
       "category": "memory",
       "vcpu": 224,
       "ram": 5952,
@@ -5515,7 +5515,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "m4_ultramem_56",
+      "instance": "m4-ultramem-56",
       "category": "memory",
       "vcpu": 56,
       "ram": 1488,
@@ -5527,7 +5527,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n1_highcpu_16",
+      "instance": "n1-highcpu-16",
       "category": "compute",
       "vcpu": 16,
       "ram": 14.400390625,
@@ -5539,7 +5539,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n1_highcpu_2",
+      "instance": "n1-highcpu-2",
       "category": "compute",
       "vcpu": 2,
       "ram": 1.7998046875,
@@ -5551,7 +5551,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n1_highcpu_32",
+      "instance": "n1-highcpu-32",
       "category": "compute",
       "vcpu": 32,
       "ram": 28.7998046875,
@@ -5563,7 +5563,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n1_highcpu_4",
+      "instance": "n1-highcpu-4",
       "category": "compute",
       "vcpu": 4,
       "ram": 3.599609375,
@@ -5575,7 +5575,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n1_highcpu_64",
+      "instance": "n1-highcpu-64",
       "category": "compute",
       "vcpu": 64,
       "ram": 57.599609375,
@@ -5587,7 +5587,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n1_highcpu_8",
+      "instance": "n1-highcpu-8",
       "category": "compute",
       "vcpu": 8,
       "ram": 7.2001953125,
@@ -5599,7 +5599,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n1_highcpu_96",
+      "instance": "n1-highcpu-96",
       "category": "compute",
       "vcpu": 96,
       "ram": 86.400390625,
@@ -5611,7 +5611,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n1_highmem_16",
+      "instance": "n1-highmem-16",
       "category": "memory",
       "vcpu": 16,
       "ram": 104,
@@ -5623,7 +5623,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n1_highmem_2",
+      "instance": "n1-highmem-2",
       "category": "memory",
       "vcpu": 2,
       "ram": 13,
@@ -5635,7 +5635,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n1_highmem_32",
+      "instance": "n1-highmem-32",
       "category": "memory",
       "vcpu": 32,
       "ram": 208,
@@ -5647,7 +5647,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n1_highmem_4",
+      "instance": "n1-highmem-4",
       "category": "memory",
       "vcpu": 4,
       "ram": 26,
@@ -5659,7 +5659,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n1_highmem_64",
+      "instance": "n1-highmem-64",
       "category": "memory",
       "vcpu": 64,
       "ram": 416,
@@ -5671,7 +5671,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n1_highmem_8",
+      "instance": "n1-highmem-8",
       "category": "memory",
       "vcpu": 8,
       "ram": 52,
@@ -5683,7 +5683,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n1_highmem_96",
+      "instance": "n1-highmem-96",
       "category": "memory",
       "vcpu": 96,
       "ram": 624,
@@ -5695,7 +5695,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n1_megamem_96",
+      "instance": "n1-megamem-96",
       "category": "memory",
       "vcpu": 96,
       "ram": 1433.599609375,
@@ -5707,7 +5707,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n1_standard_1",
+      "instance": "n1-standard-1",
       "category": "general",
       "vcpu": 1,
       "ram": 3.75,
@@ -5719,7 +5719,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n1_standard_16",
+      "instance": "n1-standard-16",
       "category": "general",
       "vcpu": 16,
       "ram": 60,
@@ -5731,7 +5731,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n1_standard_2",
+      "instance": "n1-standard-2",
       "category": "general",
       "vcpu": 2,
       "ram": 7.5,
@@ -5743,7 +5743,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n1_standard_32",
+      "instance": "n1-standard-32",
       "category": "general",
       "vcpu": 32,
       "ram": 120,
@@ -5755,7 +5755,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n1_standard_4",
+      "instance": "n1-standard-4",
       "category": "general",
       "vcpu": 4,
       "ram": 15,
@@ -5767,7 +5767,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n1_standard_64",
+      "instance": "n1-standard-64",
       "category": "general",
       "vcpu": 64,
       "ram": 240,
@@ -5779,7 +5779,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n1_standard_8",
+      "instance": "n1-standard-8",
       "category": "general",
       "vcpu": 8,
       "ram": 30,
@@ -5791,7 +5791,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n1_standard_96",
+      "instance": "n1-standard-96",
       "category": "general",
       "vcpu": 96,
       "ram": 360,
@@ -5803,7 +5803,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n1_ultramem_160",
+      "instance": "n1-ultramem-160",
       "category": "memory",
       "vcpu": 160,
       "ram": 3844,
@@ -5815,7 +5815,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n1_ultramem_40",
+      "instance": "n1-ultramem-40",
       "category": "memory",
       "vcpu": 40,
       "ram": 961,
@@ -5827,7 +5827,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n1_ultramem_80",
+      "instance": "n1-ultramem-80",
       "category": "memory",
       "vcpu": 80,
       "ram": 1922,
@@ -5839,7 +5839,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2_highcpu_16",
+      "instance": "n2-highcpu-16",
       "category": "compute",
       "vcpu": 16,
       "ram": 16,
@@ -5851,7 +5851,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2_highcpu_2",
+      "instance": "n2-highcpu-2",
       "category": "compute",
       "vcpu": 2,
       "ram": 2,
@@ -5863,7 +5863,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2_highcpu_32",
+      "instance": "n2-highcpu-32",
       "category": "compute",
       "vcpu": 32,
       "ram": 32,
@@ -5875,7 +5875,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2_highcpu_4",
+      "instance": "n2-highcpu-4",
       "category": "compute",
       "vcpu": 4,
       "ram": 4,
@@ -5887,7 +5887,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2_highcpu_48",
+      "instance": "n2-highcpu-48",
       "category": "compute",
       "vcpu": 48,
       "ram": 48,
@@ -5899,7 +5899,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2_highcpu_64",
+      "instance": "n2-highcpu-64",
       "category": "compute",
       "vcpu": 64,
       "ram": 64,
@@ -5911,7 +5911,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2_highcpu_8",
+      "instance": "n2-highcpu-8",
       "category": "compute",
       "vcpu": 8,
       "ram": 8,
@@ -5923,7 +5923,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2_highcpu_80",
+      "instance": "n2-highcpu-80",
       "category": "compute",
       "vcpu": 80,
       "ram": 80,
@@ -5935,7 +5935,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2_highcpu_96",
+      "instance": "n2-highcpu-96",
       "category": "compute",
       "vcpu": 96,
       "ram": 96,
@@ -5947,7 +5947,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2_highmem_128",
+      "instance": "n2-highmem-128",
       "category": "memory",
       "vcpu": 128,
       "ram": 864,
@@ -5959,7 +5959,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2_highmem_16",
+      "instance": "n2-highmem-16",
       "category": "memory",
       "vcpu": 16,
       "ram": 128,
@@ -5971,7 +5971,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2_highmem_2",
+      "instance": "n2-highmem-2",
       "category": "memory",
       "vcpu": 2,
       "ram": 16,
@@ -5983,7 +5983,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2_highmem_32",
+      "instance": "n2-highmem-32",
       "category": "memory",
       "vcpu": 32,
       "ram": 256,
@@ -5995,7 +5995,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2_highmem_4",
+      "instance": "n2-highmem-4",
       "category": "memory",
       "vcpu": 4,
       "ram": 32,
@@ -6007,7 +6007,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2_highmem_48",
+      "instance": "n2-highmem-48",
       "category": "memory",
       "vcpu": 48,
       "ram": 384,
@@ -6019,7 +6019,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2_highmem_64",
+      "instance": "n2-highmem-64",
       "category": "memory",
       "vcpu": 64,
       "ram": 512,
@@ -6031,7 +6031,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2_highmem_8",
+      "instance": "n2-highmem-8",
       "category": "memory",
       "vcpu": 8,
       "ram": 64,
@@ -6043,7 +6043,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2_highmem_80",
+      "instance": "n2-highmem-80",
       "category": "memory",
       "vcpu": 80,
       "ram": 640,
@@ -6055,7 +6055,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2_highmem_96",
+      "instance": "n2-highmem-96",
       "category": "memory",
       "vcpu": 96,
       "ram": 768,
@@ -6067,7 +6067,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2_standard_128",
+      "instance": "n2-standard-128",
       "category": "general",
       "vcpu": 128,
       "ram": 512,
@@ -6079,7 +6079,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2_standard_16",
+      "instance": "n2-standard-16",
       "category": "general",
       "vcpu": 16,
       "ram": 64,
@@ -6091,7 +6091,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2_standard_2",
+      "instance": "n2-standard-2",
       "category": "general",
       "vcpu": 2,
       "ram": 8,
@@ -6103,7 +6103,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2_standard_32",
+      "instance": "n2-standard-32",
       "category": "general",
       "vcpu": 32,
       "ram": 128,
@@ -6115,7 +6115,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2_standard_4",
+      "instance": "n2-standard-4",
       "category": "general",
       "vcpu": 4,
       "ram": 16,
@@ -6127,7 +6127,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2_standard_48",
+      "instance": "n2-standard-48",
       "category": "general",
       "vcpu": 48,
       "ram": 192,
@@ -6139,7 +6139,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2_standard_64",
+      "instance": "n2-standard-64",
       "category": "general",
       "vcpu": 64,
       "ram": 256,
@@ -6151,7 +6151,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2_standard_8",
+      "instance": "n2-standard-8",
       "category": "general",
       "vcpu": 8,
       "ram": 32,
@@ -6163,7 +6163,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2_standard_80",
+      "instance": "n2-standard-80",
       "category": "general",
       "vcpu": 80,
       "ram": 320,
@@ -6175,7 +6175,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2_standard_96",
+      "instance": "n2-standard-96",
       "category": "general",
       "vcpu": 96,
       "ram": 384,
@@ -6187,7 +6187,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d_highcpu_128",
+      "instance": "n2d-highcpu-128",
       "category": "compute",
       "vcpu": 128,
       "ram": 128,
@@ -6199,7 +6199,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d_highcpu_16",
+      "instance": "n2d-highcpu-16",
       "category": "compute",
       "vcpu": 16,
       "ram": 16,
@@ -6211,7 +6211,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d_highcpu_2",
+      "instance": "n2d-highcpu-2",
       "category": "compute",
       "vcpu": 2,
       "ram": 2,
@@ -6223,7 +6223,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d_highcpu_224",
+      "instance": "n2d-highcpu-224",
       "category": "compute",
       "vcpu": 224,
       "ram": 224,
@@ -6235,7 +6235,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d_highcpu_32",
+      "instance": "n2d-highcpu-32",
       "category": "compute",
       "vcpu": 32,
       "ram": 32,
@@ -6247,7 +6247,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d_highcpu_4",
+      "instance": "n2d-highcpu-4",
       "category": "compute",
       "vcpu": 4,
       "ram": 4,
@@ -6259,7 +6259,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d_highcpu_48",
+      "instance": "n2d-highcpu-48",
       "category": "compute",
       "vcpu": 48,
       "ram": 48,
@@ -6271,7 +6271,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d_highcpu_64",
+      "instance": "n2d-highcpu-64",
       "category": "compute",
       "vcpu": 64,
       "ram": 64,
@@ -6283,7 +6283,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d_highcpu_8",
+      "instance": "n2d-highcpu-8",
       "category": "compute",
       "vcpu": 8,
       "ram": 8,
@@ -6295,7 +6295,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d_highcpu_80",
+      "instance": "n2d-highcpu-80",
       "category": "compute",
       "vcpu": 80,
       "ram": 80,
@@ -6307,7 +6307,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d_highcpu_96",
+      "instance": "n2d-highcpu-96",
       "category": "compute",
       "vcpu": 96,
       "ram": 96,
@@ -6319,7 +6319,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d_highmem_16",
+      "instance": "n2d-highmem-16",
       "category": "memory",
       "vcpu": 16,
       "ram": 128,
@@ -6331,7 +6331,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d_highmem_2",
+      "instance": "n2d-highmem-2",
       "category": "memory",
       "vcpu": 2,
       "ram": 16,
@@ -6343,7 +6343,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d_highmem_32",
+      "instance": "n2d-highmem-32",
       "category": "memory",
       "vcpu": 32,
       "ram": 256,
@@ -6355,7 +6355,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d_highmem_4",
+      "instance": "n2d-highmem-4",
       "category": "memory",
       "vcpu": 4,
       "ram": 32,
@@ -6367,7 +6367,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d_highmem_48",
+      "instance": "n2d-highmem-48",
       "category": "memory",
       "vcpu": 48,
       "ram": 384,
@@ -6379,7 +6379,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d_highmem_64",
+      "instance": "n2d-highmem-64",
       "category": "memory",
       "vcpu": 64,
       "ram": 512,
@@ -6391,7 +6391,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d_highmem_8",
+      "instance": "n2d-highmem-8",
       "category": "memory",
       "vcpu": 8,
       "ram": 64,
@@ -6403,7 +6403,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d_highmem_80",
+      "instance": "n2d-highmem-80",
       "category": "memory",
       "vcpu": 80,
       "ram": 640,
@@ -6415,7 +6415,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d_highmem_96",
+      "instance": "n2d-highmem-96",
       "category": "memory",
       "vcpu": 96,
       "ram": 768,
@@ -6427,7 +6427,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d_standard_128",
+      "instance": "n2d-standard-128",
       "category": "general",
       "vcpu": 128,
       "ram": 512,
@@ -6439,7 +6439,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d_standard_16",
+      "instance": "n2d-standard-16",
       "category": "general",
       "vcpu": 16,
       "ram": 64,
@@ -6451,7 +6451,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d_standard_2",
+      "instance": "n2d-standard-2",
       "category": "general",
       "vcpu": 2,
       "ram": 8,
@@ -6463,7 +6463,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d_standard_224",
+      "instance": "n2d-standard-224",
       "category": "general",
       "vcpu": 224,
       "ram": 896,
@@ -6475,7 +6475,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d_standard_32",
+      "instance": "n2d-standard-32",
       "category": "general",
       "vcpu": 32,
       "ram": 128,
@@ -6487,7 +6487,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d_standard_4",
+      "instance": "n2d-standard-4",
       "category": "general",
       "vcpu": 4,
       "ram": 16,
@@ -6499,7 +6499,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d_standard_48",
+      "instance": "n2d-standard-48",
       "category": "general",
       "vcpu": 48,
       "ram": 192,
@@ -6511,7 +6511,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d_standard_64",
+      "instance": "n2d-standard-64",
       "category": "general",
       "vcpu": 64,
       "ram": 256,
@@ -6523,7 +6523,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d_standard_8",
+      "instance": "n2d-standard-8",
       "category": "general",
       "vcpu": 8,
       "ram": 32,
@@ -6535,7 +6535,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d_standard_80",
+      "instance": "n2d-standard-80",
       "category": "general",
       "vcpu": 80,
       "ram": 320,
@@ -6547,7 +6547,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n2d_standard_96",
+      "instance": "n2d-standard-96",
       "category": "general",
       "vcpu": 96,
       "ram": 384,
@@ -6559,7 +6559,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n4_highcpu_16",
+      "instance": "n4-highcpu-16",
       "category": "compute",
       "vcpu": 16,
       "ram": 32,
@@ -6571,7 +6571,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n4_highcpu_2",
+      "instance": "n4-highcpu-2",
       "category": "compute",
       "vcpu": 2,
       "ram": 4,
@@ -6583,7 +6583,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n4_highcpu_32",
+      "instance": "n4-highcpu-32",
       "category": "compute",
       "vcpu": 32,
       "ram": 64,
@@ -6595,7 +6595,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n4_highcpu_4",
+      "instance": "n4-highcpu-4",
       "category": "compute",
       "vcpu": 4,
       "ram": 8,
@@ -6607,7 +6607,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n4_highcpu_48",
+      "instance": "n4-highcpu-48",
       "category": "compute",
       "vcpu": 48,
       "ram": 96,
@@ -6619,7 +6619,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n4_highcpu_64",
+      "instance": "n4-highcpu-64",
       "category": "compute",
       "vcpu": 64,
       "ram": 128,
@@ -6631,7 +6631,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n4_highcpu_8",
+      "instance": "n4-highcpu-8",
       "category": "compute",
       "vcpu": 8,
       "ram": 16,
@@ -6643,7 +6643,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n4_highcpu_80",
+      "instance": "n4-highcpu-80",
       "category": "compute",
       "vcpu": 80,
       "ram": 160,
@@ -6655,7 +6655,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n4_highmem_16",
+      "instance": "n4-highmem-16",
       "category": "memory",
       "vcpu": 16,
       "ram": 128,
@@ -6667,7 +6667,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n4_highmem_2",
+      "instance": "n4-highmem-2",
       "category": "memory",
       "vcpu": 2,
       "ram": 16,
@@ -6679,7 +6679,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n4_highmem_32",
+      "instance": "n4-highmem-32",
       "category": "memory",
       "vcpu": 32,
       "ram": 256,
@@ -6691,7 +6691,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n4_highmem_4",
+      "instance": "n4-highmem-4",
       "category": "memory",
       "vcpu": 4,
       "ram": 32,
@@ -6703,7 +6703,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n4_highmem_48",
+      "instance": "n4-highmem-48",
       "category": "memory",
       "vcpu": 48,
       "ram": 384,
@@ -6715,7 +6715,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n4_highmem_64",
+      "instance": "n4-highmem-64",
       "category": "memory",
       "vcpu": 64,
       "ram": 512,
@@ -6727,7 +6727,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n4_highmem_8",
+      "instance": "n4-highmem-8",
       "category": "memory",
       "vcpu": 8,
       "ram": 64,
@@ -6739,7 +6739,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n4_highmem_80",
+      "instance": "n4-highmem-80",
       "category": "memory",
       "vcpu": 80,
       "ram": 640,
@@ -6751,7 +6751,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n4_standard_16",
+      "instance": "n4-standard-16",
       "category": "general",
       "vcpu": 16,
       "ram": 64,
@@ -6763,7 +6763,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n4_standard_2",
+      "instance": "n4-standard-2",
       "category": "general",
       "vcpu": 2,
       "ram": 8,
@@ -6775,7 +6775,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n4_standard_32",
+      "instance": "n4-standard-32",
       "category": "general",
       "vcpu": 32,
       "ram": 128,
@@ -6787,7 +6787,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n4_standard_4",
+      "instance": "n4-standard-4",
       "category": "general",
       "vcpu": 4,
       "ram": 16,
@@ -6799,7 +6799,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n4_standard_48",
+      "instance": "n4-standard-48",
       "category": "general",
       "vcpu": 48,
       "ram": 192,
@@ -6811,7 +6811,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n4_standard_64",
+      "instance": "n4-standard-64",
       "category": "general",
       "vcpu": 64,
       "ram": 256,
@@ -6823,7 +6823,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n4_standard_8",
+      "instance": "n4-standard-8",
       "category": "general",
       "vcpu": 8,
       "ram": 32,
@@ -6835,7 +6835,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "n4_standard_80",
+      "instance": "n4-standard-80",
       "category": "general",
       "vcpu": 80,
       "ram": 320,
@@ -6847,7 +6847,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "t2d_standard_1",
+      "instance": "t2d-standard-1",
       "category": "general",
       "vcpu": 1,
       "ram": 4,
@@ -6859,7 +6859,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "t2d_standard_16",
+      "instance": "t2d-standard-16",
       "category": "general",
       "vcpu": 16,
       "ram": 64,
@@ -6871,7 +6871,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "t2d_standard_2",
+      "instance": "t2d-standard-2",
       "category": "general",
       "vcpu": 2,
       "ram": 8,
@@ -6883,7 +6883,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "t2d_standard_32",
+      "instance": "t2d-standard-32",
       "category": "general",
       "vcpu": 32,
       "ram": 128,
@@ -6895,7 +6895,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "t2d_standard_4",
+      "instance": "t2d-standard-4",
       "category": "general",
       "vcpu": 4,
       "ram": 16,
@@ -6907,7 +6907,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "t2d_standard_48",
+      "instance": "t2d-standard-48",
       "category": "general",
       "vcpu": 48,
       "ram": 192,
@@ -6919,7 +6919,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "t2d_standard_60",
+      "instance": "t2d-standard-60",
       "category": "general",
       "vcpu": 60,
       "ram": 240,
@@ -6931,7 +6931,7 @@
       "source": "composed+win"
     },
     {
-      "instance": "t2d_standard_8",
+      "instance": "t2d-standard-8",
       "category": "general",
       "vcpu": 8,
       "ram": 32,
