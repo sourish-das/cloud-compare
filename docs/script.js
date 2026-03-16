@@ -24,13 +24,13 @@ import {
    Provider label maps (centralized)
    ======================================================================== */
 const PROVIDER_LABELS = {
-  aws:   { price: 'EC2 Price/hr',            monthly: 'EC2 Monthly' },
-  azure: { price: 'VM Price/hr',             monthly: 'VM Monthly' },
+  aws:   { price: 'EC2 Price/hr',             monthly: 'EC2 Monthly' },
+  azure: { price: 'VM Price/hr',              monthly: 'VM Monthly' },
   gcp:   { price: 'Compute Engine Price/hr', monthly: 'Compute Engine Monthly' },
-  oci:   { price: 'Compute Price/hr',        monthly: 'Compute Monthly' }
+  oci:   { price: 'Compute Price/hr',         monthly: 'Compute Monthly' }
 };
 const STORAGE_LABELS = {
-  aws:   { hr: 'EBS Price/hr',              monthly: 'EBS Monthly' },
+  aws:   { hr: 'EBS Price/hr',               monthly: 'EBS Monthly' },
   azure: { hr: 'Azure Disk Price/hr',       monthly: 'Azure Disk Monthly' },
   gcp:   { hr: 'Persistent Disk Price/hr',  monthly: 'Persistent Disk Monthly' },
   oci:   { hr: 'Block Volume Price/hr',     monthly: 'Block Volume Monthly' },
@@ -223,7 +223,6 @@ async function hydrateControlsFromMeta() {
 
 /* ========================================================================
    ---- Export results grid to PDF (Option B) ----
-   (ADDED: placed just above compare() as requested)
    ======================================================================== */
 
 async function downloadResultsAsPdf() {
@@ -383,11 +382,16 @@ async function downloadResultsAsPdf() {
 
     document.body.removeChild(wrapper);
 
+    // IMPROVEMENT: Better file name (timestamp + inputs)
     const os = document.getElementById("os")?.value || "OS";
     const v  = document.getElementById("cpu")?.value || "";
     const m  = document.getElementById("ram")?.value || "";
+    const st = document.getElementById("storageType")?.value || "";
+    const sg = document.getElementById("storageAmt")?.value || "";
+    const ts = new Date().toISOString().replace(/[:.]/g, "-"); // YYYY-MM-DDTHH-MM-SSZ
+
     try {
-      pdf.save(`cloud-compare_${os}_${v}vCPU_${m}GB.pdf`);
+      pdf.save(`cloud-compare_${os}_${v}vCPU_${m}GB_${sg}GB-${st}_${ts}.pdf`);
     } catch (e) {
       return fail("Sorry, PDF export failed (save).", e);
     }
@@ -405,7 +409,7 @@ export async function compare(resetFamilies = false) {
   if (btn) btn.disabled = true;
   setStatus("Fetching local prices…");
 
-  // (ADDED) disable Export while computing to avoid stale exports
+  // Disable Export while computing to avoid stale exports
   const dlBtn1 = document.getElementById("downloadPdfBtn");
   if (dlBtn1) dlBtn1.disabled = true;
 
@@ -701,7 +705,7 @@ export async function compare(resetFamilies = false) {
     showFamilyFilters();
     setStatus("Comparison complete ✓");
 
-    // (ADDED) enable Export on success
+    // Enable Export on success
     const dlBtn2 = document.getElementById("downloadPdfBtn");
     if (dlBtn2) dlBtn2.disabled = false;
 
@@ -710,7 +714,7 @@ export async function compare(resetFamilies = false) {
     setStatus(`Error: ${err.message}`, "error");
     alert("Unable to read local prices. Please try again.");
 
-    // (ADDED) keep Export disabled on error
+    // Keep Export disabled on error
     const dlBtnErr = document.getElementById("downloadPdfBtn");
     if (dlBtnErr) dlBtnErr.disabled = true;
 
@@ -733,17 +737,29 @@ async function bootstrap() {
     const ociNoticeInit = document.getElementById("ociRhelNotice");
     if (ociNoticeInit) ociNoticeInit.hidden = true;
 
-    if (osEl) {
-      osEl.addEventListener("change", () => {
-        sanitizeFamiliesForWindows(osEl.value);
-        const ociNotice = document.getElementById("ociRhelNotice");
-        if (ociNotice) ociNotice.hidden = true;
-      });
-    }
-
-    ["awsFamily","azFamily","gcpFamily","ociProcessor"].forEach(id => {
+    // IMPROVEMENT: Keep Export disabled when filters change
+    [
+      "os", "cpu", "ram", "storageType", "storageAmt",
+      "awsFamily","azFamily","gcpFamily","ociProcessor"
+    ].forEach(id => {
       const el = document.getElementById(id);
-      if (el) el.addEventListener("change", () => compare(false));
+      if (!el) return;
+      el.addEventListener("change", () => {
+        const dl = document.getElementById("downloadPdfBtn");
+        if (dl) dl.disabled = true; // force re-compare before export
+        
+        // Existing logic for OS changes
+        if (id === "os") {
+          sanitizeFamiliesForWindows(el.value);
+          const ociNotice = document.getElementById("ociRhelNotice");
+          if (ociNotice) ociNotice.hidden = true;
+        }
+
+        // Auto-run compare for family filters
+        if (["awsFamily","azFamily","gcpFamily","ociProcessor"].includes(id)) {
+          compare(false);
+        }
+      });
     });
 
     initStorageTypeTooltip();
@@ -756,7 +772,7 @@ async function bootstrap() {
       btn.setAttribute("data-bound", "1");
     }
 
-    // (ADDED) Bind Export PDF button (start disabled; enabled after compare)
+    // Bind Export PDF button (start disabled; enabled after compare)
     const dlBtn = document.getElementById("downloadPdfBtn");
     if (dlBtn && !dlBtn.getAttribute("data-bound-pdf")) {
       dlBtn.addEventListener("click", () => downloadResultsAsPdf());
@@ -771,6 +787,7 @@ async function bootstrap() {
     setStatus("Initialization failed. Open console for details.", "error");
   }
 }
+
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", bootstrap);
 } else {
