@@ -26,10 +26,13 @@ const {
   categorizeByInstanceName,
   widenAzureSeries,
 
-  // NEW: UI naming helpers
+  // UI naming helpers
   azureDisplayNameFromNormalized,
   azureSeriesFromNormalized,
-  azureSeriesNameFromNormalized
+  azureSeriesNameFromNormalized,
+
+  // RHEL synthesis (from azure.js you already updated)
+  synthesizeAzureRhelRows
 } = require("../lib/azure");
 
 // Write to docs/data by default (workflow can override)
@@ -46,7 +49,7 @@ async function fetchWithRetry(url, retries = 6) {
     } catch (err) {
       console.warn(`[Azure] Retail error on attempt ${i + 1}/${retries} → ${err.message}`);
     }
-    await new Promise(res => setTimeout(res, 1500 * Math.pow(2, i)));
+    await new Promise((res) => setTimeout(res, 1500 * Math.pow(2, i)));
   }
   throw new Error(`[Azure] Retail failed after ${retries} retries → ${url}`);
 }
@@ -60,7 +63,9 @@ async function fetchRetailPrices() {
     `?$filter=serviceName eq 'Virtual Machines' and armRegionName eq '${REGION}' and type eq 'Consumption'`;
 
   const items = [];
-  let next = base, pages = 0, MAX = 200;
+  let next = base,
+    pages = 0,
+    MAX = 200;
 
   while (next && pages < MAX) {
     const j = await fetchWithRetry(next);
@@ -84,8 +89,15 @@ async function main() {
 
     // Exclude discounted/alt offers by text (defense-in-depth)
     const blob = [
-      it.productName, it.skuName, it.meterName, it.armSkuName, it.retailPriceType
-    ].filter(Boolean).join(" ").toLowerCase();
+      it.productName,
+      it.skuName,
+      it.meterName,
+      it.armSkuName,
+      it.retailPriceType
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
 
     if (/\bpromo\b/.test(blob)) continue;
     if (/dev\s*\/?\s*test|devtest|msdn/i.test(blob)) continue;
@@ -98,7 +110,7 @@ async function main() {
     const price = extractRetailHourlyUSD(it);
     if (!(price > 0)) continue;
 
-    // Use full name, do NOT split (prevents collapsing D2s v5 -> D2s)
+    // Use full name, do NOT split (prevents collapsing "D2s v5" -> "D2s")
     const instRaw = it.armSkuName || it.skuName || "";
     if (!instRaw) continue;
 
@@ -112,17 +124,17 @@ async function main() {
     // OS eligibility
     const { os } = getRetailOsInfo(it);
     if (os === "Linux") {
-      if (!isLinuxRetailEligible(it)) continue;       // free Linux only
+      if (!isLinuxRetailEligible(it)) continue; // free Linux only
     } else if (os === "Windows") {
-      if (!isWindowsRetailEligible(it)) continue;     // license-included, no SQL/DevTest/BYOL/preinstalled
-      if (isAzureArmInstance(instance)) continue;     // block ARM (Bpsv2 / Dpsv5 / Dpldsv5 / Epsv5)
+      if (!isWindowsRetailEligible(it)) continue; // license-included, no SQL/DevTest/BYOL/preinstalled
+      if (isAzureArmInstance(instance)) continue; // block ARM (Bpsv2 / Dpsv5 / Dpldsv5 / Epsv5)
     } else {
       continue;
     }
 
     rows.push({
       instance,
-      // NEW: UI-friendly fields
+      // UI-friendly fields
       displayInstance: azureDisplayNameFromNormalized(instance),
       series: azureSeriesFromNormalized(instance),
       seriesName: azureSeriesNameFromNormalized(instance),
@@ -135,12 +147,12 @@ async function main() {
   }
 
   // Deduplicate by (instance, region, os)
-  const cheapest = dedupeCheapestByKey(rows, r => `${r.instance}-${r.region}-${r.os}`);
-  const countsByOs = cheapest.reduce((a, r) => (a[r.os] = (a[r.os] || 0) + 1, a), {});
+  const cheapest = dedupeCheapestByKey(rows, (r) => `${r.instance}-${r.region}-${r.os}`);
+  let countsByOs = cheapest.reduce((a, r) => ((a[r.os] = (a[r.os] || 0) + 1), a), {});
   console.log(`[Azure] collected=${rows.length}, cheapest=${cheapest.length}, byOS=`, countsByOs);
   if (warnAndSkipWriteOnEmpty("Azure", cheapest)) return;
 
-  // Enrich with ResourceSkus if available
+  // Enrich with ResourceSkus if available (adds vcpu/ram for each row)
   const subscriptionId = process.env.AZURE_SUBSCRIPTION_ID;
   const armToken = process.env.ARM_TOKEN;
 
@@ -151,15 +163,27 @@ async function main() {
 
   for (const vm of cheapest) {
     const spec = skuMap.get(String(vm.instance).toLowerCase());
-    vm.vcpu = (spec?.vcpu ?? null);
-    vm.ram  = (spec?.ram  ?? null);
-    vm.category = categorizeByInstanceName(vm.instance);
+    vm.vcpu = spec?.vcpu ?? vm.vcpu ?? null;
+    vm.ram = spec?.ram ?? vm.ram ?? null;
+    vm.category = vm.category || categorizeByInstanceName(vm.instance);
   }
 
+  // ---------- NEW: Synthesize RHEL from Linux base using azure.js buckets ----------
+  const addedRhel = synthesizeAzureRhelRows(cheapest);
+  if (addedRhel > 0) {
+    console.log(`[Azure] RHEL synthesized: ${addedRhel} rows`);
+  }
+
+  // Recompute counts for logging after synthesis
+  countsByOs = cheapest.reduce((a, r) => ((a[r.os] = (a[r.os] || 0) + 1), a), {});
+  console.log(`[Azure] post-synthesis byOS=`, countsByOs);
+
+  if (warnAndSkipWriteOnEmpty("Azure", cheapest)) return;
+
   const meta = {
-    os: ["Linux", "Windows"],
-    vcpu: uniqSortedNums(cheapest.map(x => x.vcpu)),
-    ram:  uniqSortedNums(cheapest.map(x => x.ram))
+    os: ["Linux", "RHEL", "Windows"],
+    vcpu: uniqSortedNums(cheapest.map((x) => x.vcpu)),
+    ram: uniqSortedNums(cheapest.map((x) => x.ram))
   };
 
   // Storage (monthly) — UI converts to hourly
@@ -174,7 +198,7 @@ async function main() {
   console.log(`✅ Wrote ${OUT}`);
 }
 
-main().catch(e => {
+main().catch((e) => {
   console.error(e);
   process.exit(1);
 });
