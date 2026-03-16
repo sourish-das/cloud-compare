@@ -75,9 +75,9 @@ jobs:
           echo "ARM_TOKEN=${ARM_TOKEN}" >> "$GITHUB_ENV"
 
       # ------------------------------------------------------------
-      # Optional: probe that the token works against ARM (diagnostic)
+      # Optional: quick probe that the token works (diagnostic only)
       # ------------------------------------------------------------
-      - name: Probe ARM (locations list)
+      - name: Probe ARM (locations list) [optional]
         shell: bash
         env:
           SUB_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
@@ -90,9 +90,9 @@ jobs:
             "https://management.azure.com/subscriptions/${SUB_ID}/locations?api-version=2020-01-01")
           echo "ARM probe HTTP: ${CODE}"
           if [[ "${CODE}" != "200" ]]; then
-            echo "::warning::ARM probe failed (HTTP ${CODE}). The fetch script may still succeed if it uses a different API."
+            echo "::warning::ARM probe failed (HTTP ${CODE}). Continuing..."
           else
-            echo "Probe OK - sample keys:" && jq 'keys' /tmp/arm.json | head -n 20 || true
+            jq 'keys' /tmp/arm.json | head -n 20 || true
           fi
 
       # ------------------------------------------------------------
@@ -102,7 +102,9 @@ jobs:
         run: mkdir -p docs/data/azure
 
       # ------------------------------------------------------------
-      # >>> Run the Azure fetcher (writes to docs/data/azure/azure.prices.json)
+      # >>> Run the Azure fetcher (writes docs/data/azure/azure.prices.json)
+      #     RHEL fallback(s) are OPTIONAL — pick ONE style or none.
+      #     If both are present, BUCKET_MAP takes precedence.
       # ------------------------------------------------------------
       - name: Fetch Azure prices
         run: node scripts/providers/azure.fetch.js
@@ -111,6 +113,23 @@ jobs:
           AZURE_REGION: "eastus"
           AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           OUTPUT_PATH: "docs/data/azure/azure.prices.json"
+
+          # -------------------------------
+          # OPTIONAL RHEL FALLBACKS:
+          # (A) Single fallback (applies to all sizes/families)
+          # AZURE_RHEL_RATE_PER_VCPU: "0.0144"
+
+          # (B) Bucketed fallback (recommended; overrides single rate if both set)
+          #  - 'small'  = 1–4 vCPU
+          #  - 'mid'    = 5–8 vCPU
+          #  - 'big'    = >8 vCPU
+          #  - Families: D = General, F = Compute, E = Memory
+          AZURE_RHEL_BUCKET_MAP: >-
+            {
+              "D": {"small":0.0142,"mid":0.0146,"big":0.0150},
+              "F": {"small":0.0144,"mid":0.0148,"big":0.0152},
+              "E": {"small":0.0141,"mid":0.0145,"big":0.0149}
+            }
 
       # ------------------------------------------------------------
       # Validate output & show quick stats (counts by OS)
@@ -141,7 +160,7 @@ jobs:
           retention-days: 7
 
       # =========================================
-      # OPTIONAL DEBUG MODE — snapshot to docs/data (no direct overwrite)
+      # OPTIONAL DEBUG MODE — snapshot to docs/data
       # =========================================
       - name: Debug Publish to docs/data (optional)
         if: ${{ vars.DEBUG_PUBLISH == 'true' }}
