@@ -165,7 +165,7 @@ function _normalizedFromSkuName(skuName = "") {
   let family = lettersFull;
   for (const suf of KNOWN_SUBS) {
     if (lettersFull.endsWith(suf)) {
-      sub = suf;                                 // e.g., 'as'
+      sub = suf;                                  // e.g., 'as'
       family = lettersFull.slice(0, -suf.length); // e.g., 'ec'
       break;
     }
@@ -305,6 +305,126 @@ function azureSeriesNameFromNormalized(instance = "") {
   return `${seriesCore}-series`;
 }
 
+/* ============================================================
+ * RHEL synthesis for Azure (Linux base + per‑vCPU software fee)
+ * ============================================================*/
+
+/**
+ * Optional JSON override from env:
+ *   AZURE_RHEL_BUCKET_MAP = {
+ *     "D": {"small":0.0142,"mid":0.0146,"big":0.0150},
+ *     "F": {"small":0.0144,"mid":0.0148,"big":0.0152},
+ *     "E": {"small":0.0141,"mid":0.0145,"big":0.0149}
+ *   }
+ * Also supports single fallback:
+ *   AZURE_RHEL_RATE_PER_VCPU = "0.0144"
+ */
+function _readBucketOverride() {
+  try {
+    const raw = process.env.AZURE_RHEL_BUCKET_MAP;
+    if (!raw) return null;
+    const obj = JSON.parse(raw);
+    return (obj && typeof obj === "object") ? obj : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Family letter helper: returns 'D'|'E'|'F' (else 'D' as safe default) */
+function _famLetter(instance = "") {
+  const n = String(instance || "");
+  let c = n.toLowerCase().startsWith("standard_") ? n[9] : n[0];
+  c = (c || "").toUpperCase();
+  return (c === "D" || c === "E" || c === "F") ? c : "D";
+}
+
+/** Bucket label by vCPU */
+function _bucketByVcpu(vcpu = 0) {
+  const v = Number(vcpu) || 0;
+  return (v <= 4) ? "small" : (v <= 8) ? "mid" : "big";
+}
+
+/**
+ * Choose a per‑vCPU uplift in USD/hr by (family, vCPU bucket).
+ * Precedence:
+ *   1) AZURE_RHEL_RATE_PER_VCPU (single numeric override)
+ *   2) AZURE_RHEL_BUCKET_MAP (family/bucket JSON)
+ *   3) Built‑in East‑US defaults
+ */
+function pickAzureRhelUpliftPerVcpu(instance = "", vcpu = 0) {
+  const single = Number(process.env.AZURE_RHEL_RATE_PER_VCPU);
+  if (Number.isFinite(single) && single > 0) return single;
+
+  const fam = _famLetter(instance);
+  const bucket = _bucketByVcpu(vcpu);
+
+  const override = _readBucketOverride();
+  if (override && override[fam] && Number.isFinite(override[fam][bucket])) {
+    return Number(override[fam][bucket]);
+  }
+
+  // Built‑in (East US, PAYG) conservative averages
+  const defaults = {
+    D: { small: 0.0142, mid: 0.0146, big: 0.0150 },
+    F: { small: 0.0144, mid: 0.0148, big: 0.0152 },
+    E: { small: 0.0141, mid: 0.0145, big: 0.0149 }
+  };
+
+  return defaults[fam][bucket];
+}
+
+function _normOsLabel(os = "") {
+  const s = String(os || "").toLowerCase();
+  if (s.startsWith("win")) return "windows";
+  if (/rhel|red\s*hat/.test(s)) return "rhel";
+  return "linux";
+}
+
+function _hasRhelRowAlready(rows, base) {
+  const inst = String(base?.instance || "");
+  const reg  = String(base?.region   || "");
+  return rows.some(r =>
+    String(r.instance) === inst &&
+    String(r.region)   === reg &&
+    _normOsLabel(r.os) === "rhel"
+  );
+}
+
+/**
+ * Synthesize Azure RHEL rows from Linux rows.
+ * Adds: priceRhel = linuxPrice + (vcpu * uplift). Skips when vCPU unknown.
+ * Returns number of rows added.
+ */
+function synthesizeAzureRhelRows(rows) {
+  if (!Array.isArray(rows) || rows.length === 0) return 0;
+
+  let added = 0;
+  const linux = rows.filter(r => _normOsLabel(r.os) === "linux");
+
+  for (const base of linux) {
+    const inst = String(base.instance || "");
+    const vcpu = Number(base.vcpu);
+    const pLnx = Number(base.pricePerHourUSD);
+
+    if (!inst || !Number.isFinite(vcpu) || vcpu <= 0 || !Number.isFinite(pLnx)) continue;
+    if (_hasRhelRowAlready(rows, base)) continue;
+
+    const uplift = pickAzureRhelUpliftPerVcpu(inst, vcpu);
+    const priceRhel = pLnx + (vcpu * uplift);
+    if (!Number.isFinite(priceRhel) || priceRhel <= 0) continue;
+
+    rows.push({
+      ...base,
+      os: "RHEL",
+      pricePerHourUSD: priceRhel,
+      source: (base.source ? String(base.source) : "retail") + "+rhel"
+    });
+    added++;
+  }
+
+  return added;
+}
+
 module.exports = {
   // OS & retail classifiers
   getRetailOsInfo,
@@ -332,5 +452,9 @@ module.exports = {
   // UI naming helpers
   azureDisplayNameFromNormalized,
   azureSeriesFromNormalized,
-  azureSeriesNameFromNormalized
+  azureSeriesNameFromNormalized,
+
+  // RHEL synthesis (Azure)
+  pickAzureRhelUpliftPerVcpu,
+  synthesizeAzureRhelRows
 };
