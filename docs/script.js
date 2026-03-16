@@ -1,5 +1,5 @@
 // docs/script.js (4‑provider coordinator - AWS, Azure, GCP, OCI)
-// Full drop-in with PDF export (Option B), RHEL-on-OCI notice, and robust bootstrap handling.
+// Full drop-in with PDF snapshot flattening and row-alignment fixes.
 
 import {
   fmt, monthly, sumSafe, fillSelect, setSelectValue, safeSetText,
@@ -24,16 +24,16 @@ import {
    Provider label maps (centralized)
    ======================================================================== */
 const PROVIDER_LABELS = {
-  aws:   { price: 'EC2 Price/hr',             monthly: 'EC2 Monthly' },
+  aws:    { price: 'EC2 Price/hr',             monthly: 'EC2 Monthly' },
   azure: { price: 'VM Price/hr',              monthly: 'VM Monthly' },
-  gcp:   { price: 'Compute Engine Price/hr', monthly: 'Compute Engine Monthly' },
-  oci:   { price: 'Compute Price/hr',         monthly: 'Compute Monthly' }
+  gcp:    { price: 'Compute Engine Price/hr', monthly: 'Compute Engine Monthly' },
+  oci:    { price: 'Compute Price/hr',         monthly: 'Compute Monthly' }
 };
 const STORAGE_LABELS = {
-  aws:   { hr: 'EBS Price/hr',               monthly: 'EBS Monthly' },
+  aws:    { hr: 'EBS Price/hr',                monthly: 'EBS Monthly' },
   azure: { hr: 'Azure Disk Price/hr',       monthly: 'Azure Disk Monthly' },
-  gcp:   { hr: 'Persistent Disk Price/hr',  monthly: 'Persistent Disk Monthly' },
-  oci:   { hr: 'Block Volume Price/hr',     monthly: 'Block Volume Monthly' },
+  gcp:    { hr: 'Persistent Disk Price/hr',  monthly: 'Persistent Disk Monthly' },
+  oci:    { hr: 'Block Volume Price/hr',     monthly: 'Block Volume Monthly' },
 };
 
 /* ========================================================================
@@ -270,6 +270,35 @@ async function downloadResultsAsPdf() {
 
     const clone = grid.cloneNode(true);
 
+    // --- Replace <select> controls in the CLONE with styled text snapshots ---
+    (function snapshotSelects(root) {
+      const all = root.querySelectorAll("select");
+      all.forEach(sel => {
+        const txt = sel.options?.[sel.selectedIndex]?.text ?? sel.value ?? "";
+        const approxWidth = Math.max(120, sel.getBoundingClientRect()?.width || sel.offsetWidth || 140);
+        const span = document.createElement("span");
+        span.className = "cc-select-snapshot";
+        span.textContent = txt;
+        span.style.display = "inline-block";
+        span.style.minWidth = approxWidth + "px";
+        span.style.height = "30px";
+        span.style.lineHeight = "28px";
+        span.style.padding = "0 8px";
+        span.style.border = "1px solid #999";
+        span.style.borderRadius = "4px";
+        span.style.background = "#fff";
+        span.style.color = "#111";
+        span.style.fontSize = "12px";
+        span.style.whiteSpace = "nowrap";
+        span.style.overflow = "hidden";
+        span.style.textOverflow = "ellipsis";
+        span.style.verticalAlign = "middle";
+        sel.replaceWith(span);
+      });
+    })(clone);
+
+    wrapper.appendChild(clone);
+
     // Strip <img> to avoid CORS/tainted canvas
     clone.querySelectorAll("img").forEach(img => {
       const ph = document.createElement("span");
@@ -279,9 +308,6 @@ async function downloadResultsAsPdf() {
       ph.className = "no-export-img";
       img.replaceWith(ph);
     });
-
-    // Add clone first
-    wrapper.appendChild(clone);
 
     // Aggressive override: remove ANY gradient/background images including pseudo elements
     const styleOverride = document.createElement("style");
@@ -294,12 +320,33 @@ async function downloadResultsAsPdf() {
         background-clip: initial !important;
         box-shadow: none !important;
       }
+      
+      /* Align "Family"/"Processor" rows cleanly in export clone */
+      .family-filter,
+      .panel .label-with-info {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 8px !important;
+        margin: 6px 0 !important;
+      }
+      .family-filter label,
+      .panel .label-with-info label {
+        flex: 0 0 80px !important;
+        font-weight: 700 !important;
+        margin: 0 !important;
+      }
+
+      /* Snapshot spans look like compact inputs */
+      .cc-select-snapshot {
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif !important;
+      }
     `;
     wrapper.appendChild(styleOverride);
 
     document.body.appendChild(wrapper);
 
-    // Also inline-clear any inline/background from elements in the cloned subtree
+    // Inline-clear background properties from elements in the cloned subtree
     try {
       wrapper.querySelectorAll('.results, .results *').forEach(el => {
         el.style.background = 'transparent';
@@ -382,13 +429,13 @@ async function downloadResultsAsPdf() {
 
     document.body.removeChild(wrapper);
 
-    // IMPROVEMENT: Better file name (timestamp + inputs)
+    // Better file name (timestamp + inputs)
     const os = document.getElementById("os")?.value || "OS";
     const v  = document.getElementById("cpu")?.value || "";
     const m  = document.getElementById("ram")?.value || "";
     const st = document.getElementById("storageType")?.value || "";
     const sg = document.getElementById("storageAmt")?.value || "";
-    const ts = new Date().toISOString().replace(/[:.]/g, "-"); // YYYY-MM-DDTHH-MM-SSZ
+    const ts = new Date().toISOString().replace(/[:.]/g, "-"); 
 
     try {
       pdf.save(`cloud-compare_${os}_${v}vCPU_${m}GB_${sg}GB-${st}_${ts}.pdf`);
@@ -400,7 +447,6 @@ async function downloadResultsAsPdf() {
   }
 }
 
-
 /* ========================================================================
    MAIN compare()
    ======================================================================== */
@@ -409,7 +455,6 @@ export async function compare(resetFamilies = false) {
   if (btn) btn.disabled = true;
   setStatus("Fetching local prices…");
 
-  // Disable Export while computing to avoid stale exports
   const dlBtn1 = document.getElementById("downloadPdfBtn");
   if (dlBtn1) dlBtn1.disabled = true;
 
@@ -446,10 +491,8 @@ export async function compare(resetFamilies = false) {
 
   try {
     resetCards();
-
     const data = await loadPricesAndMeta();
 
-    // Build info
     try {
       const info = await loadBuildInfo();
       const counts = {
@@ -474,7 +517,6 @@ export async function compare(resetFamilies = false) {
     const azList  = filterOutArmForWindows(data.azure ?? [], "azure", os);
     const gcpList = filterOutArmForWindows(data.gcp ?? [], "gcp", os);
 
-    /* ---------------- AWS ---------------- */
     let awsCard;
     try {
       const a = findBestAws(awsList, vcpu, ram, os, familyAws);
@@ -486,7 +528,6 @@ export async function compare(resetFamilies = false) {
       awsCard = { error: e.message };
     }
 
-    /* ---------------- Azure ---------------- */
     let azCard;
     try {
       const z = findBestAzure(azList, vcpu, ram, os, familyAz);
@@ -504,7 +545,6 @@ export async function compare(resetFamilies = false) {
       azCard = { error: e.message };
     }
 
-    /* ---------------- GCP ---------------- */
     let gcpCard;
     try {
       const g = findBestGcp(gcpList, vcpu, ram, os, familyGcp);
@@ -516,14 +556,13 @@ export async function compare(resetFamilies = false) {
       gcpCard = { error: e.message };
     }
 
-    /* ---------------- OCI ---------------- */
     let ociCard;
     try {
       if (String(os).toLowerCase() === "rhel") {
         ociCard = {
           disabled: true,
           pricePerHourUSD: null,
-          message: "OCI does not provide a pre-built RHEL platform image. Use BYOL / BYOS (bring your own license/subscription)."
+          message: "OCI does not provide a pre-built RHEL platform image. Use BYOL / BYOS."
         };
       } else {
         const comp = data.oci;
@@ -532,9 +571,7 @@ export async function compare(resetFamilies = false) {
         const opts = latest ? { processor: ociProcessor, generation: latest } : { processor: ociProcessor };
         const o = findBestOci(comp, vcpu, ram, os, opts);
         ociCard = o ? {
-          instance: o.instance,
-          vcpu: o.vcpu,
-          ram:  o.ram,
+          instance: o.instance, vcpu: o.vcpu, ram: o.ram,
           pricePerHourUSD: o.pricePerHourUSD,
           region: STORAGE_CFG?.oci?.region ?? "—",
           breakdown: o.breakdown
@@ -544,14 +581,12 @@ export async function compare(resetFamilies = false) {
       ociCard = { error: e.message };
     }
 
-    /* ---------------- Storage labels ---------------- */
     const sLabel = `${storageAmtGB} GB ${storageType.toUpperCase()}`;
     safeSetText("awsStorageSel", `Storage: ${sLabel}`);
     safeSetText("azStorageSel",  `Storage: ${sLabel}`);
     safeSetText("gcpStorageSel", `Storage: ${sLabel}`);
     safeSetText("ociStorageSel", `Storage: ${sLabel}`);
 
-    /* ---------------- Storage costs ---------------- */
     let awsStorageMonthly = getAwsStorageMonthly(storageType, storageAmtGB);
     let awsStorageHr = awsStorageMonthly / HRS_PER_MONTH;
 
@@ -577,7 +612,6 @@ export async function compare(resetFamilies = false) {
     safeSetText("ociStoragePriceHrLabel",  `${STORAGE_LABELS.oci.hr}:`);
     safeSetText("ociStorageMonthlyLabel",  `≈ ${STORAGE_LABELS.oci.monthly}:`);
 
-    /* ---------------- Render AWS card ---------------- */
     if (!awsCard || awsCard.error) {
       safeSetText("awsInstance", `<strong>Recommended Instance:</strong> Error: ${awsCard?.error ?? "No match"}`, { html: true });
     } else {
@@ -588,30 +622,18 @@ export async function compare(resetFamilies = false) {
       safeSetText("awsMonthly", `≈ ${PROVIDER_LABELS.aws.monthly}: ${fmt(monthly(awsCard.pricePerHourUSD))}`);
     }
 
-    /* ---------------- Render Azure card ---------------- */
     if (!azCard || azCard.error) {
-      safeSetText(
-        "azInstance",
-        `<strong>Recommended VM Size:</strong> Error: ${azCard?.error ?? "No match"}`,
-        { html: true }
-      );
+      safeSetText("azInstance", `<strong>Recommended VM Size:</strong> Error: ${azCard?.error ?? "No match"}`, { html: true });
     } else {
       const azDisplay = azCard.displayInstance ?? azCard.instance;
-      const seriesHtml = azCard.seriesName
-        ? ` <span class="badge-series" title="Azure series">${azCard.seriesName}</span>`
-        : "";
-      safeSetText(
-        "azInstance",
-        `<strong>Recommended VM Size:</strong> ${azDisplay} (${azCard.region})${seriesHtml}`,
-        { html: true }
-      );
+      const seriesHtml = azCard.seriesName ? ` <span class="badge-series">${azCard.seriesName}</span>` : "";
+      safeSetText("azInstance", `<strong>Recommended VM Size:</strong> ${azDisplay} (${azCard.region})${seriesHtml}`, { html: true });
       safeSetText("azCpu", `vCPU: ${azCard.vcpu}`);
       safeSetText("azRam", `RAM: ${azCard.ram} GB`);
       safeSetText("azPrice", `${PROVIDER_LABELS.azure.price}: ${fmt(azCard.pricePerHourUSD)}`);
       safeSetText("azMonthly", `≈ ${PROVIDER_LABELS.azure.monthly}: ${fmt(monthly(azCard.pricePerHourUSD))}`);
     }
 
-    /* ---------------- Render GCP card ---------------- */
     if (!gcpCard || gcpCard.error) {
       safeSetText("gcpInstance", `<strong>Recommended Machine:</strong> Error: ${gcpCard?.error ?? "No match"}`, { html: true });
     } else {
@@ -622,7 +644,6 @@ export async function compare(resetFamilies = false) {
       safeSetText("gcpMonthly", `≈ ${PROVIDER_LABELS.gcp.monthly}: ${fmt(monthly(gcpCard.pricePerHourUSD))}`);
     }
 
-    /* ---------------- Render OCI card ---------------- */
     const ociNoticeEl = document.getElementById("ociRhelNotice");
     const ociRhelLineEl = document.getElementById("ociRhelLine");
     const ociPanelEl = document.querySelector(".panel--oci");
@@ -633,7 +654,7 @@ export async function compare(resetFamilies = false) {
       safeSetText("ociRam", `RAM: —`);
       safeSetText("ociPrice", `${PROVIDER_LABELS.oci.price}: —`);
       safeSetText("ociMonthly", `≈ ${PROVIDER_LABELS.oci.monthly}: —`);
-      if (ociNoticeEl) { ociNoticeEl.hidden = true; }
+      if (ociNoticeEl) ociNoticeEl.hidden = true;
       if (ociRhelLineEl) { ociRhelLineEl.textContent = ""; ociRhelLineEl.setAttribute("aria-hidden","true"); }
       if (ociPanelEl) ociPanelEl.classList.remove("panel--disabled");
     } else if (ociCard.disabled) {
@@ -645,9 +666,7 @@ export async function compare(resetFamilies = false) {
       if (ociNoticeEl) {
         ociNoticeEl.textContent = ociCard.message + " ";
         const link = document.getElementById("ociRhelLearnMore");
-        if (link) {
-          ociNoticeEl.appendChild(link);
-        }
+        if (link) ociNoticeEl.appendChild(link);
         ociNoticeEl.hidden = false;
         try { ociNoticeEl.focus(); } catch (_) {}
       }
@@ -671,7 +690,6 @@ export async function compare(resetFamilies = false) {
       }
     }
 
-    /* ---------------- Storage cost render ---------------- */
     safeSetText("awsStoragePriceHr", fmt(awsStorageHr));
     safeSetText("awsStorageMonthly", fmt(awsStorageMonthly));
     safeSetText("azStoragePriceHr", fmt(azStorageHr));
@@ -687,7 +705,6 @@ export async function compare(resetFamilies = false) {
       appendToText("azStorageSel", extra);
     }
 
-    /* ---------------- Totals ---------------- */
     const awsTotalHr = sumSafe(awsCard?.pricePerHourUSD, awsStorageHr);
     const azTotalHr  = sumSafe(azCard?.pricePerHourUSD,  azStorageHr);
     const gcpTotalHr = sumSafe(gcpCard?.pricePerHourUSD, gcpStorageHr);
@@ -705,7 +722,6 @@ export async function compare(resetFamilies = false) {
     showFamilyFilters();
     setStatus("Comparison complete ✓");
 
-    // Enable Export on success
     const dlBtn2 = document.getElementById("downloadPdfBtn");
     if (dlBtn2) dlBtn2.disabled = false;
 
@@ -713,11 +729,8 @@ export async function compare(resetFamilies = false) {
     console.error(err);
     setStatus(`Error: ${err.message}`, "error");
     alert("Unable to read local prices. Please try again.");
-
-    // Keep Export disabled on error
     const dlBtnErr = document.getElementById("downloadPdfBtn");
     if (dlBtnErr) dlBtnErr.disabled = true;
-
   } finally {
     const btn2 = document.getElementById("compareBtn");
     if (btn2) btn2.disabled = false;
@@ -726,18 +739,15 @@ export async function compare(resetFamilies = false) {
 window.compare = compare;
 
 /* ========================================================================
-   BOOTSTRAP: controls, tooltips, listeners
+   BOOTSTRAP
    ======================================================================== */
 async function bootstrap() {
   try {
     await hydrateControlsFromMeta();
-
-    // Ensure OCI RHEL notice is hidden on boot and whenever OS changes
     const osEl = document.getElementById("os");
     const ociNoticeInit = document.getElementById("ociRhelNotice");
     if (ociNoticeInit) ociNoticeInit.hidden = true;
 
-    // IMPROVEMENT: Keep Export disabled when filters change
     [
       "os", "cpu", "ram", "storageType", "storageAmt",
       "awsFamily","azFamily","gcpFamily","ociProcessor"
@@ -746,16 +756,12 @@ async function bootstrap() {
       if (!el) return;
       el.addEventListener("change", () => {
         const dl = document.getElementById("downloadPdfBtn");
-        if (dl) dl.disabled = true; // force re-compare before export
-        
-        // Existing logic for OS changes
+        if (dl) dl.disabled = true;
         if (id === "os") {
           sanitizeFamiliesForWindows(el.value);
           const ociNotice = document.getElementById("ociRhelNotice");
           if (ociNotice) ociNotice.hidden = true;
         }
-
-        // Auto-run compare for family filters
         if (["awsFamily","azFamily","gcpFamily","ociProcessor"].includes(id)) {
           compare(false);
         }
@@ -772,7 +778,6 @@ async function bootstrap() {
       btn.setAttribute("data-bound", "1");
     }
 
-    // Bind Export PDF button (start disabled; enabled after compare)
     const dlBtn = document.getElementById("downloadPdfBtn");
     if (dlBtn && !dlBtn.getAttribute("data-bound-pdf")) {
       dlBtn.addEventListener("click", () => downloadResultsAsPdf());
@@ -793,6 +798,3 @@ if (document.readyState === "loading") {
 } else {
   bootstrap();
 }
-console.log("[script.js] module loaded from", import.meta.url);
-window.addEventListener("error", e => console.error("[GlobalError]", e.message, e.filename ?? "", e.lineno ?? ""));
-window.addEventListener("unhandledrejection", e => console.error("[PromiseRejection]", e.reason));
