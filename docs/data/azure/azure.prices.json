@@ -23905,10 +23905,10 @@
       "category": "general"
     },
     {
-      "instance": "standard_msmv2medmem_type1",
-      "displayInstance": "Standard MSMV2medmem",
-      "series": "MSMV-medmem",
-      "seriesName": "MSMVmedmem-series",
+      "instance": "standard_mmsv2medmem-type1",
+      "displayInstance": "Standard Mmsv2medmem-type1",
+      "series": null,
+      "seriesName": null,
       "pricePerHourUSD": 28.896,
       "region": "eastus",
       "os": "Linux",
