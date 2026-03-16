@@ -105,12 +105,11 @@ async function fetchGcpPrices() {
     if (cat.usageType && !/OnDemand/i.test(cat.usageType)) continue; // On‑demand only
     if (!regionMatches(sku.serviceRegions, REGION)) continue;
 
-    const mt = inferMachineType(sku);
+    const mt = inferMachineType(sku); // hyphenated predefined type or null
     if (!mt) continue;                   // includes exclusion of custom
     if (!isPerInstanceSku(sku, mt)) continue;
 
-    const instTok = mt.replace(/-/g, "_").toUpperCase();
-    const fam = classifyGcpInstance(instTok);
+    const fam = classifyGcpInstance(mt); // hyphen-native classification
     if (!fam) continue;
 
     const readable = (sku.description || sku.displayName || "");
@@ -141,20 +140,14 @@ async function fetchGcpPrices() {
   }
 
   // 3) Fallback: compose Linux prices using CPU/RAM unit rates + machineTypes.list
+  // Determine which Linux families are missing from the per-instance pass.
   const entries = Object.values(gcp_price_list).filter(v => v.os === "Linux");
-  const haveLinuxGeneral = entries.some(v => {
-    const tok = v.machine_type.replace(/-/g, "_").toUpperCase();
-    return classifyGcpInstance(tok) === "general";
-  });
-  const haveLinuxCompute = entries.some(v => {
-    const tok = v.machine_type.replace(/-/g, "_").toUpperCase();
-    return classifyGcpInstance(tok) === "compute";
-  });
-  const haveLinuxMemory = entries.some(v => {
-    const tok = v.machine_type.replace(/-/g, "_").toUpperCase();
-    return classifyGcpInstance(tok) === "memory";
-  });
+  const haveLinuxGeneral = entries.some(v => classifyGcpInstance(v.machine_type) === "general");
+  const haveLinuxCompute = entries.some(v => classifyGcpInstance(v.machine_type) === "compute");
+  const haveLinuxMemory  = entries.some(v => classifyGcpInstance(v.machine_type) === "memory");
 
+  // If per-instance produced nothing, compose ALL families.
+  // Else compose only the families that are missing.
   const composeGeneral = FORCE_COMPOSE || (entries.length === 0 ? true : !haveLinuxGeneral);
   const composeCompute = FORCE_COMPOSE || (entries.length === 0 ? true : !haveLinuxCompute);
   const composeMemory  = FORCE_COMPOSE || (entries.length === 0 ? true : !haveLinuxMemory);
@@ -187,13 +180,13 @@ async function fetchGcpPrices() {
       }
 
       for (const [mt, hw] of mtMap.entries()) {
-        const instTok = mt.replace(/-/g, "_").toUpperCase();
-        const fam = classifyGcpInstance(instTok);
+        const fam = classifyGcpInstance(mt); // hyphen-native classification
         if (!fam) continue;
         if (fam === "general" && !composeGeneral) continue;
         if (fam === "compute" && !composeCompute) continue;
         if (fam === "memory"  && !composeMemory)  continue;
 
+        // series = token before first dash (e.g., 'n2', 'c3d', 'm2')
         const series = mt.split("-")[0];
         const rates  = linuxSeriesRates[series];
         if (!rates || !rates.core || !rates.ram) continue;
@@ -218,6 +211,7 @@ async function fetchGcpPrices() {
   // 4) Synthesize Windows rows from Linux base + per-vCPU Windows license (x86 only)
   if (windowsCoreRate) {
     const linuxEntries = Object.values(gcp_price_list).filter(v => v.os === "Linux");
+    // map of existing per-instance Windows rows (avoid adding duplicate synthesized if desired)
     const existingWindows = new Set(
       Object.values(gcp_price_list)
         .filter(v => v.os === "Windows")
@@ -226,8 +220,10 @@ async function fetchGcpPrices() {
 
     let added = 0;
     for (const base of linuxEntries) {
+      // Skip Arm machine types entirely for Windows (e.g., t2a-*, c4a-*, n4a-*, a4x-*)
       if (isGcpArmMachineType(base.machine_type)) continue;
 
+      // If a Catalog Windows row already exists for the same mt+region, you can skip synthesis
       const winKey = `${base.machine_type}__${base.region}`;
       if (existingWindows.has(winKey)) continue;
 
@@ -283,10 +279,8 @@ async function main() {
 
     // JSON should expose human/hyphenated name like "c4-highcpu-2"
     const instance = String(item.machine_type);
-    // Internal key stays underscored for stable classification/dedupe
-    const instanceKey = instance.replace(/-/g, "_");
 
-    const category = classifyGcpInstance(instanceKey);
+    const category = classifyGcpInstance(instance); // hyphen-native
     if (!category) continue;
 
     const os = item.os && item.os.toLowerCase().includes("win") ? "Windows" : "Linux";
@@ -304,7 +298,6 @@ async function main() {
 
     rows.push({
       instance,        // hyphenated (for display/consumers)
-      instanceKey,     // underscored (for internal logic)
       category,
       vcpu,
       ram,
@@ -319,8 +312,7 @@ async function main() {
 
   const cheapest = dedupeCheapestByKey(
     rows,
-    // keep stability: use the internal key for uniqueness
-    r => `${r.instanceKey}-${r.region}-${r.os}`
+    r => `${r.instance}-${r.region}-${r.os}`
   );
 
   // Quick category counts (nice for logs)
