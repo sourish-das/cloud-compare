@@ -343,8 +343,9 @@ async function main() {
   // Storage (public list prices converted to hourly in UI)
   const storage = {
     region: REGION,
-    ssd_per_gb_month: 0.17,
-    hdd_per_gb_month: 0.04
+    ssd_per_gb_month: 0.10,  // Updated: Zonal PD Balanced SSD (general-purpose)
+    hdd_per_gb_month: 0.04,  // Zonal Standard PD (HDD)
+    hdd_free_gb_per_month: 30 // Apply once per estimate for HDD totals
   };
 
   const out = { meta, compute: cheapest, storage };
