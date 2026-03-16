@@ -141,7 +141,6 @@ async function fetchGcpPrices() {
   }
 
   // 3) Fallback: compose Linux prices using CPU/RAM unit rates + machineTypes.list
-  // Determine which Linux families are missing from the per-instance pass.
   const entries = Object.values(gcp_price_list).filter(v => v.os === "Linux");
   const haveLinuxGeneral = entries.some(v => {
     const tok = v.machine_type.replace(/-/g, "_").toUpperCase();
@@ -156,8 +155,6 @@ async function fetchGcpPrices() {
     return classifyGcpInstance(tok) === "memory";
   });
 
-  // If per-instance produced nothing, compose ALL families.
-  // Else compose only the families that are missing.
   const composeGeneral = FORCE_COMPOSE || (entries.length === 0 ? true : !haveLinuxGeneral);
   const composeCompute = FORCE_COMPOSE || (entries.length === 0 ? true : !haveLinuxCompute);
   const composeMemory  = FORCE_COMPOSE || (entries.length === 0 ? true : !haveLinuxMemory);
@@ -197,7 +194,6 @@ async function fetchGcpPrices() {
         if (fam === "compute" && !composeCompute) continue;
         if (fam === "memory"  && !composeMemory)  continue;
 
-        // series = token before first dash (e.g., 'n2', 'c3d', 'm2')
         const series = mt.split("-")[0];
         const rates  = linuxSeriesRates[series];
         if (!rates || !rates.core || !rates.ram) continue;
@@ -222,7 +218,6 @@ async function fetchGcpPrices() {
   // 4) Synthesize Windows rows from Linux base + per-vCPU Windows license (x86 only)
   if (windowsCoreRate) {
     const linuxEntries = Object.values(gcp_price_list).filter(v => v.os === "Linux");
-    // map of existing per-instance Windows rows (avoid adding duplicate synthesized if desired)
     const existingWindows = new Set(
       Object.values(gcp_price_list)
         .filter(v => v.os === "Windows")
@@ -231,10 +226,8 @@ async function fetchGcpPrices() {
 
     let added = 0;
     for (const base of linuxEntries) {
-      // Skip Arm machine types entirely for Windows (e.g., t2a-*, c4a-*, n4a-*, a4x-*)
       if (isGcpArmMachineType(base.machine_type)) continue;
 
-      // If a Catalog Windows row already exists for the same mt+region, you can skip synthesis
       const winKey = `${base.machine_type}__${base.region}`;
       if (existingWindows.has(winKey)) continue;
 
@@ -288,8 +281,12 @@ async function main() {
     if (!item.region || item.region !== REGION) continue;
     if (!item.machine_type) continue;
 
-    const instance = item.machine_type.replace(/-/g, "_");
-    const category = classifyGcpInstance(instance);
+    // JSON should expose human/hyphenated name like "c4-highcpu-2"
+    const instance = String(item.machine_type);
+    // Internal key stays underscored for stable classification/dedupe
+    const instanceKey = instance.replace(/-/g, "_");
+
+    const category = classifyGcpInstance(instanceKey);
     if (!category) continue;
 
     const os = item.os && item.os.toLowerCase().includes("win") ? "Windows" : "Linux";
@@ -306,7 +303,8 @@ async function main() {
     const source = item.__src || "catalog";
 
     rows.push({
-      instance,
+      instance,        // hyphenated (for display/consumers)
+      instanceKey,     // underscored (for internal logic)
       category,
       vcpu,
       ram,
@@ -321,7 +319,8 @@ async function main() {
 
   const cheapest = dedupeCheapestByKey(
     rows,
-    r => `${r.instance}-${r.region}-${r.os}`
+    // keep stability: use the internal key for uniqueness
+    r => `${r.instanceKey}-${r.region}-${r.os}`
   );
 
   // Quick category counts (nice for logs)
@@ -343,9 +342,9 @@ async function main() {
   // Storage (public list prices converted to hourly in UI)
   const storage = {
     region: REGION,
-    ssd_per_gb_month: 0.10,  // Updated: Zonal PD Balanced SSD (general-purpose)
-    hdd_per_gb_month: 0.04,  // Zonal Standard PD (HDD)
-    hdd_free_gb_per_month: 30 // Apply once per estimate for HDD totals
+    ssd_per_gb_month: 0.10,   // Zonal PD Balanced SSD (general-purpose)
+    hdd_per_gb_month: 0.04,   // Zonal Standard PD (HDD)
+    hdd_free_gb_per_month: 30 // Apply once per estimate for HDD totals (handle in UI calc)
   };
 
   const out = { meta, compute: cheapest, storage };
