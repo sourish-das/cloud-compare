@@ -1,106 +1,565 @@
+:root{
+  --bg:#f5f5f5;
+  --panel:#fff;
+  --shadow:0 0 6px rgba(0,0,0,.08);
+  --text:#222;
+  --muted:#666;
+  --primary:#0060df;
+  --total:#0a7a34;
+}
+
+/* === Google logo-inspired provider accents (override defaults) === */
 :root {
-  --bg: #f5f5f5;
-  --panel: #fff;
-  --shadow: 0 0 6px rgba(0,0,0,.08);
-  --text: #222;
-  --muted: #666;
-  --primary: #0060df;
-  --total: #0a7a34;
-  --aws: #4285F4;
-  --azure: #EA4335;
-  --gcp: #FBBC05;
-  --oci: #34A853;
+  --aws:    #4285F4; /* Blue    */
+  --azure: #EA4335; /* Red     */
+  --gcp:    #FBBC05; /* Yellow  */
+  --oci:    #34A853; /* Green   */
 }
 
 * { box-sizing: border-box; }
 
-body {
-  margin: 0;
-  padding-top: 50px; /* Forces space from top of address bar */
-  font-family: system-ui, -apple-system, sans-serif;
-  color: var(--text);
-  background: var(--bg);
+html, body {
+  margin:0;
+  padding:0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color:var(--text);
+  background:var(--bg);
 }
 
-/* --- Header Spacing --- */
-.app-title { 
-  text-align: center; 
-  margin: 0 auto 40px !important; /* Forces 40px space below the title */
+h2 {
+  text-align:center;
+  margin:24px 0 12px;
 }
 
+/* ========================== HEADER: Soft color pill ========================== */
+.app-title {
+  font-weight: 700;
+  text-align: center;
+  margin: 24px auto 12px;
+  color: #111827;
+  line-height: 1.15;
+}
+
+/* Centered pill header */
 .app-title--pill {
-  display: inline-block; /* Changed from block to inline-block for better centering control */
-  padding: 12px 28px;
-  border-radius: 999px; 
-  border: 1px solid rgba(0,0,0,0.08); 
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  background: linear-gradient(90deg, 
-    color-mix(in srgb, var(--aws) 12%, white) 0%, color-mix(in srgb, var(--azure) 12%, white) 33%, 
-    color-mix(in srgb, var(--gcp) 12%, white) 66%, color-mix(in srgb, var(--oci) 12%, white) 100%);
+  display: block;              /* ensures perfect centering */
+  width: fit-content;          /* shrink to exact pill width */
+  margin-left: auto;           /* center horizontally */
+  margin-right: auto;          /* center horizontally */
+  padding: 8px 18px;
+  border-radius: 999px;
+
+  /* soft gradient pill using provider colors */
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--aws) 12%, white 88%) 0%,
+      color-mix(in srgb, var(--azure) 12%, white 88%) 33%,
+      color-mix(in srgb, var(--gcp) 12%, white 88%) 66%,
+      color-mix(in srgb, var(--oci) 12%, white 88%) 100%
+    );
+
+  border: 1px solid rgba(0,0,0,0.06);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
 }
 
-/* --- Filter Bar Spacing --- */
+/* Subtle underline accent */
+.app-title--pill::after {
+  content: "";
+  display: block;
+  width: 160px;
+  height: 3px;
+  margin: 8px auto 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--aws), var(--oci));
+  opacity: 0.22;
+}
+
+/* ======================================================
+   FILTER BAR — STABLE
+   ====================================================== */
 .filters { 
-  background: var(--panel); 
-  margin: 0 auto 50px !important; /* Increased to 50px to ensure gap above cards */
-  padding: 24px; 
-  max-width: 1200px; 
-  border-radius: 8px; 
-  box-shadow: var(--shadow); 
+  background:var(--panel); 
+  margin:0 auto 20px; 
+  padding:16px; 
+  max-width:1200px;
+  border-radius:8px; 
+  box-shadow:var(--shadow); 
 }
 
-.filters .row { display: grid; grid-template-columns: auto repeat(4, 160px) 200px; gap: 12px; align-items: end; }
-
-/* --- Fixed Circle "i" Button --- */
-.info-btn { 
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px !important; 
-  height: 16px !important; 
-  min-width: 16px !important; /* Prevents horizontal squishing */
-  min-height: 16px !important; /* Prevents vertical squishing */
-  
-  border-radius: 50% !important; 
-  border: 1px solid #2563eb; 
-  background: #fff; 
-  color: #2563eb; 
-  font-size: 10px; 
-  font-weight: bold;
-  line-height: 1; 
-  cursor: pointer;
-  margin-left: 4px;
-  vertical-align: middle;
+/* Base grid – overridden by “equal widths” block below */
+.filters .row {
+  display:grid;
+  grid-template-columns: repeat(5, 1fr) auto;
+  gap:12px;
+  align-items:end;
 }
 
-/* --- Inputs & Results --- */
-.filters select, .filters .btn-eq { height: 42px; }
+.filters .row > div {
+  display:flex;
+  flex-direction:column;
+  width:100%;
+  min-width:0;
+}
+
+/* ======================================================
+   LABELS
+   ====================================================== */
+label,
+.label-with-info {
+  font-weight:600;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  line-height:1;
+  margin-bottom:6px;
+}
+
+/* ======================================================
+   INPUTS & BUTTONS
+   ====================================================== */
+.filters select,
+.filters button:not(.info-btn) {
+  height:40px;
+  padding:0 10px;
+}
+
+/* FIXED: Modernized select for high-quality PDF export */
 .filters select {
-  appearance: none; border: 1px solid #ccc; border-radius: 6px; padding: 0 32px 0 10px; cursor: pointer; 
-  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23666'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E") no-repeat right 10px center / 16px;
+  width:100%;
+  border:1px solid #ccc;
+  border-radius:6px;
+  background:#fff;
+  
+  /* Remove native browser styling */
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  /* Custom SVG arrow (vector-based for PDF crispness) */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23666666'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+  padding-right: 32px; /* space for arrow */
+  cursor: pointer;
 }
 
-.btn-row { display: inline-flex; gap: 8px; width: 100%; }
+.filters select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(0, 96, 223, 0.1);
+}
+
 button {
-  padding: 0 16px; border-radius: 6px; color: #fff; border: 1px solid #1c50bd; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: filter 0.2s;
+  padding:0 16px;
+  border-radius:6px;
+  background:var(--primary);
+  color:#fff;
+  border:none;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  white-space:nowrap;
+}
+
+/* Primary button polish (modern gradient) */
+button {
   background: linear-gradient(180deg, #2b79ff 0%, #1e5bd6 100%);
+  border: 1px solid #1c50bd;
+}
+button:hover:not(:disabled) { filter: brightness(1.03); }
+button:active:not(:disabled) { transform: translateY(1px); }
+
+button:disabled {
+  background:#9fbef2;
+  cursor:not-allowed;
 }
 
-.results { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; max-width: 1200px; margin: 0 auto 60px; }
-.panel { background: var(--panel); padding: 18px; border-radius: 8px; box-shadow: var(--shadow); min-height: 340px; }
+.status {
+  margin-top:10px;
+  font-size:14px;
+  color:var(--muted);
+}
 
-.panel h3 { margin: 0 0 12px; display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 1.1rem; }
-.panel--aws { border-top: 4px solid var(--aws); } .panel--aws h3 { color: var(--aws); }
-.panel--azure { border-top: 4px solid var(--azure); } .panel--azure h3 { color: var(--azure); }
-.panel--gcp { border-top: 4px solid var(--gcp); } .panel--gcp h3 { color: #C49000; }
-.panel--oci { border-top: 4px solid var(--oci); } .panel--oci h3 { color: var(--oci); }
+/* ======================================================
+   RESULTS GRID
+   ====================================================== */
+.results {
+  display:grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap:16px;
+  max-width:1200px;
+  margin:0 auto 40px;
+}
 
-.total { font-weight: 700; border-top: 1px dashed #e5e7eb; padding-top: 10px; margin-top: 10px; color: var(--total); }
+@media (min-width: 1200px) {
+  .results { gap: 22px; }
+}
 
+.panel {
+  background:var(--panel);
+  padding:14px;
+  border-radius:8px;
+  box-shadow:var(--shadow);
+  min-height:340px; 
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+
+.panel:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,.10);
+}
+
+.panel h3 { margin:0 0 10px; }
+.panel p { margin:6px 0; }
+.panel p.muted { color: var(--muted); }
+
+.split {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:0.95rem;
+  margin:5px 0;
+}
+
+.split .label { color:#333; white-space: nowrap; }
+.split span:last-child { white-space: nowrap; }
+
+.total .label { font-weight:700; }
+.total span:last-child { font-weight:700; color:var(--total); }
+
+.divider {
+  border:0;
+  border-top:1px dashed #e5e7eb;
+  margin:8px 0;
+}
+
+/* ======================================================
+   PROVIDER ACCENTS
+   ====================================================== */
+.panel--aws   { border-top: 4px solid var(--aws); }
+.panel--azure { border-top: 4px solid var(--azure); }
+.panel--gcp   { border-top: 4px solid var(--gcp); }
+.panel--oci   { border-top: 4px solid var(--oci); }
+
+.panel--aws   h3 { color: var(--aws); }
+.panel--azure h3 { color: var(--azure); }
+.panel--oci   h3 { color: var(--oci); }
+
+.panel--gcp h3 {
+  color: #C49000;
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, rgba(251,188,5,0.08), rgba(251,188,5,0.00));
+}
+
+.panel--aws h3,
+.panel--azure h3,
+.panel--oci h3 {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: transparent;
+}
+
+/* ==========================
+   Azure/GLOBAL: series badge
+   ========================== */
+.badge-series {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 6px;
+  font-size: 12px;
+  line-height: 16px;
+  border-radius: 4px;
+  background: #eef3ff;
+  color: #1f4fe0;
+  border: 1px solid #d6e0ff;
+  white-space: nowrap;
+}
+
+/* ======================================================
+   FAMILY FILTERS
+   ====================================================== */
+.family-filter {
+  display:flex;
+  gap:8px;
+  align-items:center;
+  margin:6px 0 8px;
+}
+
+.family-filter select {
+  min-width:160px;
+}
+
+/* ======================================================
+   INFO BUTTON
+   ====================================================== */
+.info-btn {
+  width:12px;
+  height:12px;
+  min-width:12px;
+  min-height:12px;
+  padding:0;
+  margin-left:4px;
+  line-height:12px;
+  font-size:8px;
+  font-weight:600;
+  border-radius:50%;
+  border:1px solid #2563eb;
+  background:#fff;
+  color:#2563eb;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  box-sizing:border-box;
+}
+
+.info-btn,
+.info-btn:focus,
+.info-btn:active {
+  outline:none;
+  box-shadow:none;
+}
+
+.filters .label-with-info .info-btn {
+  width:12px;
+  height:12px;
+  min-width:12px;
+  min-height:12px;
+  padding:0;
+  margin-left:4px;
+  line-height:12px;
+  font-size:8px;
+  vertical-align:middle;
+}
+
+/* ======================================================
+   TOOLTIP PANEL
+   ====================================================== */
+.info-pop {
+  position:absolute;
+  margin-top:6px;
+  z-index:1000;
+  min-width:280px;
+  max-width:360px;
+  padding:12px 14px;
+  border-radius:4px;
+  background:#2b2b2b;
+  color:#fff;
+  box-shadow:0 8px 20px rgba(0,0,0,.18);
+  font-size:14px;
+  line-height:1.35;
+  display:none;
+}
+
+.info-pop[aria-hidden="false"] { display:block; }
+
+.info-pop__arrow {
+  position:absolute;
+  top:-6px;
+  left:12px;
+  width:12px;
+  height:12px;
+  background:#2b2b2b;
+  transform:rotate(45deg);
+}
+
+/* ======================================================
+   OCI INFO MODAL VARIANT
+   ====================================================== */
+.info-pop--modal {
+  position: fixed;
+  inset: 0;
+  display: none; 
+  place-items: center;
+  background: rgba(0,0,0,0.35);
+  padding: 20px;
+  z-index: 2000;
+}
+
+.info-pop--modal[aria-hidden="false"] {
+  display: grid;
+}
+
+.info-pop--modal .info-pop__content {
+  background: #fff;
+  color: var(--text);
+  width: min(680px, 90vw);
+  max-height: 80vh;
+  overflow: auto;
+  border-radius: 10px;
+  padding: 20px 24px;
+  box-shadow: 0 14px 40px rgba(0,0,0,0.25);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.info-pop--modal .info-pop__arrow {
+  display: none !important;
+}
+
+.info-pop__close {
+  float: right;
+  border: none;
+  background: transparent;
+  font-size: 20px;
+  color: #777;
+  cursor: pointer;
+}
+
+.info-pop__close:hover {
+  color: #222;
+}
+
+/* ======================================================
+   OCI TITLE ALIGNMENT
+   ====================================================== */
+h3.inline-flex {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ======================================================
+   DISABLED OPTION STYLE
+   ====================================================== */
+select option[disabled] {
+  color: #aaa;
+}
+
+/* ======================================================
+   RHEL ON OCI NOTICE
+   ====================================================== */
+.oci-rhel-notice {
+  background: #fff4f4;
+  border: 1px solid #f5c2c2;
+  color: #7a1f1f;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 0.92rem;
+  margin-bottom: 10px;
+  line-height:1.25;
+  display: none;
+}
+
+.oci-rhel-notice:not([hidden]) {
+  display: block;
+}
+
+.oci-rhel-notice a {
+  color: #7a1f1f;
+  text-decoration: underline;
+}
+.oci-rhel-notice a:focus,
+.oci-rhel-notice a:hover {
+  text-decoration: none;
+  outline: 2px solid rgba(122,31,31,0.12);
+  border-radius: 4px;
+}
+
+.panel--disabled {
+  opacity: 0.65;
+  pointer-events: none;
+  filter: grayscale(.06);
+  background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.96));
+  position: relative;
+}
+
+.panel--disabled::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.0), rgba(255,255,255,0.0));
+  pointer-events: none;
+}
+
+.oci-rhel-line {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-top: 6px;
+}
+
+.oci-rhel-notice:focus {
+  outline: 3px solid rgba(122,31,31,0.12);
+  outline-offset: 2px;
+}
+
+.sr-only {
+  position: absolute !important;
+  height: 1px; width: 1px;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  white-space: nowrap;
+  border: 0;
+  padding: 0;
+  margin: -1px;
+}
+
+/* ======================================================
+   FILTER BAR: equal widths
+   ====================================================== */
+.filters .row {
+  grid-template-columns:
+    auto   /* OS */
+    160px  /* vCPU  */
+    160px  /* RAM   */
+    160px  /* Storage(GB) */
+    160px  /* Storage Type */
+    200px; /* Buttons group */
+}
+
+.filters .row select {
+  width: 100%;
+  max-width: 100%;
+}
+
+.btn-row {
+  display: inline-flex;
+  width: 100%; 
+  gap: 8px;
+}
+
+.btn-row .btn-eq {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 40px; 
+  padding: 0 12px;
+}
+
+/* -------------------------
+   Responsive fallbacks
+   ------------------------- */
 @media (max-width: 1100px) {
-  .filters .row { grid-template-columns: 1fr 1fr 1fr; }
-  .results { grid-template-columns: repeat(2, 1fr); }
+  .filters .row {
+    grid-template-columns: 1fr 1fr 1fr; 
+  }
+  .btn-row { width: auto; }
 }
+
 @media (max-width: 640px) {
-  .filters .row, .results { grid-template-columns: 1fr; }
+  .filters .row {
+    grid-template-columns: 1fr; 
+  }
+  .btn-row { width: 100%; }
+}
+
+/* ======================================================
+   RESPONSIVE SAFETY
+   ====================================================== */
+@media (max-width: 1100px) {
+  .results {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .results {
+    grid-template-columns: 1fr;
+  }
 }
