@@ -568,76 +568,59 @@ select option[disabled] {
    STABLE PDF EXPORT: FIXES FAMILY & PROCESSOR BOXES
    ====================================================== */
 @media print {
-  @page { margin: 1.2cm; size: auto; }
-  
-  body { 
-    background: #fff !important; 
-    -webkit-print-color-adjust: exact !important; 
-    print-color-adjust: exact !important; 
+  /* 1. Force the page to recognize colors and layout */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
-  /* 1. Hide the interactive buttons and tooltips */
-  .btn-row, .info-btn, .status, .info-pop, .info-pop--modal, .filters { 
-    display: none !important; 
+  /* 2. Fix the Results Grid - 4 columns is too tight for PDF, try 2 or 3 */
+  .results {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important; 
+    gap: 20px !important;
+    width: 100% !important;
   }
 
-  /* 2. Fix the "Odd" Family/Processor Alignment */
-  /* Target the container of the label and select */
-  .family-filter {
+  /* 3. The Core Fix: Family & Processor alignment */
+  .family-filter, 
+  .panel .label-with-info {
     display: flex !important;
-    flex-wrap: nowrap !important;
+    flex-direction: row !important; /* Force side-by-side */
     align-items: center !important;
     justify-content: flex-start !important;
-    gap: 8px !important;
-    margin: 10px 0 !important;
     width: 100% !important;
+    margin: 8px 0 !important;
+    gap: 10px !important;
   }
 
-  /* Ensure labels don't shrink or wrap */
-  .family-filter label {
-    flex: 0 0 auto !important;
-    margin-bottom: 0 !important;
-    white-space: nowrap !important;
-    font-size: 13px !important;
-  }
-
-  /* Force the select box to have a solid, non-collapsible structure */
-  .family-filter select {
-    flex: 1 1 auto !important; /* Allow it to fill remaining space but maintain structure */
-    display: block !important;
-    visibility: visible !important;
-    appearance: none !important; 
-    -webkit-appearance: none !important;
-    border: 1px solid #aaa !important; /* Slightly darker for PDF contrast */
-    background: #fff !important;
-    height: 32px !important; /* Explicit height is crucial for PDF engines */
-    line-height: 32px !important;
-    padding: 0 8px !important;
-    border-radius: 4px !important;
+  /* 4. Fix the Labels */
+  .family-filter label, 
+  .panel .label-with-info {
+    flex: 0 0 80px !important; /* Gives label a fixed width so boxes align */
     font-size: 12px !important;
-    width: 100% !important;
-    min-width: 140px !important;
+    font-weight: bold !important;
+    margin: 0 !important;
   }
 
-  /* 3. Layout Control */
-  .results { 
-    display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important; /* 2 columns is often safer for PDF widths */
-    gap: 15px !important;
+  /* 5. Fix the Select Box (The "Snap" Fix) */
+  .family-filter select,
+  .panel select {
+    flex: 1 1 auto !important;
+    display: block !important;
+    height: 30px !important;      /* Hard height prevents collapsing */
+    min-width: 120px !important;
+    border: 1px solid #999 !important; 
+    background-color: #fff !important;
+    border-radius: 4px !important;
+    padding: 2px 5px !important;
+    font-size: 11px !important;
+    appearance: none !important;   /* Removes the ugly default arrow */
+    -webkit-appearance: none !important;
   }
 
-  .panel { 
-    box-shadow: none !important; 
-    border: 1px solid #ddd !important; 
-    break-inside: avoid;
-    padding: 15px !important;
-    min-height: auto !important; /* Let it shrink to content in PDF */
-  }
-
-  /* 4. Fix Title */
-  .app-title--pill {
-    background: #f1f5f9 !important;
-    border: 1px solid #cbd5e1 !important;
-    -webkit-print-color-adjust: exact;
+  /* 6. Hide the junk you don't need in a PDF */
+  .filters, .info-btn, .btn-row, .status {
+    display: none !important;
   }
 }
