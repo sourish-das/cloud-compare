@@ -100,7 +100,7 @@ jobs:
           # AWS_RHEL_RATE_PER_VCPU_MAP: '{"us-east-1":0.0159,"_default":0.0168}'
 
           # Simpler single-number fallback (used only if MAP not set and nothing learned)
-          AWS_RHEL_RATE_PER_VCPU: "0.0168"
+          AWS_RHEL_RATE_PER_VCPU: "0.0159"
 
       # ------------------------------------------------------------
       # Validate the output was created and show quick stats
