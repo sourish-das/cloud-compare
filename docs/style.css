@@ -582,15 +582,16 @@ select option[disabled] {
     display: none !important; 
   }
 
-  /* 2. Fix the Header Pill Background */
+  /* 2. Fix the Header Pill Background visibility */
   .app-title--pill {
     background: #f8fafc !important;
     border: 1px solid #e2e8f0 !important;
     -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
-  /* 3. FIX FAMILY/PROCESSOR BOXES */
-  /* This forces the label and the "dropdown" to sit on one line properly */
+  /* 3. FIX FAMILY/PROCESSOR BOXES ALIGNMENT */
+  /* This forces the label and the selection box to align properly */
   .family-filter, 
   .panel .label-with-info {
     display: flex !important;
@@ -600,7 +601,7 @@ select option[disabled] {
     margin: 8px 0 !important;
   }
 
-  /* Style the select to look like a clean text box in PDF */
+  /* Force the dropdown to look like a clean text field in PDF */
   .family-filter select,
   .panel select {
     appearance: none !important;
@@ -612,28 +613,24 @@ select option[disabled] {
     border-radius: 4px !important;
     font-size: 13px !important;
     color: #374151 !important;
-    flex: 1 !important; /* Makes it fill remaining space nicely */
+    width: 100% !important; /* Ensures the box doesn't collapse */
+    max-width: 180px !important;
     min-width: 120px !important;
   }
 
-  /* 4. Force 4-Column Layout on Paper */
+  /* 4. Results Grid Preservation */
   .results { 
-    display: grid !important;
-    grid-template-columns: repeat(4, 1fr) !important;
+    display: flex !important;
+    flex-direction: row !important;
     gap: 10px !important;
   }
 
   .panel { 
+    flex: 1 !important;
     box-shadow: none !important; 
     border: 1px solid #e5e7eb !important; 
     break-inside: avoid;
     padding: 12px !important;
     min-height: auto !important;
-  }
-
-  .total { 
-    border-top: 2px solid #111 !important; 
-    margin-top: 12px !important;
-    padding-top: 8px !important;
   }
 }
