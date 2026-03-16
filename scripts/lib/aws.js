@@ -2,11 +2,12 @@
 // Helpers for AWS Retail Prices + RHEL/Windows synthesis
 
 /**
- * Family filter: m, c, r, t, x, i, z, h
+ * Family filter (default): m, c, r, t, x, z
+ * (Exclude i/h by default to avoid storage-optimized families in 'Auto')
  */
 function isWantedEc2Family(instance = "") {
   const c = String(instance)[0]?.toLowerCase();
-  return ["m", "c", "r", "t", "x", "i", "z", "h"].includes(c);
+  return ["m", "c", "r", "t", "x", "z"].includes(c);
 }
 
 /**
@@ -41,35 +42,51 @@ function getAwsWindowsUplift() {
   const raw = process.env.AWS_WINDOWS_RATE_PER_VCPU;
   const n = Number(raw);
   if (Number.isFinite(n) && n > 0) return n;
-  return 0.046; 
+  return 0.046;
 }
 
 /**
- * RHEL license uplift ($/vCPU-hr) — AWS moved to per‑vCPU billing (2024‑07‑01).
+ * RHEL license uplift ($/vCPU-hr) — per‑vCPU billing (2024‑07‑01).
  *
  * Priority:
- *   1) AWS_RHEL_RATE_PER_VCPU_MAP (JSON: { "us-east-1":0.0168, "_default":0.016 })
- *   2) AWS_RHEL_RATE_PER_VCPU     (single numeric override)
- *   3) default = 0.0168
+ *   (map)  AWS_RHEL_RATE_PER_VCPU_MAP JSON may include:
+ *           - _arm / _x86  (arch-specific learned rates)
+ *           - <region>     (region-specific rate)
+ *           - _default     (fallback)
+ *   (env)  AWS_RHEL_RATE_PER_VCPU     (single numeric override)
+ *   (def)  0.0168
  */
-function getAwsRhelUplift() {
-  // 1) Region‑aware JSON map
+function getAwsRhelUplift(instance = "") {
+  // Prefer a region map with optional arch hints set by the fetcher
   try {
-    const mapRaw = process.env.AWS_RHEL_RATE_PER_VCPU_MAP;
-    if (mapRaw) {
-      const map = JSON.parse(mapRaw);
+    const raw = process.env.AWS_RHEL_RATE_PER_VCPU_MAP;
+    if (raw) {
+      const map = JSON.parse(raw);
       const region = process.env.AWS_REGION || "us-east-1";
-      const v = Number(map?.[region] ?? map?._default);
-      if (Number.isFinite(v) && v > 0) return v;
-    }
-  } catch {}
 
-  // 2) Single numeric override
-  const raw = process.env.AWS_RHEL_RATE_PER_VCPU;
-  const n = Number(raw);
+      const flat = String(instance || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+      const isArm =
+        flat.startsWith("t4g") || /^c[6-9]g/.test(flat) || /^m[6-9]g/.test(flat) || /^r[6-9]g/.test(flat);
+      const archKey = isArm ? "_arm" : "_x86";
+
+      const archRate = Number(map?.[archKey]);
+      if (Number.isFinite(archRate) && archRate > 0) return archRate;
+
+      const regionRate = Number(map?.[region]);
+      if (Number.isFinite(regionRate) && regionRate > 0) return regionRate;
+
+      const defRate = Number(map?._default);
+      if (Number.isFinite(defRate) && defRate > 0) return defRate;
+    }
+  } catch {
+    // ignore parse errors and fall through to env/default
+  }
+
+  // Single numeric override (quick pin to Calculator if desired)
+  const n = Number(process.env.AWS_RHEL_RATE_PER_VCPU);
   if (Number.isFinite(n) && n > 0) return n;
 
-  // 3) Default — matched to AWS Pricing Calculator for us-east-1
+  // Default fallback (historically aligned to us-east-1 typical)
   return 0.0168;
 }
 
@@ -101,7 +118,7 @@ function _hasRhelVariantKeywords(text = "") {
  */
 function isPlainRhel(attrs = {}, names = {}) {
   const os = String(attrs?.operatingSystem || "");
-  const isRhel = (os === "RHEL" || os === "Red Hat Enterprise Linux");
+  const isRhel = os === "RHEL" || os === "Red Hat Enterprise Linux";
   if (!isRhel) return false;
 
   const lm = String(attrs?.licenseModel || "");
@@ -116,7 +133,9 @@ function isPlainRhel(attrs = {}, names = {}) {
     names.meterName,
     attrs.usagetype,
     attrs.operation
-  ].filter(Boolean).join(" ");
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   if (_hasRhelVariantKeywords(blob)) return false;
 
@@ -128,21 +147,23 @@ function isPlainRhel(attrs = {}, names = {}) {
  */
 function _hasWindowsRowAlready(rows, base) {
   const inst = String(base?.instance || "");
-  const reg  = String(base?.region   || "");
-  return rows.some(r =>
-    String(r.instance) === inst &&
-    String(r.region)   === reg &&
-    _normOs(r.os) === "windows"
+  const reg = String(base?.region || "");
+  return rows.some(
+    (r) =>
+      String(r.instance) === inst &&
+      String(r.region) === reg &&
+      _normOs(r.os) === "windows"
   );
 }
 
 function _hasRhelRowAlready(rows, base) {
   const inst = String(base?.instance || "");
-  const reg  = String(base?.region   || "");
-  return rows.some(r =>
-    String(r.instance) === inst &&
-    String(r.region)   === reg &&
-    _normOs(r.os) === "rhel"
+  const reg = String(base?.region || "");
+  return rows.some(
+    (r) =>
+      String(r.instance) === inst &&
+      String(r.region) === reg &&
+      _normOs(r.os) === "rhel"
   );
 }
 
@@ -155,7 +176,7 @@ function synthesizeAwsWindowsRows(rows) {
   const uplift = getAwsWindowsUplift();
   let added = 0;
 
-  const linux = rows.filter(r => _normOs(r.os) === "linux");
+  const linux = rows.filter((r) => _normOs(r.os) === "linux");
 
   for (const base of linux) {
     const inst = String(base.instance || "");
@@ -163,10 +184,10 @@ function synthesizeAwsWindowsRows(rows) {
     const pLnx = _safeNum(base.pricePerHourUSD, null);
 
     if (!inst || !Number.isFinite(vcpu) || !Number.isFinite(pLnx)) continue;
-    if (isAwsGravitonInstance(inst)) continue; 
+    if (isAwsGravitonInstance(inst)) continue; // Windows ≠ Graviton
     if (_hasWindowsRowAlready(rows, base)) continue;
 
-    const priceWin = pLnx + (vcpu * uplift);
+    const priceWin = pLnx + vcpu * uplift;
     if (!Number.isFinite(priceWin) || priceWin <= 0) continue;
 
     rows.push({
@@ -183,15 +204,13 @@ function synthesizeAwsWindowsRows(rows) {
 
 /**
  * Synthesize AWS RHEL rows from Linux rows.
- * Applies correct per‑vCPU uplift; ARM is allowed.
+ * Applies per‑vCPU uplift; ARM is allowed.
  */
 function synthesizeAwsRhelRows(rows) {
   if (!Array.isArray(rows) || rows.length === 0) return 0;
 
-  const uplift = getAwsRhelUplift();
   let added = 0;
-
-  const linux = rows.filter(r => _normOs(r.os) === "linux");
+  const linux = rows.filter((r) => _normOs(r.os) === "linux");
 
   for (const base of linux) {
     const inst = String(base.instance || "");
@@ -201,7 +220,9 @@ function synthesizeAwsRhelRows(rows) {
     if (!inst || !Number.isFinite(vcpu) || !Number.isFinite(pLnx)) continue;
     if (_hasRhelRowAlready(rows, base)) continue;
 
-    const priceRhel = pLnx + (vcpu * uplift);
+    // Instance-aware uplift (enables learned ARM/x86 rates when present)
+    const uplift = getAwsRhelUplift(inst);
+    const priceRhel = pLnx + vcpu * uplift;
     if (!Number.isFinite(priceRhel) || priceRhel <= 0) continue;
 
     rows.push({
@@ -221,7 +242,7 @@ function synthesizeAwsRhelRows(rows) {
  */
 function filterOnlyPlainRhel(rows) {
   if (!Array.isArray(rows)) return rows;
-  return rows.filter(r => {
+  return rows.filter((r) => {
     if (_normOs(r.os) !== "rhel") return true;
     const blob = [r.instance, r.region, r.source].filter(Boolean).join(" ");
     return !_hasRhelVariantKeywords(blob);
