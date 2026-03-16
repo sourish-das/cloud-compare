@@ -1,6 +1,4 @@
-// docs/script.js (4‑provider coordinator - AWS, Azure, GCP, OCI)
-// Full drop-in with PDF snapshot flattening and row-alignment fixes.
-
+// docs/script.js (Optimized 4‑provider coordinator)
 import {
   fmt, monthly, sumSafe, fillSelect, setSelectValue, safeSetText,
   appendToText, setStatus, resetCards,
@@ -13,45 +11,31 @@ import {
 } from "./ui/utils.js";
 import { STORAGE_CFG, loadPricesAndMeta } from "./ui/state.js";
 import { initStorageTypeTooltip, initOsTypeTooltip, initOciTooltip } from "./ui/tooltips.js";
-import {
-  findBestAws,
-  findBestAzure,
-  findBestGcp,
-  findBestOci
-} from "./ui/matchers.js";
+import { findBestAws, findBestAzure, findBestGcp, findBestOci } from "./ui/matchers.js";
 
-/* ========================================================================
-   Provider label maps (centralized)
-   ======================================================================== */
+/* --- Configuration Maps --- */
 const PROVIDER_LABELS = {
-  aws:    { price: 'EC2 Price/hr',             monthly: 'EC2 Monthly' },
+  aws:   { price: 'EC2 Price/hr',             monthly: 'EC2 Monthly' },
   azure: { price: 'VM Price/hr',              monthly: 'VM Monthly' },
-  gcp:    { price: 'Compute Engine Price/hr', monthly: 'Compute Engine Monthly' },
-  oci:    { price: 'Compute Price/hr',         monthly: 'Compute Monthly' }
-};
-const STORAGE_LABELS = {
-  aws:    { hr: 'EBS Price/hr',                monthly: 'EBS Monthly' },
-  azure: { hr: 'Azure Disk Price/hr',       monthly: 'Azure Disk Monthly' },
-  gcp:    { hr: 'Persistent Disk Price/hr',  monthly: 'Persistent Disk Monthly' },
-  oci:    { hr: 'Block Volume Price/hr',     monthly: 'Block Volume Monthly' },
+  gcp:   { price: 'Compute Engine Price/hr', monthly: 'Compute Engine Monthly' },
+  oci:   { price: 'Compute Price/hr',         monthly: 'Compute Monthly' }
 };
 
-/* ========================================================================
-   Build freshness (optional footer info)
-   ======================================================================== */
+const STORAGE_LABELS = {
+  aws:   { hr: 'EBS Price/hr',                monthly: 'EBS Monthly' },
+  azure: { hr: 'Azure Disk Price/hr',       monthly: 'Azure Disk Monthly' },
+  gcp:   { hr: 'Persistent Disk Price/hr',  monthly: 'Persistent Disk Monthly' },
+  oci:   { hr: 'Block Volume Price/hr',     monthly: 'Block Volume Monthly' },
+};
+
+/* --- Helpers --- */
 async function loadBuildInfo() {
   try {
     const r = await fetch('./data/buildInfo.json?v=' + Date.now(), { cache: 'no-store' });
-    if (!r.ok) return null;
-    return await r.json();
-  } catch {
-    return null;
-  }
+    return r.ok ? await r.json() : null;
+  } catch { return null; }
 }
 
-/* ========================================================================
-   Filter visibility
-   ======================================================================== */
 function showFamilyFilters() {
   ["awsFamilyWrap", "azFamilyWrap", "gcpFamilyWrap", "ociProcessorWrap"].forEach(id => {
     const el = document.getElementById(id);
@@ -59,742 +43,258 @@ function showFamilyFilters() {
   });
 }
 
-/* ========================================================================
-   Storage helpers
-   ======================================================================== */
-function getAwsStorageMonthly(type, gb) {
-  return getAwsStorageMonthlyFromCfg(type, gb, STORAGE_CFG.aws);
-}
-function getAzureStorage(type, gb) {
-  return getAzureStorageSkuAndMonthlyFromCfg(type, gb, STORAGE_CFG.azure);
-}
-function getGcpStorageMonthly(type, gb) {
-  return getGcpStorageMonthlyFromCfg(type, gb, STORAGE_CFG.gcp);
+function isArmEntry(provider, entry) {
+  const arch = String(entry?.arch || entry?.cpuArch || entry?.architecture || "").toLowerCase();
+  const isArmArch = arch.includes("arm") || arch.includes("aarch64") || arch.includes("ampere");
+  
+  const label = String(entry?.instance || entry?.family || entry?.series || entry?.size || "").toLowerCase();
+  const patterns = {
+    aws: /(t4g|a1|c\d+g|m\d+g|r\d+g)\b|graviton/,
+    azure: /\b(dpsv5|dpldsv5|epsv5)\b/,
+    gcp: /\b(t2a|c4a|n4a|a4x)\b/,
+    oci: /\.a1\b|\.a2\b|ampere|arm/
+  };
+  
+  return isArmArch || (patterns[provider] && patterns[provider].test(label));
 }
 
-/* ========================================================================
-   Windows ↔ Arm guardrails
-   ======================================================================== */
-function isArmArchField(obj) {
-  const a = String(obj?.arch
-    ?? obj?.cpuArch
-    ?? obj?.architecture
-    ?? "").toLowerCase();
-  return a.includes("arm")
-    || a.includes("aarch64")
-    || a.includes("ampere");
-}
-function isArmSkuPattern(provider, skuString) {
-  const s = String(skuString ?? "").toLowerCase();
-  if (provider === "aws") return /(t4g|a1|c\d+g|m\d+g|r\d+g)\b/.test(s)
-    || s.includes("graviton");
-  if (provider === "azure") return /\b(dpsv5|dpldsv5|epsv5)\b/.test(s);
-  if (provider === "gcp") return /\b(t2a|c4a|n4a|a4x)\b/.test(s);
-  if (provider === "oci") return /\.a1\b|\.a2\b/.test(s)
-    || s.includes("ampere")
-    || s.includes("arm");
-  return false;
-}
-function isArmEntry(provider, entry) {
-  const byArch = isArmArchField(entry);
-  const label = entry?.instance
-    ?? entry?.family
-    ?? entry?.series
-    ?? entry?.size
-    ?? "";
-  return byArch || isArmSkuPattern(provider, label);
-}
 function filterOutArmForWindows(list, provider, os) {
   if (String(os).toLowerCase() !== "windows") return list ?? [];
-  if (!Array.isArray(list)) return [];
-  const f = list.filter(x => !isArmEntry(provider, x));
-  return f.length > 0 ? f : list;
+  const filtered = (list ?? []).filter(x => !isArmEntry(provider, x));
+  return filtered.length > 0 ? filtered : list;
 }
-function sanitizeFamilyForWindows(provider, family, os) {
-  if (String(os).toLowerCase() !== "windows") return family ?? "";
-  return isArmSkuPattern(provider, family) ? "" : family ?? "";
-}
-function disableOptionsIfPresent(selectEl, values, disabled) {
-  if (!selectEl) return;
-  const targets = values.map(v => v.toLowerCase());
-  Array.from(selectEl.options ?? []).forEach(o => {
-    if (targets.includes(o.value.toLowerCase())) {
-      o.disabled = !!disabled;
-    }
-  });
-}
+
 function sanitizeFamiliesForWindows(os) {
   const isWin = String(os).toLowerCase() === "windows";
+  const configs = [
+    { id: "awsFamily", keys: ["t4g","c7g","m7g","r7g","a1","graviton"], prov: "aws" },
+    { id: "azFamily",  keys: ["Dpsv5","Dpldsv5","Epsv5"], prov: "azure" },
+    { id: "gcpFamily", keys: ["t2a","c4a","n4a","a4x"], prov: "gcp" }
+  ];
 
-  const awsSel = document.getElementById("awsFamily");
-  if (awsSel) {
-    if (isWin && isArmSkuPattern("aws", awsSel.value)) awsSel.value = "";
-    disableOptionsIfPresent(awsSel, ["t4g","c7g","m7g","r7g","a1","graviton"], isWin);
-  }
-
-  const azSel = document.getElementById("azFamily");
-  if (azSel) {
-    if (isWin && isArmSkuPattern("azure", azSel.value)) azSel.value = "";
-    disableOptionsIfPresent(azSel, ["Dpsv5","Dpldsv5","Epsv5"], isWin);
-  }
-
-  const gcpSel = document.getElementById("gcpFamily");
-  if (gcpSel) {
-    if (isWin && isArmSkuPattern("gcp", gcpSel.value)) gcpSel.value = "";
-    disableOptionsIfPresent(gcpSel, ["t2a","c4a","n4a","a4x"], isWin);
-  }
-
-  const ociProcEl = document.getElementById("ociProcessor");
-  if (ociProcEl) {
-    Array.from(ociProcEl.options).forEach(o => {
-      if (o.value.toLowerCase() === "arm") o.disabled = isWin;
+  configs.forEach(({id, keys, prov}) => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    if (isWin && isArmEntry(prov, { family: sel.value })) sel.value = "";
+    Array.from(sel.options).forEach(o => {
+      if (keys.some(k => o.value.toLowerCase().includes(k.toLowerCase()))) o.disabled = isWin;
     });
-    if (isWin && ociProcEl.value.toLowerCase() === "arm") {
-      ociProcEl.value = "auto";
-    }
+  });
+
+  const ociProc = document.getElementById("ociProcessor");
+  if (ociProc) {
+    Array.from(ociProc.options).forEach(o => { if (o.value === "arm") o.disabled = isWin; });
+    if (isWin && ociProc.value === "arm") ociProc.value = "auto";
   }
 }
 
-/* ========================================================================
-   OCI helpers (generation preference finder)
-   ======================================================================== */
 function ociLatestGen(linux, processor) {
   if (!linux || !processor || processor === "auto") return null;
-  const ORDER = {
-    amd: ["E6","E5","E4","E3"],
-    arm: ["A4","A2","A1"],
-    intel:["Optimized3","Standard3"]
-  };
+  const ORDER = { amd: ["E6","E5","E4","E3"], arm: ["A4","A2","A1"], intel:["Optimized3","Standard3"] };
   const arr = linux[processor] ?? [];
-  if (!Array.isArray(arr) || arr.length === 0) return null;
   const gens = new Set(arr.map(e => String(e.gen ?? "").toLowerCase()));
-  for (const g of ORDER[processor] ?? []) {
-    if (gens.has(g.toLowerCase())) return g;
-  }
-  return arr
-    .map(e => String(e.gen ?? ""))
-    .filter(Boolean)
-    .sort((a, b) => a.localeCompare(b))
-    .pop() ?? null;
+  for (const g of ORDER[processor] ?? []) { if (gens.has(g.toLowerCase())) return g; }
+  return arr.map(e => String(e.gen ?? "")).filter(Boolean).sort().pop() ?? null;
 }
 
-/* ========================================================================
-   Controls hydration from meta (safe fallbacks)
-   ======================================================================== */
+/* --- UI Component Updater --- */
+function updateProviderUI(prefix, providerKey, card, storageHr, storageMonthly) {
+  const labels = PROVIDER_LABELS[providerKey];
+  const sLabels = STORAGE_LABELS[providerKey];
+
+  if (!card || card.error || card.disabled) {
+    const msg = card?.disabled ? "—" : `Error: ${card?.error ?? "No match"}`;
+    safeSetText(`${prefix}Instance`, `<strong>Recommended:</strong> ${msg}`, { html: true });
+    safeSetText(`${prefix}Cpu`, `vCPU: —`);
+    safeSetText(`${prefix}Ram`, `RAM: —`);
+    safeSetText(`${prefix}Price`, `${labels.price}: —`);
+    safeSetText(`${prefix}Monthly`, `≈ ${labels.monthly}: —`);
+    safeSetText(`${prefix}TotalHr`, fmt(null));
+    safeSetText(`${prefix}TotalMonthly`, fmt(null));
+  } else {
+    const instanceLabel = card.displayInstance ?? card.instance;
+    const badge = card.seriesName ? ` <span class="badge-series">${card.seriesName}</span>` : "";
+    safeSetText(`${prefix}Instance`, `<strong>Recommended:</strong> ${instanceLabel} (${card.region})${badge}`, { html: true });
+    safeSetText(`${prefix}Cpu`, `vCPU: ${card.vcpu}`);
+    safeSetText(`${prefix}Ram`, `RAM: ${card.ram} GB`);
+    safeSetText(`${prefix}Price`, `${labels.price}: ${fmt(card.pricePerHourUSD)}`);
+    safeSetText(`${prefix}Monthly`, `≈ ${labels.monthly}: ${fmt(monthly(card.pricePerHourUSD))}`);
+    
+    safeSetText(`${prefix}TotalHr`, fmt(sumSafe(card.pricePerHourUSD, storageHr)));
+    safeSetText(`${prefix}TotalMonthly`, fmt(sumSafe(monthly(card.pricePerHourUSD), storageMonthly)));
+  }
+
+  // Update Storage Labels
+  safeSetText(`${prefix}StoragePriceHrLabel`, `${sLabels.hr}:`);
+  safeSetText(`${prefix}StorageMonthlyLabel`, `≈ ${sLabels.monthly}:`);
+  safeSetText(`${prefix}StoragePriceHr`, fmt(storageHr));
+  safeSetText(`${prefix}StorageMonthly`, fmt(storageMonthly));
+}
+
 async function hydrateControlsFromMeta() {
   try {
     const { meta } = await loadPricesAndMeta();
-    const osList = Array.isArray(meta?.os) && meta.os.length
-      ? meta.os
-      : ["Linux", "RHEL", "Windows"];
-    fillSelect("os", osList.map(v => {
-      const s = (typeof v === "string") ? v : v?.value;
-      return {
-        value: s,
-        text: (s === "Linux"  ? "Linux (Open‑source)"
-          : s === "RHEL"     ? "RHEL (Red Hat Enterprise Linux)"
-          : s === "Windows"  ? "Windows"
-          : String(s))
-      };
-    }));
-    ensureSelectOption("os", "RHEL", "RHEL (Red Hat Enterprise Linux)");
-
-    const vcpus = (Array.isArray(meta?.vcpu) && meta.vcpu.length) ? meta.vcpu : [1,2,4,8,16];
-    const rams  = (Array.isArray(meta?.ram)  && meta.ram.length)  ? meta.ram  : [1,2,4,8,16,32];
+    const osData = (meta?.os ?? ["Linux", "RHEL", "Windows"]).map(v => {
+      const s = typeof v === "string" ? v : v?.value;
+      const textMap = { "Linux": "Linux (Open‑source)", "RHEL": "RHEL (Enterprise)", "Windows": "Windows" };
+      return { value: s, text: textMap[s] || s };
+    });
+    fillSelect("os", osData);
+    ensureSelectOption("os", "RHEL", "RHEL (Enterprise)");
+    
+    const vcpus = meta?.vcpu ?? [1,2,4,8,16];
+    const rams  = meta?.ram ?? [1,2,4,8,16,32];
     fillSelect("cpu", vcpus.map(v => ({ value: v, text: v })));
     fillSelect("ram", rams.map(v => ({ value: v, text: v })));
     setSelectValue("os", "Linux");
-    setSelectValue("cpu", String(vcpus.includes(2) ? 2 : vcpus[0]));
-    setSelectValue("ram", String(rams.includes(4) ? 4 : rams[0]));
-  } catch {
-    fillSelect("os", [
-      { value: "Linux",  text: "Linux (Open‑source)" },
-      { value: "RHEL",   text: "RHEL (Red Hat Enterprise Linux)" },
-      { value: "Windows",text: "Windows" }
-    ]);
-    ensureSelectOption("os", "RHEL", "RHEL (Red Hat Enterprise Linux)");
-    fillSelect("cpu", [1,2,4,8,16].map(v => ({value:v, text:v})));
-    fillSelect("ram", [1,2,4,8,16,32].map(v => ({value:v, text:v})));
-    setSelectValue("os","Linux");
-    setSelectValue("cpu","2");
-    setSelectValue("ram","4");
-  }
+    setSelectValue("cpu", "2");
+    setSelectValue("ram", "4");
+  } catch (e) { console.error("Hydration failed", e); }
 }
 
-/* ========================================================================
-   ---- Export results grid to PDF (Option B) ----
-   ======================================================================== */
-
+/* --- PDF Export --- */
 async function downloadResultsAsPdf() {
-  const fail = (msg, err) => {
-    if (err) console.error("[PDF Export] failed:", err);
-    else console.error("[PDF Export] failed:", msg);
-    alert(msg || "Sorry, PDF export failed. Please try again.");
+  const { jsPDF } = window.jspdf || {};
+  if (typeof window.html2canvas !== "function" || !jsPDF) return alert("PDF libraries not loaded.");
+
+  const grid = document.querySelector(".results");
+  if (!grid) return alert("Run compare first.");
+
+  const wrapper = document.createElement("div");
+  Object.assign(wrapper.style, { padding: "16px", background: "#fff", position: "fixed", left: "-10000px", width: `${grid.offsetWidth}px` });
+
+  const title = document.querySelector("h2.app-title")?.textContent || "Cloud Cost Comparison";
+  const header = document.createElement("h2");
+  header.textContent = title;
+  Object.assign(header.style, { margin: "0 0 12px", fontFamily: "sans-serif", color: "#111" });
+  wrapper.appendChild(header);
+
+  const clone = grid.cloneNode(true);
+  
+  // Snapshot Selects
+  clone.querySelectorAll("select").forEach(sel => {
+    const span = document.createElement("span");
+    span.className = "cc-select-snapshot";
+    span.textContent = sel.options[sel.selectedIndex]?.text || sel.value;
+    Object.assign(span.style, {
+      display: "inline-block", minWidth: "120px", height: "30px", lineHeight: "28px",
+      padding: "0 8px", border: "1px solid #999", borderRadius: "4px", fontSize: "12px"
+    });
+    sel.replaceWith(span);
+  });
+
+  wrapper.appendChild(clone);
+  
+  const style = document.createElement("style");
+  style.textContent = `
+    .results, .results * { background: transparent !important; box-shadow: none !important; }
+    .family-filter, .panel .label-with-info { display: flex !important; align-items: center !important; gap: 8px !important; margin: 6px 0 !important; }
+    .family-filter label, .panel .label-with-info label { flex: 0 0 80px !important; font-weight: 700 !important; }
+  `;
+  wrapper.appendChild(style);
+  document.body.appendChild(wrapper);
+
+  const canvas = await html2canvas(wrapper, { scale: 2, useCORS: true });
+  const imgData = canvas.toDataURL("image/png");
+  const pdf = new jsPDF("p", "pt", "a4");
+  const imgW = pdf.internal.pageSize.getWidth() - 48;
+  const imgH = (canvas.height * imgW) / canvas.width;
+
+  pdf.addImage(imgData, "PNG", 24, 24, imgW, imgH);
+  pdf.save(`cloud-compare-${new Date().getTime()}.pdf`);
+  document.body.removeChild(wrapper);
+}
+
+/* --- Main Logic --- */
+export async function compare(resetFamilies = false) {
+  const elements = {
+    btn: document.getElementById("compareBtn"),
+    dlBtn: document.getElementById("downloadPdfBtn"),
+    os: document.getElementById("os")?.value || "Linux",
+    cpu: Number(document.getElementById("cpu")?.value || 0),
+    ram: Number(document.getElementById("ram")?.value || 0),
+    stType: (document.getElementById("storageType")?.value || "hdd").toLowerCase(),
+    stAmt: Number(document.getElementById("storageAmt")?.value || 0)
   };
 
-  try {
-    const { jsPDF } = window.jspdf || {};
-    if (typeof window.html2canvas !== "function" || !jsPDF) {
-      return fail("PDF export is not available. Please try again.");
-    }
-
-    const grid = document.querySelector(".results");
-    if (!grid) return fail("Nothing to export yet. Please run Compare first.");
-
-    const titleEl = document.querySelector("h2.app-title");
-
-    const wrapper = document.createElement("div");
-    wrapper.style.padding = "16px";
-    wrapper.style.background = "#ffffff";
-    wrapper.style.display = "inline-block";
-    wrapper.style.position = "fixed";
-    wrapper.style.left = "-10000px";
-
-    const gridRect = grid.getBoundingClientRect();
-    const targetWidth = Math.max(320, Math.round(gridRect.width || grid.clientWidth || 800));
-    wrapper.style.width = `${targetWidth}px`;
-
-    // Plain text title (no gradients / color-mix)
-    if (titleEl) {
-      const t = document.createElement("h2");
-      t.textContent = titleEl.textContent || "Cloud Cost Comparator";
-      t.style.margin = "0 0 12px 0";
-      t.style.fontFamily = "system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
-      t.style.fontWeight = "700";
-      t.style.fontSize = "18px";
-      t.style.lineHeight = "1.2";
-      t.style.color = "#111827";
-      t.style.background = "transparent";
-      wrapper.appendChild(t);
-    }
-
-    const clone = grid.cloneNode(true);
-
-    // --- Replace <select> controls in the CLONE with styled text snapshots ---
-    (function snapshotSelects(root) {
-      const all = root.querySelectorAll("select");
-      all.forEach(sel => {
-        const txt = sel.options?.[sel.selectedIndex]?.text ?? sel.value ?? "";
-        const approxWidth = Math.max(120, sel.getBoundingClientRect()?.width || sel.offsetWidth || 140);
-        const span = document.createElement("span");
-        span.className = "cc-select-snapshot";
-        span.textContent = txt;
-        span.style.display = "inline-block";
-        span.style.minWidth = approxWidth + "px";
-        span.style.height = "30px";
-        span.style.lineHeight = "28px";
-        span.style.padding = "0 8px";
-        span.style.border = "1px solid #999";
-        span.style.borderRadius = "4px";
-        span.style.background = "#fff";
-        span.style.color = "#111";
-        span.style.fontSize = "12px";
-        span.style.whiteSpace = "nowrap";
-        span.style.overflow = "hidden";
-        span.style.textOverflow = "ellipsis";
-        span.style.verticalAlign = "middle";
-        sel.replaceWith(span);
-      });
-    })(clone);
-
-    wrapper.appendChild(clone);
-
-    // Strip <img> to avoid CORS/tainted canvas
-    clone.querySelectorAll("img").forEach(img => {
-      const ph = document.createElement("span");
-      ph.style.display = img.style.display || "inline-block";
-      ph.style.width = (img.width ? img.width + "px" : (img.style.width || "16px"));
-      ph.style.height = (img.height ? img.height + "px" : (img.style.height || "16px"));
-      ph.className = "no-export-img";
-      img.replaceWith(ph);
-    });
-
-    // Aggressive override: remove ANY gradient/background images including pseudo elements
-    const styleOverride = document.createElement("style");
-    styleOverride.textContent = `
-      .results, .results *,
-      .results *::before, .results *::after {
-        background: transparent !important;
-        background-image: none !important;
-        -webkit-background-clip: initial !important;
-        background-clip: initial !important;
-        box-shadow: none !important;
-      }
-      
-      /* Align "Family"/"Processor" rows cleanly in export clone */
-      .family-filter,
-      .panel .label-with-info {
-        display: flex !important;
-        flex-direction: row !important;
-        align-items: center !important;
-        gap: 8px !important;
-        margin: 6px 0 !important;
-      }
-      .family-filter label,
-      .panel .label-with-info label {
-        flex: 0 0 80px !important;
-        font-weight: 700 !important;
-        margin: 0 !important;
-      }
-
-      /* Snapshot spans look like compact inputs */
-      .cc-select-snapshot {
-        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif !important;
-      }
-    `;
-    wrapper.appendChild(styleOverride);
-
-    document.body.appendChild(wrapper);
-
-    // Inline-clear background properties from elements in the cloned subtree
-    try {
-      wrapper.querySelectorAll('.results, .results *').forEach(el => {
-        el.style.background = 'transparent';
-        el.style.backgroundImage = 'none';
-        el.style.webkitBackgroundClip = 'initial';
-        el.style.backgroundClip = 'initial';
-        el.style.boxShadow = 'none';
-      });
-    } catch (e) {
-      console.warn('[PDF Export] inline cleanup skipped:', e);
-    }
-
-    const scale = Math.min(2, Math.max(1, window.devicePixelRatio || 1));
-    let canvas;
-    try {
-      canvas = await html2canvas(wrapper, {
-        backgroundColor: "#ffffff",
-        scale,
-        useCORS: true,
-        foreignObjectRendering: false,
-        ignoreElements: (el) => el.classList?.contains("no-export"),
-      });
-    } catch (e) {
-      document.body.removeChild(wrapper);
-      return fail("Sorry, PDF export failed (capture). Please try again.", e);
-    }
-
-    const cW = Math.max(1, canvas.width || 1);
-    const cH = Math.max(1, canvas.height || 1);
-
-    let imgData;
-    try {
-      imgData = canvas.toDataURL("image/png");
-    } catch (e) {
-      document.body.removeChild(wrapper);
-      return fail("Sorry, PDF export failed (image encoding).", e);
-    }
-
-    const pdf = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
-    const pageW = pdf.internal.pageSize.getWidth();
-    const pageH = pdf.internal.pageSize.getHeight();
-    const margin = 24;
-    const printableH = pageH - margin * 2;
-    const imgW = pageW - margin * 2;
-
-    const ratio = imgW / cW;
-    const imgH = cH * ratio;
-
-    try {
-      if (imgH <= printableH) {
-        pdf.addImage(imgData, "PNG", margin, margin, imgW, imgH);
-      } else {
-        const slicePx = Math.max(1, Math.floor(printableH / ratio));
-        const pageCanvas = document.createElement("canvas");
-        pageCanvas.width = cW;
-        pageCanvas.height = slicePx;
-        const pageCtx = pageCanvas.getContext("2d");
-
-        let srcY = 0;
-        let remaining = cH;
-
-        while (remaining > 0) {
-          pageCtx.clearRect(0, 0, pageCanvas.width, pageCanvas.height);
-          pageCtx.drawImage(
-            canvas,
-            0, srcY, cW, slicePx,
-            0, 0, cW, slicePx
-          );
-          const pageImg = pageCanvas.toDataURL("image/png");
-          pdf.addImage(pageImg, "PNG", margin, margin, imgW, printableH);
-          remaining -= slicePx;
-          srcY += slicePx;
-          if (remaining > 0) pdf.addPage();
-        }
-      }
-    } catch (e) {
-      document.body.removeChild(wrapper);
-      return fail("Sorry, PDF export failed (pagination).", e);
-    }
-
-    document.body.removeChild(wrapper);
-
-    // Better file name (timestamp + inputs)
-    const os = document.getElementById("os")?.value || "OS";
-    const v  = document.getElementById("cpu")?.value || "";
-    const m  = document.getElementById("ram")?.value || "";
-    const st = document.getElementById("storageType")?.value || "";
-    const sg = document.getElementById("storageAmt")?.value || "";
-    const ts = new Date().toISOString().replace(/[:.]/g, "-"); 
-
-    try {
-      pdf.save(`cloud-compare_${os}_${v}vCPU_${m}GB_${sg}GB-${st}_${ts}.pdf`);
-    } catch (e) {
-      return fail("Sorry, PDF export failed (save).", e);
-    }
-  } catch (err) {
-    return fail("Sorry, PDF export failed. Please try again.", err);
-  }
-}
-
-/* ========================================================================
-   MAIN compare()
-   ======================================================================== */
-export async function compare(resetFamilies = false) {
-  const btn = document.getElementById("compareBtn");
-  if (btn) btn.disabled = true;
-  setStatus("Fetching local prices…");
-
-  const dlBtn1 = document.getElementById("downloadPdfBtn");
-  if (dlBtn1) dlBtn1.disabled = true;
+  if (elements.btn) elements.btn.disabled = true;
+  if (elements.dlBtn) elements.dlBtn.disabled = true;
+  setStatus("Fetching prices...");
 
   if (resetFamilies) {
-    ["awsFamily","azFamily","gcpFamily"].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.value = "";
-    });
-    const ocip = document.getElementById("ociProcessor");
-    if (ocip) ocip.value = "auto";
+    ["awsFamily","azFamily","gcpFamily"].forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = ""; });
+    if (document.getElementById("ociProcessor")) document.getElementById("ociProcessor").value = "auto";
   }
 
-  const os = document.getElementById("os")?.value ?? "Linux";
-  const vcpu = Number(document.getElementById("cpu")?.value ?? 0);
-  const ram  = Number(document.getElementById("ram")?.value ?? 0);
-  const storageType = (document.getElementById("storageType")?.value ?? "hdd").toLowerCase();
-  const storageAmtGB = Number(document.getElementById("storageAmt")?.value ?? 0);
-
-  const familyAws = sanitizeFamilyForWindows("aws", document.getElementById("awsFamily")?.value ?? "", os);
-  const familyAz  = sanitizeFamilyForWindows("azure", document.getElementById("azFamily")?.value ?? "", os);
-  const familyGcp = sanitizeFamilyForWindows("gcp", document.getElementById("gcpFamily")?.value ?? "", os);
-
-  const ociProcEl = document.getElementById("ociProcessor");
-  let ociProcessor = (ociProcEl?.value ?? "auto").toLowerCase();
-  if (String(os).toLowerCase() === "windows") {
-    const armOpt = ociProcEl?.querySelector('option[value="arm"]');
-    if (armOpt) armOpt.disabled = true;
-    if (ociProcessor === "arm") {
-      ociProcessor = "auto";
-      if (ociProcEl) ociProcEl.value = "auto";
-    }
-  }
-  sanitizeFamiliesForWindows(os);
+  sanitizeFamiliesForWindows(elements.os);
 
   try {
     resetCards();
-    const data = await loadPricesAndMeta();
+    const { aws, azure, gcp, oci } = await loadPricesAndMeta();
 
-    try {
-      const info = await loadBuildInfo();
-      const counts = {
-        az: Array.isArray(data.azure) ? data.azure.length : 0,
-        aw: Array.isArray(data.aws)   ? data.aws.length   : 0,
-        gc: Array.isArray(data.gcp)   ? data.gcp.length   : 0,
-        oc: (() => {
-          const l = data.oci?.linux ?? {};
-          return (l.amd?.length ?? 0) + (l.arm?.length ?? 0) + (l.intel?.length ?? 0);
-        })()
-      };
-      const when = info?.generatedAt ?? "—";
-      safeSetText(
-        "dataInfo",
-        `Data: ${when} · Rows — Azure: ${counts.az}, AWS: ${counts.aw}, GCP: ${counts.gc}, OCI: ${counts.oc}`
-      );
-    } catch {
-      safeSetText("dataInfo","Data: — · Rows — Azure: —, AWS: —, GCP: —, OCI: —");
-    }
-
-    const awsList = filterOutArmForWindows(data.aws ?? [], "aws", os);
-    const azList  = filterOutArmForWindows(data.azure ?? [], "azure", os);
-    const gcpList = filterOutArmForWindows(data.gcp ?? [], "gcp", os);
-
-    let awsCard;
-    try {
-      const a = findBestAws(awsList, vcpu, ram, os, familyAws);
-      awsCard = a ? {
-        instance: a.instance, vcpu: a.vcpu, ram: a.ram,
-        pricePerHourUSD: a.pricePerHourUSD, region: a.region
-      } : null;
-    } catch (e) {
-      awsCard = { error: e.message };
-    }
-
-    let azCard;
-    try {
-      const z = findBestAzure(azList, vcpu, ram, os, familyAz);
-      azCard = z ? {
-        instance: z.instance,
-        displayInstance: z.displayInstance ?? z.instance,
-        seriesName: z.seriesName ?? z.series ?? "",
-        vcpu: z.vcpu ?? vcpu,
-        ram:  z.ram  ?? ram,
-        pricePerHourUSD: z.pricePerHourUSD,
-        region: z.region,
-        os
-      } : null;
-    } catch (e) {
-      azCard = { error: e.message };
-    }
-
-    let gcpCard;
-    try {
-      const g = findBestGcp(gcpList, vcpu, ram, os, familyGcp);
-      gcpCard = g ? {
-        instance: g.instance, vcpu: g.vcpu, ram: g.ram,
-        pricePerHourUSD: g.pricePerHourUSD, region: g.region
-      } : null;
-    } catch (e) {
-      gcpCard = { error: e.message };
-    }
-
-    let ociCard;
-    try {
-      if (String(os).toLowerCase() === "rhel") {
-        ociCard = {
-          disabled: true,
-          pricePerHourUSD: null,
-          message: "OCI does not provide a pre-built RHEL platform image. Use BYOL / BYOS."
-        };
-      } else {
-        const comp = data.oci;
-        const linux = comp?.linux ?? {};
-        const latest = (ociProcessor === "auto") ? null : ociLatestGen(linux, ociProcessor);
-        const opts = latest ? { processor: ociProcessor, generation: latest } : { processor: ociProcessor };
-        const o = findBestOci(comp, vcpu, ram, os, opts);
-        ociCard = o ? {
-          instance: o.instance, vcpu: o.vcpu, ram: o.ram,
-          pricePerHourUSD: o.pricePerHourUSD,
-          region: STORAGE_CFG?.oci?.region ?? "—",
-          breakdown: o.breakdown
-        } : null;
-      }
-    } catch (e) {
-      ociCard = { error: e.message };
-    }
-
-    const sLabel = `${storageAmtGB} GB ${storageType.toUpperCase()}`;
-    safeSetText("awsStorageSel", `Storage: ${sLabel}`);
-    safeSetText("azStorageSel",  `Storage: ${sLabel}`);
-    safeSetText("gcpStorageSel", `Storage: ${sLabel}`);
-    safeSetText("ociStorageSel", `Storage: ${sLabel}`);
-
-    let awsStorageMonthly = getAwsStorageMonthly(storageType, storageAmtGB);
-    let awsStorageHr = awsStorageMonthly / HRS_PER_MONTH;
-
-    const { sku: azDiskSku, size: azDiskGB, monthlyUSD: azStorageMonthly } = getAzureStorage(storageType, storageAmtGB);
-    let azStorageHr = azStorageMonthly / HRS_PER_MONTH;
-
-    let gcpStorageMonthly = getGcpStorageMonthly(storageType, storageAmtGB);
-    let gcpStorageHr = gcpStorageMonthly / HRS_PER_MONTH;
-
-    let ociStorageMonthly = getOciStorageMonthlyFromCfg(storageAmtGB, STORAGE_CFG.oci);
-    let ociStorageHr = ociStorageMonthly / HRS_PER_MONTH;
-    if (ociCard?.disabled) {
-      ociStorageMonthly = null;
-      ociStorageHr = null;
-    }
-
-    safeSetText("awsStoragePriceHrLabel", `${STORAGE_LABELS.aws.hr}:`);
-    safeSetText("awsStorageMonthlyLabel",  `≈ ${STORAGE_LABELS.aws.monthly}:`);
-    safeSetText("azStoragePriceHrLabel",   `${STORAGE_LABELS.azure.hr}:`);
-    safeSetText("azStorageMonthlyLabel",   `≈ ${STORAGE_LABELS.azure.monthly}:`);
-    safeSetText("gcpStoragePriceHrLabel",  `${STORAGE_LABELS.gcp.hr}:`);
-    safeSetText("gcpStorageMonthlyLabel",  `≈ ${STORAGE_LABELS.gcp.monthly}:`);
-    safeSetText("ociStoragePriceHrLabel",  `${STORAGE_LABELS.oci.hr}:`);
-    safeSetText("ociStorageMonthlyLabel",  `≈ ${STORAGE_LABELS.oci.monthly}:`);
-
-    if (!awsCard || awsCard.error) {
-      safeSetText("awsInstance", `<strong>Recommended Instance:</strong> Error: ${awsCard?.error ?? "No match"}`, { html: true });
+    // Matching
+    const awsMatch = findBestAws(filterOutArmForWindows(aws, "aws", elements.os), elements.cpu, elements.ram, elements.os, document.getElementById("awsFamily")?.value);
+    const azMatch  = findBestAzure(filterOutArmForWindows(azure, "azure", elements.os), elements.cpu, elements.ram, elements.os, document.getElementById("azFamily")?.value);
+    const gcpMatch = findBestGcp(filterOutArmForWindows(gcp, "gcp", elements.os), elements.cpu, elements.ram, elements.os, document.getElementById("gcpFamily")?.value);
+    
+    let ociMatch;
+    if (elements.os.toLowerCase() === "rhel") {
+      ociMatch = { disabled: true, message: "OCI: Use BYOL for RHEL." };
     } else {
-      safeSetText("awsInstance", `<strong>Recommended Instance:</strong> ${awsCard.instance} (${awsCard.region})`, { html: true });
-      safeSetText("awsCpu", `vCPU: ${awsCard.vcpu}`);
-      safeSetText("awsRam", `RAM: ${awsCard.ram} GB`);
-      safeSetText("awsPrice", `${PROVIDER_LABELS.aws.price}: ${fmt(awsCard.pricePerHourUSD)}`);
-      safeSetText("awsMonthly", `≈ ${PROVIDER_LABELS.aws.monthly}: ${fmt(monthly(awsCard.pricePerHourUSD))}`);
+      const proc = document.getElementById("ociProcessor")?.value || "auto";
+      const gen = ociLatestGen(oci?.linux, proc);
+      ociMatch = findBestOci(oci, elements.cpu, elements.ram, elements.os, { processor: proc, generation: gen });
     }
 
-    if (!azCard || azCard.error) {
-      safeSetText("azInstance", `<strong>Recommended VM Size:</strong> Error: ${azCard?.error ?? "No match"}`, { html: true });
-    } else {
-      const azDisplay = azCard.displayInstance ?? azCard.instance;
-      const seriesHtml = azCard.seriesName ? ` <span class="badge-series">${azCard.seriesName}</span>` : "";
-      safeSetText("azInstance", `<strong>Recommended VM Size:</strong> ${azDisplay} (${azCard.region})${seriesHtml}`, { html: true });
-      safeSetText("azCpu", `vCPU: ${azCard.vcpu}`);
-      safeSetText("azRam", `RAM: ${azCard.ram} GB`);
-      safeSetText("azPrice", `${PROVIDER_LABELS.azure.price}: ${fmt(azCard.pricePerHourUSD)}`);
-      safeSetText("azMonthly", `≈ ${PROVIDER_LABELS.azure.monthly}: ${fmt(monthly(azCard.pricePerHourUSD))}`);
-    }
+    // Storage Calculations
+    const stLabel = `Storage: ${elements.stAmt} GB ${elements.stType.toUpperCase()}`;
+    ["aws","az","gcp","oci"].forEach(p => safeSetText(`${p}StorageSel`, stLabel));
 
-    if (!gcpCard || gcpCard.error) {
-      safeSetText("gcpInstance", `<strong>Recommended Machine:</strong> Error: ${gcpCard?.error ?? "No match"}`, { html: true });
-    } else {
-      safeSetText("gcpInstance", `<strong>Recommended Machine:</strong> ${gcpCard.instance} (${gcpCard.region})`, { html: true });
-      safeSetText("gcpCpu", `vCPU: ${gcpCard.vcpu}`);
-      safeSetText("gcpRam", `RAM: ${gcpCard.ram} GB`);
-      safeSetText("gcpPrice", `${PROVIDER_LABELS.gcp.price}: ${fmt(gcpCard.pricePerHourUSD)}`);
-      safeSetText("gcpMonthly", `≈ ${PROVIDER_LABELS.gcp.monthly}: ${fmt(monthly(gcpCard.pricePerHourUSD))}`);
-    }
+    const awsStM = getAwsStorageMonthly(elements.stType, elements.stAmt);
+    const azSt = getAzureStorage(elements.stType, elements.stAmt);
+    const gcpStM = getGcpStorageMonthly(elements.stType, elements.stAmt);
+    const ociStM = ociMatch?.disabled ? 0 : getOciStorageMonthlyFromCfg(elements.stAmt, STORAGE_CFG.oci);
 
-    const ociNoticeEl = document.getElementById("ociRhelNotice");
-    const ociRhelLineEl = document.getElementById("ociRhelLine");
-    const ociPanelEl = document.querySelector(".panel--oci");
+    // UI Updates
+    updateProviderUI("aws", "aws", awsMatch, awsStM/HRS_PER_MONTH, awsStM);
+    updateProviderUI("az",  "azure", azMatch, azSt.monthlyUSD/HRS_PER_MONTH, azSt.monthlyUSD);
+    updateProviderUI("gcp", "gcp", gcpMatch, gcpStM/HRS_PER_MONTH, gcpStM);
+    updateProviderUI("oci", "oci", ociMatch, ociStM/HRS_PER_MONTH, ociStM);
 
-    if (!ociCard || ociCard.error) {
-      safeSetText("ociInstance", `<strong>Recommended Machine:</strong> Error: ${ociCard?.error ?? "No match"}`, { html: true });
-      safeSetText("ociCpu", `vCPU: —`);
-      safeSetText("ociRam", `RAM: —`);
-      safeSetText("ociPrice", `${PROVIDER_LABELS.oci.price}: —`);
-      safeSetText("ociMonthly", `≈ ${PROVIDER_LABELS.oci.monthly}: —`);
-      if (ociNoticeEl) ociNoticeEl.hidden = true;
-      if (ociRhelLineEl) { ociRhelLineEl.textContent = ""; ociRhelLineEl.setAttribute("aria-hidden","true"); }
-      if (ociPanelEl) ociPanelEl.classList.remove("panel--disabled");
-    } else if (ociCard.disabled) {
-      safeSetText("ociInstance", `<strong>Recommended Machine:</strong> —`, { html: true });
-      safeSetText("ociCpu", `vCPU: —`);
-      safeSetText("ociRam", `RAM: —`);
-      safeSetText("ociPrice", `${PROVIDER_LABELS.oci.price}: —`);
-      safeSetText("ociMonthly", `≈ ${PROVIDER_LABELS.oci.monthly}: —`);
-      if (ociNoticeEl) {
-        ociNoticeEl.textContent = ociCard.message + " ";
-        const link = document.getElementById("ociRhelLearnMore");
-        if (link) ociNoticeEl.appendChild(link);
-        ociNoticeEl.hidden = false;
-        try { ociNoticeEl.focus(); } catch (_) {}
-      }
-      if (ociRhelLineEl) { ociRhelLineEl.textContent = ""; ociRhelLineEl.setAttribute("aria-hidden","true"); }
-      if (ociPanelEl) ociPanelEl.classList.add("panel--disabled");
-    } else {
-      if (ociNoticeEl) ociNoticeEl.hidden = true;
-      if (ociPanelEl) ociPanelEl.classList.remove("panel--disabled");
-      safeSetText("ociInstance", `<strong>Recommended Machine:</strong> ${ociCard.instance} (${ociCard.region})`, { html: true });
-      safeSetText("ociCpu", `vCPU: ${ociCard.vcpu}`);
-      safeSetText("ociRam", `RAM: ${ociCard.ram} GB`);
-      safeSetText("ociPrice", `${PROVIDER_LABELS.oci.price}: ${fmt(ociCard.pricePerHourUSD)}`);
-      safeSetText("ociMonthly", `≈ ${PROVIDER_LABELS.oci.monthly}: ${fmt(monthly(ociCard.pricePerHourUSD))}`);
-      if (ociCard.breakdown?.rhel_license_per_hour) {
-        if (ociRhelLineEl) {
-          ociRhelLineEl.textContent = `RHEL license/hr: ${fmt(ociCard.breakdown.rhel_license_per_hour)}`;
-          ociRhelLineEl.setAttribute("aria-hidden","false");
-        }
-      } else {
-        if (ociRhelLineEl) { ociRhelLineEl.textContent = ""; ociRhelLineEl.setAttribute("aria-hidden","true"); }
-      }
-    }
-
-    safeSetText("awsStoragePriceHr", fmt(awsStorageHr));
-    safeSetText("awsStorageMonthly", fmt(awsStorageMonthly));
-    safeSetText("azStoragePriceHr", fmt(azStorageHr));
-    safeSetText("azStorageMonthly", fmt(azStorageMonthly));
-    safeSetText("gcpStoragePriceHr", fmt(gcpStorageHr));
-    safeSetText("gcpStorageMonthly", fmt(gcpStorageMonthly));
-    safeSetText("ociStoragePriceHr", fmt(ociStorageHr));
-    safeSetText("ociStorageMonthly", fmt(ociStorageMonthly));
-    if (azDiskSku) {
-      const extra = (azDiskGB && azDiskGB !== storageAmtGB)
-        ? ` (billed as ${azDiskGB} GB ${storageType.toUpperCase()}, ${azDiskSku})`
-        : ` (${azDiskSku})`;
-      appendToText("azStorageSel", extra);
-    }
-
-    const awsTotalHr = sumSafe(awsCard?.pricePerHourUSD, awsStorageHr);
-    const azTotalHr  = sumSafe(azCard?.pricePerHourUSD,  azStorageHr);
-    const gcpTotalHr = sumSafe(gcpCard?.pricePerHourUSD, gcpStorageHr);
-    const ociTotalHr = ociCard?.disabled ? null : sumSafe(ociCard?.pricePerHourUSD, ociStorageHr);
-
-    safeSetText("awsTotalHr", fmt(awsTotalHr));
-    safeSetText("awsTotalMonthly", fmt(sumSafe(monthly(awsCard?.pricePerHourUSD), awsStorageMonthly)));
-    safeSetText("azTotalHr", fmt(azTotalHr));
-    safeSetText("azTotalMonthly", fmt(sumSafe(monthly(azCard?.pricePerHourUSD), azStorageMonthly)));
-    safeSetText("gcpTotalHr", fmt(gcpTotalHr));
-    safeSetText("gcpTotalMonthly", fmt(sumSafe(monthly(gcpCard?.pricePerHourUSD), gcpStorageMonthly)));
-    safeSetText("ociTotalHr", fmt(ociTotalHr));
-    safeSetText("ociTotalMonthly", fmt(ociCard?.disabled ? null : sumSafe(monthly(ociCard?.pricePerHourUSD), ociStorageMonthly)));
-
+    if (azSt.sku) appendToText("azStorageSel", ` (${azSt.sku})`);
+    
     showFamilyFilters();
     setStatus("Comparison complete ✓");
-
-    const dlBtn2 = document.getElementById("downloadPdfBtn");
-    if (dlBtn2) dlBtn2.disabled = false;
-
+    if (elements.dlBtn) elements.dlBtn.disabled = false;
   } catch (err) {
     console.error(err);
-    setStatus(`Error: ${err.message}`, "error");
-    alert("Unable to read local prices. Please try again.");
-    const dlBtnErr = document.getElementById("downloadPdfBtn");
-    if (dlBtnErr) dlBtnErr.disabled = true;
+    setStatus("Error loading data", "error");
   } finally {
-    const btn2 = document.getElementById("compareBtn");
-    if (btn2) btn2.disabled = false;
+    if (elements.btn) elements.btn.disabled = false;
   }
 }
-window.compare = compare;
 
-/* ========================================================================
-   BOOTSTRAP
-   ======================================================================== */
+// OCI specific storage helper used in compare
+function getAwsStorageMonthly(t, g) { return getAwsStorageMonthlyFromCfg(t, g, STORAGE_CFG.aws); }
+function getAzureStorage(t, g) { return getAzureStorageSkuAndMonthlyFromCfg(t, g, STORAGE_CFG.azure); }
+function getGcpStorageMonthly(t, g) { return getGcpStorageMonthlyFromCfg(t, g, STORAGE_CFG.gcp); }
+
+/* --- Bootstrap --- */
 async function bootstrap() {
-  try {
-    await hydrateControlsFromMeta();
-    const osEl = document.getElementById("os");
-    const ociNoticeInit = document.getElementById("ociRhelNotice");
-    if (ociNoticeInit) ociNoticeInit.hidden = true;
+  await hydrateControlsFromMeta();
+  const inputs = ["os", "cpu", "ram", "storageType", "storageAmt", "awsFamily", "azFamily", "gcpFamily", "ociProcessor"];
+  inputs.forEach(id => document.getElementById(id)?.addEventListener("change", () => {
+    if (["awsFamily", "azFamily", "gcpFamily", "ociProcessor"].includes(id)) compare(false);
+    else if (document.getElementById("downloadPdfBtn")) document.getElementById("downloadPdfBtn").disabled = true;
+  }));
 
-    [
-      "os", "cpu", "ram", "storageType", "storageAmt",
-      "awsFamily","azFamily","gcpFamily","ociProcessor"
-    ].forEach(id => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.addEventListener("change", () => {
-        const dl = document.getElementById("downloadPdfBtn");
-        if (dl) dl.disabled = true;
-        if (id === "os") {
-          sanitizeFamiliesForWindows(el.value);
-          const ociNotice = document.getElementById("ociRhelNotice");
-          if (ociNotice) ociNotice.hidden = true;
-        }
-        if (["awsFamily","azFamily","gcpFamily","ociProcessor"].includes(id)) {
-          compare(false);
-        }
-      });
-    });
-
-    initStorageTypeTooltip();
-    initOsTypeTooltip();
-    initOciTooltip();
-
-    const btn = document.getElementById("compareBtn");
-    if (btn && !btn.getAttribute("data-bound")) {
-      btn.addEventListener("click", () => compare(true));
-      btn.setAttribute("data-bound", "1");
-    }
-
-    const dlBtn = document.getElementById("downloadPdfBtn");
-    if (dlBtn && !dlBtn.getAttribute("data-bound-pdf")) {
-      dlBtn.addEventListener("click", () => downloadResultsAsPdf());
-      dlBtn.setAttribute("data-bound-pdf", "1");
-      dlBtn.disabled = true;
-    }
-
-    setStatus("Select inputs and click Compare");
-    safeSetText("dataInfo", "Loading…");
-  } catch (e) {
-    console.error("[bootstrap] failed:", e);
-    setStatus("Initialization failed. Open console for details.", "error");
-  }
+  document.getElementById("compareBtn")?.addEventListener("click", () => compare(true));
+  document.getElementById("downloadPdfBtn")?.addEventListener("click", downloadResultsAsPdf);
+  
+  initStorageTypeTooltip();
+  initOsTypeTooltip();
+  initOciTooltip();
+  setStatus("Ready");
 }
 
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", bootstrap);
-} else {
-  bootstrap();
-}
+document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", bootstrap) : bootstrap();
