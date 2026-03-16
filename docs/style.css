@@ -577,57 +577,67 @@ select option[disabled] {
   }
 
   /* 1. Hide the interactive buttons and tooltips */
-  .btn-row, .info-btn, .status, .info-pop, .info-pop--modal { 
+  .btn-row, .info-btn, .status, .info-pop, .info-pop--modal, .filters { 
     display: none !important; 
   }
 
   /* 2. Fix the "Odd" Family/Processor Alignment */
-  /* Force label and box to stay side-by-side */
-  .family-filter, 
-  .panel .label-with-info {
+  /* Target the container of the label and select */
+  .family-filter {
     display: flex !important;
-    flex-direction: row !important;
+    flex-wrap: nowrap !important;
     align-items: center !important;
-    gap: 10px !important;
-    margin-bottom: 12px !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    margin: 10px 0 !important;
+    width: 100% !important;
   }
 
-  /* Force the select box to look like a professional field */
-  .family-filter select,
-  .panel select {
-    display: inline-block !important;
-    visibility: visible !important;
-    appearance: none !important; /* Removes the browser arrow */
-    -webkit-appearance: none !important;
-    border: 1px solid #ccc !important;
-    background-color: #fcfcfc !important;
-    padding: 4px 8px !important;
-    border-radius: 4px !important;
+  /* Ensure labels don't shrink or wrap */
+  .family-filter label {
+    flex: 0 0 auto !important;
+    margin-bottom: 0 !important;
+    white-space: nowrap !important;
     font-size: 13px !important;
-    color: #333 !important;
-    /* This prevents the "collapsed" look from your screenshots */
-    width: 160px !important; 
-    min-width: 160px !important;
   }
 
-  /* 3. Force 4-Column Layout on Page */
+  /* Force the select box to have a solid, non-collapsible structure */
+  .family-filter select {
+    flex: 1 1 auto !important; /* Allow it to fill remaining space but maintain structure */
+    display: block !important;
+    visibility: visible !important;
+    appearance: none !important; 
+    -webkit-appearance: none !important;
+    border: 1px solid #aaa !important; /* Slightly darker for PDF contrast */
+    background: #fff !important;
+    height: 32px !important; /* Explicit height is crucial for PDF engines */
+    line-height: 32px !important;
+    padding: 0 8px !important;
+    border-radius: 4px !important;
+    font-size: 12px !important;
+    width: 100% !important;
+    min-width: 140px !important;
+  }
+
+  /* 3. Layout Control */
   .results { 
     display: grid !important;
-    grid-template-columns: repeat(4, 1fr) !important;
-    gap: 12px !important;
+    grid-template-columns: repeat(2, 1fr) !important; /* 2 columns is often safer for PDF widths */
+    gap: 15px !important;
   }
 
   .panel { 
     box-shadow: none !important; 
-    border: 1px solid #e5e7eb !important; 
+    border: 1px solid #ddd !important; 
     break-inside: avoid;
-    padding: 14px !important;
+    padding: 15px !important;
+    min-height: auto !important; /* Let it shrink to content in PDF */
   }
 
-  /* 4. Fix Title Background */
+  /* 4. Fix Title */
   .app-title--pill {
-    background: #f8fafc !important;
+    background: #f1f5f9 !important;
     border: 1px solid #cbd5e1 !important;
-    padding: 10px 20px !important;
+    -webkit-print-color-adjust: exact;
   }
 }
