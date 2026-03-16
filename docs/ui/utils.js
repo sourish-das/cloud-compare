@@ -182,16 +182,26 @@ export function getAzureStorageSkuAndMonthlyFromCfg(type, gb, azCfg) {
 
 /* ---------- GCP storage pricing ---------- */
 /**
- * GCP PD-SSD and PD-Standard:
- * Simple per-GB rate, same as AWS model.
+ * GCP PD-Balanced (SSD) and PD-Standard (HDD).
+ * - SSD: simple per-GB rate (Balanced PD).
+ * - HDD: per-GB rate with a one-time free 30 GiB-month band (if provided in cfg).
+ * Returns monthly USD or null.
  */
 export function getGcpStorageMonthlyFromCfg(type, gb, gcpCfg) {
   if (!isFinite(gb) || gb <= 0) return null;
   const t = (type || "hdd").toLowerCase();
+
   if (t === "ssd") {
-    return gb * Number(gcpCfg?.ssd_per_gb_month ?? 0.17);
+    // Balanced PD default = $0.10/GB-month (overridden by STORAGE_CFG.gcp if present)
+    const rate = Number(gcpCfg?.ssd_per_gb_month ?? 0.10);
+    return gb * rate;
   }
-  return gb * Number(gcpCfg?.hdd_per_gb_month ?? 0.04);
+
+  // HDD (PD-Standard) with one-time 30 GiB-month free band
+  const hddRate = Number(gcpCfg?.hdd_per_gb_month ?? 0.04);
+  const freeBand = Number(gcpCfg?.hdd_free_gb_per_month ?? 0) || 0;
+  const billableGiB = Math.max(0, Number(gb) - freeBand);
+  return billableGiB * hddRate;
 }
 
 /* ---------- OCI storage pricing ---------- */
