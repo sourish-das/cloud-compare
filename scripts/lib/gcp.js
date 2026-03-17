@@ -1,7 +1,7 @@
 // scripts/lib/gcp.js
 // Helpers for GCP Retail Prices + Compute discovery (Linux-first)
 // CommonJS (Node 18+, global fetch)
-// Version: 2.2.0 - Includes latest C4/N4/X4 series, 10x pack fix, and modern RAM ratios.
+// Version: 2.2.1 - Includes latest C4/N4/X4 series, 10x pack fix, and modern RAM ratios.
 
 "use strict";
 
