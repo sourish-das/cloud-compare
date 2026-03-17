@@ -1,3 +1,6 @@
+// scripts/lib/oci.js
+// Helpers for OCI Retail Prices + ResourceSkus enrichment
+
 "use strict";
 
 const fs = require("fs");
