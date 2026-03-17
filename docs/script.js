@@ -596,7 +596,7 @@ export async function compare(resetFamilies = false) {
     let gcpStorageMonthly = getGcpStorageMonthly(storageType, storageAmtGB);
     let gcpStorageHr = gcpStorageMonthly / HRS_PER_MONTH;
 
-    let ociStorageMonthly = getOciStorageMonthlyFromCfg(storageAmtGB, STORAGE_CFG.oci);
+    let ociStorageMonthly = getOciStorageMonthlyFromCfg(storageType, storageAmtGB, STORAGE_CFG.oci);
     let ociStorageHr = ociStorageMonthly / HRS_PER_MONTH;
     if (ociCard?.disabled) {
       ociStorageMonthly = null;
