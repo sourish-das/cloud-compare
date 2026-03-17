@@ -55,7 +55,8 @@ function inferMachineType(sku) {
   }
   const s = String(sku?.description || sku?.displayName || "").toLowerCase();
   // Include latest families (x4, h3/h4/h4d, c4/c4a/c4d, n4/n4a/n4d)
-  const re = /\b(m1|m2|m3|m4|x4|h4d|h4|h3|c2d|c2|c3d|c3|c4d|c4a|c4|n4d|n4a|n4|n2d|n2|n1|e2|t2a|t2d)-(standard|highmem|highcpu|ultramem|megamem)-(\d+)\b/;
+  const re =
+    /\b(m1|m2|m3|m4|x4|h4d|h4|h3|c2d|c2|c3d|c3|c4d|c4a|c4|n4d|n4a|n4|n2d|n2|n1|e2|t2a|t2d)-(standard|highmem|highcpu|ultramem|megamem)-(\d+)\b/;
   const m = s.match(re);
   if (!m) return null;
   return `${m[1]}-${m[2]}-${m[3]}`;
@@ -82,7 +83,9 @@ function extractHourlyPrice(pricingInfo) {
 function deriveVcpuRamFromType(mt) {
   if (!mt) return { vcpu: undefined, ram: undefined };
   if (/^custom-/.test(mt)) return { vcpu: undefined, ram: undefined };
-  const m = String(mt).match(/^(m1|m2|m3|m4|x4|h4d|h4|h3|c2d|c2|c3d|c3|c4d|c4a|c4|n4d|n4a|n4|n2d|n2|n1|e2|t2a|t2d)-(standard|highmem|highcpu|ultramem|megamem)-(\d+)$/i);
+  const m = String(mt).match(
+    /^(m1|m2|m3|m4|x4|h4d|h4|h3|c2d|c2|c3d|c3|c4d|c4a|c4|n4d|n4a|n4|n2d|n2|n1|e2|t2a|t2d)-(standard|highmem|highcpu|ultramem|megamem)-(\d+)$/i
+  );
   if (!m) return { vcpu: undefined, ram: undefined };
 
   const series = m[1].toLowerCase();
