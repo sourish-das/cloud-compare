@@ -1,7 +1,7 @@
 // scripts/lib/gcp.js
 // Helpers for GCP Retail Prices + Compute discovery (Linux-first)
 // CommonJS (Node 18+, global fetch)
-// Version: 2.1.0 - Includes latest C4/N4/X4 series and enhanced pricing normalization.
+// Version: 2.2.0 - Includes latest C4/N4/X4 series, 10x pack fix, and modern RAM ratios.
 
 "use strict";
 
@@ -61,7 +61,7 @@ function inferMachineType(sku) {
 /**
  * Normalize Catalog prices to $/hour.
  * This version is conversion-aware, handling per-second and per-minute units.
- * Required because GCP Billing API often returns "nanos per second".
+ * FIXED: Handles "display packs" (e.g. 10x vCPU-hours) to prevent 10x undercount.
  */
 function extractHourlyPrice(pricingInfo) {
   for (const p of (pricingInfo || [])) {
@@ -70,35 +70,44 @@ function extractHourlyPrice(pricingInfo) {
     const rate = pe?.tieredRates?.[0]?.unitPrice;
     if (!rate) continue;
 
-    // Raw money amount (units + nanos)
-    const money = Number(rate.units || 0) + Number(rate.nanos || 0) / 1e9;
+    // Raw money amount (in the unit described by usage/base below)
+    let money = Number(rate.units || 0) + Number(rate.nanos || 0) / 1e9;
     if (!(money > 0)) continue;
 
     const usage = String(pe.usageUnit || "").toLowerCase();   // e.g., 'h', 's', 'min'
     const base  = String(pe.baseUnit   || "").toLowerCase();  // e.g., 's'
-    const k     = Number(pe.baseUnitConversionFactor || 1);   // e.g., 3600
+    const k     = Number(pe.baseUnitConversionFactor || 1);   // e.g., 3600 when mapping base->usage
 
-    // 1. If usageUnit is explicitly 'hour', assume money is already $/hour.
+    // If the usage unit explicitly says hours, treat 'money' as already $/hour.
+    let hourly;
     if (usage === "h" || usage === "hour" || usage === "hours") {
-      return money;
+      hourly = money;
+    } else if (usage === "s" || usage === "sec" || usage === "second" || usage === "seconds") {
+      hourly = money * 3600; // seconds -> hours
+    } else if (usage === "min" || usage === "minute" || usage === "minutes") {
+      hourly = money * 60;   // minutes -> hours
+    } else if (base === "s" || base === "sec" || base === "second" || base === "seconds") {
+      // If usageUnit is empty but baseUnit is seconds, multiply once by factor to reach hours.
+      hourly = money * (k > 0 ? k : 3600);
+    } else {
+      // Default: assume already per hour.
+      hourly = money;
     }
 
-    // 2. If usage is seconds/minutes, convert to per hour via hard math.
-    if (usage === "s" || usage === "sec" || usage === "second" || usage === "seconds") {
-      return money * 3600;
-    }
-    if (usage === "min" || usage === "minute" || usage === "minutes") {
-      return money * 60;
-    }
+    // --- NEW: handle "display packs" (e.g., price is for 10 vCPU-hrs or 10 GiB-hrs) ---
+    const dq = Number(pe.displayQuantity || 1);
+    const ud = String(pe.usageUnitDescription || "").toLowerCase();
+    const mentionsTenPack = dq >= 10 && (/\b10\b/.test(ud) && /\b(vcpu|core|gb|gib|memory|ram)\b/.test(ud));
 
-    // 3. If usageUnit is empty/generic but baseUnit is seconds, use factor or fallback.
-    if (base === "s" || base === "sec" || base === "second" || base === "seconds") {
-      // If factor says how many base units make one usage unit (often 3600 for s->h).
-      return money * (k > 0 ? k : 3600);
+    // Heuristic: if displayQuantity >= 10 and description implies a 10-pack,
+    // or the computed hourly looks implausibly small for core/ram SKUs (<~0.05),
+    // scale by displayQuantity to get the true per-hour, per-VM unit rate.
+    if (dq >= 10 && (mentionsTenPack || hourly < 0.05)) {
+      hourly *= dq;
     }
+    // -------------------------------------------------------------------------------
 
-    // Default: return raw amount
-    return money;
+    return hourly;
   }
   return null;
 }
@@ -106,9 +115,7 @@ function extractHourlyPrice(pricingInfo) {
 /**
  * Derive vCPU/RAM for predefined machine types.
  * Standard ratios used for unit-rate pricing composition.
- * - STANDARD: 4 GiB / vCPU
- * - HIGHMEM:  8 GiB / vCPU
- * - HIGHCPU:  1 GiB / vCPU (N1 is special: 0.9 GiB)
+ * FIXED: Sets 2 GiB/vCPU for modern HIGHCPU (N4/N4A/C4/C4D etc.).
  */
 function deriveVcpuRamFromType(mt) {
   if (!mt) return { vcpu: undefined, ram: undefined };
@@ -129,8 +136,10 @@ function deriveVcpuRamFromType(mt) {
 
   if (cls.startsWith("standard")) return { vcpu, ram: vcpu * 4 };
   if (cls.startsWith("highmem"))  return { vcpu, ram: vcpu * 8 };
-  if (cls.startsWith("highcpu"))  {
-    return { vcpu, ram: series.startsWith("n1") ? vcpu * 0.9 : vcpu * 1.0 };
+  
+  if (cls.startsWith("highcpu")) {
+    if (series.startsWith("n1")) return { vcpu, ram: vcpu * 0.9 }; // legacy N1
+    return { vcpu, ram: vcpu * 2 }; // modern families: 2 GiB per vCPU
   }
 
   return { vcpu, ram: undefined };
