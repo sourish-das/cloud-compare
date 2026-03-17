@@ -206,14 +206,26 @@ export function getGcpStorageMonthlyFromCfg(type, gb, gcpCfg) {
 
 /* ---------- OCI storage pricing ---------- */
 /**
- * OCI Block Volume:
- * - One base price (USD per GB-month)
- * - Same base price for HDD/SSD UI selection
- * - Performance via VPUs (not modeled here)
+ * OCI Block Volume monthly USD:
+ * Monthly = GB × (base_per_GB_month + VPUs × vpu_price_per_GB_month)
+ * - Back-compat: if called as (gb, cfg) → assume SSD/Balanced (10 VPUs).
+ * - If called as ('ssd'|'hdd', gb, cfg):
+ *     'ssd' → Balanced (10 VPUs)
+ *     'hdd' → Lower Cost (0 VPUs)
+ * Note: Defaults (0.0255 base; 0.0017 per VPU per GB-month) can be overridden
+ *       by STORAGE_CFG.oci in state.js.
  */
-export function getOciStorageMonthlyFromCfg(gb, ociCfg) {
+export function getOciStorageMonthlyFromCfg(arg1, arg2, arg3) {
+  let type = 'ssd', gb, cfg;
+  if (typeof arg1 === 'string') { type = String(arg1).toLowerCase(); gb = arg2; cfg = arg3; }
+  else { gb = arg1; cfg = arg2; }
   if (!isFinite(gb) || gb <= 0) return null;
-  return gb * Number(ociCfg?.block_volume_gb_month ?? 0.0255);
+
+  const base   = Number(cfg?.block_volume_gb_month ?? 0.0255);
+  const vpuUSD = Number(cfg?.vpu_per_gb_month ?? 0.0017);
+  const vpus   = (type === 'hdd') ? 0 : 10; // SSD → Balanced (10), HDD → Lower Cost (0)
+
+  return Number(gb) * (base + vpus * vpuUSD);
 }
 
 /* ---------- Reset all UI fields (AWS + Azure + GCP + OCI) ---------- */
