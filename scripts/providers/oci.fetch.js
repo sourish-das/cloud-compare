@@ -1,8 +1,5 @@
 // scripts/providers/oci.fetch.js
 // Node 18+
-// Live-only model: try Oracle APEX -> write docs/data/oci/oci.prices.json
-// Fallback 1: last committed docs/data/oci/oci.prices.json
-// Fallback 2: published list-price defaults (keeps pipeline green)
 
 const path = require("path");
 const fs = require("fs");
@@ -41,8 +38,10 @@ const FALLBACK = {
     Standard3:  { cpu: 0.04,  ram: 0.0015, shape: "VM.Standard3.Flex",  arch: "x86" },
     Optimized3: { cpu: 0.054, ram: 0.0015, shape: "VM.Optimized3.Flex", arch: "x86" }
   },
-  bv: 0.0255, // Block Volume base ($/GB-month)
-  win: 0.046  // Windows uplift ($/vCPU-hour)
+  // Storage fallbacks
+  bv: 0.0255,     // Block Volume base ($/GB-month)
+  bv_vpu: 0.0017, // Block Volume Performance Units price ($ per VPU per GB-month)
+  win: 0.046      // Windows uplift ($/vCPU-hour)
 };
 
 // ---- APEX helpers
@@ -88,7 +87,10 @@ const RX = {
   X9O_RAM: /Compute\s*-\s*Virtual\s*Machine\s*Optimized\s*-\s*X9\s*-\s*Memory/i,
   // Windows & Block Volume
   WIN: /Windows.*(license|server).*(per.*(vCPU|OCPU).*(hour|hr))/i,
-  BV:  /Block\s*Volume\s*Storage/i
+  // Base capacity (USD per GB-month) — avoid backups/replication lines
+  BV:  /Block\s*Volume.*(Provisioned|Storage).*(GB.?month|per\s*GB\s*month)/i,
+  // Performance Units (USD per VPU per GB-month)
+  BV_VPU: /Block\s*Volume\s*Performance\s*Units/i
 };
 
 const isNum = (x) => Number.isFinite(Number(x));
@@ -136,11 +138,14 @@ function buildFromApex(items) {
   if (!arm.length) throw new Error("Arm list empty");
   // intel may be empty in some regions; do not enforce
 
-  const win = firstVal(items, RX.WIN, FALLBACK.win);
-  const bv  = minVal(items, RX.BV,  FALLBACK.bv); // prefer minimum published base
+  const win   = firstVal(items, RX.WIN,   FALLBACK.win);
+  const bv    = minVal(items, RX.BV,      FALLBACK.bv);     // base capacity $/GB-month
+  const bvVpu = firstVal(items, RX.BV_VPU, FALLBACK.bv_vpu); // VPU $ per VPU per GB-month
 
-  if (!isNum(win)) console.warn("[OCI] Windows license price not found in APEX; using fallback.");
-  if (!isNum(bv))  console.warn("[OCI] Block Volume base not found in APEX; using fallback.");
+  if (!isNum(win))  console.warn("[OCI] Windows license price not found in APEX; using fallback.");
+  if (!isNum(bv))   console.warn("[OCI] Block Volume base not found in APEX; using fallback.");
+  if (!isNum(bvVpu))console.warn("[OCI] Block Volume VPU price not found in APEX; using fallback.");
+  else              console.log(`[OCI] BV VPU price (USD/VPU/GB-month, ${OCI_REGION}): ${bvVpu}`);
 
   return {
     meta: {
@@ -155,7 +160,11 @@ function buildFromApex(items) {
       linux: { amd, arm, intel },
       windows: { license_per_vcpu_hour: Number(isNum(win) ? win : FALLBACK.win) }
     },
-    storage: { region: OCI_REGION, block_volume_gb_month: Number(isNum(bv) ? bv : FALLBACK.bv) }
+    storage: {
+      region: OCI_REGION,
+      block_volume_gb_month: Number(isNum(bv) ? bv : FALLBACK.bv),
+      vpu_per_gb_month:      Number(isNum(bvVpu) ? bvVpu : FALLBACK.bv_vpu)
+    }
   };
 }
 
@@ -188,7 +197,11 @@ function buildFromFallback() {
       linux: { amd, arm, intel },
       windows: { license_per_vcpu_hour: FALLBACK.win }
     },
-    storage: { region: OCI_REGION, block_volume_gb_month: FALLBACK.bv }
+    storage: {
+      region: OCI_REGION,
+      block_volume_gb_month: FALLBACK.bv,
+      vpu_per_gb_month: FALLBACK.bv_vpu
+    }
   };
 }
 
