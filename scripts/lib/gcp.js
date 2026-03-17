@@ -10,31 +10,18 @@
 const CE_SERVICE_ID = "6F81-5844-456A";
 
 /* ============================================================
- * Series policy (apples-to-apples with AWS/Azure categories)
- * ------------------------------------------------------------
- * GENERAL → E/N/T (STANDARD only)
- * COMPUTE → C/H + any *-HIGHCPU-*
- * MEMORY  → M + X + any *-HIGHMEM-*
+ * (Optional) Series lists for UI display only (not used to classify)
  * ============================================================ */
-
 const GCP_SERIES_ALLOW = {
   general: ["E2", "N1", "N2", "N2D", "N4", "N4A", "N4D", "T2A", "T2D"],
   compute: ["C2", "C2D", "C3", "C3D", "C4", "C4D", "C4A", "H3", "H4", "H4D"],
   memory:  ["M1", "M2", "M3", "M4", "X4"]
 };
 
-// Arm-identifying series
+// Arm-identifying series (used only for arch tag)
 const ARM_SERIES = new Set(["t2a", "c4a", "n4a", "a4x"]);
 
-// Classification by non-STANDARD suffix
-const CLASS_TO_CATEGORY = {
-  HIGHCPU:  "compute",
-  HIGHMEM:  "memory",
-  ULTRAMEM: "memory",
-  MEGAMEM:  "memory"
-};
-
-// Example instances (handy for probes or docs)
+// Example instances (handy for probes/docs; not used by logic)
 const GCP_EXAMPLE_INSTANCES = {
   general: ["e2-standard-2", "n2-standard-4", "t2a-standard-4", "n4-standard-4"],
   compute: ["c2-standard-4", "c3-standard-4", "c4-standard-4", "n2-highcpu-4", "e2-highcpu-8"],
@@ -78,7 +65,7 @@ function extractHourlyPrice(pricingInfo) {
  * - STANDARD: 4 GiB / vCPU
  * - HIGHMEM:  8 GiB / vCPU
  * - HIGHCPU:  1 GiB / vCPU (N1 HIGHCPU is 0.9 GiB/vCPU)
- * - M*/X*: do NOT guess RAM (leave undefined)
+ * - M-series / X-series: do NOT guess RAM (leave undefined)
  */
 function deriveVcpuRamFromType(mt) {
   if (!mt) return { vcpu: undefined, ram: undefined };
@@ -183,13 +170,12 @@ function buildSeriesUnitRateMaps(allSkus, region) {
 }
 
 /* ============================================================
- * Category classification (hyphen-native)
+ * Category classification (Calculator-style: suffix only)
  * ============================================================ */
 
 /**
- * Classify a predefined machine type to {general|compute|memory}.
+ * Classify by suffix only (no series bias), mirroring GCP Calculator.
  * Accepts tokens like: c4-standard-4, n2-highcpu-8, m2-ultramem-208
- * (We standardize on hyphens across providers; exclude custom-*.)
  */
 function classifyGcpInstance(instance) {
   if (!instance) return null;
@@ -200,18 +186,11 @@ function classifyGcpInstance(instance) {
   const m = T.match(/^([A-Z0-9]+)-(STANDARD|HIGHCPU|HIGHMEM|ULTRAMEM|MEGAMEM)-(\d+)$/);
   if (!m) return null;
 
-  const series = m[1];
-  const cls    = m[2];
-
-  // Non-Standard classes have priority
-  if (cls === "HIGHCPU") return "compute";
-  if (cls === "HIGHMEM" || cls === "ULTRAMEM" || cls === "MEGAMEM") return "memory";
-
-  // STANDARD → decide by series family
-  if (GCP_SERIES_ALLOW.compute.includes(series)) return "compute";
-  if (GCP_SERIES_ALLOW.memory.includes(series))  return "memory";
-  if (GCP_SERIES_ALLOW.general.includes(series)) return "general";
-  return null;
+  const cls = m[2];
+  if (cls === "STANDARD") return "general";
+  if (cls === "HIGHCPU")  return "compute";
+  // HIGHMEM/ULTRAMEM/MEGAMEM → memory
+  return "memory";
 }
 
 function getGcpAllowedPrefixes(category) {
@@ -219,16 +198,14 @@ function getGcpAllowedPrefixes(category) {
 }
 
 /* ============================================================
- * Arm helpers
+ * Arm helpers (for arch tag)
  * ============================================================ */
 
-/** Returns true if the series is Arm (T2A/C4A/N4A/A4X). */
 function isGcpArmSeries(series) {
   if (!series) return false;
   return ARM_SERIES.has(String(series).toLowerCase());
 }
 
-/** Returns true if a predefined machine type (e.g., t2a-standard-4) is Arm. */
 function isGcpArmMachineType(machineType) {
   if (!machineType) return false;
   const m = String(machineType).toLowerCase().match(/^([a-z0-9]+)-[a-z]+[a-z0-9]*-\d+$/);
@@ -340,10 +317,6 @@ async function listZoneMachineTypes(projectId, zone, accessToken) {
 const WINDOWS_STANDARD_FALLBACK_RATE =
   Number(process.env.GCP_WINDOWS_RATE_PER_VCPU || 0) || 0.046;
 
-/**
- * Attempt to resolve Windows Server per‑vCPU license rate from Catalog for region.
- * Falls back to env/public rate when not present in tenant.
- */
 function buildWindowsCoreRate(allSkus, region) {
   const inRegion = (sku) => {
     const cat = sku?.category || {};
