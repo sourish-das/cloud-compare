@@ -21,6 +21,13 @@ const {
   getAccessTokenFromADC,
   listRegionZones,
   listZoneMachineTypes,
+  // catalog parsing/helpers
+  inferMachineType,
+  isPerInstanceSku,
+  extractHourlyPrice,
+  deriveVcpuRamFromType,
+  classifyGcpInstance,
+  regionMatches,
   // arch tag
   isGcpArmSeries
 } = require("../lib/gcp");
@@ -33,8 +40,10 @@ const API_KEY  = process.env.GCP_PRICE_API_KEY;     // Catalog (only if no beare
 const PROJECT  = process.env.GCP_PROJECT_ID;        // Compute discovery project
 
 // --------- local helpers ----------
-const EXCLUDE_NAME = /(ultra(mem|cpu)?|hyper|extreme|-metal|-lssd)/i;
+// Keep ultramem shapes; still exclude bare-metal/LSSD etc.
+const EXCLUDE_NAME = /(hyper|extreme|-metal|-lssd)/i;
 
+// Suffix-only (Calculator-style) classifier for compose path
 function classifyBySuffix(instance) {
   const m = String(instance).toLowerCase().match(/-(standard|highcpu|highmem|ultramem|megamem)-\d+$/);
   if (!m) return null;
@@ -45,11 +54,16 @@ function classifyBySuffix(instance) {
 }
 
 async function listSkus(serviceId, pageToken = "") {
+  // Use literal '&' (no HTML entities) so pagination and API key work correctly.
   const base = `https://cloudbilling.googleapis.com/v1/services/${serviceId}/skus?currencyCode=${encodeURIComponent(CURRENCY)}&pageSize=5000`;
   const bearer = process.env.GCLOUD_ACCESS_TOKEN || process.env.GOOGLE_OAUTH_ACCESS_TOKEN || "";
   const headers = bearer ? { Authorization: `Bearer ${bearer}` } : {};
-  const url = bearer ? (pageToken ? `${base}&pageToken=${encodeURIComponent(pageToken)}` : base)
-                     : (pageToken ? `${base}&pageToken=${encodeURIComponent(pageToken)}&key=${API_KEY}` : `${base}&key=${API_KEY}`);
+  const url = bearer
+    ? (pageToken ? `${base}&pageToken=${encodeURIComponent(pageToken)}` : base)
+    : (pageToken
+        ? `${base}&pageToken=${encodeURIComponent(pageToken)}&key=${API_KEY}`
+        : `${base}&key=${API_KEY}`);
+
   const r = await fetch(url, { headers });
   if (!r.ok) {
     const txt = await r.text().catch(() => "");
@@ -58,9 +72,8 @@ async function listSkus(serviceId, pageToken = "") {
   return r.json();
 }
 
-// ---------- main fetch ----------
 async function main() {
-  logStart(`[GCP] Linux-only fetch (region=${REGION})`);
+  logStart(`[GCP] Linux hybrid fetch (per-instance first, compose fallback) [region=${REGION}]`);
 
   // 1) Pull full Catalog SKUs for Compute Engine
   if (!process.env.GCLOUD_ACCESS_TOKEN && !API_KEY) {
@@ -75,22 +88,73 @@ async function main() {
   } while (pageToken);
 
   // Build OnDemand Core/RAM unit-rate map per series for our region
+  // (lib/gcp.js: now normalized to $/hour and prefers exact > us > global)
   const unitRates = buildSeriesUnitRateMaps(allSkus, REGION);
 
-  // 2) Discover predefined machine types (exact vCPU/RAM)
+  // 2) Phase-1: Catalog per-instance SKUs (Linux, exact-region) → rows
+  const rows = [];
+  const have = new Set(); // machineType names captured in Phase-1 (lowercase)
+  for (const sku of allSkus) {
+    const cat = sku?.category || {};
+    if (cat.resourceFamily !== "Compute") continue;
+    if (cat.usageType && !/OnDemand/i.test(cat.usageType)) continue; // on-demand only
+    if (!regionMatches(sku.serviceRegions, REGION)) continue;
+
+    const mt = inferMachineType(sku);         // hyphenated predefined type or null
+    if (!mt) continue;                        // excludes custom-*
+    if (!isPerInstanceSku(sku, mt)) continue; // only true per-instance rows
+
+    // Treat as Linux unless description explicitly mentions Windows
+    const readable = (sku.description || sku.displayName || "");
+    if (/windows/i.test(readable)) continue;  // Linux-only scope here
+
+    // Price normalized to $/hour by lib/gcp.js
+    const price = extractHourlyPrice(sku.pricingInfo);
+    if (!(price > 0)) continue;
+
+    // vCPU/RAM from attributes or derive from type token
+    const a = sku.attributes || {};
+    let vcpu = a.vcpu ? Number(a.vcpu) : undefined;
+    let ram  = a.memoryGb ? Number(a.memoryGb) : undefined;
+    if (!Number.isFinite(vcpu) || !Number.isFinite(ram)) {
+      const d = deriveVcpuRamFromType(mt);
+      if (!Number.isFinite(vcpu)) vcpu = d.vcpu;
+      if (!Number.isFinite(ram))  ram  = d.ram;
+    }
+    if (!Number.isFinite(vcpu) || !Number.isFinite(ram)) continue;
+
+    const category = classifyGcpInstance(mt) || classifyBySuffix(mt);
+    if (!category) continue;
+
+    const series = mt.split("-")[0].toLowerCase();
+    rows.push({
+      instance: mt.toLowerCase(),
+      category,
+      vcpu,
+      ram,
+      pricePerHourUSD: +Number(price).toFixed(6),
+      region: REGION,
+      os: "Linux",
+      series,
+      arch: isGcpArmSeries(series) ? "arm" : "x86",
+      source: "catalog"
+    });
+    have.add(mt.toLowerCase());
+  }
+
+  // 3) Phase-2: Compose fallback for shapes missing after Phase-1
   if (!PROJECT) throw new Error("[GCP] GCP_PROJECT_ID is required for Compute discovery.");
   const accessToken = await getAccessTokenFromADC(); // reads GCLOUD_ACCESS_TOKEN
   if (!accessToken) throw new Error("[GCP] GCLOUD_ACCESS_TOKEN is empty.");
 
   const zones = await listRegionZones(PROJECT, REGION, accessToken);
   const mtMap = new Map(); // type -> { vcpu, ramGiB }
-
   for (const z of zones) {
     const mts = await listZoneMachineTypes(PROJECT, z, accessToken);
     for (const mt of mts) {
       const name = String(mt.name || "").toLowerCase();
       if (name.startsWith("custom-")) continue;
-      if (!/^[a-z0-9]+-[a-z]+[a-z0-9]*-\d+$/.test(name)) continue;
+      if (!/^[a-z0-9]+-[a-z]+[a-z0-9]*-\d+$/.test(name)) continue; // predefined, hyphen-native
       if (EXCLUDE_NAME.test(name)) continue;
       if (!mtMap.has(name)) {
         const vcpu = Number(mt.guestCpus || 0);
@@ -100,9 +164,8 @@ async function main() {
     }
   }
 
-  // 3) Compose Linux base from Core/RAM unit rates (suffix classification only)
-  const rows = [];
   for (const [type, hw] of mtMap.entries()) {
+    if (have.has(type)) continue; // already got a catalog per-instance row
     const category = classifyBySuffix(type);
     if (!category) continue;
 
