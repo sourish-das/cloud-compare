@@ -1,3 +1,4 @@
+// scripts/lib/gcp.js
 // Helpers for GCP Retail Prices + Compute discovery (Linux-first)
 // CommonJS (Node 18+, global fetch)
 
@@ -49,13 +50,46 @@ function inferMachineType(sku) {
   return `${m[1]}-${m[2]}-${m[3]}`;
 }
 
-/** Extract the first positive hourly price from a Catalog pricingInfo block. */
+/**
+ * Replace the entire function in scripts/lib/gcp.js
+ * Normalize Catalog prices to **$/hour** (handles per-second/minute/base-unit cases).
+ */
 function extractHourlyPrice(pricingInfo) {
   for (const p of (pricingInfo || [])) {
-    const unit = p?.pricingExpression?.tieredRates?.[0]?.unitPrice;
-    if (!unit) continue;
-    const price = Number(unit.units || 0) + Number(unit.nanos || 0) / 1e9;
-    if (price > 0) return price;
+    const pe = p?.pricingExpression;
+    if (!pe) continue;
+    const rate = pe?.tieredRates?.[0]?.unitPrice;
+    if (!rate) continue;
+
+    // raw money amount
+    const money = Number(rate.units || 0) + Number(rate.nanos || 0) / 1e9;
+    if (!(money > 0)) continue;
+
+    const usage = String(pe.usageUnit || "").toLowerCase();   // e.g., 'h'
+    const base  = String(pe.baseUnit   || "").toLowerCase();  // e.g., 's'
+    const k     = Number(pe.baseUnitConversionFactor || 1);   // e.g., 3600
+
+    // Normalize to $/hour
+    // If usageUnit is 'hour' but baseUnit is 'second', multiply by baseUnitConversionFactor.
+    if (usage === "h" || usage === "hour" || usage === "hours") {
+      return money * (k > 0 ? k : 1);
+    }
+
+    // If usage unit is seconds/minutes, convert explicitly to hour.
+    if (usage === "s" || usage === "sec" || usage === "second" || usage === "seconds") {
+      return money * 3600;
+    }
+    if (usage === "min" || usage === "minute" || usage === "minutes") {
+      return money * 60;
+    }
+
+    // If usageUnit is empty but baseUnit is given, try base→hour via factor or fallback.
+    if (base === "s" || base === "sec" || base === "second" || base === "seconds") {
+      return money * (k > 0 ? k : 3600);
+    }
+
+    // Otherwise assume already per hour.
+    return money;
   }
   return null;
 }
@@ -147,26 +181,52 @@ function parseSeriesUnitRate(sku) {
   return { series, kind, price };
 }
 
-/** Build a per-series { core, ram } unit-rate map for a given region (On‑Demand only). */
+/**
+ * Build per-series { core, ram } map (On-Demand only) with scope precedence:
+ *    exact region > 'us' > 'global'
+ */
 function buildSeriesUnitRateMaps(allSkus, region) {
-  const maps = {};
+  const bySeriesKind = {};
+  const want = String(region || "").toLowerCase();
+  const normSet = (arr) => new Set((arr || []).map(s => String(s).toLowerCase()));
+
+  const scopeOf = (sku) => {
+    const set = normSet(sku.serviceRegions);
+    if (set.has(want)) return "exact";
+    if (want.startsWith("us-") && set.has("us")) return "us";
+    if (set.has("global")) return "global";
+    return null;
+  };
+
   for (const sku of (allSkus || [])) {
     const cat = sku?.category || {};
     if (cat.resourceFamily !== "Compute") continue;
-    if (cat.usageType && !/OnDemand/i.test(cat.usageType)) continue; // on-demand only
-    if (!regionMatches(sku.serviceRegions, region)) continue;
+    if (cat.usageType && !/OnDemand/i.test(cat.usageType)) continue;
+
+    const scope = scopeOf(sku);
+    if (!scope) continue;
 
     const info = parseSeriesUnitRate(sku);
     if (!info) continue;
 
-    // Keep the lowest positive price seen for each kind (defensive)
-    if (!maps[info.series]) maps[info.series] = {};
-    const cur = Number(maps[info.series][info.kind] || 0);
-    if (!(cur > 0) || info.price < cur) {
-      maps[info.series][info.kind] = info.price;
+    const { series, kind, price } = info;
+    if (!(price > 0)) continue;
+
+    if (!bySeriesKind[series]) bySeriesKind[series] = { core: {}, ram: {} };
+    const cur = bySeriesKind[series][kind][scope];
+    if (!(cur > 0) || price < cur) {
+      bySeriesKind[series][kind][scope] = price;
     }
   }
-  return maps;
+
+  // Collapse with precedence: exact > us > global
+  const out = {};
+  for (const [series, kinds] of Object.entries(bySeriesKind)) {
+    const core = kinds.core.exact ?? kinds.core.us ?? kinds.core.global;
+    const ram  = kinds.ram.exact  ?? kinds.ram.us  ?? kinds.ram.global;
+    if (core > 0 && ram > 0) out[series] = { core, ram };
+  }
+  return out;
 }
 
 /* ============================================================
