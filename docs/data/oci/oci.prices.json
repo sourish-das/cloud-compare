@@ -8,7 +8,7 @@
       "Windows"
     ],
     "source": "Oracle Public Pricelist (APEX) or defaults",
-    "last_verified": "2026-03-16T17:53:21.433Z"
+    "last_verified": "2026-03-17T07:29:04.775Z"
   },
   "compute": {
     "linux": {
@@ -88,6 +88,7 @@
   },
   "storage": {
     "region": "us-ashburn-1",
-    "block_volume_gb_month": 0.037
+    "block_volume_gb_month": 0.0255,
+    "vpu_per_gb_month": 0.0017
   }
 }
