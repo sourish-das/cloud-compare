@@ -38,8 +38,10 @@ export let STORAGE_CFG = {
   },
   oci: {
     region: "us-ashburn-1",
-    // OCI Block Volume base price (USD / GB / month)
-    block_volume_gb_month: 0.0255
+    // OCI Block Volume pricing (USD / GB / month)
+    block_volume_gb_month: 0.0255,
+    // VPU (performance units) price per VPU per GB-month; Balanced = 10 VPUs → +0.017/GB-month
+    vpu_per_gb_month: 0.0017
   }
 };
 
@@ -158,6 +160,10 @@ export async function loadPricesAndMeta() {
       region: (incomingStorage.oci?.region ?? ociScopedStorage.region) ?? STORAGE_CFG.oci.region,
       block_volume_gb_month: Number(
         (incomingStorage.oci?.block_volume_gb_month ?? ociScopedStorage.block_volume_gb_month) ?? STORAGE_CFG.oci.block_volume_gb_month
+      ),
+      // NEW: merge VPU price (USD per VPU per GB-month)
+      vpu_per_gb_month: Number(
+        (incomingStorage.oci?.vpu_per_gb_month ?? ociScopedStorage.vpu_per_gb_month) ?? STORAGE_CFG.oci.vpu_per_gb_month
       )
     }
   };
