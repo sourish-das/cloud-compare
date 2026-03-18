@@ -14,9 +14,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # ------------------------------------------------------------
   # 1) Azure
-  # ------------------------------------------------------------
   azure:
     uses: ./.github/workflows/update-azure.yml
     permissions:
@@ -24,9 +22,7 @@ jobs:
       id-token: write
     secrets: inherit
 
-  # ------------------------------------------------------------
   # 2) AWS
-  # ------------------------------------------------------------
   aws:
     needs: azure
     uses: ./.github/workflows/update-aws.yml
@@ -34,9 +30,7 @@ jobs:
       contents: read
     secrets: inherit
 
-  # ------------------------------------------------------------
   # 3) GCP
-  # ------------------------------------------------------------
   gcp:
     needs: aws
     uses: ./.github/workflows/update-gcp.yml
@@ -45,9 +39,7 @@ jobs:
       id-token: write
     secrets: inherit
 
-  # ------------------------------------------------------------
   # 4) OCI
-  # ------------------------------------------------------------
   oci:
     needs: gcp
     uses: ./.github/workflows/update-oci.yml
@@ -55,9 +47,7 @@ jobs:
       contents: read
     secrets: inherit
 
-  # ------------------------------------------------------------
   # 5) Aggregate & Commit (SINGLE COMMIT OWNER)
-  # ------------------------------------------------------------
   aggregate:
     needs: [azure, aws, gcp, oci]
     runs-on: ubuntu-latest
@@ -66,9 +56,7 @@ jobs:
       actions: read
 
     steps:
-      # --------------------------------------------------------
       # Checkout clean main
-      # --------------------------------------------------------
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
@@ -79,9 +67,7 @@ jobs:
           git fetch origin main
           git checkout -B main origin/main
 
-      # --------------------------------------------------------
       # Tools
-      # --------------------------------------------------------
       - name: Ensure jq is available
         run: |
           if ! command -v jq >/dev/null 2>&1; then
@@ -89,9 +75,7 @@ jobs:
             sudo apt-get install -y jq
           fi
 
-      # --------------------------------------------------------
       # Download provider artifacts
-      # --------------------------------------------------------
       - name: Download Azure artifact
         uses: actions/download-artifact@v4
         with:
@@ -120,9 +104,7 @@ jobs:
           path: _artifacts/oci
           run-id: ${{ needs.oci.outputs.run_id }}
 
-      # --------------------------------------------------------
       # Validate artifacts & export paths
-      # --------------------------------------------------------
       - name: Validate provider JSONs
         shell: bash
         run: |
@@ -143,10 +125,8 @@ jobs:
           echo "GC_SRC=$GC_SRC" >> $GITHUB_ENV
           echo "OC_SRC=$OC_SRC" >> $GITHUB_ENV
 
-      # --------------------------------------------------------
-      # Stage provider outputs into docs/
-      # --------------------------------------------------------
-      - name: Stage provider outputs
+      # Stage provider outputs (Azure/AWS/OCI as-is)
+      - name: Stage provider outputs (Azure/AWS/OCI)
         shell: bash
         run: |
           set -euo pipefail
@@ -154,12 +134,101 @@ jobs:
 
           cp -f "$AZ_SRC" docs/data/azure/azure.prices.json
           cp -f "$AW_SRC" docs/data/aws/aws.prices.json
-          cp -f "$GC_SRC" docs/data/gcp/gcp.prices.json
+          # GCP handled via gate below
           cp -f "$OC_SRC" docs/data/oci/oci.prices.json
 
-      # --------------------------------------------------------
-      # OPTIONAL: quick OCI structure check (keeps parity with provider validation)
-      # --------------------------------------------------------
+      # GCP: Stage candidate (do not publish yet)
+      - name: Stage GCP candidate (not yet live)
+        id: gcp_stage
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p docs/data/gcp/_staging
+          cp -f "$GC_SRC" docs/data/gcp/_staging/gcp.prices.json
+          echo "CAND=docs/data/gcp/_staging/gcp.prices.json" >> $GITHUB_ENV
+          echo "PROD=docs/data/gcp/gcp.prices.json"         >> $GITHUB_ENV
+
+      # GCP: Compute content hashes (promote only if different)
+      - name: Compute GCP hashes (candidate vs published)
+        id: gcp_hash
+        shell: bash
+        run: |
+          set -euo pipefail
+          CAND_HASH=$(sha256sum "$CAND" | awk '{print $1}')
+          if [[ -f "$PROD" ]]; then
+            PROD_HASH=$(sha256sum "$PROD" | awk '{print $1}')
+          else
+            PROD_HASH="(missing)"
+          fi
+          echo "candidate_hash=$CAND_HASH" >> $GITHUB_OUTPUT
+          echo "published_hash=$PROD_HASH" >> $GITHUB_OUTPUT
+          if [[ "$CAND_HASH" == "$PROD_HASH" ]]; then
+            echo "same=true" >> $GITHUB_OUTPUT
+          else
+            echo "same=false" >> $GITHUB_OUTPUT
+          fi
+
+      # GCP: Validate candidate JSON (parse + shape + price probes)
+      - name: Validate GCP candidate
+        id: gcp_validate
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # 1) Must parse
+          jq -e . "$CAND" >/dev/null
+
+          # 2) Must contain a reasonable number of rows
+          jq -e '.compute | length > 100' "$CAND" >/dev/null
+
+          # 3) Price sanity checks to prevent publishing tiny-scale regressions
+          jq -e '.compute[] | select(.instance=="c4-highcpu-16") | .pricePerHourUSD > 0.10' "$CAND" >/dev/null
+          jq -e '.compute[] | select(.instance=="n4-standard-8")  | .pricePerHourUSD > 0.10' "$CAND" >/dev/null
+
+          echo "valid=true" >> $GITHUB_OUTPUT
+
+      # GCP: Validate currently published JSON (auto-repair if invalid)
+      - name: Validate currently published GCP JSON
+        id: gcp_prod_validate
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -f "$PROD" ]]; then
+            if jq -e . "$PROD" >/dev/null 2>&1; then
+              echo "valid=true"  >> $GITHUB_OUTPUT
+            else
+              echo "valid=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "valid=false"   >> $GITHUB_OUTPUT
+          fi
+
+      # GCP: If published is invalid but candidate is valid, force replace (self-heal)
+      - name: Force-repair published GCP JSON (if invalid)
+        if: ${{ steps.gcp_prod_validate.outputs.valid != 'true' && steps.gcp_validate.outputs.valid == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp -f "$CAND" "$PROD"
+          echo "Published GCP JSON was invalid; replaced with validated candidate."
+
+      # GCP: Promote if (different && valid); otherwise keep current
+      - name: Promote GCP candidate to live
+        if: ${{ steps.gcp_hash.outputs.same == 'false' && steps.gcp_validate.outputs.valid == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp -f "$CAND" "$PROD"
+          echo "Promoted new GCP prices.json to docs/data/gcp/"
+
+      - name: Skip GCP promotion (no change or invalid candidate)
+        if: ${{ steps.gcp_hash.outputs.same == 'true' || steps.gcp_validate.outputs.valid != 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "::warning::GCP not promoted — reason: same=${{ steps.gcp_hash.outputs.same }}, valid=${{ steps.gcp_validate.outputs.valid }}"
+
+      # OPTIONAL: quick OCI structure check
       - name: OCI structure sanity (optional)
         if: always()
         shell: bash
@@ -167,11 +236,8 @@ jobs:
           set -euo pipefail
           jq -e '.compute.linux.amd | length > 0' docs/data/oci/oci.prices.json >/dev/null || echo "::warning::OCI linux.amd is empty"
           jq -e '.compute.linux.arm | length > 0' docs/data/oci/oci.prices.json >/dev/null || echo "::warning::OCI linux.arm is empty"
-          # intel may be empty; do not fail
 
-      # --------------------------------------------------------
       # Build FLAT docs/data/prices.json (no timestamps)
-      # --------------------------------------------------------
       - name: Merge into docs/data/prices.json (FLAT)
         shell: bash
         run: |
@@ -193,9 +259,7 @@ jobs:
               oci:   $oc[0].compute
             }' > docs/data/prices.json
 
-      # --------------------------------------------------------
       # buildInfo.json (forces commit diff)
-      # --------------------------------------------------------
       - name: Write buildInfo.json
         shell: bash
         run: |
@@ -203,9 +267,7 @@ jobs:
             "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
             > docs/data/buildInfo.json
 
-      # --------------------------------------------------------
       # Commit (single authoritative commit)
-      # --------------------------------------------------------
       - name: Commit merged cloud prices
         shell: bash
         run: |
