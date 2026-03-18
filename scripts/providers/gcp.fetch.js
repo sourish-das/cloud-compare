@@ -53,7 +53,7 @@ function withinPolicy(vcpu) {
   return Number.isFinite(vcpu) && vcpu > 0 && vcpu <= MAX_VCPU;
 }
 
-// --------- List SKUs (no HTML entities) ---------
+// --------- List SKUs (NO HTML entities in URL) ---------
 async function listSkus(serviceId, pageToken = '') {
   const base = `https://cloudbilling.googleapis.com/v1/services/${serviceId}/skus?currencyCode=${encodeURIComponent(CURRENCY)}&pageSize=5000`;
   const bearer = process.env.GCLOUD_ACCESS_TOKEN || process.env.GOOGLE_OAUTH_ACCESS_TOKEN || '';
@@ -71,7 +71,7 @@ async function listSkus(serviceId, pageToken = '') {
 
 function clamp(x, lo, hi) { return Math.max(lo, Math.min(hi, x)); }
 
-// --------- NEW: per-series self-calibration from real per-instance SKUs ---------
+// --------- Per-series self-calibration from real per-instance SKUs ---------
 function buildSeriesScaleMap(allSkus, unitRates, region) {
   const bySeries = {};   // series -> [factor,...]
   const want = String(region || '').toLowerCase();
@@ -96,8 +96,9 @@ function buildSeriesScaleMap(allSkus, unitRates, region) {
     const rates  = unitRates[series];
     if (!rates || !(rates.core > 0) || !(rates.ram > 0)) continue;
 
+    // Linux-only ground truth
     const descTxt = `${sku.description || ''} ${sku.displayName || ''}`;
-    if (/windows|sql server|rhel|red hat|suse|sles|sap/i.test(descTxt)) continue; // Linux only
+    if (/windows|sql server|rhel|red hat|suse|sles|sap/i.test(descTxt)) continue;
 
     const actual = extractHourlyPrice(sku.pricingInfo);
     if (!(actual > 0)) continue;
@@ -122,10 +123,10 @@ function buildSeriesScaleMap(allSkus, unitRates, region) {
     }
   }
 
-  // robust median factor per series
+  // robust median factor per series (clamped)
   const out = {};
   for (const [series, samples] of Object.entries(bySeries)) {
-    samples.sort((x, y) => x - y);
+    samples.sort((a, b) => a - b);
     const mid = samples[Math.floor(samples.length / 2)];
     const factor = clamp(mid, 0.5, 2.0);
     if (Math.abs(factor - 1) > 0.03) out[series] = factor; // only record meaningful deviations
@@ -150,7 +151,8 @@ async function main() {
     pageToken = nextPageToken || '';
   } while (pageToken);
 
-  // 2) Build OnDemand Core/RAM unit-rate map per series for our region ($/hour per unit)
+  // 2) Build OnDemand Core/RAM unit-rate map per series for our region ($/hour per 1 unit)
+  //    (Ensure lib/gcp.js normalizes displayQuantity blocks to per-1 unit.)
   const unitRates = buildSeriesUnitRateMaps(allSkus, REGION);
 
   // 2b) Per-series scale factors from real per-instance rows (Linux)
@@ -178,8 +180,6 @@ async function main() {
       }
 
       if (!factor) continue; // nothing to inherit/estimate
-
-      // Clamp and apply
       seriesScale[arm] = clamp(Number(factor), 0.5, 2.0);
     }
   })();
@@ -288,6 +288,29 @@ async function main() {
       source: 'composed'
     });
   }
+
+  // --- 10× INFLATION FIX-UP (applies to both catalog and composed rows) ---
+  (function fixTenXInflation() {
+    const fixed = [];
+    for (const r of rows) {
+      const ur = unitRates[r.series] || {};
+      const base = (r.vcpu * (ur.core || 0)) + (r.ram * (ur.ram || 0));
+      const pred = base * (seriesScale[r.series] ?? 1);
+      if (pred > 0) {
+        const ratio = r.pricePerHourUSD / pred;
+        // If row is ~10× higher than expected, correct it
+        if (ratio > 8 && ratio < 12) {
+          const old = r.pricePerHourUSD;
+          r.pricePerHourUSD = +(r.pricePerHourUSD / 10).toFixed(6);
+          fixed.push({ instance: r.instance, os: r.os, old, corrected: r.pricePerHourUSD, ratio: +ratio.toFixed(2) });
+        }
+      }
+    }
+    if (fixed.length) {
+      console.warn('[GCP] Fixed 10× inflated rows:', fixed.slice(0, 8));
+      if (fixed.length > 8) console.warn(`[GCP] ...and ${fixed.length - 8} more`);
+    }
+  })();
 
   // 5) Deduplicate / finalize (Linux only)
   const cheapest = dedupeCheapestByKey(rows, r => `${r.instance}-${r.region}-${r.os}`);
