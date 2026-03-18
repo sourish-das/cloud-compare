@@ -1,25 +1,25 @@
 // scripts/lib/gcp.js
 // Helpers for GCP Retail Prices + Compute discovery (Linux-first)
 // CommonJS (Node 18+, global fetch)
-// Version: 2.2.2 (normalized hourly pricing, deterministic; cleaned regex)
-"use strict";
+// Version: 2.2.3 (normalized hourly pricing; DO NOT divide by displayQuantity)
+'use strict';
 
 // Compute Engine service id for Catalog Retail Prices API
-const CE_SERVICE_ID = "6F81-5844-456A";
+const CE_SERVICE_ID = '6F81-5844-456A';
 
 // UI helpers (exported for completeness; not used for pricing logic)
 const GCP_SERIES_ALLOW = {
-  general: ["E2", "N1", "N2", "N2D", "N4", "N4A", "N4D", "T2A", "T2D"],
-  compute: ["C2", "C2D", "C3", "C3D", "C4", "C4D", "C4A", "H3", "H4", "H4D"],
-  memory:  ["M1", "M2", "M3", "M4", "X4"]
+  general: ['E2', 'N1', 'N2', 'N2D', 'N4', 'N4A', 'N4D', 'T2A', 'T2D'],
+  compute: ['C2', 'C2D', 'C3', 'C3D', 'C4', 'C4D', 'C4A', 'H3', 'H4', 'H4D'],
+  memory:  ['M1', 'M2', 'M3', 'M4', 'X4']
 };
 
-const ARM_SERIES = new Set(["t2a", "c4a", "n4a"]);
+const ARM_SERIES = new Set(['t2a', 'c4a', 'n4a']);
 
 const GCP_EXAMPLE_INSTANCES = {
-  general: ["e2-standard-2", "n2-standard-4", "t2a-standard-4", "n4-standard-4"],
-  compute: ["c2-standard-4", "c3-standard-4", "c4-standard-4", "n2-highcpu-4", "e2-highcpu-8"],
-  memory:  ["m1-ultramem-40", "m2-ultramem-208", "m3-megamem-64", "n2-highmem-8", "e2-highmem-4"]
+  general: ['e2-standard-2', 'n2-standard-4', 't2a-standard-4', 'n4-standard-4'],
+  compute: ['c2-standard-4', 'c3-standard-4', 'c4-standard-4', 'n2-highcpu-4', 'e2-highcpu-8'],
+  memory:  ['m1-ultramem-40', 'm2-ultramem-208', 'm3-megamem-64', 'n2-highmem-8', 'e2-highmem-4']
 };
 
 // ---------------------------
@@ -32,7 +32,7 @@ function inferMachineType(sku) {
     if (/^custom-/.test(mt)) return null;
     return mt;
   }
-  const s = String((sku && (sku.description || sku.displayName)) || "").toLowerCase();
+  const s = String((sku && (sku.description || sku.displayName)) || '').toLowerCase();
   // {series}-{class}-{vcpu}
   const re = /\b(m1|m2|m3|m4|x4|h4d|h4|h3|c2d|c2|c3d|c3|c4d|c4a|c4|n4d|n4a|n4|n2d|n2|n1|e2|t2a|t2d)-(standard|highmem|highcpu|ultramem|megamem)-(\d+)\b/;
   const m = s.match(re);
@@ -40,21 +40,25 @@ function inferMachineType(sku) {
   return `${m[1]}-${m[2]}-${m[3]}`;
 }
 
-// Normalize Catalog prices to $/hour per single unit of resource (core or GiB)
+// Normalize Catalog prices to $/hour for a single unit (core or GiB)
 function extractHourlyPrice(pricingInfo) {
   for (const p of (pricingInfo || [])) {
     const pe = p && p.pricingExpression;
     if (!pe) continue;
     const rate = pe && pe.tieredRates && pe.tieredRates[0] && pe.tieredRates[0].unitPrice;
     if (!rate) continue;
-    let money = Number(rate.units || 0) + Number(rate.nanos || 0)/1e9;
-    if (!(money > 0)) continue;
-    const usage = String(pe.usageUnit || "").toLowerCase();
-    const base  = String(pe.baseUnit  || "").toLowerCase();
-    const k     = Number(pe.baseUnitConversionFactor || 1);
-    const dq    = Number(pe.displayQuantity || 1); // often 10 for CPU/RAM packs
 
-    // Step 1: normalize to price per hour
+    let money = Number(rate.units || 0) + Number(rate.nanos || 0) / 1e9;
+    if (!(money > 0)) continue;
+
+    const usage = String(pe.usageUnit || '').toLowerCase();
+    const base  = String(pe.baseUnit  || '').toLowerCase();
+    const k     = Number(pe.baseUnitConversionFactor || 1);
+    // NOTE: displayQuantity is often 10 on CE retail SKUs, but those lines are
+    // already priced per single unit-hour. Dividing by dq would undercount 10×.
+    // const dq  = Number(pe.displayQuantity || 1);
+
+    // Normalize to price per hour
     let perHour;
     if (usage === 'h' || usage === 'hour' || usage === 'hours') perHour = money;
     else if (usage === 's' || usage === 'sec' || usage === 'second' || usage === 'seconds') perHour = money * 3600;
@@ -62,9 +66,8 @@ function extractHourlyPrice(pricingInfo) {
     else if (base === 's' || base === 'sec' || base === 'second' || base === 'seconds') perHour = money * (k > 0 ? k : 3600);
     else perHour = money; // assume already hourly
 
-    // Step 2: unpack packs (e.g., displayQuantity 10 -> per single unit)
-    const perHourPerUnit = perHour / (dq > 0 ? dq : 1);
-    return perHourPerUnit;
+    // DO NOT divide by displayQuantity here.
+    return perHour;
   }
   return null;
 }
@@ -86,7 +89,7 @@ function deriveVcpuRamFromType(mt) {
 }
 
 function regionMatches(serviceRegions, region) {
-  const want = String(region || "").toLowerCase();
+  const want = String(region || '').toLowerCase();
   const set = new Set((serviceRegions || []).map(r => String(r).toLowerCase()));
   if (set.has(want)) return true;
   if (set.has('global')) return true;
@@ -95,7 +98,7 @@ function regionMatches(serviceRegions, region) {
 }
 
 function isPerInstanceSku(sku, machineType) {
-  const name = String((sku && (sku.description || sku.displayName)) || "");
+  const name = String((sku && (sku.description || sku.displayName)) || '');
   if (!machineType) return false;
   if (/^custom-/.test(machineType)) return false;
   if (/(\bCore\b|\bvCPU\b|\bRam\b|\bMemory\b|Sole\s*Tenancy|Sole\s*Tenant)/i.test(name)) return false;
@@ -105,7 +108,7 @@ function isPerInstanceSku(sku, machineType) {
 }
 
 function parseSeriesUnitRate(sku) {
-  const name = String((sku.description || sku.displayName) || "").toLowerCase();
+  const name = String((sku.description || sku.displayName) || '').toLowerCase();
   if (/(windows|sles|rhel).*license|license.*(windows|sles|rhel)/i.test(name)) return null;
   if (/(local\s*ssd|gpu|sole\s*tenant|commitment|cud|preemptible|spot)/i.test(name)) return null;
   const m = name.match(/\b(m1|m2|m3|m4|x4|h4d|h4|h3|n1|n2d|n2|n4|n4a|n4d|e2|t2a|t2d|c2d|c3d|c3|c4d|c4|c4a|c2)\b.*\b(core|vcpu|ram|memory|ultramem|megamem)\b/i);
@@ -185,25 +188,25 @@ function computeBaseHourlyFromUnitMaps(machineType, unitMaps, opts = {}) {
 }
 
 async function getAccessTokenFromADC() {
-  const token = process.env.GCLOUD_ACCESS_TOKEN || process.env.GOOGLE_OAUTH_ACCESS_TOKEN || "";
-  if (!token) throw new Error("[GCP] No access token found in environment. Provide GCLOUD_ACCESS_TOKEN.");
+  const token = process.env.GCLOUD_ACCESS_TOKEN || process.env.GOOGLE_OAUTH_ACCESS_TOKEN || '';
+  if (!token) throw new Error('[GCP] No access token found in environment. Provide GCLOUD_ACCESS_TOKEN.');
   return token;
 }
 
 async function listRegionZones(projectId, region, accessToken) {
   const url = `https://compute.googleapis.com/compute/v1/projects/${projectId}/zones`;
   const zones = [];
-  let pageToken = "";
+  let pageToken = '';
   while (true) {
     const pageUrl = pageToken ? `${url}?pageToken=${encodeURIComponent(pageToken)}` : url;
     const r = await fetch(pageUrl, { headers: { Authorization: `Bearer ${accessToken}` } });
     if (!r.ok) {
-      const txt = await r.text().catch(() => "");
+      const txt = await r.text().catch(() => '');
       throw new Error(`[GCP] zones.list HTTP ${r.status}: ${txt}`);
     }
     const j = await r.json();
     for (const z of (j.items || [])) {
-      const name = String(z.name || "").toLowerCase();
+      const name = String(z.name || '').toLowerCase();
       if (name.startsWith(`${region.toLowerCase()}-`)) zones.push(z.name);
     }
     if (!j.nextPageToken) break;
@@ -215,20 +218,21 @@ async function listRegionZones(projectId, region, accessToken) {
 async function listZoneMachineTypes(projectId, zone, accessToken) {
   const url = `https://compute.googleapis.com/compute/v1/projects/${projectId}/zones/${zone}/machineTypes`;
   const mts = [];
-  let pageToken = "";
+  let pageToken = '';
   while (true) {
     const pageUrl = pageToken ? `${url}?pageToken=${encodeURIComponent(pageToken)}` : url;
     const r = await fetch(pageUrl, { headers: { Authorization: `Bearer ${accessToken}` } });
     if (!r.ok) {
-      const txt = await r.text().catch(() => "");
+      const txt = await r.text().catch(() => '');
       throw new Error(`[GCP] machineTypes.list HTTP ${r.status}: ${txt}`);
     }
     const j = await r.json();
     for (const mt of (j.items || [])) {
-      const name = String(mt.name || "");
+      const name = String(mt.name || '');
       if (/^custom-/i.test(name)) continue;
-      const okName = /^[a-z0-9]+-[a-z]+[a-z0-9]*-\d+$/i.test(name) ||
-                     /^[a-z0-9]+-[a-z]+[a-z0-9]*-[a-z]+-\d+$/i.test(name);
+      const okName =
+        /^[a-z0-9]+-[a-z]+[a-z0-9]*-\d+$/i.test(name) ||
+        /^[a-z0-9]+-[a-z]+[a-z0-9]*-[a-z]+-\d+$/i.test(name);
       if (!okName) continue;
       mts.push({ name, guestCpus: mt.guestCpus, memoryMb: mt.memoryMb });
     }
@@ -251,7 +255,7 @@ function buildWindowsCoreRate(allSkus, region) {
   const candidates = [];
   for (const sku of (allSkus || [])) {
     if (!inRegion(sku)) continue;
-    const name = String((sku.description || sku.displayName) || "").toLowerCase();
+    const name = String((sku.description || sku.displayName) || '').toLowerCase();
     if (!/windows/.test(name)) continue;
     if (!/(license|licensing|core|vcpu)/.test(name)) continue;
     if (BAD.test(name)) continue;
@@ -261,7 +265,7 @@ function buildWindowsCoreRate(allSkus, region) {
   if (candidates.length === 0) {
     for (const sku of (allSkus || [])) {
       if (!inRegion(sku)) continue;
-      const name = String((sku.description || sku.displayName) || "").toLowerCase();
+      const name = String((sku.description || sku.displayName) || '').toLowerCase();
       if (!/windows/.test(name) || BAD.test(name)) continue;
       if (!/(paid|on-?demand|windows\s*server)/.test(name)) continue;
       const price = extractHourlyPrice(sku.pricingInfo);
@@ -269,7 +273,7 @@ function buildWindowsCoreRate(allSkus, region) {
     }
   }
   if (candidates.length > 0) {
-    candidates.sort((a,b) => a.price - b.price);
+    candidates.sort((a, b) => a.price - b.price);
     return candidates[0].price;
   }
   return WINDOWS_STANDARD_FALLBACK_RATE;
