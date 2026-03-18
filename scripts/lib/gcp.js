@@ -54,19 +54,31 @@ function extractHourlyPrice(pricingInfo) {
     const usage = String(pe.usageUnit || '').toLowerCase();
     const base  = String(pe.baseUnit  || '').toLowerCase();
     const k     = Number(pe.baseUnitConversionFactor || 1);
-    // NOTE: displayQuantity is often 10 on CE retail SKUs, but those lines are
-    // already priced per single unit-hour. Dividing by dq would undercount 10×.
-    // const dq  = Number(pe.displayQuantity || 1);
 
-    // Normalize to price per hour
+    // Catalog often encodes block pricing (e.g., displayQuantity = 10).
+    // We normalize to *per single unit-hour* by dividing by the block size.
+    const dq = Number(pe.displayQuantity || 1);
+    const q  = dq > 0 ? dq : 1;
+
+    // Normalize to price per 1 hour *and* per 1 unit
     let perHour;
-    if (usage === 'h' || usage === 'hour' || usage === 'hours') perHour = money;
-    else if (usage === 's' || usage === 'sec' || usage === 'second' || usage === 'seconds') perHour = money * 3600;
-    else if (usage === 'min' || usage === 'minute' || usage === 'minutes') perHour = money * 60;
-    else if (base === 's' || base === 'sec' || base === 'second' || base === 'seconds') perHour = money * (k > 0 ? k : 3600);
-    else perHour = money; // assume already hourly
+    if (usage === 'h' || usage === 'hour' || usage === 'hours') {
+      // money is for q hours → per-hour is money / q
+      perHour = money / q;
+    } else if (usage === 's' || usage === 'sec' || usage === 'second' || usage === 'seconds') {
+      // money is for q seconds → scale to 3600 seconds
+      perHour = money * (3600 / q);
+    } else if (usage === 'min' || usage === 'minute' || usage === 'minutes') {
+      // money is for q minutes → scale to 60 minutes
+      perHour = money * (60 / q);
+    } else if (base === 's' || base === 'sec' || base === 'second' || base === 'seconds') {
+      // base unit is seconds; k = seconds per usage unit (often 3600 for hour)
+      perHour = money * ((k > 0 ? k : 3600) / q);
+    } else {
+      // Assume already hourly but block priced → normalize by q
+      perHour = money / q;
+    }
 
-    // DO NOT divide by displayQuantity here.
     return perHour;
   }
   return null;
