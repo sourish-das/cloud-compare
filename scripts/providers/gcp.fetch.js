@@ -157,6 +157,29 @@ async function main() {
     console.log('[GCP] series-scale factors: (none)');
   }
 
+  // --- ARM series fallback scale from x86 sibling (only if ARM has no ground-truth factor) ---
+(function inheritArmScale() {
+  const sib = { n4a: 'n4', c4a: 'c4', t2a: 't2d' };
+  for (const [arm, x86] of Object.entries(sib)) {
+    if (seriesScale[arm] != null) continue;
+    let factor = seriesScale[x86];
+
+    // If sibling lacks a factor, estimate from unitRates ratio (x86 vs ARM)
+    const xr = unitRates[x86], ar = unitRates[arm];
+    if (!factor && xr && ar && xr.core > 0 && ar.core > 0 && xr.ram > 0 && ar.ram > 0) {
+      const fCore = xr.core / ar.core;
+      const fRam  = xr.ram  / ar.ram;
+      const est   = (fCore + fRam) / 2;
+      if (est > 0.5 && est < 10) factor = est;
+    }
+
+    if (!factor) continue; // nothing to inherit/estimate
+
+    // Clamp and apply
+    seriesScale[arm] = Math.max(0.5, Math.min(10, Number(factor)));
+  }
+})();
+
   // 3) Phase-1: Catalog per-instance SKUs (Linux, exact-region)
   const rows = [];
   const have = new Set(); // machineType names captured in Phase-1 (lowercase)
