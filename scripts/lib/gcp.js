@@ -3,7 +3,7 @@
 // CommonJS (Node 18+, global fetch)
 // Version: 2.3.0
 //  - extractHourlyPrice: TIME-ONLY normalization (no quantity handling)
-//  - parseSeriesUnitRate: CPU/RAM unit SKUs normalized to *per 1 unit* using displayQuantity
+//  - buildSeriesUnitRateMaps: CPU/RAM unit SKUs normalized to *per 1 unit* (OnDemand, hourly, Linux)
 'use strict';
 
 // Compute Engine service id for Catalog Retail Prices API
@@ -50,8 +50,12 @@ function extractHourlyPrice(pricingInfo) {
     const pe = p && p.pricingExpression;
     if (!pe) continue;
 
-    const tr0 = pe.tieredRates && pe.tieredRates[0];
-    const rate = tr0 && tr0.unitPrice;
+    // Choose tier with startUsageAmount = 0 if present
+    let tr = null;
+    if (Array.isArray(pe.tieredRates) && pe.tieredRates.length) {
+      tr = pe.tieredRates.find(t => Number(t.startUsageAmount || 0) === 0) || pe.tieredRates[0];
+    }
+    const rate = tr && tr.unitPrice;
     if (!rate) continue;
 
     let money = Number(rate.units || 0) + Number(rate.nanos || 0) / 1e9;
@@ -124,105 +128,89 @@ function isPerInstanceSku(sku, machineType) {
 }
 
 // ---------------------------
-// SKU parsing for CPU/RAM unit rates
+// SKU parsing helpers (optional)
 // ---------------------------
-
-// Helper: pick the first pricingExpression that actually has a rate
 function firstPricingExpressionWithRate(sku) {
   for (const p of (sku.pricingInfo || [])) {
     const pe = p && p.pricingExpression;
-    const tr0 = pe && pe.tieredRates && pe.tieredRates[0];
+    if (!pe) continue;
+    const tr0 = Array.isArray(pe.tieredRates) && pe.tieredRates[0];
     if (tr0 && tr0.unitPrice) return pe;
   }
   return null;
 }
 
-function parseSeriesUnitRate(sku) {
-  const cat = (sku && sku.category) || {};
-  // Only Compute, OnDemand, and CPU/RAM or descriptions that clearly imply core/ram
-  if (cat.resourceFamily !== 'Compute') return null;
-  if (cat.usageType && !/OnDemand/i.test(cat.usageType)) return null;
-
-  const name = String((sku.description || sku.displayName) || '').toLowerCase();
-
-  // Decide 'kind' using resourceGroup first (case-insensitive), then fallback to description
-  let kind = null;
-  const rg = String(cat.resourceGroup || '').toLowerCase();
-  if (rg === 'cpu') kind = 'core';
-  else if (rg === 'ram') kind = 'ram';
-  else {
-    if (/\b(vcpu|core)\b/.test(name)) kind = 'core';
-    else if (/\b(ram|memory|gib)\b/.test(name)) kind = 'ram';
-    else return null;
-  }
-
-  // Extract series token (covers c4d/c4a/n4d/c3d/c2d/t2d etc.)
-  const mSeries = name.match(/\b(m1|m2|m3|m4|x4|h4d|h4|h3|n1|n2d|n2|n4|n4a|n4d|e2|t2a|t2d|c2d|c3d|c3|c4d|c4|c4a|c2)\b/i);
-  if (!mSeries) return null;
-  const series = mSeries[1].toLowerCase();
-
-  // Hourly price from Catalog (time-normalized only)
-  const pricePerHour = extractHourlyPrice(sku.pricingInfo);
-  if (!(pricePerHour > 0)) return null;
-
-  // ---- per-unit quantity normalization ----
-  // Certain CPU/RAM unit SKUs are priced for a block of units (e.g., "per 10 vCPU").
-  // The block size is encoded in pricingExpression.displayQuantity for those SKUs.
-  // Convert to price per *single* unit by dividing by that quantity.
-  let unitsPerPrice = 1;
-  const pe = firstPricingExpressionWithRate(sku);
-  if (pe && Number(pe.displayQuantity || 0) > 0) {
-    unitsPerPrice = Number(pe.displayQuantity);
-  } else {
-    // Conservative fallback: look for "per 10 vcpu"/"per 10 gib" in description
-    const mQ = name.match(/\b(per|for)\s+(\d+)\s*(vcpu|core|cores|gib|gb|ram|memory)\b/);
-    if (mQ) {
-      const n = Number(mQ[2]);
-      if (n > 0 && n <= 512) unitsPerPrice = n;
-    }
-  }
-
-  const unitPrice = pricePerHour / (unitsPerPrice > 0 ? unitsPerPrice : 1);
-  if (!(unitPrice > 0)) return null;
-
-  return { series, kind, price: unitPrice };
-}
-
+// ---------------------------
+// **PATCH B** — Hardened unit‑rate extraction
+//   OnDemand + Linux‑only + hourly + CPU/RAM only + base tier (startUsageAmount=0)
+// ---------------------------
 function buildSeriesUnitRateMaps(allSkus, region) {
-  const bySeriesKind = {};
+  const out = {}; // { series: { core, ram } }
   const want = String(region || '').toLowerCase();
-  const scopeOf = (sku) => {
-    const set = new Set((sku.serviceRegions || []).map(s => String(s).toLowerCase()));
-    if (set.has(want)) return 'exact';
-    if (want.startsWith('us-') && set.has('us')) return 'us';
-    if (set.has('global')) return 'global';
-    return null;
+
+  const inRegion = (sku) => {
+    const sr = new Set((sku.serviceRegions || []).map(s => String(s).toLowerCase()));
+    return sr.has(want) || (want.startsWith('us-') && sr.has('us')) || sr.has('global');
   };
 
-  for (const sku of (allSkus || [])) {
-    const cat = (sku && sku.category) || {};
-    if (cat.resourceFamily !== 'Compute') continue;
-    if (cat.usageType && !/OnDemand/i.test(cat.usageType)) continue;
+  const extractBaseTierRate = (pricingInfo) => {
+    const expr = pricingInfo?.[0]?.pricingExpression;
+    if (!expr?.tieredRates?.length) return 0;
+    const base = expr.tieredRates.find(t => Number(t.startUsageAmount || 0) === 0) || expr.tieredRates[0];
+    const units = Number(base?.unitPrice?.units || 0);
+    const nanos = Number(base?.unitPrice?.nanos || 0);
+    // Normalize to $/hour just like extractHourlyPrice
+    let money = units + nanos / 1e9;
+    const usage = String(expr.usageUnit || '').toLowerCase();
+    const baseU = String(expr.baseUnit  || '').toLowerCase();
+    const k     = Number(expr.baseUnitConversionFactor || 1);
+    if (usage === 'h' || usage === 'hour' || usage === 'hours') return money;
+    if (usage === 's' || usage === 'sec' || usage === 'second' || usage === 'seconds') return money * 3600;
+    if (usage === 'min' || usage === 'minute' || usage === 'minutes') return money * 60;
+    if (baseU === 's' || baseU === 'sec' || baseU === 'second' || baseU === 'seconds') return money * (k > 0 ? k : 3600);
+    return money;
+  };
 
-    const scope = scopeOf(sku);
-    if (!scope) continue;
+  for (const sku of allSkus || []) {
+    try {
+      if (!sku || !inRegion(sku)) continue;
 
-    const info = parseSeriesUnitRate(sku);
-    if (!info) continue;
+      // OnDemand only
+      const usageType = String(sku.category?.usageType || '');
+      if (!/ondemand/i.test(usageType)) continue;
 
-    const { series, kind, price } = info;
-    if (!bySeriesKind[series]) bySeriesKind[series] = { core: {}, ram: {} };
+      // Linux only (skip OS uplifts/Windows/RHEL/SUSE/SAP)
+      const text = `${sku.description || ''} ${sku.summary || ''}`;
+      if (/windows|sql server|rhel|red hat|suse|sles|sap/i.test(text)) continue;
 
-    const cur = bySeriesKind[series][kind][scope];
-    if (!(cur > 0) || price < cur) bySeriesKind[series][kind][scope] = price;
+      // Hourly unit only
+      const unit = String(sku.category?.usageUnit || '');
+      if (!/hour/i.test(unit)) continue;
+
+      // CPU/RAM resource groups only for unit rates
+      const rg = sku.category?.resourceGroup;
+      if (rg !== 'CPU' && rg !== 'RAM') continue;
+
+      // Series detection: from machineType token if present, else from description/attributes
+      let series = null;
+      const mt = inferMachineType(sku);
+      if (mt) series = mt.split('-')[0].toLowerCase();
+      if (!series) {
+        const desc = `${sku.description || ''} ${sku.displayName || ''}`.toLowerCase();
+        const m = desc.match(/\b(m1|m2|m3|m4|x4|h4d|h4|h3|n1|n2d|n2|n4|n4a|n4d|e2|t2a|t2d|c2d|c3d|c3|c4d|c4|c4a|c2)\b/);
+        if (m) series = m[1].toLowerCase();
+      }
+      if (!series) continue;
+
+      const rate = extractBaseTierRate(sku.pricingInfo);
+      if (!(rate > 0)) continue;
+
+      out[series] ??= {};
+      if (rg === 'CPU') out[series].core = rate;   // $ per vCPU-hour
+      if (rg === 'RAM') out[series].ram  = rate;   // $ per GB-hour
+    } catch { /* ignore bad SKU */ }
   }
 
-  const out = {};
-  for (const [series, kinds] of Object.entries(bySeriesKind)) {
-    const core = kinds.core.exact ?? kinds.core.us ?? kinds.core.global;
-    const ram  = kinds.ram.exact  ?? kinds.ram.us  ?? kinds.ram.global;
-    if (core > 0 && ram > 0) out[series] = { core, ram };
-  }
   return out;
 }
 
