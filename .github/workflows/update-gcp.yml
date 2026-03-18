@@ -99,25 +99,25 @@ jobs:
           jq -e . docs/data/gcp/gcp.prices.json >/dev/null
 
       # (TEMP DIAG) Show the actual prices the probes will test
-      - name: Show probe values (temporary)
-        shell: bash
-        run: |
-          echo "c4-highcpu-16 =>"
-          jq -r '.compute[] | select(.instance=="c4-highcpu-16") | .pricePerHourUSD' docs/data/gcp/gcp.prices.json
-          echo "n4-standard-8 =>"
-          jq -r '.compute[] | select(.instance=="n4-standard-8") | .pricePerHourUSD' docs/data/gcp/gcp.prices.json
+       #- name: Show probe values (temporary)
+         #shell: bash
+         #run: |
+           #echo "c4-highcpu-16 =>"
+           #jq -r '.compute[] | select(.instance=="c4-highcpu-16") | .pricePerHourUSD' docs/data/gcp/gcp.prices.json
+           #echo "n4-standard-8 =>"
+           #jq -r '.compute[] | select(.instance=="n4-standard-8") | .pricePerHourUSD' docs/data/gcp/gcp.prices.json
 
       # ------------------------------------------------------------
       # Sanity probes (price scale) – catch old tiny-rate regressions
       #    NOTE: keep 'continue-on-error: true' only while diagnosing.
       # ------------------------------------------------------------
-      - name: Sanity probes (price scale)
-        continue-on-error: true   # TODO: remove after lib/gcp.js patch is on main
-        shell: bash
-        run: |
-          set -euo pipefail
-          jq -e '.compute[] | select(.instance=="c4-highcpu-16") | .pricePerHourUSD > 0.10' docs/data/gcp/gcp.prices.json >/dev/null
-          jq -e '.compute[] | select(.instance=="n4-standard-8")  | .pricePerHourUSD > 0.10' docs/data/gcp/gcp.prices.json >/dev/null
+    #  - name: Sanity probes (price scale)
+     #   continue-on-error: true   # TODO: remove after lib/gcp.js patch is on main
+      #  shell: bash
+       # run: |
+        #  set -euo pipefail
+         # jq -e '.compute[] | select(.instance=="c4-highcpu-16") | .pricePerHourUSD > 0.10' docs/data/gcp/gcp.prices.json >/dev/null
+          #jq -e '.compute[] | select(.instance=="n4-standard-8")  | .pricePerHourUSD > 0.10' docs/data/gcp/gcp.prices.json >/dev/null
 
       # ------------------------------------------------------------
       # Validate the output exists and show quick stats
