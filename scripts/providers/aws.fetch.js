@@ -138,7 +138,7 @@ function deriveRegionUplifts(rows) {
 /** Detect AWS architecture from instance type */
 function detectAwsArch(instanceType = "") {
   const t = String(instanceType).toLowerCase();
-  // Known Graviton / ARM families: a1, t4g, c*g, m*g, r*g (including newer gens)
+  // Known Graviton / ARM families: a1, t4g, c*g, m*g, r*g (including future gens)
   if (/^a1\./.test(t)) return "arm";
   if (/(^|\.)(t4g|c[6-9]g|m[6-9]g|r[6-9]g|c[1-9][0-9]g|m[1-9][0-9]g|r[1-9][0-9]g)(\.|$)/.test(t)) return "arm";
   return "x86";
@@ -180,8 +180,8 @@ async function main() {
 
     if (!(isLinux || isWinOK || isRhelOK)) continue;
 
-    // Windows cannot run on Graviton
-    if (isWinOK && isAwsGravitonInstance(inst)) continue;
+    // CHANGE: do NOT skip Windows on Graviton here; let the UI decide later.
+    // if (isWinOK && isAwsGravitonInstance(inst)) continue;
 
     const price = pickHourlyUsdMin(onDemandTerms[sku]);
     if (!(price > 0)) continue;
