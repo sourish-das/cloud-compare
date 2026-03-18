@@ -235,7 +235,7 @@ export function getOciStorageMonthlyFromCfg(arg1, arg2, arg3) {
 /* ---------- Reset all UI fields (AWS + Azure + GCP + OCI) ---------- */
 export function resetCards() {
   // Titles use trusted HTML for bold labels; everything else stays text-only.
-  safeSetText("awsInstance", `<strong>Recommended Instance:</strong> …`, { html: true });
+  safeSetText("awsInstance", `&lt;strong&gt;Recommended Instance:&lt;/strong&gt; …`, { html: true });
   safeSetText("awsCpu",     "vCPU: …");
   safeSetText("awsRam",     "RAM: …");
   safeSetText("awsPrice",   "EC2 Price/hr: —");
@@ -248,7 +248,7 @@ export function resetCards() {
   safeSetText("awsTotalHr",        "—");
   safeSetText("awsTotalMonthly",   "—");
 
-  safeSetText("azInstance", `<strong>Recommended VM Size:</strong> …`, { html: true });
+  safeSetText("azInstance", `&lt;strong&gt;Recommended VM Size:&lt;/strong&gt; …`, { html: true });
   safeSetText("azCpu",     "vCPU: …");
   safeSetText("azRam",     "RAM: …");
   safeSetText("azPrice",   "VM Price/hr: —");
@@ -261,7 +261,7 @@ export function resetCards() {
   safeSetText("azTotalHr",        "—");
   safeSetText("azTotalMonthly",   "—");
 
-  safeSetText("gcpInstance", `<strong>Recommended Machine:</strong> …`, { html: true });
+  safeSetText("gcpInstance", `&lt;strong&gt;Recommended Machine:&lt;/strong&gt; …`, { html: true });
   safeSetText("gcpCpu",     "vCPU: …");
   safeSetText("gcpRam",     "RAM: …");
   safeSetText("gcpPrice",   "Compute Engine Price/hr: —");
@@ -274,7 +274,7 @@ export function resetCards() {
   safeSetText("gcpTotalHr",        "—");
   safeSetText("gcpTotalMonthly",   "—");
 
-  safeSetText("ociInstance", `<strong>Recommended Machine:</strong> …`, { html: true });
+  safeSetText("ociInstance", `&lt;strong&gt;Recommended Machine:&lt;/strong&gt; …`, { html: true });
   safeSetText("ociCpu",     "vCPU: …");
   safeSetText("ociRam",     "RAM: …");
   safeSetText("ociPrice",   "Compute Price/hr: —");
@@ -317,6 +317,7 @@ export function genRank(row){ const p = String(row?.provider||'').toLowerCase();
 function srcRank(r){ return r?.source === 'catalog' ? 1 : 0; }
 export function sortForAuto(a, b){ return ( (a.totalHr - b.totalHr) || (genRank(b.row) - genRank(a.row)) || ((a.row.vcpu||0) - (b.row.vcpu||0)) || (srcRank(b.row) - srcRank(a.row)) ); }
 
+/* ---------- Family allow-list (unchanged) ---------- */
 export function allowListOK(row){
   const p = String(row?.provider || '').toLowerCase();
   const inst = String(row?.instance || '').toLowerCase();
@@ -327,19 +328,77 @@ export function allowListOK(row){
   return true;
 }
 
-export function pickCheapestPerCategory(rows, { includeStorageHr = false, storageHrFn = null } = {}){
+/* ---------- Global ARCH POLICY ---------- */
+/**
+ * Policy from slider (future):
+ *  - "x86"   : block ARM
+ *  - "allow" : allow both
+ *  - "arm"   : ARM-only
+ * Windows is ALWAYS x86-only regardless of policy.
+ */
+function _rawArchPolicy() {
+  const v = (window?.state?.archPolicy ?? 'x86').toString().toLowerCase();
+  return (v === 'x86' || v === 'allow' || v === 'arm') ? v : 'x86';
+}
+function _isWindows(os) {
+  return String(os || '').toLowerCase().includes('windows');
+}
+function _currentOS() {
+  return window?.state?.os || 'Linux (Open-source)';
+}
+function _effectiveArchPolicyForOS(os) {
+  // Windows stays x86-only forever
+  if (_isWindows(os)) return 'x86';
+  return _rawArchPolicy(); // Linux/RHEL follow slider (default x86)
+}
+
+// Prefer row.arch; fallback to provider name patterns
+function _isArmRow(row) {
+  const arch = String(row?.arch || row?.architecture || '').toLowerCase();
+  if (arch) return arch === 'arm';
+
+  const p   = String(row?.provider || '').toLowerCase();
+  const id  = String(row?.instance || row?.displayInstance || '').toLowerCase();
+
+  if (p === 'aws')  return /^a1\./.test(id) || /^t4g\./.test(id) || /\b[cmr]\d+g\./.test(id);
+  if (p === 'azure') return /\b(dpsv5|dplsv5|epsv5)\b/.test(id) || /standard_[de]\d+p(l)?s_v5/.test(id);
+  if (p === 'gcp')  return /\b(n4a|c4a|t2a)-/.test(id);
+  if (p === 'oci')  return /\bvm\.standard\.a[124]\.flex\b/.test(id) || /\bstandard\.a[124]\.flex\b/.test(id) || /\bampere\b/.test(id) || /\baltra\b/.test(id);
+  return false;
+}
+function _archPolicyPass(row, policy) {
+  const isArm = _isArmRow(row);
+  if (policy === 'x86')  return !isArm;
+  if (policy === 'arm')  return  isArm;
+  return true; // "allow"
+}
+
+export function pickCheapestPerCategory(
+  rows,
+  { includeStorageHr = false, storageHrFn = null, archPolicy /* optional override */ } = {}
+){
   const cats = ['general','compute','memory'];
   const res = { general: null, compute: null, memory: null };
 
+  // Resolve policy given current OS (Windows → force x86)
+  const os = _currentOS();
+  const effectivePolicy = _effectiveArchPolicyForOS(os);
+
   const withTotals = (rows || [])
+    // 1) Apply architecture policy first (Windows x86-only; Linux/RHEL respect slider)
+    .filter(r => _archPolicyPass(r, String(archPolicy || effectivePolicy).toLowerCase()))
+    // 2) Then optional allow-list (families)
     .filter(allowListOK)
+    // 3) Compute totals with optional storage
     .map(r => {
       const storageHr = includeStorageHr && typeof storageHrFn === 'function' ? storageHrFn(r) : 0;
       return { row: r, totalHr: (Number(r.pricePerHourUSD) || 0) + (Number(storageHr) || 0) };
     });
 
   for (const c of cats) {
-    const pick = withTotals.filter(x => String(x.row.category) === c).sort(sortForAuto)[0]?.row || null;
+    const pick = withTotals
+      .filter(x => String(x.row.category) === c)
+      .sort(sortForAuto)[0]?.row || null;
     res[c] = pick;
   }
   return res;
