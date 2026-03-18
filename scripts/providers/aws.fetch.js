@@ -118,7 +118,7 @@ function deriveRegionUplifts(rows) {
     if (!Number.isFinite(v) || v <= 0 || !Number.isFinite(pL) || !Number.isFinite(pR) || pR <= pL) continue;
 
     const inst = String(linux.instance || "").toLowerCase();
-    const isArm = /^t4g/.test(inst) || /^c[6-9]g/.test(inst) || /^m[6-9]g/.test(inst) || /^r[6-9]g/.test(inst);
+    const isArm = /^a1\./.test(inst) || /(^|\.)(c[6-9]g|m[6-9]g|r[6-9]g|t4g)(\.|$)/.test(inst);
     const bucket = isArm ? "arm" : "x86";
 
     const uplift = (pR - pL) / v; // $/vCPU/hr
@@ -133,6 +133,15 @@ function deriveRegionUplifts(rows) {
   };
 
   return { arm: median(pairs.arm), x86: median(pairs.x86) };
+}
+
+/** Detect AWS architecture from instance type */
+function detectAwsArch(instanceType = "") {
+  const t = String(instanceType).toLowerCase();
+  // Known Graviton / ARM families: a1, t4g, c*g, m*g, r*g (including newer gens)
+  if (/^a1\./.test(t)) return "arm";
+  if (/(^|\.)(t4g|c[6-9]g|m[6-9]g|r[6-9]g|c[1-9][0-9]g|m[1-9][0-9]g|r[1-9][0-9]g)(\.|$)/.test(t)) return "arm";
+  return "x86";
 }
 
 async function main() {
@@ -180,6 +189,8 @@ async function main() {
     const vcpu = a.vcpu ? Number(a.vcpu) : null;
     const ram = parseGiB(a.memory);
 
+    const architecture = detectAwsArch(inst);
+
     rows.push({
       instance: inst,
       vcpu,
@@ -187,6 +198,7 @@ async function main() {
       pricePerHourUSD: price,
       region: REGION,
       os: normOs(osRaw),
+      architecture,
       source: "catalog"
     });
   }
@@ -248,6 +260,7 @@ async function main() {
     os: ["Linux", "RHEL", "Windows"],
     vcpu: uniqSortedNums(cheapest.map(x => x.vcpu)),
     ram: uniqSortedNums(cheapest.map(x => x.ram))
+    // Intentionally not adding architecture axis to meta yet
   };
 
   const storage = {
