@@ -1,4 +1,8 @@
 // docs/ui/utils.js
+// Shared UI helpers: formatting, DOM, storage pricing resolvers, and (optionally)
+// architecture normalization + stable sorting utilities. Safe to use alongside
+// the merged state.js recommender — implementations here match state.js.
+
 export const HRS_PER_MONTH = 730;
 
 /* ---------- Formatting & math helpers ---------- */
@@ -173,7 +177,7 @@ export function getAzureStorageSkuAndMonthlyFromCfg(type, gb, azCfg) {
   const allowed = Object.keys(hddTbl).map(Number);
   let size = nearestCeil(gb, allowed);
   if (size == null && allowed.length) size = allowed.sort((a, b) => a - b)[0];
-  if (size != null && size < 32) size = 32;
+  if (size != null && size < 32) size = 32; // 32 GiB minimum for HDD
 
   const monthlyUSD = size != null ? (hddTbl[size] ?? null) : null;
   const sku = sizeToAzureSku("hdd", size);
@@ -282,4 +286,61 @@ export function resetCards() {
   safeSetText("ociStorageMonthly", "—");
   safeSetText("ociTotalHr",        "—");
   safeSetText("ociTotalMonthly",   "—");
+}
+
+/* ================= Optional: Normalization + sorting exports =================
+ * These are kept for backward-compatibility if other modules import them.
+ * The merged state.js already implements equivalent logic.
+ */
+
+export function normalizeArch(row){
+  if (!row) return row;
+  row.arch = row.arch || row.architecture || null;
+  return row;
+}
+
+export function normalizeRows(rows){
+  return (rows || []).map(r => normalizeArch({ ...r }));
+}
+
+export function applyArchFilter(rows, archPref){
+  if (archPref === 'any') return rows;
+  return (rows || []).filter(r => !r.arch || r.arch === archPref);
+}
+
+function _num(x){ const n = Number(x); return Number.isFinite(n) ? n : 0; }
+export function genRankAWS(inst){ const m = String(inst||'').match(/[0-9]{1,2}/); return m ? _num(m[0]) : 0; }
+export function genRankAzure(sku){ const m = String(sku||'').toLowerCase().match(/v([0-9]{1,2})/); return m ? _num(m[1]) : 0; }
+export function genRankGCP(type){ const s = String(type||'').split('-')[0]; const m = s && s.match(/[a-z]*([0-9]{1,2})[a-z]?/i); return m ? _num(m[1]) : 0; }
+export function genRankOCI(shape){ const s = String(shape||''); const m = s.match(/\.E([0-9]+)/i); if (m) return _num(m[1]); if (/\.A4\./i.test(s)) return 4; if (/\.A2\./i.test(s)) return 2; if (/\.A1\./i.test(s)) return 1; return 0; }
+export function genRank(row){ const p = String(row?.provider||'').toLowerCase(); const id = row?.instance || row?.displayInstance || ''; if(p==='aws')return genRankAWS(id); if(p==='azure')return genRankAzure(id); if(p==='gcp')return genRankGCP(id); if(p==='oci')return genRankOCI(id); return 0; }
+function srcRank(r){ return r?.source === 'catalog' ? 1 : 0; }
+export function sortForAuto(a, b){ return ( (a.totalHr - b.totalHr) || (genRank(b.row) - genRank(a.row)) || ((a.row.vcpu||0) - (b.row.vcpu||0)) || (srcRank(b.row) - srcRank(a.row)) ); }
+
+export function allowListOK(row){
+  const p = String(row?.provider || '').toLowerCase();
+  const inst = String(row?.instance || '').toLowerCase();
+  if (p === 'aws')   return /^(m[6-9]|c[6-9]|r[6-9]|t4)/.test(inst);
+  if (p === 'azure') return /(dv5|das v5|dps v5|ev5|eas v5|eps v5|fsv2)/i.test(inst) || /standard d\d+ps v5/i.test(inst);
+  if (p === 'gcp')   return /^(n4|n4d|t2a|t2d|c3|c4|c4a|m3)/.test(inst);
+  if (p === 'oci')   return /(VM\.Standard\.E[3-6]\.Flex|VM\.Standard3\.Flex|VM\.Optimized3\.Flex|VM\.Standard\.A[124]\.Flex)/i.test(row.instance||'');
+  return true;
+}
+
+export function pickCheapestPerCategory(rows, { includeStorageHr = false, storageHrFn = null } = {}){
+  const cats = ['general','compute','memory'];
+  const res = { general: null, compute: null, memory: null };
+
+  const withTotals = (rows || [])
+    .filter(allowListOK)
+    .map(r => {
+      const storageHr = includeStorageHr && typeof storageHrFn === 'function' ? storageHrFn(r) : 0;
+      return { row: r, totalHr: (Number(r.pricePerHourUSD) || 0) + (Number(storageHr) || 0) };
+    });
+
+  for (const c of cats) {
+    const pick = withTotals.filter(x => String(x.row.category) === c).sort(sortForAuto)[0]?.row || null;
+    res[c] = pick;
+  }
+  return res;
 }
