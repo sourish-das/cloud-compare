@@ -56,11 +56,18 @@ function withinPolicy(vcpu) {
 async function listSkus(serviceId, pageToken = '') {
   // Use literal '&' (no HTML entities) so pagination and API key work correctly
   const base = `https://cloudbilling.googleapis.com/v1/services/${serviceId}/skus?currencyCode=${encodeURIComponent(CURRENCY)}&pageSize=5000`;
+
   const bearer = process.env.GCLOUD_ACCESS_TOKEN || process.env.GOOGLE_OAUTH_ACCESS_TOKEN || '';
   const headers = bearer ? { Authorization: `Bearer ${bearer}` } : {};
+
   const url = bearer
-    ? (pageToken ? `${base}&pageToken=${encodeURIComponent(pageToken)}` : base)
-    : (pageToken ? `${base}&pageToken=${encodeURIComponent(pageToken)}&key=${API_KEY}` : `${base}&key=${API_KEY}`);
+    ? (pageToken
+        ? `${base}&pageToken=${encodeURIComponent(pageToken)}`
+        : base)
+    : (pageToken
+        ? `${base}&pageToken=${encodeURIComponent(pageToken)}&key=${API_KEY}`
+        : `${base}&key=${API_KEY}`);
+
   const r = await fetch(url, { headers });
   if (!r.ok) {
     const txt = await r.text().catch(() => '');
