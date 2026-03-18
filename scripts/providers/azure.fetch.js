@@ -49,7 +49,7 @@ async function fetchRetailPrices(region){
      contains(productName,'Virtual Machines')
      or contains(tolower(productName),'v5')
      or contains(tolower(productName),'asv5')
-     or contains(tolower(productName),'dplsv5')
+     or contains(tolower(productName),'dplds')
      or contains(tolower(skuName),'v5')
      or contains(tolower(meterName),'v5')
 )
