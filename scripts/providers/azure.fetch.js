@@ -127,10 +127,13 @@ async function main() {
       if (!isLinuxRetailEligible(it)) continue; // free Linux only
     } else if (os === "Windows") {
       if (!isWindowsRetailEligible(it)) continue; // license-included, no SQL/DevTest/BYOL/preinstalled
-      if (isAzureArmInstance(instance)) continue; // block ARM (Bpsv2 / Dpsv5 / Dpldsv5 / Epsv5)
+      if (isAzureArmInstance(instance)) continue; // block Windows on ARM (no images / not supported)
     } else {
       continue;
     }
+
+    // <<< NEW: tag architecture for every row >>>
+    const architecture = isAzureArmInstance(instance) ? "arm" : "x86";
 
     rows.push({
       instance,
@@ -142,6 +145,7 @@ async function main() {
       pricePerHourUSD: price,
       region: REGION,
       os,
+      architecture, // NEW
       source: "retail"
     });
   }
@@ -184,6 +188,7 @@ async function main() {
     os: ["Linux", "RHEL", "Windows"],
     vcpu: uniqSortedNums(cheapest.map((x) => x.vcpu)),
     ram: uniqSortedNums(cheapest.map((x) => x.ram))
+    // Not exposing architecture in meta for now to avoid UI churn
   };
 
   // Storage (monthly) — UI converts to hourly
