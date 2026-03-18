@@ -39,6 +39,14 @@ const {
 const OUT = process.env.OUTPUT_PATH || path.join("docs", "data", "azure", "azure.prices.json");
 const REGION = process.env.AZURE_REGION || "eastus";
 
+/* ---------------- helpers ---------------- */
+function detectAzureArchByName(name) {
+  const s = String(name || "").toLowerCase();
+  // Common ARM hints: dps v5, eps v5, dpldsv5, bps v2 etc.
+  if (/\bdp?s\s*v5\b/.test(s) || /\beps\s*v5\b/.test(s) || /dpldsv5/.test(s) || /bps\s*v2/.test(s)) return "arm";
+  return "x86";
+}
+
 /* ---------------- fetch with retry ---------------- */
 async function fetchWithRetry(url, retries = 6) {
   for (let i = 0; i < retries; i++) {
@@ -63,9 +71,7 @@ async function fetchRetailPrices() {
     `?$filter=serviceName eq 'Virtual Machines' and armRegionName eq '${REGION}' and type eq 'Consumption'`;
 
   const items = [];
-  let next = base,
-    pages = 0,
-    MAX = 200;
+  let next = base, pages = 0, MAX = 200;
 
   while (next && pages < MAX) {
     const j = await fetchWithRetry(next);
@@ -127,13 +133,15 @@ async function main() {
       if (!isLinuxRetailEligible(it)) continue; // free Linux only
     } else if (os === "Windows") {
       if (!isWindowsRetailEligible(it)) continue; // license-included, no SQL/DevTest/BYOL/preinstalled
-      // NOTE: We intentionally do NOT skip Windows on ARM here.
+      // Intentionally NOT skipping Windows on ARM here.
     } else {
       continue;
     }
 
-    // Tag architecture for every row
-    const architecture = isAzureArmInstance(instance) ? "arm" : "x86";
+    // Tag architecture for every row (fallback to name-based detection if helper disagrees)
+    const archFromHelper = isAzureArmInstance(instance) ? "arm" : "x86";
+    const archFromName   = detectAzureArchByName(instRaw);
+    const architecture   = archFromHelper === archFromName ? archFromHelper : archFromName;
 
     rows.push({
       instance,
@@ -145,7 +153,7 @@ async function main() {
       pricePerHourUSD: price,
       region: REGION,
       os,
-      architecture, // tag only, no filtering here
+      architecture, // tag only; filtering happens in UI
       source: "retail"
     });
   }
@@ -170,6 +178,10 @@ async function main() {
     vm.vcpu = spec?.vcpu ?? vm.vcpu ?? null;
     vm.ram = spec?.ram ?? vm.ram ?? null;
     vm.category = vm.category || categorizeByInstanceName(vm.instance);
+    // Ensure architecture remains present after enrichment
+    if (!vm.architecture) {
+      vm.architecture = isAzureArmInstance(vm.instance) ? "arm" : "x86";
+    }
   }
 
   // Synthesize RHEL from Linux base using azure.js buckets
