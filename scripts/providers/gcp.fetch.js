@@ -1,4 +1,3 @@
-
 // scripts/providers/gcp.fetch.js
 // Node 18+ (global fetch)
 'use strict';
