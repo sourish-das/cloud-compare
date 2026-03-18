@@ -125,6 +125,17 @@ function isPrimaryOnDemandRetailItem(it = {}) {
   return typeOk && primary;
 }
 
+/**
+ * Widen series: allow major VM families we care about (generic; fetcher filters burstable later).
+ */
+function widenAzureSeries(instance = "") {
+  const n = String(instance).toLowerCase();
+  const body = n.startsWith("standard_") ? n.slice(9) : n;
+  const lead = (body[0] || "").toUpperCase();
+  // Keep B to stay generic; fetcher calls isBurstableAzure() to exclude B-series.
+  return ["A","B","D","E","F","L","M","N","H"].includes(lead);
+}
+
 /* ============================================================
  * ResourceSkus enrichment
  * - Adds a cross-walk so "ECasv6-2" also maps to "standard_ec2as_v6"
