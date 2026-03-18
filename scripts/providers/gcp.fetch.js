@@ -1,6 +1,6 @@
 // scripts/providers/gcp.fetch.js
 // Node 18+ (global fetch)
-"use strict";
+'use strict';
 
 const fs   = require('fs');
 const path = require('path');
@@ -32,8 +32,8 @@ const {
 const OUT      = process.env.OUTPUT_PATH || path.join('docs','data','gcp','gcp.prices.json');
 const REGION   = (process.env.GCP_REGION   || 'us-east1').toLowerCase();
 const CURRENCY = (process.env.GCP_CURRENCY || 'USD');
-const API_KEY  = process.env.GCP_PRICE_API_KEY;        // Catalog (only if no bearer)
-const PROJECT  = process.env.GCP_PROJECT_ID;           // Compute discovery project
+const API_KEY  = process.env.GCP_PRICE_API_KEY || '';   // Catalog (only if no bearer)
+const PROJECT  = process.env.GCP_PROJECT_ID  || '';     // Compute discovery project
 const MAX_VCPU = Number(process.env.GCP_MAX_VCPU || '128'); // enterprise cap
 
 // Enterprise policy exclusions (names)
@@ -54,7 +54,7 @@ function withinPolicy(vcpu) {
 }
 
 async function listSkus(serviceId, pageToken = '') {
-  // Use literal '&' so pagination and API key work correctly
+  // Use literal '&' (no HTML entities) so pagination and API key work correctly
   const base = `https://cloudbilling.googleapis.com/v1/services/${serviceId}/skus?currencyCode=${encodeURIComponent(CURRENCY)}&pageSize=5000`;
   const bearer = process.env.GCLOUD_ACCESS_TOKEN || process.env.GOOGLE_OAUTH_ACCESS_TOKEN || '';
   const headers = bearer ? { Authorization: `Bearer ${bearer}` } : {};
@@ -86,8 +86,8 @@ async function main() {
     pageToken = nextPageToken || '';
   } while (pageToken);
 
-  // 2) Build OnDemand Core/RAM unit-rate map per series for our region
-  const unitRates = buildSeriesUnitRateMaps(allSkus, REGION); // normalized to $/hour per single unit
+  // 2) Build OnDemand Core/RAM unit-rate map per series for our region ($/hour per unit)
+  const unitRates = buildSeriesUnitRateMaps(allSkus, REGION);
 
   // 3) Phase-1: Catalog per-instance SKUs (Linux, exact-region)
   const rows = [];
@@ -97,6 +97,7 @@ async function main() {
     if (cat.resourceFamily !== 'Compute') continue;
     if (cat.usageType && !/OnDemand/i.test(cat.usageType)) continue; // on-demand only
     if (!regionMatches(sku.serviceRegions, REGION)) continue;
+
     const mt = inferMachineType(sku); // hyphenated predefined type or null
     if (!mt) continue; // excludes custom-*
     if (!isPerInstanceSku(sku, mt)) continue; // only true per-instance rows
@@ -154,7 +155,7 @@ async function main() {
       if (!/^[a-z0-9]+-[a-z]+[a-z0-9]*-\d+$/.test(name)) continue; // predefined, hyphen-native
       if (EXCLUDE_NAME.test(name)) continue;
       if (!mtMap.has(name)) {
-        const vcpu = Number(mt.guestCpus || 0);
+        const vcpu  = Number(mt.guestCpus || 0);
         const ramGiB = Number(mt.memoryMb || 0) / 1024;
         if (vcpu > 0 && ramGiB > 0) mtMap.set(name, { vcpu, ramGiB });
       }
