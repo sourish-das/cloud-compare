@@ -46,11 +46,13 @@ async function fetchRetailPrices(region){
   const base = 'https://prices.azure.com/api/retail/prices';
   let next = `${base}?$filter=serviceFamily eq 'Compute'
   and (
-       contains(productName,'Virtual Machines') 
-       or contains(productName,'v5')
-       or contains(skuName,'v5')
-       or contains(meterName,'v5')
-  )
+     contains(productName,'Virtual Machines')
+     or contains(tolower(productName),'v5')
+     or contains(tolower(productName),'asv5')
+     or contains(tolower(productName),'dplsv5')
+     or contains(tolower(skuName),'v5')
+     or contains(tolower(meterName),'v5')
+)
   and (armRegionName eq '${region}' or armRegionName eq '' or armRegionName eq null)`;
   const rows = [];
   let pages = 0; const MAXP=60;
