@@ -1,10 +1,9 @@
 // scripts/lib/gcp.js
 // Helpers for GCP Retail Prices + Compute discovery (Linux-first)
 // CommonJS (Node 18+, global fetch)
-// Version: 2.5.0
-//  - extractHourlyPrice: TIME-ONLY normalization (select base tier, normalize to $/hour)
-//  - buildSeriesUnitRateMaps: CPU/RAM unit SKUs normalized to *per 1 unit* using
-//    pricingExpression.displayQuantity (e.g., per 10 vCPU) with robust text fallback.
+// Version: 2.5.1
+//  - extractHourlyPrice: selects base tier and normalizes to $/hour
+//  - buildSeriesUnitRateMaps: NORMALIZES unit SKUs to per-1 unit (uses displayQuantity; text fallback)
 'use strict';
 
 // Compute Engine service id for Catalog Retail Prices API
@@ -108,7 +107,7 @@ function deriveVcpuRamFromType(mt) {
 // ---------------------------
 function regionMatches(serviceRegions, region) {
   const want = String(region || '').toLowerCase();
-  const set = new Set((serviceRegions || []).map(r => String(r).toLowerCase());
+  const set = new Set((serviceRegions || []).map(r => String(r).toLowerCase()));
   if (set.has(want)) return true;
   if (set.has('global')) return true;
   if (want.startsWith('us-') && set.has('us')) return true;
@@ -341,7 +340,7 @@ async function listZoneMachineTypes(projectId, zone, accessToken) {
 }
 
 // ---------------------------
-// Windows uplift discovery (kept for compatibility; not used in Linux baseline)
+// Windows uplift discovery (compat; not used in Linux baseline)
 // ---------------------------
 const WINDOWS_STANDARD_FALLBACK_RATE = Number(process.env.GCP_WINDOWS_RATE_PER_VCPU || 0) || 0.046; // $/vCPU-hr
 
