@@ -1,9 +1,10 @@
 // scripts/lib/gcp.js
 // Helpers for GCP Retail Prices + Compute discovery (Linux-first)
 // CommonJS (Node 18+, global fetch)
-// Version: 2.3.0
-//  - extractHourlyPrice: TIME-ONLY normalization (no quantity handling)
-//  - buildSeriesUnitRateMaps: CPU/RAM unit SKUs normalized to *per 1 unit* (OnDemand, hourly, Linux)
+// Version: 2.5.0
+//  - extractHourlyPrice: TIME-ONLY normalization (select base tier, normalize to $/hour)
+//  - buildSeriesUnitRateMaps: CPU/RAM unit SKUs normalized to *per 1 unit* using
+//    pricingExpression.displayQuantity (e.g., per 10 vCPU) with robust text fallback.
 'use strict';
 
 // Compute Engine service id for Catalog Retail Prices API
@@ -107,7 +108,7 @@ function deriveVcpuRamFromType(mt) {
 // ---------------------------
 function regionMatches(serviceRegions, region) {
   const want = String(region || '').toLowerCase();
-  const set = new Set((serviceRegions || []).map(r => String(r).toLowerCase()));
+  const set = new Set((serviceRegions || []).map(r => String(r).toLowerCase());
   if (set.has(want)) return true;
   if (set.has('global')) return true;
   if (want.startsWith('us-') && set.has('us')) return true;
@@ -141,8 +142,8 @@ function firstPricingExpressionWithRate(sku) {
 }
 
 // ---------------------------
-// **PATCH B** — Hardened unit‑rate extraction
-//   OnDemand + Linux‑only + hourly + CPU/RAM only + base tier (startUsageAmount=0)
+// Per-1-unit unit-rate extraction (OnDemand + Linux-only + hourly + CPU/RAM only)
+// Normalizes any block-priced SKU (e.g., "per 10 vCPU") to *per 1 vCPU* or *per 1 GB*.
 // ---------------------------
 function buildSeriesUnitRateMaps(allSkus, region) {
   const out = {}; // { series: { core, ram } }
@@ -153,22 +154,45 @@ function buildSeriesUnitRateMaps(allSkus, region) {
     return sr.has(want) || (want.startsWith('us-') && sr.has('us')) || sr.has('global');
   };
 
-  const extractBaseTierRate = (pricingInfo) => {
+  // Convert pricingExpression to $/hour
+  const hourlyFromExpr = (pricingInfo) => {
     const expr = pricingInfo?.[0]?.pricingExpression;
-    if (!expr?.tieredRates?.length) return 0;
+    if (!expr?.tieredRates?.length) return { moneyPerHour: 0, expr: null };
     const base = expr.tieredRates.find(t => Number(t.startUsageAmount || 0) === 0) || expr.tieredRates[0];
     const units = Number(base?.unitPrice?.units || 0);
     const nanos = Number(base?.unitPrice?.nanos || 0);
-    // Normalize to $/hour just like extractHourlyPrice
     let money = units + nanos / 1e9;
+
     const usage = String(expr.usageUnit || '').toLowerCase();
     const baseU = String(expr.baseUnit  || '').toLowerCase();
     const k     = Number(expr.baseUnitConversionFactor || 1);
-    if (usage === 'h' || usage === 'hour' || usage === 'hours') return money;
-    if (usage === 's' || usage === 'sec' || usage === 'second' || usage === 'seconds') return money * 3600;
-    if (usage === 'min' || usage === 'minute' || usage === 'minutes') return money * 60;
-    if (baseU === 's' || baseU === 'sec' || baseU === 'second' || baseU === 'seconds') return money * (k > 0 ? k : 3600);
-    return money;
+
+    if (usage === 'h' || usage === 'hour' || usage === 'hours') return { moneyPerHour: money, expr };
+    if (usage === 's' || usage === 'sec' || usage === 'second' || usage === 'seconds') return { moneyPerHour: money * 3600, expr };
+    if (usage === 'min' || usage === 'minute' || usage === 'minutes') return { moneyPerHour: money * 60, expr };
+    if (baseU === 's' || baseU === 'sec' || baseU === 'second' || baseU === 'seconds') return { moneyPerHour: money * (k > 0 ? k : 3600), expr };
+    return { moneyPerHour: money, expr };
+  };
+
+  // Detect block size (e.g., 10 vCPU or 10 GiB) for this SKU
+  const detectUnitsPerPrice = (sku, expr, rg /* 'CPU'|'RAM' */) => {
+    // 1) API-provided quantity is authoritative if present
+    const dq = Number(expr?.displayQuantity || 0);
+    if (dq > 0) return dq;
+
+    // 2) Fallback: parse human text
+    const txt = `${sku.description || ''} ${sku.displayName || ''}`.toLowerCase();
+
+    // e.g., "per 10 vcpu", "for 10 cores", "per-10 vcpu", "for 10 gib", "per block of 10 vcpu"
+    const m = txt.match(/\b(?:per|for)(?:\s*block\s*of)?\s*-?\s*(\d+)\s*(vcpu|core|cores|gb|gib|ram|memory)\b/);
+    if (m) {
+      const n = Number(m[1]);
+      if (n > 0 && n <= 1024) {
+        if (rg === 'CPU' && /\b(vcpu|core|cores)\b/.test(m[2])) return n;
+        if (rg === 'RAM' && /\b(gb|gib|ram|memory)\b/.test(m[2])) return n;
+      }
+    }
+    return 1; // default: per-1-unit
   };
 
   for (const sku of allSkus || []) {
@@ -179,35 +203,39 @@ function buildSeriesUnitRateMaps(allSkus, region) {
       const usageType = String(sku.category?.usageType || '');
       if (!/ondemand/i.test(usageType)) continue;
 
-      // Linux only (skip OS uplifts/Windows/RHEL/SUSE/SAP)
-      const text = `${sku.description || ''} ${sku.summary || ''}`;
-      if (/windows|sql server|rhel|red hat|suse|sles|sap/i.test(text)) continue;
+      // Linux-only (skip OS uplifts from unit-rate base)
+      const plain = `${sku.description || ''} ${sku.summary || ''}`;
+      if (/windows|sql server|rhel|red hat|suse|sles|sap/i.test(plain)) continue;
 
-      // Hourly unit only
+      // Time-based (we'll normalize to hour anyway)
       const unit = String(sku.category?.usageUnit || '');
-      if (!/hour/i.test(unit)) continue;
+      if (!/hour|h|sec|s|min|minute/i.test(unit)) continue;
 
-      // CPU/RAM resource groups only for unit rates
+      // CPU/RAM only
       const rg = sku.category?.resourceGroup;
       if (rg !== 'CPU' && rg !== 'RAM') continue;
 
-      // Series detection: from machineType token if present, else from description/attributes
+      // Series detection (prefer machineType token)
       let series = null;
       const mt = inferMachineType(sku);
       if (mt) series = mt.split('-')[0].toLowerCase();
       if (!series) {
         const desc = `${sku.description || ''} ${sku.displayName || ''}`.toLowerCase();
-        const m = desc.match(/\b(m1|m2|m3|m4|x4|h4d|h4|h3|n1|n2d|n2|n4|n4a|n4d|e2|t2a|t2d|c2d|c3d|c3|c4d|c4|c4a|c2)\b/);
-        if (m) series = m[1].toLowerCase();
+        const mm = desc.match(/\b(m1|m2|m3|m4|x4|h4d|h4|h3|n1|n2d|n2|n4|n4a|n4d|e2|t2a|t2d|c2d|c3d|c3|c4d|c4|c4a|c2)\b/);
+        if (mm) series = mm[1].toLowerCase();
       }
       if (!series) continue;
 
-      const rate = extractBaseTierRate(sku.pricingInfo);
-      if (!(rate > 0)) continue;
+      const { moneyPerHour, expr } = hourlyFromExpr(sku.pricingInfo);
+      if (!(moneyPerHour > 0)) continue;
+
+      // **** Normalize to per-1-unit ****
+      const block = detectUnitsPerPrice(sku, expr, rg); // often 1 or 10
+      const perUnitPerHour = moneyPerHour / (block > 0 ? block : 1);
 
       out[series] ??= {};
-      if (rg === 'CPU') out[series].core = rate;   // $ per vCPU-hour
-      if (rg === 'RAM') out[series].ram  = rate;   // $ per GB-hour
+      if (rg === 'CPU') out[series].core = perUnitPerHour; // $ per vCPU-hour (1 vCPU)
+      if (rg === 'RAM') out[series].ram  = perUnitPerHour; // $ per GB-hour (1 GB)
     } catch { /* ignore bad SKU */ }
   }
 
@@ -235,7 +263,7 @@ function getGcpAllowedPrefixes(category) {
 }
 
 // ---------------------------
-// Compose base price from unit maps
+// Compose base price from unit maps (Linux base)
 // ---------------------------
 function computeBaseHourlyFromUnitMaps(machineType, unitMaps, opts = {}) {
   if (!machineType || !unitMaps) return { price: null, vcpu: undefined, ram: undefined };
@@ -313,9 +341,9 @@ async function listZoneMachineTypes(projectId, zone, accessToken) {
 }
 
 // ---------------------------
-// Windows uplift discovery (unchanged)
+// Windows uplift discovery (kept for compatibility; not used in Linux baseline)
 // ---------------------------
-const WINDOWS_STANDARD_FALLBACK_RATE = Number(process.env.GCP_WINDOWS_RATE_PER_VCPU || 0) || 0.046;
+const WINDOWS_STANDARD_FALLBACK_RATE = Number(process.env.GCP_WINDOWS_RATE_PER_VCPU || 0) || 0.046; // $/vCPU-hr
 
 function buildWindowsCoreRate(allSkus, region) {
   const inRegion = (sku) => {
