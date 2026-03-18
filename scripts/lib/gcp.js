@@ -40,12 +40,14 @@ function inferMachineType(sku) {
   return `${m[1]}-${m[2]}-${m[3]}`;
 }
 
-// Normalize Catalog prices to $/hour for a single unit (core or GiB)
+// Normalize Catalog prices to $/hour (time only; no per-unit quantity here)
 function extractHourlyPrice(pricingInfo) {
   for (const p of (pricingInfo || [])) {
     const pe = p && p.pricingExpression;
     if (!pe) continue;
-    const rate = pe && pe.tieredRates && pe.tieredRates[0] && pe.tieredRates[0].unitPrice;
+
+    const tr0 = pe.tieredRates && pe.tieredRates[0];
+    const rate = tr0 && tr0.unitPrice;
     if (!rate) continue;
 
     let money = Number(rate.units || 0) + Number(rate.nanos || 0) / 1e9;
@@ -55,32 +57,14 @@ function extractHourlyPrice(pricingInfo) {
     const base  = String(pe.baseUnit  || '').toLowerCase();
     const k     = Number(pe.baseUnitConversionFactor || 1);
 
-    // IMPORTANT: Many CE retail SKUs encode a block scale via displayQuantity (often 10).
-    // In the SKUs we're seeing, 'money' is for 1/dq of the target unit; to normalize to
-    // *per single unit-hour*, we need to MULTIPLY by dq (not divide).
-    const dq = Number(pe.displayQuantity || 1);
-    const q  = dq > 0 ? dq : 1;
+    // Convert to hourly
+    if (usage === 'h' || usage === 'hour' || usage === 'hours') return money;
+    if (usage === 's' || usage === 'sec' || usage === 'second' || usage === 'seconds') return money * 3600;
+    if (usage === 'min' || usage === 'minute' || usage === 'minutes') return money * 60;
+    if (base  === 's'  || base  === 'sec'  || base  === 'second'  || base  === 'seconds') return money * (k > 0 ? k : 3600);
 
-    // Normalize to price per 1 hour *and* per 1 unit
-    let perHour;
-    if (usage === 'h' || usage === 'hour' || usage === 'hours') {
-      // money is per (1/q) hour → per-hour is money * q
-      perHour = money * q;
-    } else if (usage === 's' || usage === 'sec' || usage === 'second' || usage === 'seconds') {
-      // money is per (1/q) second → first scale seconds→hour (3600), then by q
-      perHour = money * 3600 * q;
-    } else if (usage === 'min' || usage === 'minute' || usage === 'minutes') {
-      // money is per (1/q) minute → scale minutes→hour (60), then by q
-      perHour = money * 60 * q;
-    } else if (base === 's' || base === 'sec' || base === 'second' || base === 'seconds') {
-      // base unit is seconds; k = seconds per usage unit (often 3600 for hours)
-      perHour = money * ( (k > 0 ? k : 3600) * q );
-    } else {
-      // Assume hourly; money is per (1/q) hour → multiply by q
-      perHour = money * q;
-    }
-
-    return perHour;
+    // Fallback: assume hourly already
+    return money;
   }
   return null;
 }
@@ -120,18 +104,65 @@ function isPerInstanceSku(sku, machineType) {
   return hasInstanceNoun && includesType;
 }
 
+// Helper: pick the first pricingExpression that actually has a rate
+function firstPricingExpressionWithRate(sku) {
+  for (const p of (sku.pricingInfo || [])) {
+    const pe = p && p.pricingExpression;
+    const tr0 = pe && pe.tieredRates && pe.tieredRates[0];
+    if (tr0 && tr0.unitPrice) return pe;
+  }
+  return null;
+}
+
 function parseSeriesUnitRate(sku) {
+  const cat = (sku && sku.category) || {};
+  // Only Compute, OnDemand, and CPU/RAM or descriptions that clearly imply core/ram
+  if (cat.resourceFamily !== 'Compute') return null;
+  if (cat.usageType && !/OnDemand/i.test(cat.usageType)) return null;
+
   const name = String((sku.description || sku.displayName) || '').toLowerCase();
-  if (/(windows|sles|rhel).*license|license.*(windows|sles|rhel)/i.test(name)) return null;
-  if (/(local\s*ssd|gpu|sole\s*tenant|commitment|cud|preemptible|spot)/i.test(name)) return null;
-  const m = name.match(/\b(m1|m2|m3|m4|x4|h4d|h4|h3|n1|n2d|n2|n4|n4a|n4d|e2|t2a|t2d|c2d|c3d|c3|c4d|c4|c4a|c2)\b.*\b(core|vcpu|ram|memory|ultramem|megamem)\b/i);
-  if (!m) return null;
-  const series = m[1].toLowerCase();
-  const kindRaw = m[2].toLowerCase();
-  const kind = /(ram|memory|ultramem|megamem)/.test(kindRaw) ? 'ram' : 'core';
-  const price = extractHourlyPrice(sku.pricingInfo);
-  if (!(price > 0)) return null;
-  return { series, kind, price };
+
+  // Decide 'kind' using resourceGroup first, then fallback to description keywords
+  let kind = null;
+  const rg = String(cat.resourceGroup || '').toLowerCase();
+  if (rg === 'cpu') kind = 'core';
+  else if (rg === 'ram') kind = 'ram';
+  else {
+    if (/\b(vcpu|core)\b/.test(name)) kind = 'core';
+    else if (/\b(ram|memory|gib)\b/.test(name)) kind = 'ram';
+    else return null;
+  }
+
+  // Extract series token (e2/n1/n2/n2d/n4/n4a/n4d/t2a/t2d/c2/c2d/c3/c3d/c4/c4a/c4d/m1/m2/m3/m4/x4/h3/h4/h4d)
+  const mSeries = name.match(/\b(m1|m2|m3|m4|x4|h4d|h4|h3|n1|n2d|n2|n4|n4a|n4d|e2|t2a|t2d|c2d|c3d|c3|c4d|c4|c4a|c2)\b/i);
+  if (!mSeries) return null;
+  const series = mSeries[1].toLowerCase();
+
+  // Hourly price from Catalog (time-normalized only)
+  const pricePerHour = extractHourlyPrice(sku.pricingInfo);
+  if (!(pricePerHour > 0)) return null;
+
+  // ---- per-unit quantity normalization (THIS is the fix) ----
+  // Certain CPU/RAM unit SKUs are priced for a block of units (e.g., "per 10 vCPU").
+  // The block size is encoded in pricingExpression.displayQuantity for those SKUs.
+  // Convert to price per *single* unit by dividing by that quantity.
+  let unitsPerPrice = 1;
+  const pe = firstPricingExpressionWithRate(sku);
+  if (pe && Number(pe.displayQuantity || 0) > 0) {
+    unitsPerPrice = Number(pe.displayQuantity);
+  } else {
+    // Conservative fallback: look for "per 10 vcpu"/"per 10 gib" in description
+    const mQ = name.match(/\b(per|for)\s+(\d+)\s*(vcpu|core|cores|gib|gb|ram|memory)\b/);
+    if (mQ) {
+      const n = Number(mQ[2]);
+      if (n > 0 && n <= 128) unitsPerPrice = n;
+    }
+  }
+
+  const unitPrice = pricePerHour / (unitsPerPrice > 0 ? unitsPerPrice : 1);
+  if (!(unitPrice > 0)) return null;
+
+  return { series, kind, price: unitPrice };
 }
 
 function buildSeriesUnitRateMaps(allSkus, region) {
