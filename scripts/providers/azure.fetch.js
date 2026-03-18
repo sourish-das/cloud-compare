@@ -85,7 +85,7 @@ async function main() {
   const rows = [];
   for (const it of retail) {
     // Require PRIMARY meters (prevent secondary meters from winning)
-    if (it?.isPrimaryMeterRegion !== true) continue; // <-- IMPORTANT
+    if (it?.isPrimaryMeterRegion !== true) continue; // IMPORTANT
 
     // Exclude discounted/alt offers by text (defense-in-depth)
     const blob = [
@@ -121,18 +121,18 @@ async function main() {
     // Exclude burstable at source (B-series)
     if (isBurstableAzure(instance)) continue;
 
-    // OS eligibility
+    // OS eligibility — DO NOT filter by architecture; UI will decide later
     const { os } = getRetailOsInfo(it);
     if (os === "Linux") {
       if (!isLinuxRetailEligible(it)) continue; // free Linux only
     } else if (os === "Windows") {
       if (!isWindowsRetailEligible(it)) continue; // license-included, no SQL/DevTest/BYOL/preinstalled
-      if (isAzureArmInstance(instance)) continue; // block Windows on ARM (no images / not supported)
+      // NOTE: We intentionally do NOT skip Windows on ARM here.
     } else {
       continue;
     }
 
-    // <<< NEW: tag architecture for every row >>>
+    // Tag architecture for every row
     const architecture = isAzureArmInstance(instance) ? "arm" : "x86";
 
     rows.push({
@@ -145,7 +145,7 @@ async function main() {
       pricePerHourUSD: price,
       region: REGION,
       os,
-      architecture, // NEW
+      architecture, // tag only, no filtering here
       source: "retail"
     });
   }
@@ -172,7 +172,7 @@ async function main() {
     vm.category = vm.category || categorizeByInstanceName(vm.instance);
   }
 
-  // ---------- NEW: Synthesize RHEL from Linux base using azure.js buckets ----------
+  // Synthesize RHEL from Linux base using azure.js buckets
   const addedRhel = synthesizeAzureRhelRows(cheapest);
   if (addedRhel > 0) {
     console.log(`[Azure] RHEL synthesized: ${addedRhel} rows`);
