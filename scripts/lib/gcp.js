@@ -55,28 +55,29 @@ function extractHourlyPrice(pricingInfo) {
     const base  = String(pe.baseUnit  || '').toLowerCase();
     const k     = Number(pe.baseUnitConversionFactor || 1);
 
-    // Catalog often encodes block pricing (e.g., displayQuantity = 10).
-    // We normalize to *per single unit-hour* by dividing by the block size.
+    // IMPORTANT: Many CE retail SKUs encode a block scale via displayQuantity (often 10).
+    // In the SKUs we're seeing, 'money' is for 1/dq of the target unit; to normalize to
+    // *per single unit-hour*, we need to MULTIPLY by dq (not divide).
     const dq = Number(pe.displayQuantity || 1);
     const q  = dq > 0 ? dq : 1;
 
     // Normalize to price per 1 hour *and* per 1 unit
     let perHour;
     if (usage === 'h' || usage === 'hour' || usage === 'hours') {
-      // money is for q hours → per-hour is money / q
-      perHour = money / q;
+      // money is per (1/q) hour → per-hour is money * q
+      perHour = money * q;
     } else if (usage === 's' || usage === 'sec' || usage === 'second' || usage === 'seconds') {
-      // money is for q seconds → scale to 3600 seconds
-      perHour = money * (3600 / q);
+      // money is per (1/q) second → first scale seconds→hour (3600), then by q
+      perHour = money * 3600 * q;
     } else if (usage === 'min' || usage === 'minute' || usage === 'minutes') {
-      // money is for q minutes → scale to 60 minutes
-      perHour = money * (60 / q);
+      // money is per (1/q) minute → scale minutes→hour (60), then by q
+      perHour = money * 60 * q;
     } else if (base === 's' || base === 'sec' || base === 'second' || base === 'seconds') {
-      // base unit is seconds; k = seconds per usage unit (often 3600 for hour)
-      perHour = money * ((k > 0 ? k : 3600) / q);
+      // base unit is seconds; k = seconds per usage unit (often 3600 for hours)
+      perHour = money * ( (k > 0 ? k : 3600) * q );
     } else {
-      // Assume already hourly but block priced → normalize by q
-      perHour = money / q;
+      // Assume hourly; money is per (1/q) hour → multiply by q
+      perHour = money * q;
     }
 
     return perHour;
