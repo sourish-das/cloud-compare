@@ -44,7 +44,9 @@ function fetchJson(url, headers={}){
 
 async function fetchRetailPrices(region){
   const base = 'https://prices.azure.com/api/retail/prices';
-  let next = `${base}?$filter=serviceFamily eq 'Compute' and contains(productName,'Virtual Machines') and armRegionName eq '${region}'`;
+  let next = `${base}?$filter=serviceFamily eq 'Compute'
+  and contains(productName,'Virtual Machines') 
+  and (armRegionName eq '${region}' or armRegionName eq '' or armRegionName eq null)`;
   const rows = [];
   let pages = 0; const MAXP=60;
   while(next && pages<MAXP){
