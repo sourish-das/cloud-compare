@@ -25,7 +25,8 @@ const {
   deriveVcpuRamFromType,
   classifyGcpInstance,
   regionMatches,
-  isGcpArmSeries
+  isGcpArmSeries,
+  computeBaseHourlyFromUnitMaps
 } = require('../lib/gcp');
 
 // ---------- env / output ----------
@@ -53,27 +54,79 @@ function withinPolicy(vcpu) {
   return Number.isFinite(vcpu) && vcpu > 0 && vcpu <= MAX_VCPU;
 }
 
+// --------- FIX: use literal '&' (no HTML entities) ---------
 async function listSkus(serviceId, pageToken = '') {
-  // Use literal '&' (no HTML entities) so pagination and API key work correctly
   const base = `https://cloudbilling.googleapis.com/v1/services/${serviceId}/skus?currencyCode=${encodeURIComponent(CURRENCY)}&pageSize=5000`;
-
   const bearer = process.env.GCLOUD_ACCESS_TOKEN || process.env.GOOGLE_OAUTH_ACCESS_TOKEN || '';
   const headers = bearer ? { Authorization: `Bearer ${bearer}` } : {};
-
   const url = bearer
-    ? (pageToken
-        ? `${base}&pageToken=${encodeURIComponent(pageToken)}`
-        : base)
-    : (pageToken
-        ? `${base}&pageToken=${encodeURIComponent(pageToken)}&key=${API_KEY}`
-        : `${base}&key=${API_KEY}`);
-
+    ? (pageToken ? `${base}&pageToken=${encodeURIComponent(pageToken)}` : base)
+    : (pageToken ? `${base}&pageToken=${encodeURIComponent(pageToken)}&key=${API_KEY}` : `${base}&key=${API_KEY}`);
   const r = await fetch(url, { headers });
   if (!r.ok) {
     const txt = await r.text().catch(() => '');
     throw new Error(`[GCP] Catalog skus HTTP ${r.status} ${txt}`);
   }
   return r.json();
+}
+
+// --------- NEW: per-series self-calibration from real per-instance SKUs ---------
+function buildSeriesScaleMap(allSkus, unitRates, region) {
+  const bySeries = {};   // series -> [factor,...]
+  const want = String(region || '').toLowerCase();
+
+  const inRegion = (sku) => {
+    const sr = new Set((sku.serviceRegions || []).map(s => String(s).toLowerCase()));
+    return sr.has(want) || (want.startsWith('us-') && sr.has('us')) || sr.has('global');
+  };
+
+  for (const sku of (allSkus || [])) {
+    const cat = (sku && sku.category) || {};
+    if (cat.resourceFamily !== 'Compute') continue;
+    if (cat.usageType && !/OnDemand/i.test(cat.usageType)) continue;
+    if (!inRegion(sku)) continue;
+
+    // ground truth per-instance only
+    const mt = inferMachineType(sku);
+    if (!mt || /^custom-/i.test(mt)) continue;
+    if (!isPerInstanceSku(sku, mt)) continue;
+
+    const series = mt.split('-')[0].toLowerCase();
+    const rates  = unitRates[series];
+    if (!rates || !(rates.core > 0) || !(rates.ram > 0)) continue;
+
+    const actual = extractHourlyPrice(sku.pricingInfo);
+    if (!(actual > 0)) continue;
+
+    const a = sku.attributes || {};
+    let vcpu = a.vcpu ? Number(a.vcpu) : undefined;
+    let ram  = a.memoryGb ? Number(a.memoryGb) : undefined;
+    if (!Number.isFinite(vcpu) || !Number.isFinite(ram)) {
+      const d = deriveVcpuRamFromType(mt);
+      if (!Number.isFinite(vcpu)) vcpu = d.vcpu;
+      if (!Number.isFinite(ram))  ram  = d.ram;
+    }
+    if (!Number.isFinite(vcpu) || !Number.isFinite(ram)) continue;
+
+    const pred = (vcpu * Number(rates.core)) + (ram * Number(rates.ram));
+    if (!(pred > 0)) continue;
+
+    const f = actual / pred;
+    if (f > 0.1 && f < 10) {
+      if (!bySeries[series]) bySeries[series] = [];
+      bySeries[series].push(f);
+    }
+  }
+
+  // robust median factor per series
+  const out = {};
+  for (const [series, samples] of Object.entries(bySeries)) {
+    samples.sort((x, y) => x - y);
+    const mid = samples[Math.floor(samples.length / 2)];
+    const factor = Math.max(0.5, Math.min(5, mid));
+    if (Math.abs(factor - 1) > 0.05) out[series] = factor;
+  }
+  return out;
 }
 
 async function main() {
@@ -95,6 +148,14 @@ async function main() {
 
   // 2) Build OnDemand Core/RAM unit-rate map per series for our region ($/hour per unit)
   const unitRates = buildSeriesUnitRateMaps(allSkus, REGION);
+
+  // 2b) Per-series scale factors from real per-instance rows (Linux)
+  const seriesScale = buildSeriesScaleMap(allSkus, unitRates, REGION);
+  if (Object.keys(seriesScale).length) {
+    console.log('[GCP] series-scale factors:', seriesScale);
+  } else {
+    console.log('[GCP] series-scale factors: (none)');
+  }
 
   // 3) Phase-1: Catalog per-instance SKUs (Linux, exact-region)
   const rows = [];
@@ -129,7 +190,7 @@ async function main() {
     if (!Number.isFinite(vcpu) || !Number.isFinite(ram)) continue;
     if (!withinPolicy(vcpu)) continue; // enterprise policy: cap very large shapes
 
-    const category = classifyGcpInstance(mt) || classifyBySuffix(mt);
+    const category = classifyGcpInstance?.(mt) || classifyBySuffix(mt);
     if (!category) continue;
     const series = mt.split('-')[0].toLowerCase();
 
@@ -162,7 +223,7 @@ async function main() {
       if (!/^[a-z0-9]+-[a-z]+[a-z0-9]*-\d+$/.test(name)) continue; // predefined, hyphen-native
       if (EXCLUDE_NAME.test(name)) continue;
       if (!mtMap.has(name)) {
-        const vcpu  = Number(mt.guestCpus || 0);
+        const vcpu   = Number(mt.guestCpus || 0);
         const ramGiB = Number(mt.memoryMb || 0) / 1024;
         if (vcpu > 0 && ramGiB > 0) mtMap.set(name, { vcpu, ramGiB });
       }
@@ -177,8 +238,15 @@ async function main() {
     const series = type.split('-')[0];
     const rates = unitRates[series];
     if (!rates || !(rates.core > 0) || !(rates.ram > 0)) continue;
-    const price = hw.vcpu * Number(rates.core) + hw.ramGiB * Number(rates.ram);
+
+    // Base composed price
+    const base = hw.vcpu * Number(rates.core) + hw.ramGiB * Number(rates.ram);
+
+    // Apply series calibration if present
+    const factor = Number(seriesScale[series] || 1);
+    const price  = base * (factor > 0 ? factor : 1);
     if (!(price > 0)) continue;
+
     rows.push({
       instance: type,
       category,
@@ -192,6 +260,23 @@ async function main() {
       source: 'composed'
     });
   }
+
+  // --- TEMP PROBE GUARD: if both probes are tiny, scale only composed rows by 10× ---
+  try {
+    const probeMap = new Map();
+    for (const r of rows) probeMap.set(r.instance, r.pricePerHourUSD);
+    const lowC4 = probeMap.has('c4-highcpu-16') && probeMap.get('c4-highcpu-16') <= 0.10;
+    const lowN4 = probeMap.has('n4-standard-8') && probeMap.get('n4-standard-8')  <= 0.10;
+    if (lowC4 && lowN4) {
+      console.warn('[GCP] Probe guard: scaling composed rows by 10× due to tiny rates (temporary).');
+      for (const r of rows) {
+        if (r.source === 'composed') r.pricePerHourUSD = +(r.pricePerHourUSD * 10).toFixed(6);
+      }
+    }
+  } catch (e) {
+    console.warn('[GCP] Probe guard failed silently:', e && e.message);
+  }
+  // --- END TEMP GUARD ---
 
   // 5) Deduplicate / finalize (Linux only)
   const cheapest = dedupeCheapestByKey(rows, r => `${r.instance}-${r.region}-${r.os}`);
