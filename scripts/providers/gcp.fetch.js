@@ -1,3 +1,4 @@
+
 // scripts/providers/gcp.fetch.js
 // Node 18+ (global fetch)
 'use strict';
@@ -25,8 +26,7 @@ const {
   deriveVcpuRamFromType,
   classifyGcpInstance,
   regionMatches,
-  isGcpArmSeries,
-  computeBaseHourlyFromUnitMaps
+  isGcpArmSeries
 } = require('../lib/gcp');
 
 // ---------- env / output ----------
@@ -54,7 +54,7 @@ function withinPolicy(vcpu) {
   return Number.isFinite(vcpu) && vcpu > 0 && vcpu <= MAX_VCPU;
 }
 
-// --------- FIX: use literal '&' (no HTML entities) ---------
+// --------- List SKUs (no HTML entities) ---------
 async function listSkus(serviceId, pageToken = '') {
   const base = `https://cloudbilling.googleapis.com/v1/services/${serviceId}/skus?currencyCode=${encodeURIComponent(CURRENCY)}&pageSize=5000`;
   const bearer = process.env.GCLOUD_ACCESS_TOKEN || process.env.GOOGLE_OAUTH_ACCESS_TOKEN || '';
@@ -70,6 +70,8 @@ async function listSkus(serviceId, pageToken = '') {
   return r.json();
 }
 
+function clamp(x, lo, hi) { return Math.max(lo, Math.min(hi, x)); }
+
 // --------- NEW: per-series self-calibration from real per-instance SKUs ---------
 function buildSeriesScaleMap(allSkus, unitRates, region) {
   const bySeries = {};   // series -> [factor,...]
@@ -83,7 +85,7 @@ function buildSeriesScaleMap(allSkus, unitRates, region) {
   for (const sku of (allSkus || [])) {
     const cat = (sku && sku.category) || {};
     if (cat.resourceFamily !== 'Compute') continue;
-    if (cat.usageType && !/OnDemand/i.test(cat.usageType)) continue;
+    if (cat.usageType && !/ondemand/i.test(cat.usageType)) continue; // OnDemand only
     if (!inRegion(sku)) continue;
 
     // ground truth per-instance only
@@ -94,6 +96,9 @@ function buildSeriesScaleMap(allSkus, unitRates, region) {
     const series = mt.split('-')[0].toLowerCase();
     const rates  = unitRates[series];
     if (!rates || !(rates.core > 0) || !(rates.ram > 0)) continue;
+
+    const descTxt = `${sku.description || ''} ${sku.displayName || ''}`;
+    if (/windows|sql server|rhel|red hat|suse|sles|sap/i.test(descTxt)) continue; // Linux only
 
     const actual = extractHourlyPrice(sku.pricingInfo);
     if (!(actual > 0)) continue;
@@ -123,8 +128,8 @@ function buildSeriesScaleMap(allSkus, unitRates, region) {
   for (const [series, samples] of Object.entries(bySeries)) {
     samples.sort((x, y) => x - y);
     const mid = samples[Math.floor(samples.length / 2)];
-    const factor = Math.max(0.5, Math.min(5, mid));
-    if (Math.abs(factor - 1) > 0.05) out[series] = factor;
+    const factor = clamp(mid, 0.5, 2.0);
+    if (Math.abs(factor - 1) > 0.03) out[series] = factor; // only record meaningful deviations
   }
   return out;
 }
@@ -158,27 +163,27 @@ async function main() {
   }
 
   // --- ARM series fallback scale from x86 sibling (only if ARM has no ground-truth factor) ---
-(function inheritArmScale() {
-  const sib = { n4a: 'n4', c4a: 'c4', t2a: 't2d' };
-  for (const [arm, x86] of Object.entries(sib)) {
-    if (seriesScale[arm] != null) continue;
-    let factor = seriesScale[x86];
+  (function inheritArmScale() {
+    const sib = { n4a: 'n4', c4a: 'c4', t2a: 't2d' };
+    for (const [arm, x86] of Object.entries(sib)) {
+      if (seriesScale[arm] != null) continue;
+      let factor = seriesScale[x86];
 
-    // If sibling lacks a factor, estimate from unitRates ratio (x86 vs ARM)
-    const xr = unitRates[x86], ar = unitRates[arm];
-    if (!factor && xr && ar && xr.core > 0 && ar.core > 0 && xr.ram > 0 && ar.ram > 0) {
-      const fCore = xr.core / ar.core;
-      const fRam  = xr.ram  / ar.ram;
-      const est   = (fCore + fRam) / 2;
-      if (est > 0.5 && est < 10) factor = est;
+      // If sibling lacks a factor, estimate from unitRates ratio (x86 vs ARM)
+      const xr = unitRates[x86], ar = unitRates[arm];
+      if (!factor && xr && ar && xr.core > 0 && ar.core > 0 && xr.ram > 0 && ar.ram > 0) {
+        const fCore = xr.core / ar.core;
+        const fRam  = xr.ram  / ar.ram;
+        const est   = (fCore + fRam) / 2;
+        if (est > 0.5 && est < 2.0) factor = est;
+      }
+
+      if (!factor) continue; // nothing to inherit/estimate
+
+      // Clamp and apply
+      seriesScale[arm] = clamp(Number(factor), 0.5, 2.0);
     }
-
-    if (!factor) continue; // nothing to inherit/estimate
-
-    // Clamp and apply
-    seriesScale[arm] = Math.max(0.5, Math.min(10, Number(factor)));
-  }
-})();
+  })();
 
   // 3) Phase-1: Catalog per-instance SKUs (Linux, exact-region)
   const rows = [];
@@ -186,16 +191,16 @@ async function main() {
   for (const sku of allSkus) {
     const cat = (sku && sku.category) || {};
     if (cat.resourceFamily !== 'Compute') continue;
-    if (cat.usageType && !/OnDemand/i.test(cat.usageType)) continue; // on-demand only
+    if (cat.usageType && !/ondemand/i.test(cat.usageType)) continue; // on-demand only
     if (!regionMatches(sku.serviceRegions, REGION)) continue;
 
     const mt = inferMachineType(sku); // hyphenated predefined type or null
     if (!mt) continue; // excludes custom-*
     if (!isPerInstanceSku(sku, mt)) continue; // only true per-instance rows
 
-    // Treat as Linux unless description explicitly mentions Windows
+    // Treat as Linux unless description explicitly mentions Windows/RHEL/SUSE/SAP
     const readable = (sku.description || sku.displayName || '');
-    if (/windows/i.test(readable)) continue; // Linux-only scope here
+    if (/windows|sql server|rhel|red hat|suse|sles|sap/i.test(readable)) continue; // Linux-only scope here
 
     // Price normalized to $/hour by lib/gcp.js
     const price = extractHourlyPrice(sku.pricingInfo);
@@ -258,15 +263,16 @@ async function main() {
     if (!withinPolicy(hw.vcpu)) continue; // cap very large shapes
     const category = classifyBySuffix(type);
     if (!category) continue;
-    const series = type.split('-')[0];
+    const series = type.split('-')[0].toLowerCase();
+
     const rates = unitRates[series];
     if (!rates || !(rates.core > 0) || !(rates.ram > 0)) continue;
 
-    // Base composed price
+    // Base composed price (per 1 vCPU-hr and per 1 GB-hr)
     const base = hw.vcpu * Number(rates.core) + hw.ramGiB * Number(rates.ram);
 
-    // Apply series calibration if present
-    const factor = Number(seriesScale[series] || 1);
+    // Apply series calibration if present exactly once
+    const factor = Number(seriesScale[series] ?? 1);
     const price  = base * (factor > 0 ? factor : 1);
     if (!(price > 0)) continue;
 
@@ -283,23 +289,6 @@ async function main() {
       source: 'composed'
     });
   }
-
-  // --- TEMP PROBE GUARD: if both probes are tiny, scale only composed rows by 10× ---
-  try {
-    const probeMap = new Map();
-    for (const r of rows) probeMap.set(r.instance, r.pricePerHourUSD);
-    const lowC4 = probeMap.has('c4-highcpu-16') && probeMap.get('c4-highcpu-16') <= 0.10;
-    const lowN4 = probeMap.has('n4-standard-8') && probeMap.get('n4-standard-8')  <= 0.10;
-    if (lowC4 && lowN4) {
-      console.warn('[GCP] Probe guard: scaling composed rows by 10× due to tiny rates (temporary).');
-      for (const r of rows) {
-        if (r.source === 'composed') r.pricePerHourUSD = +(r.pricePerHourUSD * 10).toFixed(6);
-      }
-    }
-  } catch (e) {
-    console.warn('[GCP] Probe guard failed silently:', e && e.message);
-  }
-  // --- END TEMP GUARD ---
 
   // 5) Deduplicate / finalize (Linux only)
   const cheapest = dedupeCheapestByKey(rows, r => `${r.instance}-${r.region}-${r.os}`);
