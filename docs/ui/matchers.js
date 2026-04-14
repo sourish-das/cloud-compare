@@ -233,10 +233,9 @@ function safeNum(x, fallback = null) {
   return Number.isFinite(n) ? n : fallback;
 }
 
-function vcpuToOcpuForArch(vcpu, arch) {
+function vcpuToOcpuForArch(vcpu, _arch) {
   const v = safeNum(vcpu, 0);
-  if (arch === "arm") return v;       // ARM: 1 OCPU = 1 vCPU
-  return v / 2;                       // x86: 1 OCPU = 2 vCPU
+  return v / 2; // OCI Flex: 1 OCPU = 2 vCPU (x86 + ARM/Ampere)
 }
 
 // Kept for compatibility (not used by the new OCI matcher)
