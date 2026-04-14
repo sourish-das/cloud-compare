@@ -454,18 +454,17 @@ export async function compare(resetFamilies = false) {
       gcpCard = g ? { instance: g.instance, vcpu: g.vcpu, ram: g.ram, pricePerHourUSD: g.pricePerHourUSD, region: g.region } : null;
     } catch (e) { gcpCard = { error: e.message }; }
 
-    let ociCard; try {
-      if (String(os).toLowerCase() === 'rhel') {
+    let ociCard;
+    try {
+      if (String(os).toLowerCase() === 'rhel')
         ociCard = { disabled: true, pricePerHourUSD: null, message: 'OCI does not provide a pre-built RHEL platform image. Use BYOL / BYOS.' };
-      } else {
-        const comp = data.oci; const linux = comp?.linux ?? {};
-        const latest = (ociProcessor === 'auto') ? null : ociLatestGen(linux, ociProcessor);
-        const opts = latest ? { processor: ociProcessor, generation: latest } : { processor: ociProcessor };
-        const o = findBestOci(comp, vcpu, ram, os, opts);
-        ociCard = o ? { instance: o.instance, vcpu: o.vcpu, ram: o.ram, pricePerHourUSD: o.pricePerHourUSD, region: STORAGE_CFG?.oci?.region ?? '—', breakdown: o.breakdown } : null;
-      }
+      else {
+        const comp = data.oci, mode = (ociProcessor === 'auto') ? 'auto' : 'latest';
+    const o = findBestOci(comp, vcpu, ram, os, { processor: mode === 'auto' ? 'auto' : ociProcessor, mode });
+    ociCard = o && { instance: o.instance, vcpu: o.vcpu, ram: o.ram, pricePerHourUSD: o.pricePerHourUSD, region: STORAGE_CFG?.oci?.region ?? '—', breakdown: o.breakdown };
+    }
     } catch (e) { ociCard = { error: e.message }; }
-
+    
     // Storage labels
     const sLabel = `${storageAmtGB} GB ${storageType.toUpperCase()}`;
     safeSetText('awsStorageSel', `Storage: ${sLabel}`);
