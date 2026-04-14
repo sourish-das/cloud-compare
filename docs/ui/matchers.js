@@ -173,15 +173,57 @@ export function gcpFamilyMatch(row, family) {
 }
 
 //
+// ---------------- Generation ranking helpers ----------------
+//
+// For family-selected flows: pick latest generation (NOT cheapest)
+// Tie-breaks still use price to keep deterministic.
+function genRankAws(instance) {
+  // m7i.large -> 7, c6a.xlarge -> 6
+  const s = String(instance || "").toLowerCase();
+  const m = s.match(/[a-z]+(\d{1,2})/);
+  return m ? Number(m[1]) : 0;
+}
+
+function genRankAzure(instance) {
+  // Standard_D4s_v5 -> 5
+  const s = String(instance || "").toLowerCase();
+  const m = s.match(/_v(\d{1,2})\b/);
+  return m ? Number(m[1]) : 0;
+}
+
+function genRankGcp(instance) {
+  // n2-standard-4 -> 2 ; c3-standard-8 -> 3
+  const s = String(instance || "").toLowerCase();
+  const head = s.split("-")[0];
+  const m = head.match(/[a-z]+(\d{1,2})/);
+  return m ? Number(m[1]) : 0;
+}
+
+// OCI generation helpers
+function ociGenNumber(gen) {
+  // E6 -> 6, A4 -> 4, Standard3 -> 3, Optimized3 -> 3
+  const g = String(gen || "");
+  const m = g.match(/(\d+)/);
+  return m ? Number(m[1]) : 0;
+}
+function ociIntelVariantRank(gen) {
+  // Prefer Standard over Optimized for same generation unless you decide otherwise
+  const g = String(gen || "").toLowerCase();
+  if (g.startsWith("standard")) return 2;
+  if (g.startsWith("optimized")) return 1;
+  return 0;
+}
+
+//
 // ---------------- OCI HELPERS (UPDATED) ----------------
 //
-// With the arrays‑first model, OCI compute in the aggregated prices.json looks like:
+// With the arrays-first model, OCI compute looks like: [2](https://www.cloudcompare.org/tutorials.html)
 //   oci.compute = {
 //     linux: { amd:[{gen,shape,architecture,ocpu_per_hour,ram_gb_per_hour},...],
 //              arm:[...],
 //              intel:[...] },
 //     windows: { license_per_vcpu_hour },
-//     // (optional) rhel: { license_per_vcpu_hour }   <-- NEW (BYOS uplift if supplied)
+//     (optional) rhel: { license_per_vcpu_hour }
 //   }
 //
 // We compute the on-demand hourly price on the fly based on vCPU/RAM inputs.
@@ -207,6 +249,9 @@ export function isOciInFamily(_inst, family) {
 //
 // ---------------- AWS FINDER ----------------
 //
+// RULES:
+// - Auto (family empty): spec distance first, cheapest tie-breaker
+// - Family selected: spec distance first, LATEST generation tie-breaker, then cheapest
 export function findBestAws(list, vcpu, ram, os, family) {
   if (!Array.isArray(list) || list.length === 0)
     throw new Error("AWS price list is empty");
@@ -223,25 +268,49 @@ export function findBestAws(list, vcpu, ram, os, family) {
     isAwsInFamily(x.instance, family) &&
     (!isWin || !isAwsGravitonInstance(x.instance)) // block Graviton for Windows
   );
+
   if (filtered.length === 0) {
     const fLabel = family ? ` family=${family}` : "";
     throw new Error(`No AWS entries for OS=${os || "any"}${fLabel}`);
   }
 
-  let best = null, bestScore = Infinity;
+  let best = null;
+  let bestScore = Infinity;
+  let bestGen = -1;
+
   for (const x of filtered) {
     const score = distance(x.vcpu, vcpu) + distance(x.ram, ram);
-    const tieBreaker = x.pricePerHourUSD;
-    if (score < bestScore || (score === bestScore && tieBreaker < (best?.pricePerHourUSD ?? Infinity))) {
-      best = x; bestScore = score;
+    const gen = genRankAws(x.instance);
+    const price = x.pricePerHourUSD ?? Infinity;
+
+    if (!family) {
+      // AUTO: cheapest tie-breaker
+      if (score < bestScore || (score === bestScore && price < (best?.pricePerHourUSD ?? Infinity))) {
+        best = x; bestScore = score;
+      }
+    } else {
+      // FAMILY: latest gen wins inside best-score bucket
+      if (score < bestScore) {
+        best = x; bestScore = score; bestGen = gen;
+      } else if (score === bestScore) {
+        if (gen > bestGen) {
+          best = x; bestGen = gen;
+        } else if (gen === bestGen && price < (best?.pricePerHourUSD ?? Infinity)) {
+          best = x;
+        }
+      }
     }
   }
+
   return best;
 }
 
 //
 // ---------------- AZURE FINDER ----------------
 //
+// RULES:
+// - Auto: OS+family as requested; allow Unknown OS; cheapest tie-breaker
+// - Family selected: DO NOT DROP family filter; pick latest gen inside best-score bucket
 export function findBestAzure(list, vcpu, ram, os, family) {
   if (!Array.isArray(list) || list.length === 0)
     throw new Error("Azure price list is empty");
@@ -257,16 +326,8 @@ export function findBestAzure(list, vcpu, ram, os, family) {
     (!isWin || !isAzureArmInstance(x.instance))          // block ARM on Windows
   );
 
-  // 2) fallback: remove family filter
-  if (pre.length === 0 && family) {
-    pre = list.filter(x =>
-      isOnDemandShared(x) &&
-      (normalizeOs(x.os) === wantOS || x.os === "Unknown") &&
-      (!isWin || !isAzureArmInstance(x.instance))
-    );
-  }
-
-  // 3) fallback: ignore OS
+  // NOTE: We intentionally do NOT drop family filter when family is selected.
+  // Only fallback allowed: ignore OS (but keep family)
   if (pre.length === 0) {
     pre = list.filter(x =>
       isOnDemandShared(x) &&
@@ -287,20 +348,39 @@ export function findBestAzure(list, vcpu, ram, os, family) {
     return { ...x, vcpu: x.vcpu ?? meta.vcpu, ram: x.ram ?? meta.ram };
   });
 
-  let best = null, bestScore = Infinity;
+  let best = null;
+  let bestScore = Infinity;
+  let bestGen = -1;
+
   for (const x of enriched) {
     const hasSpecs = isFinite(x.vcpu) && isFinite(x.ram);
-    let score = hasSpecs
-      ? distance(x.vcpu, vcpu) + distance(x.ram, ram)
-      : 9999;
+    const baseScore = hasSpecs ? distance(x.vcpu, vcpu) + distance(x.ram, ram) : 9999;
 
-    if (x.os === "Unknown") score += 0.5;
-    const tieBreaker = x.pricePerHourUSD ?? Infinity;
+    const gen = genRankAzure(x.instance);
+    const price = x.pricePerHourUSD ?? Infinity;
 
-    if (score < bestScore || (score === bestScore && tieBreaker < (best?.pricePerHourUSD ?? Infinity))) {
-      best = x; bestScore = score;
+    if (!family) {
+      // AUTO: keep Unknown OS slightly worse
+      let score = baseScore;
+      if (x.os === "Unknown") score += 0.5;
+
+      if (score < bestScore || (score === bestScore && price < (best?.pricePerHourUSD ?? Infinity))) {
+        best = x; bestScore = score;
+      }
+    } else {
+      // FAMILY: latest generation inside best-score bucket
+      if (baseScore < bestScore) {
+        best = x; bestScore = baseScore; bestGen = gen;
+      } else if (baseScore === bestScore) {
+        if (gen > bestGen) {
+          best = x; bestGen = gen;
+        } else if (gen === bestGen && price < (best?.pricePerHourUSD ?? Infinity)) {
+          best = x;
+        }
+      }
     }
   }
+
   if (best) best.os = os; // ensure UI sees the requested OS label
   return best;
 }
@@ -308,6 +388,9 @@ export function findBestAzure(list, vcpu, ram, os, family) {
 //
 // ---------------- GCP FINDER (now centralized) ----------------
 //
+// RULES:
+// - Auto: OS+family; cheapest tie-breaker
+// - Family selected: do NOT drop family; choose latest gen inside best-score bucket
 export function findBestGcp(list, vcpu, ram, os, family) {
   if (!Array.isArray(list) || list.length === 0)
     throw new Error("GCP price list is empty");
@@ -325,18 +408,8 @@ export function findBestGcp(list, vcpu, ram, os, family) {
     (!isWin || !isGcpArmInstance(x.instance))             // Windows ≠ Arm
   );
 
-  // 2) fallback: remove family
-  if (pre.length === 0 && family) {
-    pre = list.filter(x =>
-      isFinite(x?.vcpu) &&
-      isFinite(x?.ram) &&
-      isFinite(x?.pricePerHourUSD) &&
-      (!wantOS || String(x.os || "").toLowerCase() === wantOS) &&
-      (!isWin || !isGcpArmInstance(x.instance))
-    );
-  }
-
-  // 3) fallback: ignore OS (keep family)
+  // NOTE: We intentionally do NOT drop family filter when family is selected.
+  // Fallback allowed: ignore OS (but keep family)
   if (pre.length === 0) {
     pre = list.filter(x =>
       isFinite(x?.vcpu) &&
@@ -352,21 +425,43 @@ export function findBestGcp(list, vcpu, ram, os, family) {
     throw new Error(`No GCP entries for OS=${os || "any"}${fLabel}`);
   }
 
-  let best = null, bestScore = Infinity;
+  let best = null;
+  let bestScore = Infinity;
+  let bestGen = -1;
+
   for (const x of pre) {
     const score = Math.abs(x.vcpu - vcpu) + Math.abs(x.ram - ram);
-    const tieBreaker = x.pricePerHourUSD ?? Infinity;
-    if (score < bestScore || (score === bestScore && tieBreaker < (best?.pricePerHourUSD ?? Infinity))) {
-      best = x; bestScore = score;
+    const gen = genRankGcp(x.instance);
+    const price = x.pricePerHourUSD ?? Infinity;
+
+    if (!family) {
+      // AUTO: cheapest tie-breaker
+      if (score < bestScore || (score === bestScore && price < (best?.pricePerHourUSD ?? Infinity))) {
+        best = x; bestScore = score;
+      }
+    } else {
+      // FAMILY: latest gen inside best-score bucket
+      if (score < bestScore) {
+        best = x; bestScore = score; bestGen = gen;
+      } else if (score === bestScore) {
+        if (gen > bestGen) {
+          best = x; bestGen = gen;
+        } else if (gen === bestGen && price < (best?.pricePerHourUSD ?? Infinity)) {
+          best = x;
+        }
+      }
     }
   }
+
   return best;
 }
 
 //
-// ---------------- OCI FINDER (arrays‑first, processor-aware) — UPDATED FOR RHEL ----------------
+// ---------------- OCI FINDER (arrays-first, processor-aware) — UPDATED FOR RHEL ----------------
 //
-// 
+// RULES (as per your latest requirement): [2](https://www.cloudcompare.org/tutorials.html)
+// - Auto: absolute cheapest across amd + intel + arm (Windows excludes arm) [1](https://github.com/sourish-das/cloud-compare/actions/workflows/update-azure.yml)[2](https://www.cloudcompare.org/tutorials.html)
+// - Processor selected: latest generation ONLY (NOT cheapest-in-latest)
 export function findBestOci(ociCompute, vcpu, ram, os, options = {}) {
   if (!ociCompute || typeof ociCompute !== "object")
     throw new Error("OCI pricing block is missing (prices.json.oci)");
@@ -385,6 +480,8 @@ export function findBestOci(ociCompute, vcpu, ram, os, options = {}) {
     throw new Error("OCI requires numeric vCPU and RAM inputs");
 
   const proc = String(options.processor || "auto").toLowerCase();    // "auto"|"amd"|"arm"|"intel"
+  const mode = String(options.mode || "auto").toLowerCase();         // "auto"|"latest"
+  // Backward compatibility: if someone still sends generation, keep honoring it
   const genFilter = String(options.generation || "auto").toLowerCase();
 
   const winUpliftPerVcpu  = isWindows ? (safeNum(W?.license_per_vcpu_hour, 0) ?? 0) : 0;
@@ -392,7 +489,7 @@ export function findBestOci(ociCompute, vcpu, ram, os, options = {}) {
   // RHEL uplift priority:
   //   1) ociCompute.rhel.license_per_vcpu_hour (if backend provides)
   //   2) window.OCI_RHEL_RATE_PER_VCPU (if exposed by app)
-  //   3) 0 (no uplift info -> treat as infra-only; still allowed to render)
+  //   3) 0
   const rhelUpliftPerVcpu = isRhel
     ? (safeNum(R?.license_per_vcpu_hour,
         safeNum(typeof window !== "undefined" ? window.OCI_RHEL_RATE_PER_VCPU : undefined, 0)) ?? 0)
@@ -400,25 +497,24 @@ export function findBestOci(ociCompute, vcpu, ram, os, options = {}) {
 
   const candidates = [];
 
-  function addCandidate(entry, archLabel) {
+  function addCandidate(entry, processorKey) {
     const ocpuRate = safeNum(entry?.ocpu_per_hour, null);
     const memRate  = safeNum(entry?.ram_gb_per_hour, null);
     if (!Number.isFinite(ocpuRate) || !Number.isFinite(memRate)) return;
 
-    // Processor filter
-    if (proc !== "auto") {
-      const wantArch = (proc === "arm") ? "arm" : "x86";
-      if (archLabel !== wantArch) return;
-    }
+    // Strict processor filter
+    if (proc !== "auto" && processorKey !== proc) return;
 
-    // Generation filter
+    // Windows excludes ARM
+    if (isWindows && processorKey === "arm") return;
+
+    // Back-compat generation filter (if provided)
     const entGen = String(entry?.gen || "").toLowerCase();
     if (genFilter !== "auto" && entGen && entGen !== genFilter) return;
 
-    // Windows excludes ARM
-    if (isWindows && archLabel === "arm") return;
-
+    const archLabel = (processorKey === "arm") ? "arm" : "x86";
     const ocpu = vcpuToOcpuForArch(v, archLabel);
+
     const cpuBase = ocpu * ocpuRate;
     const memCost = m * memRate;
 
@@ -433,7 +529,7 @@ export function findBestOci(ociCompute, vcpu, ram, os, options = {}) {
       vcpu: v,
       ram: m,
       os: isWindows ? "Windows" : (isRhel ? "RHEL" : "Linux"),
-      series: archLabel,
+      series: processorKey,
       gen: entry.gen || undefined,
       pricePerHourUSD: ph,
       breakdown: {
@@ -445,27 +541,51 @@ export function findBestOci(ociCompute, vcpu, ram, os, options = {}) {
     });
   }
 
-  // Gather from arrays; intel may be empty in some regions
-  (Array.isArray(L.amd)   ? L.amd   : []).forEach(e => addCandidate(e, "x86"));
+  (Array.isArray(L.amd)   ? L.amd   : []).forEach(e => addCandidate(e, "amd"));
   (Array.isArray(L.arm)   ? L.arm   : []).forEach(e => addCandidate(e, "arm"));
-  (Array.isArray(L.intel) ? L.intel : []).forEach(e => addCandidate(e, "x86"));
+  (Array.isArray(L.intel) ? L.intel : []).forEach(e => addCandidate(e, "intel"));
 
   if (candidates.length === 0) {
     throw new Error(`No OCI candidates for processor=${proc}`);
   }
 
-  // SPEC-FIRST selection: minimize spec distance (vcpu + ram), price as tie-breaker
+  // Processor selected + latest mode => pick latest gen ONLY (not cheapest-in-latest)
+  if (proc !== "auto" && mode === "latest") {
+    let best = null;
+    let bestGen = -1;
+    let bestIntelVariant = -1;
+
+    for (const c of candidates) {
+      const g = ociGenNumber(c.gen);
+
+      if (g > bestGen) {
+        best = c;
+        bestGen = g;
+        bestIntelVariant = (proc === "intel") ? ociIntelVariantRank(c.gen) : -1;
+        continue;
+      }
+
+      if (g === bestGen && proc === "intel") {
+        const vr = ociIntelVariantRank(c.gen);
+        if (vr > bestIntelVariant) {
+          best = c;
+          bestIntelVariant = vr;
+        }
+      }
+    }
+
+    return best;
+  }
+
+  // AUTO => absolute cheapest (spec distance is irrelevant because OCI candidates are built for chosen vCPU/RAM)
   let best = null;
-  let bestScore = Infinity;
+  let bestPrice = Infinity;
 
   for (const c of candidates) {
-    // distance() is shared helper in matchers.js
-    const score = distance(c.vcpu, v) + distance(c.ram, m);
-    const tieBreaker = Number(c.pricePerHourUSD ?? Infinity);
-
-    if (score < bestScore || (score === bestScore && tieBreaker < (best?.pricePerHourUSD ?? Infinity))) {
+    const price = Number(c.pricePerHourUSD ?? Infinity);
+    if (price < bestPrice) {
       best = c;
-      bestScore = score;
+      bestPrice = price;
     }
   }
 
