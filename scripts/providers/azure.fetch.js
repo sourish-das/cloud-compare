@@ -1,18 +1,4 @@
 // scripts/providers/azure.fetch.js
-// Fetch Azure retail VM prices and enrich with vCPU/RAM + architecture (PAYG only)
-// Output: docs/data/azure/azure.prices.json
-//
-// CACHE-ONLY MODE (Option 2):
-// - Prices: Azure Retail Prices API (no auth) [1](https://github.com/sourish-das/cloud-compare/actions/workflows/update-azure.yml)
-// - vCPU/RAM/arch: from local cache JSON (AZURE_SKU_MAP_PATH) [2](https://vodafone-my.sharepoint.com/personal/sourish_das_vodafone_com/Documents/Microsoft%20Copilot%20Chat%20Files/azure.prices%20(1).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json)
-// - NO Azure login, NO ARM token, NO subscription required
-//
-// Cache expected at: scripts/cache/azure.skus.<region>.json
-// Example entry:
-// {
-//   "standard_d2as_v5": { "vcpu": 2, "ram": 8, "cpuArchitecture": "x64" },
-//   ...
-// }
 
 const fs = require('fs');
 const path = require('path');
