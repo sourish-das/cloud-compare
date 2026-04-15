@@ -1,6 +1,18 @@
 // scripts/providers/azure.fetch.js
 // Fetch Azure retail VM prices and enrich with vCPU/RAM + architecture (PAYG only)
 // Output: docs/data/azure/azure.prices.json
+//
+// CACHE-ONLY MODE (Option 2):
+// - Prices: Azure Retail Prices API (no auth) [1](https://github.com/sourish-das/cloud-compare/actions/workflows/update-azure.yml)
+// - vCPU/RAM/arch: from local cache JSON (AZURE_SKU_MAP_PATH) [2](https://vodafone-my.sharepoint.com/personal/sourish_das_vodafone_com/Documents/Microsoft%20Copilot%20Chat%20Files/azure.prices%20(1).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json).json)
+// - NO Azure login, NO ARM token, NO subscription required
+//
+// Cache expected at: scripts/cache/azure.skus.<region>.json
+// Example entry:
+// {
+//   "standard_d2as_v5": { "vcpu": 2, "ram": 8, "cpuArchitecture": "x64" },
+//   ...
+// }
 
 const fs = require('fs');
 const path = require('path');
@@ -15,7 +27,6 @@ const {
   normalizeAzureInstanceName,
   fullInstanceFromRetail,
   isPrimaryOnDemandRetailItem,
-  getResourceSkusMap,
   azureDisplayNameFromNormalized,
   azureSeriesFromNormalized,
   azureSeriesNameFromNormalized,
@@ -24,9 +35,10 @@ const {
 } = require('../lib/azure');
 
 const REGION = process.env.AZURE_REGION || 'eastus';
-const SUBSCRIPTION_ID = process.env.AZURE_SUBSCRIPTION_ID || '';
-const ARM_TOKEN = process.env.ARM_TOKEN || '';
-const OUTPUT_PATH = process.env.OUTPUT_PATH || path.join('docs','data','azure','azure.prices.json');
+const OUTPUT_PATH = process.env.OUTPUT_PATH || path.join('docs', 'data', 'azure', 'azure.prices.json');
+
+// Option 2 cache path (required for vCPU/RAM enrichment)
+const SKU_CACHE_PATH = process.env.AZURE_SKU_MAP_PATH || '';
 
 function fetchJson(url, headers = {}) {
   return new Promise((resolve, reject) => {
@@ -41,7 +53,25 @@ function fetchJson(url, headers = {}) {
   });
 }
 
-// ---------- Retail fetch (PAYG only) with ARM-friendly tokens ----------
+/* ============================================================
+ * SKU Cache loader
+ * ============================================================ */
+function loadSkuCache(cachePath) {
+  if (!cachePath) return null;
+  try {
+    if (!fs.existsSync(cachePath)) return null;
+    const raw = fs.readFileSync(cachePath, 'utf-8');
+    const obj = JSON.parse(raw);
+    return (obj && typeof obj === 'object') ? obj : null;
+  } catch (e) {
+    console.warn(`[Azure] Failed to load SKU cache: ${cachePath} (${e.message})`);
+    return null;
+  }
+}
+
+/* ============================================================
+ * Retail fetch (PAYG only)
+ * ============================================================ */
 async function fetchRetailPrices(region) {
   const base = 'https://prices.azure.com/api/retail/prices';
   let next = `${base}?$filter=` +
@@ -57,9 +87,12 @@ async function fetchRetailPrices(region) {
     `)`;
 
   const rows = [];
-  let pages = 0; const MAXP = 120;
+  let pages = 0;
+  const MAXP = 120;
+
   while (next && pages < MAXP) {
     const j = await fetchJson(next);
+
     for (const it of (j.Items || [])) {
       // Keep only primary on‑demand VM meters
       if (!isPrimaryOnDemandRetailItem(it)) continue;
@@ -71,25 +104,28 @@ async function fetchRetailPrices(region) {
       // Defensive text guards — prevent discounted/alt meters from slipping in
       const blob = [it.productName, it.skuName, it.meterName, it.armSkuName, it.retailPriceType]
         .filter(Boolean).join(' ').toLowerCase();
-      if (/\bpromo\b/.test(blob)) continue;                    // promotional
-      if (/(dev\s*\/?\s*test|devtest|msdn)/i.test(blob)) continue; // Dev/Test
-      if (/(spot|low\s*priority)/i.test(blob)) continue;        // Spot/Low priority
-      if (/(reservation|reserved)/i.test(blob)) continue;        // Reservations
-      if (/savings\s*plan/i.test(blob)) continue;               // Savings plan
-      if (/(\bahb\b|hybrid\s*benefit)/i.test(blob)) continue;  // Azure Hybrid Benefit
+
+      if (/\bpromo\b/.test(blob)) continue;                         // promotional
+      if (/(dev\s*\/?\s*test|devtest|msdn)/i.test(blob)) continue;  // Dev/Test
+      if (/(spot|low\s*priority)/i.test(blob)) continue;            // Spot/Low priority
+      if (/(reservation|reserved)/i.test(blob)) continue;           // Reservations
+      if (/savings\s*plan/i.test(blob)) continue;                   // Savings plan
+      if (/(\bahb\b|hybrid\s*benefit)/i.test(blob)) continue;       // Azure Hybrid Benefit
 
       // Instance name: prefer armSkuName; never split
       const instanceRaw = fullInstanceFromRetail(it);
       if (!instanceRaw) continue;
+
       const instance = normalizeAzureInstanceName(instanceRaw);
       if (!instance) continue;
       if (!widenAzureSeries(instance)) continue;
       if (isBurstableAzure(instance)) continue; // exclude B-series
 
       // OS eligibility
-      const okLinux = isLinuxRetailEligible(it);     // free Linux only
-      const okWindows = isWindowsRetailEligible(it); // Windows license-included only
+      const okLinux = isLinuxRetailEligible(it);      // free Linux only
+      const okWindows = isWindowsRetailEligible(it);  // Windows license-included only
       if (!(okLinux || okWindows)) continue;
+
       const os = okWindows ? 'Windows' : 'Linux';
 
       rows.push({
@@ -100,32 +136,53 @@ async function fetchRetailPrices(region) {
         source: 'retail'
       });
     }
+
     next = j.NextPageLink || null;
     pages++;
   }
+
   return rows;
 }
 
 function inferArchitecture(name, capsArch) {
-  // capsArch like 'Arm64' | 'x64' from ResourceSkus capabilities
+  // capsArch like 'Arm64' | 'x64' (from cache)
   if (typeof capsArch === 'string') {
     const s = capsArch.toLowerCase();
-    if (s.includes('arm')) return 'arm';
+    if (s.includes('arm') || s.includes('aarch64')) return 'arm';
   }
   return isAzureArmInstance(name) ? 'arm' : 'x86';
 }
 
+/* ============================================================
+ * Cache-only enrichment (NO ARM / NO subscription)
+ * ============================================================ */
 async function enrichWithSkus(rows) {
-  if (!SUBSCRIPTION_ID || !ARM_TOKEN) {
-    console.warn('[Azure] Missing SUBSCRIPTION_ID/ARM_TOKEN. vCPU/RAM/arch may be null.');
-    return rows.map(r => ({ ...r, architecture: inferArchitecture(r.instance) }));
+  const cache = loadSkuCache(SKU_CACHE_PATH);
+
+  if (!cache) {
+    console.warn(`[Azure] SKU cache not found (AZURE_SKU_MAP_PATH=${SKU_CACHE_PATH || 'unset'}). vCPU/RAM will be null.`);
+    return rows.map(r => ({
+      ...r,
+      vcpu: null,
+      ram: null,
+      architecture: inferArchitecture(r.instance),
+      displayInstance: azureDisplayNameFromNormalized(r.instance),
+      series: azureSeriesFromNormalized(r.instance),
+      seriesName: azureSeriesNameFromNormalized(r.instance),
+      category: null
+    }));
   }
-  const skuMap = await getResourceSkusMap({ subscriptionId: SUBSCRIPTION_ID, region: REGION, armToken: ARM_TOKEN });
+
+  console.log(`[Azure] Using SKU cache: ${SKU_CACHE_PATH}`);
+
   return rows.map(r => {
-    const caps = skuMap.get(String(r.instance).toLowerCase()) || null;
-    const vcpu = caps?.vcpu ?? null;
-    const ram = caps?.ram ?? null;
-    const arch = inferArchitecture(r.instance, caps?.CpuArchitecture || caps?.cpuArchitecture);
+    const key = String(r.instance).toLowerCase();
+    const caps = cache[key] || null;
+
+    const vcpu = (caps && Number.isFinite(Number(caps.vcpu))) ? Number(caps.vcpu) : null;
+    const ram  = (caps && Number.isFinite(Number(caps.ram)))  ? Number(caps.ram)  : null;
+    const arch = inferArchitecture(r.instance, caps?.cpuArchitecture || caps?.CpuArchitecture);
+
     return {
       ...r,
       vcpu,
@@ -134,7 +191,7 @@ async function enrichWithSkus(rows) {
       displayInstance: azureDisplayNameFromNormalized(r.instance),
       series: azureSeriesFromNormalized(r.instance),
       seriesName: azureSeriesNameFromNormalized(r.instance),
-      category: null // filled later
+      category: null
     };
   });
 }
@@ -166,7 +223,7 @@ async function main() {
   const baseRows = await fetchRetailPrices(REGION);
   let enriched = await enrichWithSkus(baseRows);
 
-  // Fill category + architecture fallback (for missing caps)
+  // Fill category + architecture fallback
   enriched = enriched.map(r => ({
     ...r,
     category: r.category || categorize(r),
@@ -186,7 +243,7 @@ async function main() {
     meta: {
       os: ['Linux', 'RHEL', 'Windows'],
       vcpu: Array.from(new Set(finalRows.map(r => r.vcpu).filter(x => x != null))).sort((a, b) => a - b),
-      ram: Array.from(new Set(finalRows.map(r => r.ram).filter(x => x != null))).sort((a, b) => a - b),
+      ram:  Array.from(new Set(finalRows.map(r => r.ram ).filter(x => x != null))).sort((a, b) => a - b),
     },
     compute: finalRows
   };
