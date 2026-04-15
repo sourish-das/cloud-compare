@@ -21,8 +21,6 @@ jobs:
     uses: ./.github/workflows/update-azure.yml
     permissions:
       contents: read
-      id-token: write
-    secrets: inherit
 
   # ------------------------------------------------------------
   # 2) AWS
