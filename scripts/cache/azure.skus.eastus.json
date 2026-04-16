@@ -1,0 +1,5457 @@
+{
+  "standard_standard_a1_v2": {
+    "vcpu": 1,
+    "ram": 2.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_a2m_v2": {
+    "vcpu": 2,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_a2_v2": {
+    "vcpu": 2,
+    "ram": 4.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_a4m_v2": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_a4_v2": {
+    "vcpu": 4,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_a8m_v2": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_a8_v2": {
+    "vcpu": 8,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_b12ms": {
+    "vcpu": 12,
+    "ram": 48.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_b16als_v2": {
+    "vcpu": 16,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_b16as_v2": {
+    "vcpu": 16,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_b16ls_v2": {
+    "vcpu": 16,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_b16ms": {
+    "vcpu": 16,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_b16pls_v2": {
+    "vcpu": 16,
+    "ram": 32.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_b16ps_v2": {
+    "vcpu": 16,
+    "ram": 64.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_b16s_v2": {
+    "vcpu": 16,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_b1ls": {
+    "vcpu": 1,
+    "ram": 0.5,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_b1ms": {
+    "vcpu": 1,
+    "ram": 2.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_b1s": {
+    "vcpu": 1,
+    "ram": 1.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_b20ms": {
+    "vcpu": 20,
+    "ram": 80.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_b2als_v2": {
+    "vcpu": 2,
+    "ram": 4.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_b2as_v2": {
+    "vcpu": 2,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_b2ats_v2": {
+    "vcpu": 2,
+    "ram": 1.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_b2ls_v2": {
+    "vcpu": 2,
+    "ram": 4.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_b2ms": {
+    "vcpu": 2,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_b2pls_v2": {
+    "vcpu": 2,
+    "ram": 4.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_b2ps_v2": {
+    "vcpu": 2,
+    "ram": 8.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_b2pts_v2": {
+    "vcpu": 2,
+    "ram": 1.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_b2s": {
+    "vcpu": 2,
+    "ram": 4.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_b2s_v2": {
+    "vcpu": 2,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_b2ts_v2": {
+    "vcpu": 2,
+    "ram": 1.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_b32als_v2": {
+    "vcpu": 32,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_b32as_v2": {
+    "vcpu": 32,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_b32ls_v2": {
+    "vcpu": 32,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_b32s_v2": {
+    "vcpu": 32,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_b4als_v2": {
+    "vcpu": 4,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_b4as_v2": {
+    "vcpu": 4,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_b4ls_v2": {
+    "vcpu": 4,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_b4ms": {
+    "vcpu": 4,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_b4pls_v2": {
+    "vcpu": 4,
+    "ram": 8.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_b4ps_v2": {
+    "vcpu": 4,
+    "ram": 16.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_b4s_v2": {
+    "vcpu": 4,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_b8als_v2": {
+    "vcpu": 8,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_b8as_v2": {
+    "vcpu": 8,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_b8ls_v2": {
+    "vcpu": 8,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_b8ms": {
+    "vcpu": 8,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_b8pls_v2": {
+    "vcpu": 8,
+    "ram": 16.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_b8ps_v2": {
+    "vcpu": 8,
+    "ram": 32.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_b8s_v2": {
+    "vcpu": 8,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d1": {
+    "vcpu": 1,
+    "ram": 3.5,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d11": {
+    "vcpu": 2,
+    "ram": 14.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d11_v2": {
+    "vcpu": 2,
+    "ram": 14.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d11_v2_promo": {
+    "vcpu": 2,
+    "ram": 14.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d12": {
+    "vcpu": 4,
+    "ram": 28.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d128ds_v6": {
+    "vcpu": 128,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d128lds_v6": {
+    "vcpu": 128,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d128ls_v6": {
+    "vcpu": 128,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d128s_v6": {
+    "vcpu": 128,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d12_v2": {
+    "vcpu": 4,
+    "ram": 28.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d12_v2_promo": {
+    "vcpu": 4,
+    "ram": 28.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d13": {
+    "vcpu": 8,
+    "ram": 56.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d13_v2": {
+    "vcpu": 8,
+    "ram": 56.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d13_v2_promo": {
+    "vcpu": 8,
+    "ram": 56.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d14": {
+    "vcpu": 16,
+    "ram": 112.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d14_v2": {
+    "vcpu": 16,
+    "ram": 112.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d14_v2_promo": {
+    "vcpu": 16,
+    "ram": 112.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d15_v2": {
+    "vcpu": 20,
+    "ram": 140.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d16ads_v5": {
+    "vcpu": 16,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d16ads_v6": {
+    "vcpu": 16,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d16alds_v6": {
+    "vcpu": 16,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d16als_v6": {
+    "vcpu": 16,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d16as_v4": {
+    "vcpu": 16,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d16as_v5": {
+    "vcpu": 16,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d16as_v6": {
+    "vcpu": 16,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d16a_v4": {
+    "vcpu": 16,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d16ds_v4": {
+    "vcpu": 16,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d16ds_v5": {
+    "vcpu": 16,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d16ds_v6": {
+    "vcpu": 16,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d16d_v4": {
+    "vcpu": 16,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d16d_v5": {
+    "vcpu": 16,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d16lds_v5": {
+    "vcpu": 16,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d16lds_v6": {
+    "vcpu": 16,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d16ls_v5": {
+    "vcpu": 16,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d16ls_v6": {
+    "vcpu": 16,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d16pds_v5": {
+    "vcpu": 16,
+    "ram": 64.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d16pds_v6": {
+    "vcpu": 16,
+    "ram": 64.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d16plds_v5": {
+    "vcpu": 16,
+    "ram": 32.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d16plds_v6": {
+    "vcpu": 16,
+    "ram": 32.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d16pls_v5": {
+    "vcpu": 16,
+    "ram": 32.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d16pls_v6": {
+    "vcpu": 16,
+    "ram": 32.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d16ps_v5": {
+    "vcpu": 16,
+    "ram": 64.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d16ps_v6": {
+    "vcpu": 16,
+    "ram": 64.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d16s_v3": {
+    "vcpu": 16,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d16s_v4": {
+    "vcpu": 16,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d16s_v5": {
+    "vcpu": 16,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d16s_v6": {
+    "vcpu": 16,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d16_v3": {
+    "vcpu": 16,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d16_v4": {
+    "vcpu": 16,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d16_v5": {
+    "vcpu": 16,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d192ds_v6": {
+    "vcpu": 192,
+    "ram": 768.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d192s_v6": {
+    "vcpu": 192,
+    "ram": 768.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d1_v2": {
+    "vcpu": 1,
+    "ram": 3.5,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d2": {
+    "vcpu": 2,
+    "ram": 7.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d2ads_v5": {
+    "vcpu": 2,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d2ads_v6": {
+    "vcpu": 2,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d2alds_v6": {
+    "vcpu": 2,
+    "ram": 4.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d2als_v6": {
+    "vcpu": 2,
+    "ram": 4.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d2as_v4": {
+    "vcpu": 2,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d2as_v5": {
+    "vcpu": 2,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d2as_v6": {
+    "vcpu": 2,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d2a_v4": {
+    "vcpu": 2,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d2ds_v4": {
+    "vcpu": 2,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d2ds_v5": {
+    "vcpu": 2,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d2ds_v6": {
+    "vcpu": 2,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d2d_v4": {
+    "vcpu": 2,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d2d_v5": {
+    "vcpu": 2,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d2lds_v5": {
+    "vcpu": 2,
+    "ram": 4.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d2lds_v6": {
+    "vcpu": 2,
+    "ram": 4.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d2ls_v5": {
+    "vcpu": 2,
+    "ram": 4.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d2ls_v6": {
+    "vcpu": 2,
+    "ram": 4.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d2pds_v5": {
+    "vcpu": 2,
+    "ram": 8.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d2pds_v6": {
+    "vcpu": 2,
+    "ram": 8.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d2plds_v5": {
+    "vcpu": 2,
+    "ram": 4.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d2plds_v6": {
+    "vcpu": 2,
+    "ram": 4.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d2pls_v5": {
+    "vcpu": 2,
+    "ram": 4.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d2pls_v6": {
+    "vcpu": 2,
+    "ram": 4.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d2ps_v5": {
+    "vcpu": 2,
+    "ram": 8.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d2ps_v6": {
+    "vcpu": 2,
+    "ram": 8.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d2s_v3": {
+    "vcpu": 2,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d2s_v4": {
+    "vcpu": 2,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d2s_v5": {
+    "vcpu": 2,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d2s_v6": {
+    "vcpu": 2,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d2_v2": {
+    "vcpu": 2,
+    "ram": 7.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d2_v2_promo": {
+    "vcpu": 2,
+    "ram": 7.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d2_v3": {
+    "vcpu": 2,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d2_v4": {
+    "vcpu": 2,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d2_v5": {
+    "vcpu": 2,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d3": {
+    "vcpu": 4,
+    "ram": 14.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d32ads_v5": {
+    "vcpu": 32,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d32ads_v6": {
+    "vcpu": 32,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d32alds_v6": {
+    "vcpu": 32,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d32als_v6": {
+    "vcpu": 32,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d32as_v4": {
+    "vcpu": 32,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d32as_v5": {
+    "vcpu": 32,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d32as_v6": {
+    "vcpu": 32,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d32a_v4": {
+    "vcpu": 32,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d32ds_v4": {
+    "vcpu": 32,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d32ds_v5": {
+    "vcpu": 32,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d32ds_v6": {
+    "vcpu": 32,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d32d_v4": {
+    "vcpu": 32,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d32d_v5": {
+    "vcpu": 32,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d32lds_v5": {
+    "vcpu": 32,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d32lds_v6": {
+    "vcpu": 32,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d32ls_v5": {
+    "vcpu": 32,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d32ls_v6": {
+    "vcpu": 32,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d32pds_v5": {
+    "vcpu": 32,
+    "ram": 128.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d32pds_v6": {
+    "vcpu": 32,
+    "ram": 128.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d32plds_v5": {
+    "vcpu": 32,
+    "ram": 64.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d32plds_v6": {
+    "vcpu": 32,
+    "ram": 64.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d32pls_v5": {
+    "vcpu": 32,
+    "ram": 64.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d32pls_v6": {
+    "vcpu": 32,
+    "ram": 64.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d32ps_v5": {
+    "vcpu": 32,
+    "ram": 128.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d32ps_v6": {
+    "vcpu": 32,
+    "ram": 128.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d32s_v3": {
+    "vcpu": 32,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d32s_v4": {
+    "vcpu": 32,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d32s_v5": {
+    "vcpu": 32,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d32s_v6": {
+    "vcpu": 32,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d32_v3": {
+    "vcpu": 32,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d32_v4": {
+    "vcpu": 32,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d32_v5": {
+    "vcpu": 32,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d3_v2": {
+    "vcpu": 4,
+    "ram": 14.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d3_v2_promo": {
+    "vcpu": 4,
+    "ram": 14.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d4": {
+    "vcpu": 8,
+    "ram": 28.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d48ads_v5": {
+    "vcpu": 48,
+    "ram": 192.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d48ads_v6": {
+    "vcpu": 48,
+    "ram": 192.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d48alds_v6": {
+    "vcpu": 48,
+    "ram": 96.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d48als_v6": {
+    "vcpu": 48,
+    "ram": 96.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d48as_v4": {
+    "vcpu": 48,
+    "ram": 192.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d48as_v5": {
+    "vcpu": 48,
+    "ram": 192.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d48as_v6": {
+    "vcpu": 48,
+    "ram": 192.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d48a_v4": {
+    "vcpu": 48,
+    "ram": 192.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d48ds_v4": {
+    "vcpu": 48,
+    "ram": 192.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d48ds_v5": {
+    "vcpu": 48,
+    "ram": 192.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d48ds_v6": {
+    "vcpu": 48,
+    "ram": 192.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d48d_v4": {
+    "vcpu": 48,
+    "ram": 192.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d48d_v5": {
+    "vcpu": 48,
+    "ram": 192.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d48lds_v5": {
+    "vcpu": 48,
+    "ram": 96.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d48lds_v6": {
+    "vcpu": 48,
+    "ram": 96.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d48ls_v5": {
+    "vcpu": 48,
+    "ram": 96.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d48ls_v6": {
+    "vcpu": 48,
+    "ram": 96.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d48pds_v5": {
+    "vcpu": 48,
+    "ram": 192.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d48pds_v6": {
+    "vcpu": 48,
+    "ram": 192.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d48plds_v5": {
+    "vcpu": 48,
+    "ram": 96.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d48plds_v6": {
+    "vcpu": 48,
+    "ram": 96.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d48pls_v5": {
+    "vcpu": 48,
+    "ram": 96.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d48pls_v6": {
+    "vcpu": 48,
+    "ram": 96.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d48ps_v5": {
+    "vcpu": 48,
+    "ram": 192.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d48ps_v6": {
+    "vcpu": 48,
+    "ram": 192.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d48s_v3": {
+    "vcpu": 48,
+    "ram": 192.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d48s_v4": {
+    "vcpu": 48,
+    "ram": 192.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d48s_v5": {
+    "vcpu": 48,
+    "ram": 192.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d48s_v6": {
+    "vcpu": 48,
+    "ram": 192.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d48_v3": {
+    "vcpu": 48,
+    "ram": 192.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d48_v4": {
+    "vcpu": 48,
+    "ram": 192.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d48_v5": {
+    "vcpu": 48,
+    "ram": 192.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d4ads_v5": {
+    "vcpu": 4,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d4ads_v6": {
+    "vcpu": 4,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d4alds_v6": {
+    "vcpu": 4,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d4als_v6": {
+    "vcpu": 4,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d4as_v4": {
+    "vcpu": 4,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d4as_v5": {
+    "vcpu": 4,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d4as_v6": {
+    "vcpu": 4,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d4a_v4": {
+    "vcpu": 4,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d4ds_v4": {
+    "vcpu": 4,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d4ds_v5": {
+    "vcpu": 4,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d4ds_v6": {
+    "vcpu": 4,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d4d_v4": {
+    "vcpu": 4,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d4d_v5": {
+    "vcpu": 4,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d4lds_v5": {
+    "vcpu": 4,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d4lds_v6": {
+    "vcpu": 4,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d4ls_v5": {
+    "vcpu": 4,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d4ls_v6": {
+    "vcpu": 4,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d4pds_v5": {
+    "vcpu": 4,
+    "ram": 16.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d4pds_v6": {
+    "vcpu": 4,
+    "ram": 16.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d4plds_v5": {
+    "vcpu": 4,
+    "ram": 8.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d4plds_v6": {
+    "vcpu": 4,
+    "ram": 8.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d4pls_v5": {
+    "vcpu": 4,
+    "ram": 8.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d4pls_v6": {
+    "vcpu": 4,
+    "ram": 8.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d4ps_v5": {
+    "vcpu": 4,
+    "ram": 16.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d4ps_v6": {
+    "vcpu": 4,
+    "ram": 16.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d4s_v3": {
+    "vcpu": 4,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d4s_v4": {
+    "vcpu": 4,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d4s_v5": {
+    "vcpu": 4,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d4s_v6": {
+    "vcpu": 4,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d4_v2": {
+    "vcpu": 8,
+    "ram": 28.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d4_v2_promo": {
+    "vcpu": 8,
+    "ram": 28.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d4_v3": {
+    "vcpu": 4,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d4_v4": {
+    "vcpu": 4,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d4_v5": {
+    "vcpu": 4,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d5_v2": {
+    "vcpu": 16,
+    "ram": 56.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d5_v2_promo": {
+    "vcpu": 16,
+    "ram": 56.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d64ads_v5": {
+    "vcpu": 64,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d64ads_v6": {
+    "vcpu": 64,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d64alds_v6": {
+    "vcpu": 64,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d64als_v6": {
+    "vcpu": 64,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d64as_v4": {
+    "vcpu": 64,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d64as_v5": {
+    "vcpu": 64,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d64as_v6": {
+    "vcpu": 64,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d64a_v4": {
+    "vcpu": 64,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d64ds_v4": {
+    "vcpu": 64,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d64ds_v5": {
+    "vcpu": 64,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d64ds_v6": {
+    "vcpu": 64,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d64d_v4": {
+    "vcpu": 64,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d64d_v5": {
+    "vcpu": 64,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d64lds_v5": {
+    "vcpu": 64,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d64lds_v6": {
+    "vcpu": 64,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d64ls_v5": {
+    "vcpu": 64,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d64ls_v6": {
+    "vcpu": 64,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d64pds_v5": {
+    "vcpu": 64,
+    "ram": 208.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d64pds_v6": {
+    "vcpu": 64,
+    "ram": 256.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d64plds_v5": {
+    "vcpu": 64,
+    "ram": 128.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d64plds_v6": {
+    "vcpu": 64,
+    "ram": 128.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d64pls_v5": {
+    "vcpu": 64,
+    "ram": 128.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d64pls_v6": {
+    "vcpu": 64,
+    "ram": 128.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d64ps_v5": {
+    "vcpu": 64,
+    "ram": 208.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d64ps_v6": {
+    "vcpu": 64,
+    "ram": 256.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d64s_v3": {
+    "vcpu": 64,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d64s_v4": {
+    "vcpu": 64,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d64s_v5": {
+    "vcpu": 64,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d64s_v6": {
+    "vcpu": 64,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d64_v3": {
+    "vcpu": 64,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d64_v4": {
+    "vcpu": 64,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d64_v5": {
+    "vcpu": 64,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d8ads_v5": {
+    "vcpu": 8,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d8ads_v6": {
+    "vcpu": 8,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d8alds_v6": {
+    "vcpu": 8,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d8als_v6": {
+    "vcpu": 8,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d8as_v4": {
+    "vcpu": 8,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d8as_v5": {
+    "vcpu": 8,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d8as_v6": {
+    "vcpu": 8,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d8a_v4": {
+    "vcpu": 8,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d8ds_v4": {
+    "vcpu": 8,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d8ds_v5": {
+    "vcpu": 8,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d8ds_v6": {
+    "vcpu": 8,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d8d_v4": {
+    "vcpu": 8,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d8d_v5": {
+    "vcpu": 8,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d8lds_v5": {
+    "vcpu": 8,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d8lds_v6": {
+    "vcpu": 8,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d8ls_v5": {
+    "vcpu": 8,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d8ls_v6": {
+    "vcpu": 8,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d8pds_v5": {
+    "vcpu": 8,
+    "ram": 32.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d8pds_v6": {
+    "vcpu": 8,
+    "ram": 32.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d8plds_v5": {
+    "vcpu": 8,
+    "ram": 16.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d8plds_v6": {
+    "vcpu": 8,
+    "ram": 16.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d8pls_v5": {
+    "vcpu": 8,
+    "ram": 16.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d8pls_v6": {
+    "vcpu": 8,
+    "ram": 16.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d8ps_v5": {
+    "vcpu": 8,
+    "ram": 32.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d8ps_v6": {
+    "vcpu": 8,
+    "ram": 32.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d8s_v3": {
+    "vcpu": 8,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d8s_v4": {
+    "vcpu": 8,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d8s_v5": {
+    "vcpu": 8,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d8s_v6": {
+    "vcpu": 8,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d8_v3": {
+    "vcpu": 8,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d8_v4": {
+    "vcpu": 8,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d8_v5": {
+    "vcpu": 8,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d96ads_v5": {
+    "vcpu": 96,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d96ads_v6": {
+    "vcpu": 96,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d96alds_v6": {
+    "vcpu": 96,
+    "ram": 192.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d96als_v6": {
+    "vcpu": 96,
+    "ram": 192.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d96as_v4": {
+    "vcpu": 96,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d96as_v5": {
+    "vcpu": 96,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d96as_v6": {
+    "vcpu": 96,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d96a_v4": {
+    "vcpu": 96,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d96ds_v5": {
+    "vcpu": 96,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d96ds_v6": {
+    "vcpu": 96,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d96d_v5": {
+    "vcpu": 96,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d96lds_v5": {
+    "vcpu": 96,
+    "ram": 192.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d96lds_v6": {
+    "vcpu": 96,
+    "ram": 192.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d96ls_v5": {
+    "vcpu": 96,
+    "ram": 192.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d96ls_v6": {
+    "vcpu": 96,
+    "ram": 192.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d96pds_v6": {
+    "vcpu": 96,
+    "ram": 384.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d96plds_v6": {
+    "vcpu": 96,
+    "ram": 192.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d96pls_v6": {
+    "vcpu": 96,
+    "ram": 192.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d96ps_v6": {
+    "vcpu": 96,
+    "ram": 384.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_d96s_v5": {
+    "vcpu": 96,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d96s_v6": {
+    "vcpu": 96,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_d96_v5": {
+    "vcpu": 96,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc16ads_cc_v5": {
+    "vcpu": 16,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc16ads_v5": {
+    "vcpu": 16,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc16as_cc_v5": {
+    "vcpu": 16,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc16as_v5": {
+    "vcpu": 16,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc16ds_v3": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc16s_v3": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc1ds_v3": {
+    "vcpu": 1,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc1s_v2": {
+    "vcpu": 1,
+    "ram": 4.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc1s_v3": {
+    "vcpu": 1,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc24ds_v3": {
+    "vcpu": 24,
+    "ram": 192.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc24s_v3": {
+    "vcpu": 24,
+    "ram": 192.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc2ads_v5": {
+    "vcpu": 2,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc2as_v5": {
+    "vcpu": 2,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc2ds_v3": {
+    "vcpu": 2,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc2s_v2": {
+    "vcpu": 2,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc2s_v3": {
+    "vcpu": 2,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc32ads_cc_v5": {
+    "vcpu": 32,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc32ads_v5": {
+    "vcpu": 32,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc32as_cc_v5": {
+    "vcpu": 32,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc32as_v5": {
+    "vcpu": 32,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc32ds_v3": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc32s_v3": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc48ads_cc_v5": {
+    "vcpu": 48,
+    "ram": 192.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc48ads_v5": {
+    "vcpu": 48,
+    "ram": 192.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc48as_cc_v5": {
+    "vcpu": 48,
+    "ram": 192.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc48as_v5": {
+    "vcpu": 48,
+    "ram": 192.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc48ds_v3": {
+    "vcpu": 48,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc48s_v3": {
+    "vcpu": 48,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc4ads_cc_v5": {
+    "vcpu": 4,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc4ads_v5": {
+    "vcpu": 4,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc4as_cc_v5": {
+    "vcpu": 4,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc4as_v5": {
+    "vcpu": 4,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc4ds_v3": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc4s_v2": {
+    "vcpu": 4,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc4s_v3": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc64ads_cc_v5": {
+    "vcpu": 64,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc64ads_v5": {
+    "vcpu": 64,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc64as_cc_v5": {
+    "vcpu": 64,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc64as_v5": {
+    "vcpu": 64,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc8ads_cc_v5": {
+    "vcpu": 8,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc8ads_v5": {
+    "vcpu": 8,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc8as_cc_v5": {
+    "vcpu": 8,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc8as_v5": {
+    "vcpu": 8,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc8ds_v3": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc8s_v3": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc8_v2": {
+    "vcpu": 8,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc96ads_cc_v5": {
+    "vcpu": 96,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc96ads_v5": {
+    "vcpu": 96,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc96as_cc_v5": {
+    "vcpu": 96,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_dc96as_v5": {
+    "vcpu": 96,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ds1": {
+    "vcpu": 1,
+    "ram": 3.5,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ds11": {
+    "vcpu": 2,
+    "ram": 14.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ds11-1_v2": {
+    "vcpu": 2,
+    "ram": 14.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ds11_v2": {
+    "vcpu": 2,
+    "ram": 14.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ds11_v2_promo": {
+    "vcpu": 2,
+    "ram": 14.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ds12": {
+    "vcpu": 4,
+    "ram": 28.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ds12-1_v2": {
+    "vcpu": 4,
+    "ram": 28.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ds12-2_v2": {
+    "vcpu": 4,
+    "ram": 28.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ds12_v2": {
+    "vcpu": 4,
+    "ram": 28.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ds12_v2_promo": {
+    "vcpu": 4,
+    "ram": 28.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ds13": {
+    "vcpu": 8,
+    "ram": 56.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ds13-2_v2": {
+    "vcpu": 8,
+    "ram": 56.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ds13-4_v2": {
+    "vcpu": 8,
+    "ram": 56.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ds13_v2": {
+    "vcpu": 8,
+    "ram": 56.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ds13_v2_promo": {
+    "vcpu": 8,
+    "ram": 56.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ds14": {
+    "vcpu": 16,
+    "ram": 112.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ds14-4_v2": {
+    "vcpu": 16,
+    "ram": 112.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ds14-8_v2": {
+    "vcpu": 16,
+    "ram": 112.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ds14_v2": {
+    "vcpu": 16,
+    "ram": 112.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ds14_v2_promo": {
+    "vcpu": 16,
+    "ram": 112.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ds15_v2": {
+    "vcpu": 20,
+    "ram": 140.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ds1_v2": {
+    "vcpu": 1,
+    "ram": 3.5,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ds2": {
+    "vcpu": 2,
+    "ram": 7.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ds2_v2": {
+    "vcpu": 2,
+    "ram": 7.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ds2_v2_promo": {
+    "vcpu": 2,
+    "ram": 7.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ds3": {
+    "vcpu": 4,
+    "ram": 14.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ds3_v2": {
+    "vcpu": 4,
+    "ram": 14.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ds3_v2_promo": {
+    "vcpu": 4,
+    "ram": 14.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ds4": {
+    "vcpu": 8,
+    "ram": 28.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ds4_v2": {
+    "vcpu": 8,
+    "ram": 28.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ds4_v2_promo": {
+    "vcpu": 8,
+    "ram": 28.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ds5_v2": {
+    "vcpu": 16,
+    "ram": 56.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ds5_v2_promo": {
+    "vcpu": 16,
+    "ram": 56.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e104ids_v5": {
+    "vcpu": 104,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e104id_v5": {
+    "vcpu": 104,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e104is_v5": {
+    "vcpu": 104,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e104i_v5": {
+    "vcpu": 104,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e112iads_v5": {
+    "vcpu": 112,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e112ias_v5": {
+    "vcpu": 112,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e112ibds_v5": {
+    "vcpu": 112,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e112ibs_v5": {
+    "vcpu": 112,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e128-32ds_v6": {
+    "vcpu": 128,
+    "ram": 1024.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e128-32s_v6": {
+    "vcpu": 128,
+    "ram": 1024.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e128-64ds_v6": {
+    "vcpu": 128,
+    "ram": 1024.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e128-64s_v6": {
+    "vcpu": 128,
+    "ram": 1024.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e128ds_v6": {
+    "vcpu": 128,
+    "ram": 1024.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e128s_v6": {
+    "vcpu": 128,
+    "ram": 1024.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16-4ads_v5": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16-4as_v4": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16-4as_v5": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16-4ds_v4": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16-4ds_v5": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16-4ds_v6": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16-4s_v3": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16-4s_v4": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16-4s_v5": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16-4s_v6": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16-8ads_v5": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16-8as_v4": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16-8as_v5": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16-8ds_v4": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16-8ds_v5": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16-8ds_v6": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16-8s_v3": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16-8s_v4": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16-8s_v5": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16-8s_v6": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16ads_v5": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16ads_v6": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16as_v4": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16as_v5": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16as_v6": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16a_v4": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16bds_v5": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16bs_v5": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16ds_v4": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16ds_v5": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16ds_v6": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16d_v4": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16d_v5": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16pds_v5": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_e16pds_v6": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_e16ps_v5": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_e16ps_v6": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_e16s_v3": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16s_v4": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16s_v5": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16s_v6": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16_v3": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16_v4": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e16_v5": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e192ids_v6": {
+    "vcpu": 192,
+    "ram": 1832.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e192is_v6": {
+    "vcpu": 192,
+    "ram": 1832.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e20ads_v5": {
+    "vcpu": 20,
+    "ram": 160.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e20ads_v6": {
+    "vcpu": 20,
+    "ram": 160.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e20as_v4": {
+    "vcpu": 20,
+    "ram": 160.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e20as_v5": {
+    "vcpu": 20,
+    "ram": 160.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e20as_v6": {
+    "vcpu": 20,
+    "ram": 160.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e20a_v4": {
+    "vcpu": 20,
+    "ram": 160.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e20ds_v4": {
+    "vcpu": 20,
+    "ram": 160.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e20ds_v5": {
+    "vcpu": 20,
+    "ram": 160.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e20ds_v6": {
+    "vcpu": 20,
+    "ram": 160.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e20d_v4": {
+    "vcpu": 20,
+    "ram": 160.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e20d_v5": {
+    "vcpu": 20,
+    "ram": 160.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e20pds_v5": {
+    "vcpu": 20,
+    "ram": 160.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_e20ps_v5": {
+    "vcpu": 20,
+    "ram": 160.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_e20s_v3": {
+    "vcpu": 20,
+    "ram": 160.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e20s_v4": {
+    "vcpu": 20,
+    "ram": 160.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e20s_v5": {
+    "vcpu": 20,
+    "ram": 160.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e20s_v6": {
+    "vcpu": 20,
+    "ram": 160.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e20_v3": {
+    "vcpu": 20,
+    "ram": 160.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e20_v4": {
+    "vcpu": 20,
+    "ram": 160.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e20_v5": {
+    "vcpu": 20,
+    "ram": 160.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e2ads_v5": {
+    "vcpu": 2,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e2ads_v6": {
+    "vcpu": 2,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e2as_v4": {
+    "vcpu": 2,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e2as_v5": {
+    "vcpu": 2,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e2as_v6": {
+    "vcpu": 2,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e2a_v4": {
+    "vcpu": 2,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e2bds_v5": {
+    "vcpu": 2,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e2bs_v5": {
+    "vcpu": 2,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e2ds_v4": {
+    "vcpu": 2,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e2ds_v5": {
+    "vcpu": 2,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e2ds_v6": {
+    "vcpu": 2,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e2d_v4": {
+    "vcpu": 2,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e2d_v5": {
+    "vcpu": 2,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e2pds_v5": {
+    "vcpu": 2,
+    "ram": 16.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_e2pds_v6": {
+    "vcpu": 2,
+    "ram": 16.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_e2ps_v5": {
+    "vcpu": 2,
+    "ram": 16.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_e2ps_v6": {
+    "vcpu": 2,
+    "ram": 16.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_e2s_v3": {
+    "vcpu": 2,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e2s_v4": {
+    "vcpu": 2,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e2s_v5": {
+    "vcpu": 2,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e2s_v6": {
+    "vcpu": 2,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e2_v3": {
+    "vcpu": 2,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e2_v4": {
+    "vcpu": 2,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e2_v5": {
+    "vcpu": 2,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32-16ads_v5": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32-16as_v4": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32-16as_v5": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32-16ds_v4": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32-16ds_v5": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32-16ds_v6": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32-16s_v3": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32-16s_v4": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32-16s_v5": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32-16s_v6": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32-8ads_v5": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32-8as_v4": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32-8as_v5": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32-8ds_v4": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32-8ds_v5": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32-8ds_v6": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32-8s_v3": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32-8s_v4": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32-8s_v5": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32-8s_v6": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32ads_v5": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32ads_v6": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32as_v4": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32as_v5": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32as_v6": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32a_v4": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32bds_v5": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32bs_v5": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32ds_v4": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32ds_v5": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32ds_v6": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32d_v4": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32d_v5": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32pds_v5": {
+    "vcpu": 32,
+    "ram": 208.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_e32pds_v6": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_e32ps_v5": {
+    "vcpu": 32,
+    "ram": 208.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_e32ps_v6": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_e32s_v3": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32s_v4": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32s_v5": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32s_v6": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32_v3": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32_v4": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e32_v5": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e4-2ads_v5": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e4-2as_v4": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e4-2as_v5": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e4-2ds_v4": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e4-2ds_v5": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e4-2ds_v6": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e4-2s_v3": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e4-2s_v4": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e4-2s_v5": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e4-2s_v6": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e48ads_v5": {
+    "vcpu": 48,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e48ads_v6": {
+    "vcpu": 48,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e48as_v4": {
+    "vcpu": 48,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e48as_v5": {
+    "vcpu": 48,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e48as_v6": {
+    "vcpu": 48,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e48a_v4": {
+    "vcpu": 48,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e48bds_v5": {
+    "vcpu": 48,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e48bs_v5": {
+    "vcpu": 48,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e48ds_v4": {
+    "vcpu": 48,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e48ds_v5": {
+    "vcpu": 48,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e48ds_v6": {
+    "vcpu": 48,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e48d_v4": {
+    "vcpu": 48,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e48d_v5": {
+    "vcpu": 48,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e48pds_v6": {
+    "vcpu": 48,
+    "ram": 384.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_e48ps_v6": {
+    "vcpu": 48,
+    "ram": 384.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_e48s_v3": {
+    "vcpu": 48,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e48s_v4": {
+    "vcpu": 48,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e48s_v5": {
+    "vcpu": 48,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e48s_v6": {
+    "vcpu": 48,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e48_v3": {
+    "vcpu": 48,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e48_v4": {
+    "vcpu": 48,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e48_v5": {
+    "vcpu": 48,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e4ads_v5": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e4ads_v6": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e4as_v4": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e4as_v5": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e4as_v6": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e4a_v4": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e4bds_v5": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e4bs_v5": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e4ds_v4": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e4ds_v5": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e4ds_v6": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e4d_v4": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e4d_v5": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e4pds_v5": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_e4pds_v6": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_e4ps_v5": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_e4ps_v6": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_e4s_v3": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e4s_v4": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e4s_v5": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e4s_v6": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e4_v3": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e4_v4": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e4_v5": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64-16ads_v5": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64-16as_v4": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64-16as_v5": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64-16ds_v4": {
+    "vcpu": 64,
+    "ram": 504.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64-16ds_v5": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64-16ds_v6": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64-16s_v3": {
+    "vcpu": 64,
+    "ram": 432.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64-16s_v4": {
+    "vcpu": 64,
+    "ram": 504.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64-16s_v5": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64-16s_v6": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64-32ads_v5": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64-32as_v4": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64-32as_v5": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64-32ds_v4": {
+    "vcpu": 64,
+    "ram": 504.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64-32ds_v5": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64-32ds_v6": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64-32s_v3": {
+    "vcpu": 64,
+    "ram": 432.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64-32s_v4": {
+    "vcpu": 64,
+    "ram": 504.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64-32s_v5": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64-32s_v6": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64ads_v5": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64ads_v6": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64as_v4": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64as_v5": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64as_v6": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64a_v4": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64bds_v5": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64bs_v5": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64ds_v4": {
+    "vcpu": 64,
+    "ram": 504.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64ds_v5": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64ds_v6": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64d_v4": {
+    "vcpu": 64,
+    "ram": 504.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64d_v5": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64is_v3": {
+    "vcpu": 64,
+    "ram": 432.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64i_v3": {
+    "vcpu": 64,
+    "ram": 432.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64pds_v6": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_e64ps_v6": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_e64s_v3": {
+    "vcpu": 64,
+    "ram": 432.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64s_v4": {
+    "vcpu": 64,
+    "ram": 504.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64s_v5": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64s_v6": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64_v3": {
+    "vcpu": 64,
+    "ram": 432.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64_v4": {
+    "vcpu": 64,
+    "ram": 504.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e64_v5": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8-2ads_v5": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8-2as_v4": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8-2as_v5": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8-2ds_v4": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8-2ds_v5": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8-2ds_v6": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8-2s_v3": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8-2s_v4": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8-2s_v5": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8-2s_v6": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8-4ads_v5": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8-4as_v4": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8-4as_v5": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8-4ds_v4": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8-4ds_v5": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8-4ds_v6": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8-4s_v3": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8-4s_v4": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8-4s_v5": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8-4s_v6": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e80ids_v4": {
+    "vcpu": 80,
+    "ram": 504.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e80is_v4": {
+    "vcpu": 80,
+    "ram": 504.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8ads_v5": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8ads_v6": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8as_v4": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8as_v5": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8as_v6": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8a_v4": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8bds_v5": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8bs_v5": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8ds_v4": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8ds_v5": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8ds_v6": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8d_v4": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8d_v5": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8pds_v5": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_e8pds_v6": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_e8ps_v5": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_e8ps_v6": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_e8s_v3": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8s_v4": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8s_v5": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8s_v6": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8_v3": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8_v4": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e8_v5": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e96-24ads_v5": {
+    "vcpu": 96,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e96-24ads_v6": {
+    "vcpu": 96,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e96-24as_v4": {
+    "vcpu": 96,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e96-24as_v5": {
+    "vcpu": 96,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e96-24ds_v5": {
+    "vcpu": 96,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e96-24ds_v6": {
+    "vcpu": 96,
+    "ram": 768.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e96-24s_v5": {
+    "vcpu": 96,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e96-24s_v6": {
+    "vcpu": 96,
+    "ram": 768.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e96-48ads_v5": {
+    "vcpu": 96,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e96-48ads_v6": {
+    "vcpu": 96,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e96-48as_v4": {
+    "vcpu": 96,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e96-48as_v5": {
+    "vcpu": 96,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e96-48ds_v5": {
+    "vcpu": 96,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e96-48ds_v6": {
+    "vcpu": 96,
+    "ram": 768.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e96-48s_v5": {
+    "vcpu": 96,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e96-48s_v6": {
+    "vcpu": 96,
+    "ram": 768.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e96ads_v5": {
+    "vcpu": 96,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e96ads_v6": {
+    "vcpu": 96,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e96as_v4": {
+    "vcpu": 96,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e96as_v5": {
+    "vcpu": 96,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e96as_v6": {
+    "vcpu": 96,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e96a_v4": {
+    "vcpu": 96,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e96bds_v5": {
+    "vcpu": 96,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e96bs_v5": {
+    "vcpu": 96,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e96ds_v5": {
+    "vcpu": 96,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e96ds_v6": {
+    "vcpu": 96,
+    "ram": 768.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e96d_v5": {
+    "vcpu": 96,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e96ias_v4": {
+    "vcpu": 96,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e96pds_v6": {
+    "vcpu": 96,
+    "ram": 672.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_e96ps_v6": {
+    "vcpu": 96,
+    "ram": 672.0,
+    "cpuArchitecture": "Arm64"
+  },
+  "standard_standard_e96s_v5": {
+    "vcpu": 96,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e96s_v6": {
+    "vcpu": 96,
+    "ram": 768.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_e96_v5": {
+    "vcpu": 96,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ec16ads_cc_v5": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ec16ads_v5": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ec16as_cc_v5": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ec16as_v5": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ec20ads_cc_v5": {
+    "vcpu": 20,
+    "ram": 160.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ec20ads_v5": {
+    "vcpu": 20,
+    "ram": 160.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ec20as_cc_v5": {
+    "vcpu": 20,
+    "ram": 160.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ec20as_v5": {
+    "vcpu": 20,
+    "ram": 160.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ec2ads_v5": {
+    "vcpu": 2,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ec2as_v5": {
+    "vcpu": 2,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ec32ads_cc_v5": {
+    "vcpu": 32,
+    "ram": 192.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ec32ads_v5": {
+    "vcpu": 32,
+    "ram": 192.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ec32as_cc_v5": {
+    "vcpu": 32,
+    "ram": 192.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ec32as_v5": {
+    "vcpu": 32,
+    "ram": 192.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ec48ads_cc_v5": {
+    "vcpu": 48,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ec48ads_v5": {
+    "vcpu": 48,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ec48as_cc_v5": {
+    "vcpu": 48,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ec48as_v5": {
+    "vcpu": 48,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ec4ads_cc_v5": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ec4ads_v5": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ec4as_cc_v5": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ec4as_v5": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ec64ads_cc_v5": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ec64ads_v5": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ec64as_cc_v5": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ec64as_v5": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ec8ads_cc_v5": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ec8ads_v5": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ec8as_cc_v5": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ec8as_v5": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ec96ads_cc_v5": {
+    "vcpu": 96,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ec96ads_v5": {
+    "vcpu": 96,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ec96as_cc_v5": {
+    "vcpu": 96,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ec96as_v5": {
+    "vcpu": 96,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ec96iads_v5": {
+    "vcpu": 96,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_ec96ias_v5": {
+    "vcpu": 96,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f1": {
+    "vcpu": 1,
+    "ram": 2.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f16": {
+    "vcpu": 16,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f16als_v6": {
+    "vcpu": 16,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f16ams_v6": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f16as_v6": {
+    "vcpu": 16,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f16s": {
+    "vcpu": 16,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f16s_v2": {
+    "vcpu": 16,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f1s": {
+    "vcpu": 1,
+    "ram": 2.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f2": {
+    "vcpu": 2,
+    "ram": 4.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f2als_v6": {
+    "vcpu": 2,
+    "ram": 4.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f2ams_v6": {
+    "vcpu": 2,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f2as_v6": {
+    "vcpu": 2,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f2s": {
+    "vcpu": 2,
+    "ram": 4.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f2s_v2": {
+    "vcpu": 2,
+    "ram": 4.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f32als_v6": {
+    "vcpu": 32,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f32ams_v6": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f32as_v6": {
+    "vcpu": 32,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f32s_v2": {
+    "vcpu": 32,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f4": {
+    "vcpu": 4,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f48als_v6": {
+    "vcpu": 48,
+    "ram": 96.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f48ams_v6": {
+    "vcpu": 48,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f48as_v6": {
+    "vcpu": 48,
+    "ram": 192.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f48s_v2": {
+    "vcpu": 48,
+    "ram": 96.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f4als_v6": {
+    "vcpu": 4,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f4ams_v6": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f4as_v6": {
+    "vcpu": 4,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f4s": {
+    "vcpu": 4,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f4s_v2": {
+    "vcpu": 4,
+    "ram": 8.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f64als_v6": {
+    "vcpu": 64,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f64ams_v6": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f64as_v6": {
+    "vcpu": 64,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f64s_v2": {
+    "vcpu": 64,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f72s_v2": {
+    "vcpu": 72,
+    "ram": 144.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f8": {
+    "vcpu": 8,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f8als_v6": {
+    "vcpu": 8,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f8ams_v6": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f8as_v6": {
+    "vcpu": 8,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f8s": {
+    "vcpu": 8,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_f8s_v2": {
+    "vcpu": 8,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx12-6mds_v2": {
+    "vcpu": 12,
+    "ram": 252.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx12-6ms_v2": {
+    "vcpu": 12,
+    "ram": 252.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx12mds": {
+    "vcpu": 12,
+    "ram": 252.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx12mds_v2": {
+    "vcpu": 12,
+    "ram": 252.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx12ms_v2": {
+    "vcpu": 12,
+    "ram": 252.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx16-4mds_v2": {
+    "vcpu": 16,
+    "ram": 336.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx16-4ms_v2": {
+    "vcpu": 16,
+    "ram": 336.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx16-8mds_v2": {
+    "vcpu": 16,
+    "ram": 336.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx16-8ms_v2": {
+    "vcpu": 16,
+    "ram": 336.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx16mds_v2": {
+    "vcpu": 16,
+    "ram": 336.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx16ms_v2": {
+    "vcpu": 16,
+    "ram": 336.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx24-12mds_v2": {
+    "vcpu": 24,
+    "ram": 504.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx24-12ms_v2": {
+    "vcpu": 24,
+    "ram": 504.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx24-6mds_v2": {
+    "vcpu": 24,
+    "ram": 504.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx24-6ms_v2": {
+    "vcpu": 24,
+    "ram": 504.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx24mds": {
+    "vcpu": 24,
+    "ram": 504.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx24mds_v2": {
+    "vcpu": 24,
+    "ram": 504.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx24ms_v2": {
+    "vcpu": 24,
+    "ram": 504.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx2mds_v2": {
+    "vcpu": 2,
+    "ram": 42.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx2ms_v2": {
+    "vcpu": 2,
+    "ram": 42.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx32-16mds_v2": {
+    "vcpu": 32,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx32-16ms_v2": {
+    "vcpu": 32,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx32-8mds_v2": {
+    "vcpu": 32,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx32-8ms_v2": {
+    "vcpu": 32,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx32mds_v2": {
+    "vcpu": 32,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx32ms_v2": {
+    "vcpu": 32,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx36mds": {
+    "vcpu": 36,
+    "ram": 756.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx4-2mds_v2": {
+    "vcpu": 4,
+    "ram": 84.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx4-2ms_v2": {
+    "vcpu": 4,
+    "ram": 84.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx48-12mds_v2": {
+    "vcpu": 48,
+    "ram": 1008.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx48-12ms_v2": {
+    "vcpu": 48,
+    "ram": 1008.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx48-24mds_v2": {
+    "vcpu": 48,
+    "ram": 1008.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx48-24ms_v2": {
+    "vcpu": 48,
+    "ram": 1008.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx48mds": {
+    "vcpu": 48,
+    "ram": 1008.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx48mds_v2": {
+    "vcpu": 48,
+    "ram": 1008.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx48ms_v2": {
+    "vcpu": 48,
+    "ram": 1008.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx4mds": {
+    "vcpu": 4,
+    "ram": 84.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx4mds_v2": {
+    "vcpu": 4,
+    "ram": 84.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx4ms_v2": {
+    "vcpu": 4,
+    "ram": 84.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx64-16mds_v2": {
+    "vcpu": 64,
+    "ram": 1344.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx64-16ms_v2": {
+    "vcpu": 64,
+    "ram": 1344.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx64-32mds_v2": {
+    "vcpu": 64,
+    "ram": 1344.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx64-32ms_v2": {
+    "vcpu": 64,
+    "ram": 1344.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx64mds_v2": {
+    "vcpu": 64,
+    "ram": 1344.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx64ms_v2": {
+    "vcpu": 64,
+    "ram": 1344.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx8-2mds_v2": {
+    "vcpu": 8,
+    "ram": 168.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx8-2ms_v2": {
+    "vcpu": 8,
+    "ram": 168.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx8-4mds_v2": {
+    "vcpu": 8,
+    "ram": 168.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx8-4ms_v2": {
+    "vcpu": 8,
+    "ram": 168.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx8mds_v2": {
+    "vcpu": 8,
+    "ram": 168.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx8ms_v2": {
+    "vcpu": 8,
+    "ram": 168.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx96-24mds_v2": {
+    "vcpu": 96,
+    "ram": 1832.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx96-24ms_v2": {
+    "vcpu": 96,
+    "ram": 1832.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx96-48mds_v2": {
+    "vcpu": 96,
+    "ram": 1832.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx96-48ms_v2": {
+    "vcpu": 96,
+    "ram": 1832.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx96mds_v2": {
+    "vcpu": 96,
+    "ram": 1832.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_fx96ms_v2": {
+    "vcpu": 96,
+    "ram": 1832.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_g1": {
+    "vcpu": 2,
+    "ram": 28.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_g2": {
+    "vcpu": 4,
+    "ram": 56.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_g3": {
+    "vcpu": 8,
+    "ram": 112.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_g4": {
+    "vcpu": 16,
+    "ram": 224.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_g5": {
+    "vcpu": 32,
+    "ram": 448.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_gs1": {
+    "vcpu": 2,
+    "ram": 28.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_gs2": {
+    "vcpu": 4,
+    "ram": 56.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_gs3": {
+    "vcpu": 8,
+    "ram": 112.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_gs4": {
+    "vcpu": 16,
+    "ram": 224.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_gs4-4": {
+    "vcpu": 16,
+    "ram": 224.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_gs4-8": {
+    "vcpu": 16,
+    "ram": 224.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_gs5": {
+    "vcpu": 32,
+    "ram": 448.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_gs5-16": {
+    "vcpu": 32,
+    "ram": 448.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_gs5-8": {
+    "vcpu": 32,
+    "ram": 448.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_hb120-16rs_v2": {
+    "vcpu": 120,
+    "ram": 456.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_hb120-16rs_v3": {
+    "vcpu": 120,
+    "ram": 456.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_hb120-32rs_v2": {
+    "vcpu": 120,
+    "ram": 456.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_hb120-32rs_v3": {
+    "vcpu": 120,
+    "ram": 456.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_hb120-64rs_v2": {
+    "vcpu": 120,
+    "ram": 456.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_hb120-64rs_v3": {
+    "vcpu": 120,
+    "ram": 456.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_hb120-96rs_v2": {
+    "vcpu": 120,
+    "ram": 456.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_hb120-96rs_v3": {
+    "vcpu": 120,
+    "ram": 456.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_hb120rs_v2": {
+    "vcpu": 120,
+    "ram": 456.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_hb120rs_v3": {
+    "vcpu": 120,
+    "ram": 456.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_hb176-144rs_v4": {
+    "vcpu": 176,
+    "ram": 768.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_hb176-24rs_v4": {
+    "vcpu": 176,
+    "ram": 768.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_hb176-48rs_v4": {
+    "vcpu": 176,
+    "ram": 768.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_hb176-96rs_v4": {
+    "vcpu": 176,
+    "ram": 768.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_hb176rs_v4": {
+    "vcpu": 176,
+    "ram": 768.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_hc44-16rs": {
+    "vcpu": 44,
+    "ram": 352.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_hc44-32rs": {
+    "vcpu": 44,
+    "ram": 352.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_hc44rs": {
+    "vcpu": 44,
+    "ram": 352.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_hx176-144rs": {
+    "vcpu": 176,
+    "ram": 1408.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_hx176-24rs": {
+    "vcpu": 176,
+    "ram": 1408.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_hx176-48rs": {
+    "vcpu": 176,
+    "ram": 1408.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_hx176-96rs": {
+    "vcpu": 176,
+    "ram": 1408.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_hx176rs": {
+    "vcpu": 176,
+    "ram": 1408.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l12aos_v4": {
+    "vcpu": 12,
+    "ram": 96.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l16aos_v4": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l16as_v3": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l16as_v4": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l16s": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l16s_v2": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l16s_v3": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l16s_v4": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l24aos_v4": {
+    "vcpu": 24,
+    "ram": 192.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l2aos_v4": {
+    "vcpu": 2,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l2as_v4": {
+    "vcpu": 2,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l2s_v4": {
+    "vcpu": 2,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l32aos_v4": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l32as_v3": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l32as_v4": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l32s": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l32s_v2": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l32s_v3": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l32s_v4": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l48as_v3": {
+    "vcpu": 48,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l48as_v4": {
+    "vcpu": 48,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l48s_v2": {
+    "vcpu": 48,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l48s_v3": {
+    "vcpu": 48,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l48s_v4": {
+    "vcpu": 48,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l4aos_v4": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l4as_v4": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l4s": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l4s_v4": {
+    "vcpu": 4,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l64as_v3": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l64as_v4": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l64s_v2": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l64s_v3": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l64s_v4": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l80as_v3": {
+    "vcpu": 80,
+    "ram": 640.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l80as_v4": {
+    "vcpu": 80,
+    "ram": 640.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l80s_v2": {
+    "vcpu": 80,
+    "ram": 640.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l80s_v3": {
+    "vcpu": 80,
+    "ram": 640.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l80s_v4": {
+    "vcpu": 80,
+    "ram": 640.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l8aos_v4": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l8as_v3": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l8as_v4": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l8s": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l8s_v2": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l8s_v3": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l8s_v4": {
+    "vcpu": 8,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l96as_v4": {
+    "vcpu": 96,
+    "ram": 768.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_l96s_v4": {
+    "vcpu": 96,
+    "ram": 768.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m128": {
+    "vcpu": 128,
+    "ram": 2048.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m128-32ms": {
+    "vcpu": 128,
+    "ram": 3892.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m128-64bds_3_v3": {
+    "vcpu": 128,
+    "ram": 2794.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m128-64bds_v3": {
+    "vcpu": 128,
+    "ram": 1024.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m128-64bs_v3": {
+    "vcpu": 128,
+    "ram": 1024.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m128-64ms": {
+    "vcpu": 128,
+    "ram": 3892.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m128bds_3_v3": {
+    "vcpu": 128,
+    "ram": 2794.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m128bds_v3": {
+    "vcpu": 128,
+    "ram": 1024.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m128bs_v3": {
+    "vcpu": 128,
+    "ram": 1024.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m128dms_v2": {
+    "vcpu": 128,
+    "ram": 3892.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m128ds_v2": {
+    "vcpu": 128,
+    "ram": 2048.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m128m": {
+    "vcpu": 128,
+    "ram": 3892.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m128ms": {
+    "vcpu": 128,
+    "ram": 3892.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m128ms_v2": {
+    "vcpu": 128,
+    "ram": 3892.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m128s": {
+    "vcpu": 128,
+    "ram": 2048.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m128s_v2": {
+    "vcpu": 128,
+    "ram": 2048.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m12ds_v3": {
+    "vcpu": 12,
+    "ram": 240.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m12s_v3": {
+    "vcpu": 12,
+    "ram": 240.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m16-4ms": {
+    "vcpu": 16,
+    "ram": 437.5,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m16-8ms": {
+    "vcpu": 16,
+    "ram": 437.5,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m16bds_v3": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m16bs_v3": {
+    "vcpu": 16,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m16ms": {
+    "vcpu": 16,
+    "ram": 437.5,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m176-88bds_4_v3": {
+    "vcpu": 176,
+    "ram": 3892.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m176-88bds_v3": {
+    "vcpu": 176,
+    "ram": 1536.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m176-88bs_v3": {
+    "vcpu": 176,
+    "ram": 1536.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m176bds_4_v3": {
+    "vcpu": 176,
+    "ram": 3892.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m176bds_v3": {
+    "vcpu": 176,
+    "ram": 1536.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m176bs_v3": {
+    "vcpu": 176,
+    "ram": 1536.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m176ds_3_v3": {
+    "vcpu": 176,
+    "ram": 2794.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m176ds_4_v3": {
+    "vcpu": 176,
+    "ram": 3892.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m176s_3_v3": {
+    "vcpu": 176,
+    "ram": 2794.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m176s_4_v3": {
+    "vcpu": 176,
+    "ram": 3892.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m192idms_v2": {
+    "vcpu": 192,
+    "ram": 4096.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m192ids_v2": {
+    "vcpu": 192,
+    "ram": 2048.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m192ims_v2": {
+    "vcpu": 192,
+    "ram": 4096.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m192is_v2": {
+    "vcpu": 192,
+    "ram": 2048.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m208ms_v2": {
+    "vcpu": 208,
+    "ram": 5700.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m208s_v2": {
+    "vcpu": 208,
+    "ram": 2850.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m24ds_v3": {
+    "vcpu": 24,
+    "ram": 480.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m24s_v3": {
+    "vcpu": 24,
+    "ram": 480.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m32-16ms": {
+    "vcpu": 32,
+    "ram": 875.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m32-8ms": {
+    "vcpu": 32,
+    "ram": 875.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m32bds_v3": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m32bs_v3": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m32dms_v2": {
+    "vcpu": 32,
+    "ram": 875.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m32ls": {
+    "vcpu": 32,
+    "ram": 256.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m32ms": {
+    "vcpu": 32,
+    "ram": 875.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m32ms_v2": {
+    "vcpu": 32,
+    "ram": 875.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m32ts": {
+    "vcpu": 32,
+    "ram": 192.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m416-208ms_v2": {
+    "vcpu": 416,
+    "ram": 11400.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m416-208s_v2": {
+    "vcpu": 416,
+    "ram": 5700.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m416bs_v3": {
+    "vcpu": 416,
+    "ram": 3800.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m416ds_6_v3": {
+    "vcpu": 416,
+    "ram": 5696.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m416ds_8_v3": {
+    "vcpu": 416,
+    "ram": 7600.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m416ms_v2": {
+    "vcpu": 416,
+    "ram": 11400.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m416s_10_v2": {
+    "vcpu": 416,
+    "ram": 9496.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m416s_6_v3": {
+    "vcpu": 416,
+    "ram": 5696.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m416s_8_v2": {
+    "vcpu": 416,
+    "ram": 7600.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m416s_8_v3": {
+    "vcpu": 416,
+    "ram": 7600.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m416s_9_v2": {
+    "vcpu": 416,
+    "ram": 8568.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m416s_v2": {
+    "vcpu": 416,
+    "ram": 5700.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m48bds_v3": {
+    "vcpu": 48,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m48bs_v3": {
+    "vcpu": 48,
+    "ram": 384.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m48ds_1_v3": {
+    "vcpu": 48,
+    "ram": 974.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m48s_1_v3": {
+    "vcpu": 48,
+    "ram": 974.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m624ds_12_v3": {
+    "vcpu": 624,
+    "ram": 11400.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m624s_12_v3": {
+    "vcpu": 624,
+    "ram": 11400.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m64": {
+    "vcpu": 64,
+    "ram": 1024.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m64-16ms": {
+    "vcpu": 64,
+    "ram": 1792.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m64-32bds_1_v3": {
+    "vcpu": 64,
+    "ram": 1397.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m64-32ms": {
+    "vcpu": 64,
+    "ram": 1792.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m64bds_1_v3": {
+    "vcpu": 64,
+    "ram": 1397.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m64bds_v3": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m64bs_v3": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m64dms_v2": {
+    "vcpu": 64,
+    "ram": 1792.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m64ds_v2": {
+    "vcpu": 64,
+    "ram": 1024.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m64ls": {
+    "vcpu": 64,
+    "ram": 512.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m64m": {
+    "vcpu": 64,
+    "ram": 1792.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m64ms": {
+    "vcpu": 64,
+    "ram": 1792.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m64ms_v2": {
+    "vcpu": 64,
+    "ram": 1792.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m64s": {
+    "vcpu": 64,
+    "ram": 1024.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m64s_v2": {
+    "vcpu": 64,
+    "ram": 1024.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m8-2ms": {
+    "vcpu": 8,
+    "ram": 218.75,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m8-4ms": {
+    "vcpu": 8,
+    "ram": 218.75,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m832ds_12_v3": {
+    "vcpu": 832,
+    "ram": 11400.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m832ids_16_v3": {
+    "vcpu": 832,
+    "ram": 15200.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m832is_16_v3": {
+    "vcpu": 832,
+    "ram": 15200.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m832s_12_v3": {
+    "vcpu": 832,
+    "ram": 11400.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m8ms": {
+    "vcpu": 8,
+    "ram": 218.75,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m96-48bds_2_v3": {
+    "vcpu": 96,
+    "ram": 1946.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m96bds_2_v3": {
+    "vcpu": 96,
+    "ram": 1946.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m96bds_v3": {
+    "vcpu": 96,
+    "ram": 768.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m96bs_v3": {
+    "vcpu": 96,
+    "ram": 768.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m96ds_1_v3": {
+    "vcpu": 96,
+    "ram": 974.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m96ds_2_v3": {
+    "vcpu": 96,
+    "ram": 1946.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m96s_1_v3": {
+    "vcpu": 96,
+    "ram": 974.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_m96s_2_v3": {
+    "vcpu": 96,
+    "ram": 1946.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_nc12s_v3": {
+    "vcpu": 12,
+    "ram": 224.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_nc16as_t4_v3": {
+    "vcpu": 16,
+    "ram": 110.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_nc24ads_a100_v4": {
+    "vcpu": 24,
+    "ram": 220.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_nc24rs_v3": {
+    "vcpu": 24,
+    "ram": 448.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_nc24s_v3": {
+    "vcpu": 24,
+    "ram": 448.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_nc40ads_h100_v5": {
+    "vcpu": 40,
+    "ram": 320.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_nc48ads_a100_v4": {
+    "vcpu": 48,
+    "ram": 440.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_nc4as_t4_v3": {
+    "vcpu": 4,
+    "ram": 28.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_nc64as_t4_v3": {
+    "vcpu": 64,
+    "ram": 440.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_nc6s_v3": {
+    "vcpu": 6,
+    "ram": 112.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_nc80adis_h100_v5": {
+    "vcpu": 80,
+    "ram": 640.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_nc8as_t4_v3": {
+    "vcpu": 8,
+    "ram": 56.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_nc96ads_a100_v4": {
+    "vcpu": 96,
+    "ram": 880.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_nd40rs_v2": {
+    "vcpu": 40,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_nd96amsr_a100_v4": {
+    "vcpu": 96,
+    "ram": 1800.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_nd96asr_v4": {
+    "vcpu": 96,
+    "ram": 900.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_nd96isr_h100_v5": {
+    "vcpu": 96,
+    "ram": 1900.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_np10s": {
+    "vcpu": 10,
+    "ram": 168.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_np20s": {
+    "vcpu": 20,
+    "ram": 336.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_np40s": {
+    "vcpu": 40,
+    "ram": 672.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_nv12ads_a10_v5": {
+    "vcpu": 12,
+    "ram": 110.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_nv12ads_v710_v5": {
+    "vcpu": 12,
+    "ram": 64.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_nv12s_v2": {
+    "vcpu": 12,
+    "ram": 224.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_nv12s_v3": {
+    "vcpu": 12,
+    "ram": 112.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_nv16as_v4": {
+    "vcpu": 16,
+    "ram": 56.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_nv18ads_a10_v5": {
+    "vcpu": 18,
+    "ram": 220.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_nv24ads_v710_v5": {
+    "vcpu": 24,
+    "ram": 128.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_nv24s_v2": {
+    "vcpu": 24,
+    "ram": 448.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_nv24s_v3": {
+    "vcpu": 24,
+    "ram": 224.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_nv32as_v4": {
+    "vcpu": 32,
+    "ram": 112.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_nv36adms_a10_v5": {
+    "vcpu": 36,
+    "ram": 880.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_nv36ads_a10_v5": {
+    "vcpu": 36,
+    "ram": 440.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_nv48s_v3": {
+    "vcpu": 48,
+    "ram": 448.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_nv4ads_v710_v5": {
+    "vcpu": 4,
+    "ram": 16.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_nv4as_v4": {
+    "vcpu": 4,
+    "ram": 14.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_nv6ads_a10_v5": {
+    "vcpu": 6,
+    "ram": 55.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_nv6s_v2": {
+    "vcpu": 6,
+    "ram": 112.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_nv72ads_a10_v5": {
+    "vcpu": 72,
+    "ram": 880.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_nv8ads_v710_v5": {
+    "vcpu": 8,
+    "ram": 32.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_nv8as_v4": {
+    "vcpu": 8,
+    "ram": 28.0,
+    "cpuArchitecture": "x64"
+  },
+  "standard_standard_pb6s": {
+    "vcpu": 6,
+    "ram": 112.0,
+    "cpuArchitecture": "x64"
+  }
+}
