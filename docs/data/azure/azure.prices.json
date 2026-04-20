@@ -69,7 +69,6 @@
       875,
       880,
       974,
-      1008,
       1024,
       1344,
       1536,
@@ -82,8 +81,7 @@
       2850,
       3892,
       4096,
-      11400,
-      15200
+      11400
     ]
   },
   "compute": [
@@ -141,20 +139,6 @@
       "displayInstance": "Standard A6",
       "series": "A",
       "seriesName": "A-series",
-      "category": "other"
-    },
-    {
-      "instance": "standard_a8m_v2",
-      "pricePerHourUSD": 0.72,
-      "region": "eastus",
-      "os": "Windows",
-      "source": "retail",
-      "vcpu": 8,
-      "ram": 64,
-      "architecture": "x86",
-      "displayInstance": "Standard A8m v2",
-      "series": "A-m v2",
-      "seriesName": "Amv2-series",
       "category": "other"
     },
     {
@@ -508,6 +492,20 @@
       "category": "general"
     },
     {
+      "instance": "standard_d16ds_v7",
+      "pricePerHourUSD": 1.305,
+      "region": "eastus",
+      "os": "Linux",
+      "source": "retail",
+      "vcpu": null,
+      "ram": null,
+      "architecture": "x86",
+      "displayInstance": "Standard D16ds v7",
+      "series": "D-ds v7",
+      "seriesName": "Ddsv7-series",
+      "category": "general"
+    },
+    {
       "instance": "standard_d16lds_v6",
       "pricePerHourUSD": 1.619,
       "region": "eastus",
@@ -533,6 +531,20 @@
       "displayInstance": "Standard D16ls v7",
       "series": "D-ls v7",
       "seriesName": "Dlsv7-series",
+      "category": "general"
+    },
+    {
+      "instance": "standard_d192s_v7",
+      "pricePerHourUSD": 21.533,
+      "region": "eastus",
+      "os": "Windows",
+      "source": "retail",
+      "vcpu": null,
+      "ram": null,
+      "architecture": "x86",
+      "displayInstance": "Standard D192s v7",
+      "series": "D-s v7",
+      "seriesName": "Dsv7-series",
       "category": "general"
     },
     {
@@ -592,6 +604,20 @@
       "category": "general"
     },
     {
+      "instance": "standard_d248ds_v7",
+      "pricePerHourUSD": 31.64,
+      "region": "eastus",
+      "os": "Windows",
+      "source": "retail",
+      "vcpu": null,
+      "ram": null,
+      "architecture": "x86",
+      "displayInstance": "Standard D248ds v7",
+      "series": "D-ds v7",
+      "seriesName": "Ddsv7-series",
+      "category": "general"
+    },
+    {
       "instance": "standard_d2als_v7",
       "pricePerHourUSD": 0.0804,
       "region": "eastus",
@@ -645,6 +671,20 @@
       "displayInstance": "Standard D2as v6",
       "series": "D-as v6",
       "seriesName": "Dasv6-series",
+      "category": "general"
+    },
+    {
+      "instance": "standard_d2ds_v7",
+      "pricePerHourUSD": 0.255,
+      "region": "eastus",
+      "os": "Windows",
+      "source": "retail",
+      "vcpu": null,
+      "ram": null,
+      "architecture": "x86",
+      "displayInstance": "Standard D2ds v7",
+      "series": "D-ds v7",
+      "seriesName": "Ddsv7-series",
       "category": "general"
     },
     {
@@ -928,31 +968,17 @@
       "category": "general"
     },
     {
-      "instance": "standard_d48_v5",
-      "pricePerHourUSD": 2.304,
+      "instance": "standard_d372s_v7",
+      "pricePerHourUSD": 41.72,
       "region": "eastus",
-      "os": "Linux",
+      "os": "Windows",
       "source": "retail",
-      "vcpu": 48,
-      "ram": 192,
+      "vcpu": null,
+      "ram": null,
       "architecture": "x86",
-      "displayInstance": "Standard D48 v5",
-      "series": "D v5",
-      "seriesName": "Dv5-series",
-      "category": "general"
-    },
-    {
-      "instance": "standard_d48_v5",
-      "pricePerHourUSD": 3.024,
-      "region": "eastus",
-      "os": "RHEL",
-      "source": "retail+rhel",
-      "vcpu": 48,
-      "ram": 192,
-      "architecture": "x86",
-      "displayInstance": "Standard D48 v5",
-      "series": "D v5",
-      "seriesName": "Dv5-series",
+      "displayInstance": "Standard D372s v7",
+      "series": "D-s v7",
+      "seriesName": "Dsv7-series",
       "category": "general"
     },
     {
@@ -1208,6 +1234,20 @@
       "category": "general"
     },
     {
+      "instance": "standard_d4ds_v7",
+      "pricePerHourUSD": 0.326,
+      "region": "eastus",
+      "os": "Linux",
+      "source": "retail",
+      "vcpu": null,
+      "ram": null,
+      "architecture": "x86",
+      "displayInstance": "Standard D4ds v7",
+      "series": "D-ds v7",
+      "seriesName": "Ddsv7-series",
+      "category": "general"
+    },
+    {
       "instance": "standard_d4ls_v7",
       "pricePerHourUSD": 0.234,
       "region": "eastus",
@@ -1446,6 +1486,20 @@
       "category": "general"
     },
     {
+      "instance": "standard_d64s_v7",
+      "pricePerHourUSD": 7.178,
+      "region": "eastus",
+      "os": "Windows",
+      "source": "retail",
+      "vcpu": null,
+      "ram": null,
+      "architecture": "x86",
+      "displayInstance": "Standard D64s v7",
+      "series": "D-s v7",
+      "seriesName": "Dsv7-series",
+      "category": "general"
+    },
+    {
       "instance": "standard_d8ads_v5",
       "pricePerHourUSD": 0.412,
       "region": "eastus",
@@ -1555,6 +1609,20 @@
       "displayInstance": "Standard D8ds v4",
       "series": "D-ds v4",
       "seriesName": "Ddsv4-series",
+      "category": "general"
+    },
+    {
+      "instance": "standard_d8ds_v7",
+      "pricePerHourUSD": 0.653,
+      "region": "eastus",
+      "os": "Linux",
+      "source": "retail",
+      "vcpu": null,
+      "ram": null,
+      "architecture": "x86",
+      "displayInstance": "Standard D8ds v7",
+      "series": "D-ds v7",
+      "seriesName": "Ddsv7-series",
       "category": "general"
     },
     {
@@ -1723,20 +1791,6 @@
       "displayInstance": "Standard DADSV5",
       "series": "DADSV",
       "seriesName": "DADSV-series",
-      "category": "general"
-    },
-    {
-      "instance": "standard_dc128es_v6",
-      "pricePerHourUSD": 6.451,
-      "region": "eastus",
-      "os": "Linux",
-      "source": "retail",
-      "vcpu": null,
-      "ram": null,
-      "architecture": "x86",
-      "displayInstance": "Standard DC128es v6",
-      "series": "DC-es v6",
-      "seriesName": "DCesv6-series",
       "category": "general"
     },
     {
@@ -2118,34 +2172,6 @@
       "category": "general"
     },
     {
-      "instance": "standard_dc4s_v2",
-      "pricePerHourUSD": 0.384,
-      "region": "eastus",
-      "os": "Linux",
-      "source": "retail",
-      "vcpu": 4,
-      "ram": 16,
-      "architecture": "x86",
-      "displayInstance": "Standard DC4s v2",
-      "series": "DC-s v2",
-      "seriesName": "DCsv2-series",
-      "category": "general"
-    },
-    {
-      "instance": "standard_dc4s_v2",
-      "pricePerHourUSD": 0.4408,
-      "region": "eastus",
-      "os": "RHEL",
-      "source": "retail+rhel",
-      "vcpu": 4,
-      "ram": 16,
-      "architecture": "x86",
-      "displayInstance": "Standard DC4s v2",
-      "series": "DC-s v2",
-      "seriesName": "DCsv2-series",
-      "category": "general"
-    },
-    {
       "instance": "standard_dc64ads_v5",
       "pricePerHourUSD": 3.296,
       "region": "eastus",
@@ -2255,20 +2281,6 @@
       "displayInstance": "Standard E112iads v5",
       "series": "E-iads v5",
       "seriesName": "Eiadsv5-series",
-      "category": "memory"
-    },
-    {
-      "instance": "standard_e128-64ads_v7",
-      "pricePerHourUSD": 9.293,
-      "region": "eastus",
-      "os": "Linux",
-      "source": "retail",
-      "vcpu": null,
-      "ram": null,
-      "architecture": "arm",
-      "displayInstance": "Standard E128-64ads v7",
-      "series": "v7",
-      "seriesName": "v7-series",
       "category": "memory"
     },
     {
@@ -2650,6 +2662,20 @@
       "category": "memory"
     },
     {
+      "instance": "standard_e248ds_v7",
+      "pricePerHourUSD": 37.188,
+      "region": "eastus",
+      "os": "Windows",
+      "source": "retail",
+      "vcpu": null,
+      "ram": null,
+      "architecture": "x86",
+      "displayInstance": "Standard E248ds v7",
+      "series": "E-ds v7",
+      "seriesName": "Edsv7-series",
+      "category": "memory"
+    },
+    {
       "instance": "standard_e2ads_v5",
       "pricePerHourUSD": 0.131,
       "region": "eastus",
@@ -3014,34 +3040,6 @@
       "category": "memory"
     },
     {
-      "instance": "standard_e48pds_v6",
-      "pricePerHourUSD": 2.808,
-      "region": "eastus",
-      "os": "Linux",
-      "source": "retail",
-      "vcpu": 48,
-      "ram": 384,
-      "architecture": "arm",
-      "displayInstance": "Standard E48pds v6",
-      "series": "E-pds v6",
-      "seriesName": "Epdsv6-series",
-      "category": "memory"
-    },
-    {
-      "instance": "standard_e48pds_v6",
-      "pricePerHourUSD": 3.5232,
-      "region": "eastus",
-      "os": "RHEL",
-      "source": "retail+rhel",
-      "vcpu": 48,
-      "ram": 384,
-      "architecture": "arm",
-      "displayInstance": "Standard E48pds v6",
-      "series": "E-pds v6",
-      "seriesName": "Epdsv6-series",
-      "category": "memory"
-    },
-    {
       "instance": "standard_e48s_v4",
       "pricePerHourUSD": 3.024,
       "region": "eastus",
@@ -3267,6 +3265,20 @@
     },
     {
       "instance": "standard_e4s_v7",
+      "pricePerHourUSD": 0.347,
+      "region": "eastus",
+      "os": "Linux",
+      "source": "retail",
+      "vcpu": null,
+      "ram": null,
+      "architecture": "x86",
+      "displayInstance": "Standard E4s v7",
+      "series": "E-s v7",
+      "seriesName": "Esv7-series",
+      "category": "memory"
+    },
+    {
+      "instance": "standard_e4s_v7",
       "pricePerHourUSD": 0.531,
       "region": "eastus",
       "os": "Windows",
@@ -3445,6 +3457,20 @@
       "displayInstance": "Standard E64bs v5",
       "series": "E-bs v5",
       "seriesName": "Ebsv5-series",
+      "category": "memory"
+    },
+    {
+      "instance": "standard_e64ds_v7",
+      "pricePerHourUSD": 9.597,
+      "region": "eastus",
+      "os": "Windows",
+      "source": "retail",
+      "vcpu": null,
+      "ram": null,
+      "architecture": "x86",
+      "displayInstance": "Standard E64ds v7",
+      "series": "E-ds v7",
+      "seriesName": "Edsv7-series",
       "category": "memory"
     },
     {
@@ -4666,20 +4692,6 @@
       "category": "compute"
     },
     {
-      "instance": "standard_f4ams_v7",
-      "pricePerHourUSD": 0.542,
-      "region": "eastus",
-      "os": "Windows",
-      "source": "retail",
-      "vcpu": null,
-      "ram": null,
-      "architecture": "arm",
-      "displayInstance": "Standard F4ams v7",
-      "series": "F-ams v7",
-      "seriesName": "Famsv7-series",
-      "category": "compute"
-    },
-    {
       "instance": "standard_f4as_v6",
       "pricePerHourUSD": 0.457,
       "region": "eastus",
@@ -4999,48 +5011,6 @@
       "displayInstance": "Standard Fx32-8ms v2",
       "series": "v2",
       "seriesName": "v2-series",
-      "category": "compute"
-    },
-    {
-      "instance": "standard_fx48-24ms_v2",
-      "pricePerHourUSD": 5.312,
-      "region": "eastus",
-      "os": "Linux",
-      "source": "retail",
-      "vcpu": 48,
-      "ram": 1008,
-      "architecture": "x86",
-      "displayInstance": "Standard Fx48-24ms v2",
-      "series": "v2",
-      "seriesName": "v2-series",
-      "category": "compute"
-    },
-    {
-      "instance": "standard_fx48-24ms_v2",
-      "pricePerHourUSD": 6.041600000000001,
-      "region": "eastus",
-      "os": "RHEL",
-      "source": "retail+rhel",
-      "vcpu": 48,
-      "ram": 1008,
-      "architecture": "x86",
-      "displayInstance": "Standard Fx48-24ms v2",
-      "series": "v2",
-      "seriesName": "v2-series",
-      "category": "compute"
-    },
-    {
-      "instance": "standard_fx48mds",
-      "pricePerHourUSD": 6.672,
-      "region": "eastus",
-      "os": "Windows",
-      "source": "retail",
-      "vcpu": 48,
-      "ram": 1008,
-      "architecture": "x86",
-      "displayInstance": "Standard FX48mds",
-      "series": "FX-mds",
-      "seriesName": "FXmds-series",
       "category": "compute"
     },
     {
@@ -5534,20 +5504,6 @@
       "category": "other"
     },
     {
-      "instance": "standard_m128bs_v3",
-      "pricePerHourUSD": 14.11,
-      "region": "eastus",
-      "os": "Windows",
-      "source": "retail",
-      "vcpu": 128,
-      "ram": 1024,
-      "architecture": "x86",
-      "displayInstance": "Standard M128bs v3",
-      "series": "M-bs v3",
-      "seriesName": "Mbsv3-series",
-      "category": "other"
-    },
-    {
       "instance": "standard_m128ms",
       "pricePerHourUSD": 35.814,
       "region": "eastus",
@@ -5884,20 +5840,6 @@
       "category": "other"
     },
     {
-      "instance": "standard_m416ds-104_8_v3",
-      "pricePerHourUSD": 77.42196,
-      "region": "eastus",
-      "os": "Linux",
-      "source": "retail",
-      "vcpu": null,
-      "ram": null,
-      "architecture": "x86",
-      "displayInstance": "Standard M416ds-1048 v3",
-      "series": "v3",
-      "seriesName": "v3-series",
-      "category": "other"
-    },
-    {
       "instance": "standard_m416ds-208_8_v3",
       "pricePerHourUSD": 86.98996,
       "region": "eastus",
@@ -6066,20 +6008,6 @@
       "category": "other"
     },
     {
-      "instance": "standard_m832is_16_v3",
-      "pricePerHourUSD": 202.128,
-      "region": "eastus",
-      "os": "Windows",
-      "source": "retail",
-      "vcpu": 832,
-      "ram": 15200,
-      "architecture": "x86",
-      "displayInstance": "Standard M832is v3",
-      "series": "M-is v3",
-      "seriesName": "Misv3-series",
-      "category": "other"
-    },
-    {
       "instance": "standard_m832is-208_16_v3",
       "pricePerHourUSD": 163.856,
       "region": "eastus",
@@ -6231,20 +6159,6 @@
       "displayInstance": "Standard NC12s v3",
       "series": "NC-s v3",
       "seriesName": "NCsv3-series",
-      "category": "other"
-    },
-    {
-      "instance": "standard_nc132dsxlrtx6kv6",
-      "pricePerHourUSD": 12.452,
-      "region": "eastus",
-      "os": "Windows",
-      "source": "retail",
-      "vcpu": null,
-      "ram": null,
-      "architecture": "x86",
-      "displayInstance": "Standard Nc132dsxlrtx6kv6",
-      "series": null,
-      "seriesName": null,
       "category": "other"
     },
     {

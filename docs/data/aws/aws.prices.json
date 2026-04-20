@@ -156,6 +156,16 @@
       "source": "catalog"
     },
     {
+      "instance": "c8ib.16xlarge",
+      "vcpu": 64,
+      "ram": 128,
+      "pricePerHourUSD": 4.35456,
+      "region": "us-east-1",
+      "os": "Linux",
+      "architecture": "x86",
+      "source": "catalog"
+    },
+    {
       "instance": "m6in.16xlarge",
       "vcpu": 64,
       "ram": 256,
@@ -410,6 +420,16 @@
       "vcpu": 16,
       "ram": 64,
       "pricePerHourUSD": 0.8064,
+      "region": "us-east-1",
+      "os": "Linux",
+      "architecture": "x86",
+      "source": "catalog"
+    },
+    {
+      "instance": "c8ib.96xlarge",
+      "vcpu": 384,
+      "ram": 768,
+      "pricePerHourUSD": 26.12736,
       "region": "us-east-1",
       "os": "Linux",
       "architecture": "x86",
@@ -900,6 +920,16 @@
       "vcpu": 32,
       "ram": 1024,
       "pricePerHourUSD": 6.672,
+      "region": "us-east-1",
+      "os": "Linux",
+      "architecture": "x86",
+      "source": "catalog"
+    },
+    {
+      "instance": "c8in.4xlarge",
+      "vcpu": 16,
+      "ram": 32,
+      "pricePerHourUSD": 1.08864,
       "region": "us-east-1",
       "os": "Linux",
       "architecture": "x86",
@@ -1480,6 +1510,16 @@
       "vcpu": 256,
       "ram": 4096,
       "pricePerHourUSD": 28.01024,
+      "region": "us-east-1",
+      "os": "Linux",
+      "architecture": "x86",
+      "source": "catalog"
+    },
+    {
+      "instance": "c8in.24xlarge",
+      "vcpu": 96,
+      "ram": 192,
+      "pricePerHourUSD": 6.53184,
       "region": "us-east-1",
       "os": "Linux",
       "architecture": "x86",
@@ -2226,6 +2266,16 @@
       "source": "catalog"
     },
     {
+      "instance": "c8ib.4xlarge",
+      "vcpu": 16,
+      "ram": 32,
+      "pricePerHourUSD": 1.08864,
+      "region": "us-east-1",
+      "os": "Linux",
+      "architecture": "x86",
+      "source": "catalog"
+    },
+    {
       "instance": "c7a.32xlarge",
       "vcpu": 128,
       "ram": 256,
@@ -2626,6 +2676,16 @@
       "source": "catalog"
     },
     {
+      "instance": "c8in.xlarge",
+      "vcpu": 4,
+      "ram": 8,
+      "pricePerHourUSD": 0.27216,
+      "region": "us-east-1",
+      "os": "Linux",
+      "architecture": "x86",
+      "source": "catalog"
+    },
+    {
       "instance": "r5dn.xlarge",
       "vcpu": 4,
       "ram": 32,
@@ -2766,6 +2826,16 @@
       "source": "catalog"
     },
     {
+      "instance": "c8in.48xlarge",
+      "vcpu": 192,
+      "ram": 384,
+      "pricePerHourUSD": 13.06368,
+      "region": "us-east-1",
+      "os": "Linux",
+      "architecture": "x86",
+      "source": "catalog"
+    },
+    {
       "instance": "m6gd.16xlarge",
       "vcpu": 64,
       "ram": 256,
@@ -2830,6 +2900,16 @@
       "vcpu": 32,
       "ram": 976,
       "pricePerHourUSD": 6.672,
+      "region": "us-east-1",
+      "os": "Linux",
+      "architecture": "x86",
+      "source": "catalog"
+    },
+    {
+      "instance": "c8in.large",
+      "vcpu": 2,
+      "ram": 4,
+      "pricePerHourUSD": 0.13608,
       "region": "us-east-1",
       "os": "Linux",
       "architecture": "x86",
@@ -3326,6 +3406,16 @@
       "source": "catalog"
     },
     {
+      "instance": "c8in.12xlarge",
+      "vcpu": 48,
+      "ram": 96,
+      "pricePerHourUSD": 3.26592,
+      "region": "us-east-1",
+      "os": "Linux",
+      "architecture": "x86",
+      "source": "catalog"
+    },
+    {
       "instance": "r6idn.16xlarge",
       "vcpu": 64,
       "ram": 512,
@@ -3486,6 +3576,16 @@
       "source": "catalog"
     },
     {
+      "instance": "c8in.96xlarge",
+      "vcpu": 384,
+      "ram": 768,
+      "pricePerHourUSD": 26.12736,
+      "region": "us-east-1",
+      "os": "Linux",
+      "architecture": "x86",
+      "source": "catalog"
+    },
+    {
       "instance": "c6id.16xlarge",
       "vcpu": 64,
       "ram": 128,
@@ -3540,6 +3640,16 @@
       "vcpu": 48,
       "ram": 384,
       "pricePerHourUSD": 3.576,
+      "region": "us-east-1",
+      "os": "Linux",
+      "architecture": "x86",
+      "source": "catalog"
+    },
+    {
+      "instance": "c8in.8xlarge",
+      "vcpu": 32,
+      "ram": 64,
+      "pricePerHourUSD": 2.17728,
       "region": "us-east-1",
       "os": "Linux",
       "architecture": "x86",
@@ -3680,6 +3790,16 @@
       "vcpu": 8,
       "ram": 64,
       "pricePerHourUSD": 0.668,
+      "region": "us-east-1",
+      "os": "Linux",
+      "architecture": "x86",
+      "source": "catalog"
+    },
+    {
+      "instance": "c8in.2xlarge",
+      "vcpu": 8,
+      "ram": 16,
+      "pricePerHourUSD": 0.54432,
       "region": "us-east-1",
       "os": "Linux",
       "architecture": "x86",
@@ -3916,6 +4036,16 @@
       "source": "catalog"
     },
     {
+      "instance": "c8ib.48xlarge",
+      "vcpu": 192,
+      "ram": 384,
+      "pricePerHourUSD": 13.06368,
+      "region": "us-east-1",
+      "os": "Linux",
+      "architecture": "x86",
+      "source": "catalog"
+    },
+    {
       "instance": "m5ad.4xlarge",
       "vcpu": 16,
       "ram": 64,
@@ -4030,6 +4160,16 @@
       "vcpu": 192,
       "ram": 1536,
       "pricePerHourUSD": 15.33696,
+      "region": "us-east-1",
+      "os": "Linux",
+      "architecture": "x86",
+      "source": "catalog"
+    },
+    {
+      "instance": "c8ib.2xlarge",
+      "vcpu": 8,
+      "ram": 16,
+      "pricePerHourUSD": 0.54432,
       "region": "us-east-1",
       "os": "Linux",
       "architecture": "x86",
@@ -4256,6 +4396,16 @@
       "source": "catalog"
     },
     {
+      "instance": "c8ib.large",
+      "vcpu": 2,
+      "ram": 4,
+      "pricePerHourUSD": 0.13608,
+      "region": "us-east-1",
+      "os": "Linux",
+      "architecture": "x86",
+      "source": "catalog"
+    },
+    {
       "instance": "x2iedn.4xlarge",
       "vcpu": 16,
       "ram": 512,
@@ -4290,6 +4440,16 @@
       "vcpu": 8,
       "ram": 16,
       "pricePerHourUSD": 0.34,
+      "region": "us-east-1",
+      "os": "Linux",
+      "architecture": "x86",
+      "source": "catalog"
+    },
+    {
+      "instance": "c8ib.32xlarge",
+      "vcpu": 128,
+      "ram": 256,
+      "pricePerHourUSD": 8.70912,
       "region": "us-east-1",
       "os": "Linux",
       "architecture": "x86",
@@ -4690,6 +4850,16 @@
       "vcpu": 64,
       "ram": 512,
       "pricePerHourUSD": 4.70272,
+      "region": "us-east-1",
+      "os": "Linux",
+      "architecture": "x86",
+      "source": "catalog"
+    },
+    {
+      "instance": "c8in.32xlarge",
+      "vcpu": 128,
+      "ram": 256,
+      "pricePerHourUSD": 8.70912,
       "region": "us-east-1",
       "os": "Linux",
       "architecture": "x86",
@@ -5376,6 +5546,16 @@
       "source": "catalog"
     },
     {
+      "instance": "c8ib.24xlarge",
+      "vcpu": 96,
+      "ram": 192,
+      "pricePerHourUSD": 6.53184,
+      "region": "us-east-1",
+      "os": "Linux",
+      "architecture": "x86",
+      "source": "catalog"
+    },
+    {
       "instance": "m7i-flex.8xlarge",
       "vcpu": 32,
       "ram": 128,
@@ -5676,6 +5856,16 @@
       "source": "catalog"
     },
     {
+      "instance": "c8ib.8xlarge",
+      "vcpu": 32,
+      "ram": 64,
+      "pricePerHourUSD": 2.17728,
+      "region": "us-east-1",
+      "os": "Linux",
+      "architecture": "x86",
+      "source": "catalog"
+    },
+    {
       "instance": "c8gd.48xlarge",
       "vcpu": 192,
       "ram": 384,
@@ -5800,6 +5990,16 @@
       "vcpu": 32,
       "ram": 128,
       "pricePerHourUSD": 2.22768,
+      "region": "us-east-1",
+      "os": "Linux",
+      "architecture": "x86",
+      "source": "catalog"
+    },
+    {
+      "instance": "c8ib.xlarge",
+      "vcpu": 4,
+      "ram": 8,
+      "pricePerHourUSD": 0.27216,
       "region": "us-east-1",
       "os": "Linux",
       "architecture": "x86",
@@ -6080,6 +6280,16 @@
       "vcpu": 16,
       "ram": 122,
       "pricePerHourUSD": 1.33,
+      "region": "us-east-1",
+      "os": "Linux",
+      "architecture": "x86",
+      "source": "catalog"
+    },
+    {
+      "instance": "c8in.16xlarge",
+      "vcpu": 64,
+      "ram": 128,
+      "pricePerHourUSD": 4.35456,
       "region": "us-east-1",
       "os": "Linux",
       "architecture": "x86",
@@ -7636,6 +7846,16 @@
       "source": "catalog"
     },
     {
+      "instance": "c8ib.12xlarge",
+      "vcpu": 48,
+      "ram": 96,
+      "pricePerHourUSD": 3.26592,
+      "region": "us-east-1",
+      "os": "Linux",
+      "architecture": "x86",
+      "source": "catalog"
+    },
+    {
       "instance": "m7gd.8xlarge",
       "vcpu": 32,
       "ram": 128,
@@ -8326,6 +8546,16 @@
       "source": "catalog+win"
     },
     {
+      "instance": "c8ib.16xlarge",
+      "vcpu": 64,
+      "ram": 128,
+      "pricePerHourUSD": 31.29856,
+      "region": "us-east-1",
+      "os": "Windows",
+      "architecture": "x86",
+      "source": "catalog+win"
+    },
+    {
       "instance": "m6in.16xlarge",
       "vcpu": 64,
       "ram": 256,
@@ -8570,6 +8800,16 @@
       "vcpu": 16,
       "ram": 64,
       "pricePerHourUSD": 3.4623999999999997,
+      "region": "us-east-1",
+      "os": "Windows",
+      "architecture": "x86",
+      "source": "catalog+win"
+    },
+    {
+      "instance": "c8ib.96xlarge",
+      "vcpu": 384,
+      "ram": 768,
+      "pricePerHourUSD": 43.79136,
       "region": "us-east-1",
       "os": "Windows",
       "architecture": "x86",
@@ -9020,6 +9260,16 @@
       "vcpu": 32,
       "ram": 1024,
       "pricePerHourUSD": 8.144,
+      "region": "us-east-1",
+      "os": "Windows",
+      "architecture": "x86",
+      "source": "catalog+win"
+    },
+    {
+      "instance": "c8in.4xlarge",
+      "vcpu": 16,
+      "ram": 32,
+      "pricePerHourUSD": 2.09504,
       "region": "us-east-1",
       "os": "Windows",
       "architecture": "x86",
@@ -9530,6 +9780,16 @@
       "vcpu": 256,
       "ram": 4096,
       "pricePerHourUSD": 70.50624,
+      "region": "us-east-1",
+      "os": "Windows",
+      "architecture": "x86",
+      "source": "catalog+win"
+    },
+    {
+      "instance": "c8in.24xlarge",
+      "vcpu": 96,
+      "ram": 192,
+      "pricePerHourUSD": 10.94784,
       "region": "us-east-1",
       "os": "Windows",
       "architecture": "x86",
@@ -10186,6 +10446,16 @@
       "source": "catalog+win"
     },
     {
+      "instance": "c8ib.4xlarge",
+      "vcpu": 16,
+      "ram": 32,
+      "pricePerHourUSD": 3.7446400000000004,
+      "region": "us-east-1",
+      "os": "Windows",
+      "architecture": "x86",
+      "source": "catalog+win"
+    },
+    {
       "instance": "c7a.32xlarge",
       "vcpu": 128,
       "ram": 256,
@@ -10536,6 +10806,16 @@
       "source": "catalog+win"
     },
     {
+      "instance": "c8in.xlarge",
+      "vcpu": 4,
+      "ram": 8,
+      "pricePerHourUSD": 0.9361600000000001,
+      "region": "us-east-1",
+      "os": "Windows",
+      "architecture": "x86",
+      "source": "catalog+win"
+    },
+    {
       "instance": "r5dn.xlarge",
       "vcpu": 4,
       "ram": 32,
@@ -10656,6 +10936,16 @@
       "source": "catalog+win"
     },
     {
+      "instance": "c8in.48xlarge",
+      "vcpu": 192,
+      "ram": 384,
+      "pricePerHourUSD": 25.14048,
+      "region": "us-east-1",
+      "os": "Windows",
+      "architecture": "x86",
+      "source": "catalog+win"
+    },
+    {
       "instance": "z1d.6xlarge",
       "vcpu": 24,
       "ram": 192,
@@ -10700,6 +10990,16 @@
       "vcpu": 32,
       "ram": 976,
       "pricePerHourUSD": 11.984,
+      "region": "us-east-1",
+      "os": "Windows",
+      "architecture": "x86",
+      "source": "catalog+win"
+    },
+    {
+      "instance": "c8in.large",
+      "vcpu": 2,
+      "ram": 4,
+      "pricePerHourUSD": 1.72808,
       "region": "us-east-1",
       "os": "Windows",
       "architecture": "x86",
@@ -11096,6 +11396,16 @@
       "source": "catalog+win"
     },
     {
+      "instance": "c8in.12xlarge",
+      "vcpu": 48,
+      "ram": 96,
+      "pricePerHourUSD": 6.28512,
+      "region": "us-east-1",
+      "os": "Windows",
+      "architecture": "x86",
+      "source": "catalog+win"
+    },
+    {
       "instance": "r6idn.16xlarge",
       "vcpu": 64,
       "ram": 512,
@@ -11246,6 +11556,16 @@
       "source": "catalog+win"
     },
     {
+      "instance": "c8in.96xlarge",
+      "vcpu": 384,
+      "ram": 768,
+      "pricePerHourUSD": 43.79136,
+      "region": "us-east-1",
+      "os": "Windows",
+      "architecture": "x86",
+      "source": "catalog+win"
+    },
+    {
       "instance": "c6id.16xlarge",
       "vcpu": 64,
       "ram": 128,
@@ -11290,6 +11610,16 @@
       "vcpu": 48,
       "ram": 384,
       "pricePerHourUSD": 23.784,
+      "region": "us-east-1",
+      "os": "Windows",
+      "architecture": "x86",
+      "source": "catalog+win"
+    },
+    {
+      "instance": "c8in.8xlarge",
+      "vcpu": 32,
+      "ram": 64,
+      "pricePerHourUSD": 7.489280000000001,
       "region": "us-east-1",
       "os": "Windows",
       "architecture": "x86",
@@ -11400,6 +11730,16 @@
       "vcpu": 8,
       "ram": 64,
       "pricePerHourUSD": 1.996,
+      "region": "us-east-1",
+      "os": "Windows",
+      "architecture": "x86",
+      "source": "catalog+win"
+    },
+    {
+      "instance": "c8in.2xlarge",
+      "vcpu": 8,
+      "ram": 16,
+      "pricePerHourUSD": 0.91232,
       "region": "us-east-1",
       "os": "Windows",
       "architecture": "x86",
@@ -11606,6 +11946,16 @@
       "source": "catalog+win"
     },
     {
+      "instance": "c8ib.48xlarge",
+      "vcpu": 192,
+      "ram": 384,
+      "pricePerHourUSD": 44.93568,
+      "region": "us-east-1",
+      "os": "Windows",
+      "architecture": "x86",
+      "source": "catalog+win"
+    },
+    {
       "instance": "m5ad.4xlarge",
       "vcpu": 16,
       "ram": 64,
@@ -11720,6 +12070,16 @@
       "vcpu": 192,
       "ram": 1536,
       "pricePerHourUSD": 24.16896,
+      "region": "us-east-1",
+      "os": "Windows",
+      "architecture": "x86",
+      "source": "catalog+win"
+    },
+    {
+      "instance": "c8ib.2xlarge",
+      "vcpu": 8,
+      "ram": 16,
+      "pricePerHourUSD": 3.91232,
       "region": "us-east-1",
       "os": "Windows",
       "architecture": "x86",
@@ -11876,6 +12236,16 @@
       "source": "catalog+win"
     },
     {
+      "instance": "c8ib.large",
+      "vcpu": 2,
+      "ram": 4,
+      "pricePerHourUSD": 0.7080799999999999,
+      "region": "us-east-1",
+      "os": "Windows",
+      "architecture": "x86",
+      "source": "catalog+win"
+    },
+    {
       "instance": "x2iedn.4xlarge",
       "vcpu": 16,
       "ram": 512,
@@ -11910,6 +12280,16 @@
       "vcpu": 8,
       "ram": 16,
       "pricePerHourUSD": 3.7079999999999997,
+      "region": "us-east-1",
+      "os": "Windows",
+      "architecture": "x86",
+      "source": "catalog+win"
+    },
+    {
+      "instance": "c8ib.32xlarge",
+      "vcpu": 128,
+      "ram": 256,
+      "pricePerHourUSD": 14.59712,
       "region": "us-east-1",
       "os": "Windows",
       "architecture": "x86",
@@ -12230,6 +12610,16 @@
       "vcpu": 8,
       "ram": 64,
       "pricePerHourUSD": 1.0072,
+      "region": "us-east-1",
+      "os": "Windows",
+      "architecture": "x86",
+      "source": "catalog+win"
+    },
+    {
+      "instance": "c8in.32xlarge",
+      "vcpu": 128,
+      "ram": 256,
+      "pricePerHourUSD": 29.957120000000003,
       "region": "us-east-1",
       "os": "Windows",
       "architecture": "x86",
@@ -12756,6 +13146,16 @@
       "source": "catalog+win"
     },
     {
+      "instance": "c8ib.24xlarge",
+      "vcpu": 96,
+      "ram": 192,
+      "pricePerHourUSD": 10.94784,
+      "region": "us-east-1",
+      "os": "Windows",
+      "architecture": "x86",
+      "source": "catalog+win"
+    },
+    {
       "instance": "m7i-flex.8xlarge",
       "vcpu": 32,
       "ram": 128,
@@ -13006,6 +13406,16 @@
       "source": "catalog+win"
     },
     {
+      "instance": "c8ib.8xlarge",
+      "vcpu": 32,
+      "ram": 64,
+      "pricePerHourUSD": 7.489280000000001,
+      "region": "us-east-1",
+      "os": "Windows",
+      "architecture": "x86",
+      "source": "catalog+win"
+    },
+    {
       "instance": "c6id.24xlarge",
       "vcpu": 96,
       "ram": 192,
@@ -13080,6 +13490,16 @@
       "vcpu": 32,
       "ram": 128,
       "pricePerHourUSD": 3.69968,
+      "region": "us-east-1",
+      "os": "Windows",
+      "architecture": "x86",
+      "source": "catalog+win"
+    },
+    {
+      "instance": "c8ib.xlarge",
+      "vcpu": 4,
+      "ram": 8,
+      "pricePerHourUSD": 1.95616,
       "region": "us-east-1",
       "os": "Windows",
       "architecture": "x86",
@@ -13240,6 +13660,16 @@
       "vcpu": 16,
       "ram": 122,
       "pricePerHourUSD": 8.064,
+      "region": "us-east-1",
+      "os": "Windows",
+      "architecture": "x86",
+      "source": "catalog+win"
+    },
+    {
+      "instance": "c8in.16xlarge",
+      "vcpu": 64,
+      "ram": 128,
+      "pricePerHourUSD": 7.29856,
       "region": "us-east-1",
       "os": "Windows",
       "architecture": "x86",
@@ -13936,6 +14366,16 @@
       "source": "catalog+win"
     },
     {
+      "instance": "c8ib.12xlarge",
+      "vcpu": 48,
+      "ram": 96,
+      "pricePerHourUSD": 23.47392,
+      "region": "us-east-1",
+      "os": "Windows",
+      "architecture": "x86",
+      "source": "catalog+win"
+    },
+    {
       "instance": "x2gd.large",
       "vcpu": 2,
       "ram": 32,
@@ -14090,6 +14530,16 @@
       "vcpu": 4,
       "ram": 32,
       "pricePerHourUSD": 1.8624,
+      "region": "us-east-1",
+      "os": "RHEL",
+      "architecture": "x86",
+      "source": "catalog+rhel"
+    },
+    {
+      "instance": "c8ib.16xlarge",
+      "vcpu": 64,
+      "ram": 128,
+      "pricePerHourUSD": 29.31456,
       "region": "us-east-1",
       "os": "RHEL",
       "architecture": "x86",
@@ -14350,6 +14800,16 @@
       "vcpu": 16,
       "ram": 64,
       "pricePerHourUSD": 2.9664,
+      "region": "us-east-1",
+      "os": "RHEL",
+      "architecture": "x86",
+      "source": "catalog+rhel"
+    },
+    {
+      "instance": "c8ib.96xlarge",
+      "vcpu": 384,
+      "ram": 768,
+      "pricePerHourUSD": 31.88736,
       "region": "us-east-1",
       "os": "RHEL",
       "architecture": "x86",
@@ -14840,6 +15300,16 @@
       "vcpu": 32,
       "ram": 1024,
       "pricePerHourUSD": 7.151999999999999,
+      "region": "us-east-1",
+      "os": "RHEL",
+      "architecture": "x86",
+      "source": "catalog+rhel"
+    },
+    {
+      "instance": "c8in.4xlarge",
+      "vcpu": 16,
+      "ram": 32,
+      "pricePerHourUSD": 1.59904,
       "region": "us-east-1",
       "os": "RHEL",
       "architecture": "x86",
@@ -15420,6 +15890,16 @@
       "vcpu": 256,
       "ram": 4096,
       "pricePerHourUSD": 62.57024,
+      "region": "us-east-1",
+      "os": "RHEL",
+      "architecture": "x86",
+      "source": "catalog+rhel"
+    },
+    {
+      "instance": "c8in.24xlarge",
+      "vcpu": 96,
+      "ram": 192,
+      "pricePerHourUSD": 7.97184,
       "region": "us-east-1",
       "os": "RHEL",
       "architecture": "x86",
@@ -16166,6 +16646,16 @@
       "source": "catalog+rhel"
     },
     {
+      "instance": "c8ib.4xlarge",
+      "vcpu": 16,
+      "ram": 32,
+      "pricePerHourUSD": 3.24864,
+      "region": "us-east-1",
+      "os": "RHEL",
+      "architecture": "x86",
+      "source": "catalog+rhel"
+    },
+    {
       "instance": "c7a.32xlarge",
       "vcpu": 128,
       "ram": 256,
@@ -16566,6 +17056,16 @@
       "source": "catalog+rhel"
     },
     {
+      "instance": "c8in.xlarge",
+      "vcpu": 4,
+      "ram": 8,
+      "pricePerHourUSD": 0.81216,
+      "region": "us-east-1",
+      "os": "RHEL",
+      "architecture": "x86",
+      "source": "catalog+rhel"
+    },
+    {
       "instance": "r5dn.xlarge",
       "vcpu": 4,
       "ram": 32,
@@ -16706,6 +17206,16 @@
       "source": "catalog+rhel"
     },
     {
+      "instance": "c8in.48xlarge",
+      "vcpu": 192,
+      "ram": 384,
+      "pricePerHourUSD": 19.18848,
+      "region": "us-east-1",
+      "os": "RHEL",
+      "architecture": "x86",
+      "source": "catalog+rhel"
+    },
+    {
       "instance": "m6gd.16xlarge",
       "vcpu": 64,
       "ram": 256,
@@ -16770,6 +17280,16 @@
       "vcpu": 32,
       "ram": 976,
       "pricePerHourUSD": 10.992,
+      "region": "us-east-1",
+      "os": "RHEL",
+      "architecture": "x86",
+      "source": "catalog+rhel"
+    },
+    {
+      "instance": "c8in.large",
+      "vcpu": 2,
+      "ram": 4,
+      "pricePerHourUSD": 1.66608,
       "region": "us-east-1",
       "os": "RHEL",
       "architecture": "x86",
@@ -17266,6 +17786,16 @@
       "source": "catalog+rhel"
     },
     {
+      "instance": "c8in.12xlarge",
+      "vcpu": 48,
+      "ram": 96,
+      "pricePerHourUSD": 4.79712,
+      "region": "us-east-1",
+      "os": "RHEL",
+      "architecture": "x86",
+      "source": "catalog+rhel"
+    },
+    {
       "instance": "r6idn.16xlarge",
       "vcpu": 64,
       "ram": 512,
@@ -17426,6 +17956,16 @@
       "source": "catalog+rhel"
     },
     {
+      "instance": "c8in.96xlarge",
+      "vcpu": 384,
+      "ram": 768,
+      "pricePerHourUSD": 31.88736,
+      "region": "us-east-1",
+      "os": "RHEL",
+      "architecture": "x86",
+      "source": "catalog+rhel"
+    },
+    {
       "instance": "c6id.16xlarge",
       "vcpu": 64,
       "ram": 128,
@@ -17480,6 +18020,16 @@
       "vcpu": 48,
       "ram": 384,
       "pricePerHourUSD": 22.296,
+      "region": "us-east-1",
+      "os": "RHEL",
+      "architecture": "x86",
+      "source": "catalog+rhel"
+    },
+    {
+      "instance": "c8in.8xlarge",
+      "vcpu": 32,
+      "ram": 64,
+      "pricePerHourUSD": 6.49728,
       "region": "us-east-1",
       "os": "RHEL",
       "architecture": "x86",
@@ -17620,6 +18170,16 @@
       "vcpu": 8,
       "ram": 64,
       "pricePerHourUSD": 1.7479999999999998,
+      "region": "us-east-1",
+      "os": "RHEL",
+      "architecture": "x86",
+      "source": "catalog+rhel"
+    },
+    {
+      "instance": "c8in.2xlarge",
+      "vcpu": 8,
+      "ram": 16,
+      "pricePerHourUSD": 0.66432,
       "region": "us-east-1",
       "os": "RHEL",
       "architecture": "x86",
@@ -17856,6 +18416,16 @@
       "source": "catalog+rhel"
     },
     {
+      "instance": "c8ib.48xlarge",
+      "vcpu": 192,
+      "ram": 384,
+      "pricePerHourUSD": 38.98368,
+      "region": "us-east-1",
+      "os": "RHEL",
+      "architecture": "x86",
+      "source": "catalog+rhel"
+    },
+    {
       "instance": "m5ad.4xlarge",
       "vcpu": 16,
       "ram": 64,
@@ -17970,6 +18540,16 @@
       "vcpu": 192,
       "ram": 1536,
       "pricePerHourUSD": 18.21696,
+      "region": "us-east-1",
+      "os": "RHEL",
+      "architecture": "x86",
+      "source": "catalog+rhel"
+    },
+    {
+      "instance": "c8ib.2xlarge",
+      "vcpu": 8,
+      "ram": 16,
+      "pricePerHourUSD": 3.66432,
       "region": "us-east-1",
       "os": "RHEL",
       "architecture": "x86",
@@ -18196,6 +18776,16 @@
       "source": "catalog+rhel"
     },
     {
+      "instance": "c8ib.large",
+      "vcpu": 2,
+      "ram": 4,
+      "pricePerHourUSD": 0.64608,
+      "region": "us-east-1",
+      "os": "RHEL",
+      "architecture": "x86",
+      "source": "catalog+rhel"
+    },
+    {
       "instance": "x2iedn.4xlarge",
       "vcpu": 16,
       "ram": 512,
@@ -18230,6 +18820,16 @@
       "vcpu": 8,
       "ram": 16,
       "pricePerHourUSD": 3.46,
+      "region": "us-east-1",
+      "os": "RHEL",
+      "architecture": "x86",
+      "source": "catalog+rhel"
+    },
+    {
+      "instance": "c8ib.32xlarge",
+      "vcpu": 128,
+      "ram": 256,
+      "pricePerHourUSD": 10.62912,
       "region": "us-east-1",
       "os": "RHEL",
       "architecture": "x86",
@@ -18630,6 +19230,16 @@
       "vcpu": 64,
       "ram": 512,
       "pricePerHourUSD": 5.66272,
+      "region": "us-east-1",
+      "os": "RHEL",
+      "architecture": "x86",
+      "source": "catalog+rhel"
+    },
+    {
+      "instance": "c8in.32xlarge",
+      "vcpu": 128,
+      "ram": 256,
+      "pricePerHourUSD": 25.98912,
       "region": "us-east-1",
       "os": "RHEL",
       "architecture": "x86",
@@ -19316,6 +19926,16 @@
       "source": "catalog+rhel"
     },
     {
+      "instance": "c8ib.24xlarge",
+      "vcpu": 96,
+      "ram": 192,
+      "pricePerHourUSD": 7.97184,
+      "region": "us-east-1",
+      "os": "RHEL",
+      "architecture": "x86",
+      "source": "catalog+rhel"
+    },
+    {
       "instance": "m7i-flex.8xlarge",
       "vcpu": 32,
       "ram": 128,
@@ -19616,6 +20236,16 @@
       "source": "catalog+rhel"
     },
     {
+      "instance": "c8ib.8xlarge",
+      "vcpu": 32,
+      "ram": 64,
+      "pricePerHourUSD": 6.49728,
+      "region": "us-east-1",
+      "os": "RHEL",
+      "architecture": "x86",
+      "source": "catalog+rhel"
+    },
+    {
       "instance": "c8gd.48xlarge",
       "vcpu": 192,
       "ram": 384,
@@ -19740,6 +20370,16 @@
       "vcpu": 32,
       "ram": 128,
       "pricePerHourUSD": 2.70768,
+      "region": "us-east-1",
+      "os": "RHEL",
+      "architecture": "x86",
+      "source": "catalog+rhel"
+    },
+    {
+      "instance": "c8ib.xlarge",
+      "vcpu": 4,
+      "ram": 8,
+      "pricePerHourUSD": 1.83216,
       "region": "us-east-1",
       "os": "RHEL",
       "architecture": "x86",
@@ -20020,6 +20660,16 @@
       "vcpu": 16,
       "ram": 122,
       "pricePerHourUSD": 7.5680000000000005,
+      "region": "us-east-1",
+      "os": "RHEL",
+      "architecture": "x86",
+      "source": "catalog+rhel"
+    },
+    {
+      "instance": "c8in.16xlarge",
+      "vcpu": 64,
+      "ram": 128,
+      "pricePerHourUSD": 5.31456,
       "region": "us-east-1",
       "os": "RHEL",
       "architecture": "x86",
@@ -21570,6 +22220,16 @@
       "vcpu": 8,
       "ram": 16,
       "pricePerHourUSD": 0.594,
+      "region": "us-east-1",
+      "os": "RHEL",
+      "architecture": "x86",
+      "source": "catalog+rhel"
+    },
+    {
+      "instance": "c8ib.12xlarge",
+      "vcpu": 48,
+      "ram": 96,
+      "pricePerHourUSD": 21.98592,
       "region": "us-east-1",
       "os": "RHEL",
       "architecture": "x86",
