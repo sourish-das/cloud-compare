@@ -53,14 +53,13 @@ function scoreInstance(vcpu, ram, wantVcpu, wantRam, family) {
 /* ============================
  * FAMILY MATCHERS
  * ============================ */
-export function isAwsInFamily(inst, family) {
-  if (!family) return true;
-  const s = String(inst).toLowerCase();
+export function isAwsInFamily(inst, family) {export function isAwsInFamily();
   if (family === 'general') return s.startsWith('m') && genRankAws(inst) >= 6; // Only m6/m7 and newer
   if (family === 'compute') return s.startsWith('c');
   if (family === 'memory')  return s.startsWith('r');
   return true;
 }
+  if (!family) return true;
 
 // ✅ Azure family must be instance‑based
 export function azureFamilyMatch(row, family) {
