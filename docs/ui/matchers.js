@@ -1,9 +1,9 @@
 // docs/ui/matchers.js
 // All matching logic: normalization, families, scoring, inference, and fallbacks
 
-/* =========================================================
+/* ============================
  * OS NORMALIZATION
- * ========================================================= */
+ * ============================ */
 export function normalizeOs(val) {
   const s = String(val || '').toLowerCase();
   if (s.startsWith('win')) return 'windows';
@@ -11,9 +11,9 @@ export function normalizeOs(val) {
   return 'linux';
 }
 
-/* =========================================================
+/* ============================
  * COMMON FILTERS
- * ========================================================= */
+ * ============================ */
 export function isOnDemandShared(x) {
   const bm  = String(x.billingModel || '').toLowerCase();
   const ten = String(x.tenancyType || '').toLowerCase();
@@ -30,14 +30,17 @@ export function isOnDemandShared(x) {
   );
 }
 
-/* =========================================================
- * HARD RULE SCORING (CORE FIX)
- * ========================================================= */
-function directionalScore(vcpu, ram, wantVcpu, wantRam) {
+/* ============================
+ * CORE SCORING (FIXED)
+ * ============================ */
+function scoreInstance(vcpu, ram, wantVcpu, wantRam, family) {
   if (!isFinite(vcpu) || !isFinite(ram)) return Infinity;
 
   // ❌ Never undersize
   if (vcpu < wantVcpu || ram < wantRam) return Infinity;
+
+  // ❌ Cap RAM growth except for memory family
+  if (family !== 'memory' && ram > wantRam * 2) return Infinity;
 
   // ✅ Exact match
   if (vcpu === wantVcpu && ram === wantRam) return 0;
@@ -46,9 +49,9 @@ function directionalScore(vcpu, ram, wantVcpu, wantRam) {
   return (vcpu - wantVcpu) * 10 + (ram - wantRam);
 }
 
-/* =========================================================
+/* ============================
  * FAMILY MATCHERS
- * ========================================================= */
+ * ============================ */
 export function isAwsInFamily(inst, family) {
   if (!family) return true;
   const s = String(inst).toLowerCase();
@@ -81,7 +84,8 @@ export function isGcpInFamily(inst, family) {
   const n = String(inst).toUpperCase();
   if (family === 'memory')  return /^M[1-4]/.test(n);
   if (family === 'compute') return /^C2|^C2D|^H3|^H4D/.test(n);
-  if (family === 'general') return /^(E2|N1|N2|N2D|N4|N4A|N4D|T2A|T2D)/.test(n);
+  if (family === 'general')
+    return /^(E2|N1|N2|N2D|N4|N4A|N4D|T2A|T2D)/.test(n);
   return true;
 }
 
@@ -92,9 +96,9 @@ export function gcpFamilyMatch(row, family) {
   return isGcpInFamily(row?.instance, family);
 }
 
-/* =========================================================
+/* ============================
  * ARM GUARDS (WINDOWS)
- * ========================================================= */
+ * ============================ */
 function isAzureArmInstance(n) {
   return /psv2|dpsv5|dpldsv5|epsv5/i.test(String(n));
 }
@@ -105,43 +109,45 @@ export function isGcpArmInstance(n) {
   return /^(T2A|C4A|N4A|A4X)/.test(String(n).toUpperCase());
 }
 
-/* =========================================================
+/* ============================
  * GENERATION RANKING
- * ========================================================= */
+ * ============================ */
 function genRankAws(i){ return +(String(i).match(/[a-z]+(\d+)/)?.[1] || 0); }
 function genRankAzure(i){ return +(String(i).toLowerCase().match(/_v(\d+)/)?.[1] || 0); }
 function genRankGcp(i){ return +(String(i).split('-')[0].match(/[a-z]+(\d+)/)?.[1] || 0); }
 
-/* =========================================================
- * AZURE SPEC INFERENCE (fallback)
- * ========================================================= */
+/* ============================
+ * AZURE SPEC INFERENCE
+ * ============================ */
 export function inferAzureCoresRamFromName(name) {
   const n = String(name).toLowerCase();
   const cores = +(n.match(/standard_[a-z]+(\d+)/)?.[1] || 0);
   if (!cores) return { vcpu: null, ram: null };
+
   const perCore =
     n.startsWith('standard_d') ? 4 :
     n.startsWith('standard_f') ? 2 :
     n.startsWith('standard_e') ? 8 :
     n.startsWith('standard_b') ? 4 :
     n.startsWith('standard_m') ? 16 : null;
+
   return { vcpu: cores, ram: perCore ? cores * perCore : null };
 }
 
-/* =========================================================
- * GENERIC PICKER (AWS / AZURE / GCP)
- * ========================================================= */
-function pickBest(rows, wantVcpu, wantRam, family, genFn, autoCheapest) {
+/* ============================
+ * GENERIC PICKER
+ * ============================ */
+function pickBest(rows, wantVcpu, wantRam, family, genFn) {
   let best = null, bestScore = Infinity, bestGen = -1;
 
   for (const r of rows) {
-    const score = directionalScore(r.vcpu, r.ram, wantVcpu, wantRam);
+    const score = scoreInstance(r.vcpu, r.ram, wantVcpu, wantRam, family);
     if (!isFinite(score)) continue;
 
     const gen = genFn(r.instance);
     const price = r.pricePerHourUSD ?? Infinity;
 
-    if (autoCheapest) {
+    if (!family) {
       if (!best || price < best.pricePerHourUSD) best = r;
     } else {
       if (score < bestScore || (score === bestScore && gen > bestGen)) {
@@ -152,9 +158,9 @@ function pickBest(rows, wantVcpu, wantRam, family, genFn, autoCheapest) {
   return best;
 }
 
-/* =========================================================
+/* ============================
  * AWS
- * ========================================================= */
+ * ============================ */
 export function findBestAws(list, vcpu, ram, os, family) {
   const wantOS = normalizeOs(os);
   const isWin = wantOS === 'windows';
@@ -167,12 +173,12 @@ export function findBestAws(list, vcpu, ram, os, family) {
     (!isWin || !isAwsGravitonInstance(x.instance))
   );
 
-  return pickBest(rows, vcpu, ram, family, genRankAws, !family);
+  return pickBest(rows, vcpu, ram, family, genRankAws);
 }
 
-/* =========================================================
+/* ============================
  * AZURE
- * ========================================================= */
+ * ============================ */
 export function findBestAzure(list, vcpu, ram, os, family) {
   const wantOS = normalizeOs(os);
   const isWin = wantOS === 'windows';
@@ -190,14 +196,14 @@ export function findBestAzure(list, vcpu, ram, os, family) {
       return { ...x, vcpu: m.vcpu, ram: m.ram };
     });
 
-  const best = pickBest(rows, vcpu, ram, family, genRankAzure, !family);
+  const best = pickBest(rows, vcpu, ram, family, genRankAzure);
   if (best) best.os = os;
   return best;
 }
 
-/* =========================================================
+/* ============================
  * GCP
- * ========================================================= */
+ * ============================ */
 export function findBestGcp(list, vcpu, ram, os, family) {
   const wantOS = normalizeOs(os);
   const isWin = wantOS === 'windows';
@@ -209,12 +215,12 @@ export function findBestGcp(list, vcpu, ram, os, family) {
     (!isWin || !isGcpArmInstance(x.instance))
   );
 
-  return pickBest(rows, vcpu, ram, family, genRankGcp, !family);
+  return pickBest(rows, vcpu, ram, family, genRankGcp);
 }
 
-/* =========================================================
- * OCI (LOGIC PRESERVED)
- * ========================================================= */
+/* ============================
+ * OCI (UNCHANGED BEHAVIOR)
+ * ============================ */
 export function findBestOci(ociCompute, vcpu, ram, os, options = {}) {
   const wantOS = normalizeOs(os);
   const isWin = wantOS === 'windows';
