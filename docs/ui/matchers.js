@@ -1,5 +1,6 @@
 // docs/ui/matchers.js
-// All matching logic: normalization, families, scoring, inference, and fallbacks
+// Unified matcher for AWS, Azure, GCP, OCI
+// Exact → Nearest → Latest, no undersizing, no burstable
 
 /* ============================
  * OS NORMALIZATION
@@ -31,21 +32,21 @@ export function isOnDemandShared(x) {
 }
 
 /* ============================
- * CORE SCORING (FIXED)
+ * CORE SCORING
  * ============================ */
 function scoreInstance(vcpu, ram, wantVcpu, wantRam, family) {
   if (!isFinite(vcpu) || !isFinite(ram)) return Infinity;
 
-  // ❌ Never undersize
+  // never undersize
   if (vcpu < wantVcpu || ram < wantRam) return Infinity;
 
-  // ❌ Cap RAM growth except for memory family
+  // cap RAM explosion except memory
   if (family !== 'memory' && ram > wantRam * 2) return Infinity;
 
-  // ✅ Exact match
+  // exact match
   if (vcpu === wantVcpu && ram === wantRam) return 0;
 
-  // ✅ Nearest larger (CPU weighted more)
+  // nearest larger (CPU weighted more)
   return (vcpu - wantVcpu) * 10 + (ram - wantRam);
 }
 
@@ -55,44 +56,38 @@ function scoreInstance(vcpu, ram, wantVcpu, wantRam, family) {
 export function isAwsInFamily(inst, family) {
   if (!family) return true;
   const s = String(inst).toLowerCase();
-  if (family === 'general') return /^[mt]/.test(s);
-  if (family === 'compute') return /^c/.test(s);
-  if (family === 'memory')  return /^[rxz]/.test(s);
+  if (family === 'general') return s.startsWith('m');
+  if (family === 'compute') return s.startsWith('c');
+  if (family === 'memory')  return s.startsWith('r');
   return true;
 }
 
-export function isAzureInFamily(inst, family) {
-  if (!family) return true;
-  const m = String(inst).toLowerCase().match(/standard_([a-z])/);
-  const f = m?.[1];
-  if (!f) return true;
-  if (family === 'general') return f === 'd' || f === 'b';
-  if (family === 'compute') return f === 'f';
-  if (family === 'memory')  return f === 'e' || f === 'm';
-  return true;
-}
-
+// ✅ Azure family must be instance‑based
 export function azureFamilyMatch(row, family) {
   if (!family) return true;
-  const cat = String(row?.category || '').toLowerCase();
-  if (cat) return cat === family;
-  return isAzureInFamily(row?.instance, family);
+  const inst = String(row?.instance || '').toLowerCase();
+
+  if (family === 'compute') return inst.startsWith('standard_f');
+  if (family === 'general') return inst.startsWith('standard_d') || inst.startsWith('standard_b');
+  if (family === 'memory')  return inst.startsWith('standard_e') || inst.startsWith('standard_m');
+
+  return true;
 }
 
 export function isGcpInFamily(inst, family) {
   if (!family) return true;
   const n = String(inst).toUpperCase();
+
   if (family === 'memory')  return /^M[1-4]/.test(n);
-  if (family === 'compute') return /^C2|^C2D|^H3|^H4D/.test(n);
+  if (family === 'compute') return /^(C2|C2D|H3|H4D)/.test(n);
   if (family === 'general')
     return /^(E2|N1|N2|N2D|N4|N4A|N4D|T2A|T2D)/.test(n);
+
   return true;
 }
 
 export function gcpFamilyMatch(row, family) {
   if (!family) return true;
-  const cat = String(row?.category || '').toLowerCase();
-  if (cat) return cat === family;
   return isGcpInFamily(row?.instance, family);
 }
 
@@ -126,7 +121,7 @@ export function inferAzureCoresRamFromName(name) {
 
   const perCore =
     n.startsWith('standard_d') ? 4 :
-    n.startsWith('standard_f') ? 2 :
+    n.startsWith('standard_f') ? 4 :   // ✅ F2ads v7 = 2 vCPU / 8 GB
     n.startsWith('standard_e') ? 8 :
     n.startsWith('standard_b') ? 4 :
     n.startsWith('standard_m') ? 16 : null;
@@ -135,24 +130,23 @@ export function inferAzureCoresRamFromName(name) {
 }
 
 /* ============================
- * GENERIC PICKER
+ * GENERIC PICKER (Exact → Near → Latest)
  * ============================ */
 function pickBest(rows, wantVcpu, wantRam, family, genFn) {
-  let best = null, bestScore = Infinity, bestGen = -1;
+  // exact first
+  const exact = rows.filter(r => r.vcpu === wantVcpu && r.ram === wantRam);
+  if (exact.length) {
+    return exact.sort((a,b) => genFn(b.instance) - genFn(a.instance))[0];
+  }
 
+  let best = null, bestScore = Infinity, bestGen = -1;
   for (const r of rows) {
     const score = scoreInstance(r.vcpu, r.ram, wantVcpu, wantRam, family);
     if (!isFinite(score)) continue;
 
     const gen = genFn(r.instance);
-    const price = r.pricePerHourUSD ?? Infinity;
-
-    if (!family) {
-      if (!best || price < best.pricePerHourUSD) best = r;
-    } else {
-      if (score < bestScore || (score === bestScore && gen > bestGen)) {
-        best = r; bestScore = score; bestGen = gen;
-      }
+    if (score < bestScore || (score === bestScore && gen > bestGen)) {
+      best = r; bestScore = score; bestGen = gen;
     }
   }
   return best;
@@ -170,6 +164,7 @@ export function findBestAws(list, vcpu, ram, os, family) {
     normalizeOs(x.os) === wantOS &&
     isAwsInFamily(x.instance, family) &&
     isFinite(x.vcpu) && isFinite(x.ram) &&
+    genRankAws(x.instance) >= 6 &&          // block m3/m4
     (!isWin || !isAwsGravitonInstance(x.instance))
   );
 
@@ -219,7 +214,7 @@ export function findBestGcp(list, vcpu, ram, os, family) {
 }
 
 /* ============================
- * OCI (UNCHANGED BEHAVIOR)
+ * OCI
  * ============================ */
 export function findBestOci(ociCompute, vcpu, ram, os, options = {}) {
   const wantOS = normalizeOs(os);
