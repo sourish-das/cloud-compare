@@ -1,1 +1,52 @@
+name: Fetch Azure Calculator Prices
 
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  azure-calculator:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Playwright
+        run: npm install playwright
+
+      - name: Install Playwright Browsers
+        run: npx playwright install
+
+      - name: Scrape Azure Pricing Calculator
+        run: node scripts/providers/azure.calculator.fetch.js
+        env:
+          OUTPUT_PATH: docs/data/azure/azure.calculator.prices.json
+
+      - name: Validate output
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s docs/data/azure/azure.calculator.prices.json
+          echo "Output size (bytes):"
+          wc -c docs/data/azure/azure.calculator.prices.json
+          echo "Top-level keys:"
+          jq 'keys' docs/data/azure/azure.calculator.prices.json | sed 's/^/  /' || true
+          echo "Compute array length:"
+          jq '.compute | length' docs/data/azure/azure.calculator.prices.json || true
+
+      - name: Upload Azure calculator pricing JSON (artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: azure-calculator-prices
+          path: docs/data/azure/azure.calculator.prices.json
+          if-no-files-found: error
+          retention-days: 7
