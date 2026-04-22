@@ -11,7 +11,7 @@ const OS_TYPES = [
   { os: 'Windows', type: '(OS Only)', osLabel: 'Windows' }
 ];
 
-// Series/family mapping for category
+// Series/family mapping for category (optional, can be removed for all series)
 function getCategory(series) {
   const s = String(series).toUpperCase();
   if (s.startsWith('D')) return 'general';
@@ -25,8 +25,14 @@ function getCategory(series) {
   const page = await browser.newPage();
   await page.goto('https://azure.microsoft.com/en-us/pricing/calculator/', { waitUntil: 'domcontentloaded' });
 
-  // Add Virtual Machine to estimate
-  await page.click('text=Virtual Machine');
+  // Check if estimator is open; if not, click "Add to estimate" for Virtual Machines
+  if (!(await page.$('select[name="region"]'))) {
+    // Click the "Virtual Machines" card
+    await page.click('text="Virtual Machines"');
+    // Click the "Add to estimate" button
+    await page.click('button:has-text("Add to estimate")');
+    await page.waitForSelector('select[name="region"]', { timeout: 20000 });
+  }
 
   let allRows = [];
 
@@ -58,7 +64,8 @@ function getCategory(series) {
       const seriesMatch = vm.text.match(/^([A-Z]+)[0-9]/i);
       const series = seriesMatch ? seriesMatch[1] : '';
       const category = getCategory(series);
-      if (!category) continue; // Only D, E, F series
+      // If you want all series, comment out the next line:
+      // if (!category) continue; // Only D, E, F series
 
       // Select VM size
       await page.selectOption('select[name="size"]', vm.value);
@@ -100,7 +107,7 @@ function getCategory(series) {
         displayInstance,
         series,
         seriesName,
-        category
+        category // can be null if not D/E/F
       });
     }
   }
