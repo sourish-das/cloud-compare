@@ -85,18 +85,13 @@ function categorizeByInstanceName(instance = "") {
 
 /**
  * ✅ Unified Azure ARM instance detector (Ampere Altra/Max, v4-v9 gens)
- * Covers normalized names like:
- *   standard_d2as_v5, standard_e16ads_v7, standard_ec32as_v6, standard_d8ps_v6
- *
- * NOTE: Fixed to match the underscore generation format "_v5/_v6/_v7".
+ * Covers all D/E/F/L/A/EC/DC families with ARM suffixes (a/as/ads/ams, p/ps, etc.).
+ * Examples detected: D2as v5/v6/v7, D4ads v6, Dps v6, E16ads v7, ECas v6, Fams v7, Lps v2...
  */
 function isAzureArmInstance(instance = "") {
   const n = String(instance || "").toLowerCase();
-
-  // ARM SKUs typically include these suffixes before _vX:
-  // a, as, ads, ams, ap, aps, ps, pls, pds, p
-  // and generation v4-v9.
-  return /standard_.*(?:a|as|ads|ams|ap|aps|ps|pls|pds|p)_v[4-9]\b/.test(n);
+  // Match normalized names like: standard_d2as_v5, standard_e16ads_v7, standard_ec32as_v6, standard_d8ps_v6
+  return /standard_.*(a|as|ads|ams|ap|aps)v[4-9]/.test(n);
 }
 
 /** Detect Azure burstable (B-series) instances at source. */
@@ -138,15 +133,28 @@ function widenAzureSeries(instance = "") {
   const body = n.startsWith("standard_") ? n.slice(9) : n;
   const lead = (body[0] || "").toUpperCase();
   // Keep B to stay generic; fetcher calls isBurstableAzure() to exclude B-series.
-  return ["A", "B", "D", "E", "F", "L", "M", "N", "H"].includes(lead);
+  return ["A","B","D","E","F","L","M","N","H"].includes(lead);
 }
 
 /* ============================================================
  * ResourceSkus enrichment
- * ============================================================ */
+ * - Adds a cross-walk so "ECasv6-2" also maps to "standard_ec2as_v6"
+ *   fixing vCPU/RAM enrichment for multi-letter families.
+ * ============================================================*/
 /**
  * Try to convert an Azure ResourceSkus size name (e.g., "ECasv6-2")
  * into your normalized instance key (e.g., "standard_ec2as_v6").
+ *
+ * Pattern: <lettersFull><vX>-<size>
+ * lettersFull = family + (optional) sub-suffix (s|as|ads|als|ls|pls|ps)
+ * vX = generation (v2|v3|v5|v6...)
+ * size = numeric size
+ *
+ * Examples:
+ * ECasv6-2 -> standard_ec2as_v6
+ * Dsv5-4   -> standard_d4s_v5
+ * Lsv3-8   -> standard_ls8_v3
+ * Fv2-4    -> standard_f4_v2
  */
 function _normalizedFromSkuName(skuName = "") {
   const m = /^([a-z]+)(v\d+)-(\d+)$/i.exec(String(skuName).trim());
@@ -171,12 +179,13 @@ function _normalizedFromSkuName(skuName = "") {
 }
 
 /**
- * Build a name-> {vcpu,ram} map from ResourceSkus for a given subscription & region.
+ * Build a name->{vcpu,ram} map from ResourceSkus for a given subscription & region.
  * Requires an ARM token with Microsoft.Compute/skus read permissions.
  *
- * NOTE: sets TWO keys:
+ * NOTE: We now set TWO keys for each entry:
  * 1) raw sku.name (lowercased), e.g., "ecasv6-2"
  * 2) normalized key, e.g., "standard_ec2as_v6"
+ * so that later lookups by vm.instance (normalized) succeed.
  */
 async function getResourceSkusMap({ subscriptionId, region, armToken }) {
   const map = new Map();
@@ -212,8 +221,16 @@ async function getResourceSkusMap({ subscriptionId, region, armToken }) {
 }
 
 /* ============================================================
- * UI-friendly naming helpers
- * ============================================================ */
+ * UI-friendly naming helpers (robust for multi-letter families)
+ * ============================================================*/
+/**
+ * Internal: split normalized instance into {family, sizeNum, sub, gen}
+ * Examples:
+ * "d2s_v5"      -> { family:"d",  sizeNum:"2",  sub:"s",  gen:"v5" }
+ * "ec2as_v6"    -> { family:"ec", sizeNum:"2",  sub:"as", gen:"v6" }
+ * "e4ads_v6"    -> { family:"e",  sizeNum:"4",  sub:"ads",gen:"v6" }
+ * "ls8_v3"      -> { family:"ls", sizeNum:"8",  sub:"",   gen:"v3" }
+ */
 function _parseAzureInstanceParts(instance = "") {
   const s = String(instance).toLowerCase().replace(/^standard_/, "");
   const parts = s.split("_").filter(Boolean);
@@ -274,7 +291,17 @@ function azureSeriesNameFromNormalized(instance = "") {
 
 /* ============================================================
  * RHEL synthesis for Azure (Linux base + per–vCPU software fee)
- * ============================================================ */
+ * ============================================================*/
+/**
+ * Optional JSON override from env:
+ * AZURE_RHEL_BUCKET_MAP = {
+ *   "D": {"small":0.0142,"mid":0.0146,"big":0.0150},
+ *   "F": {"small":0.0144,"mid":0.0148,"big":0.0152},
+ *   "E": {"small":0.0141,"mid":0.0145,"big":0.0149}
+ * }
+ * Also supports single fallback:
+ * AZURE_RHEL_RATE_PER_VCPU = "0.0144"
+ */
 function _readBucketOverride() {
   try {
     const raw = process.env.AZURE_RHEL_BUCKET_MAP;
