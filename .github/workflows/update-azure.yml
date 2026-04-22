@@ -2,6 +2,7 @@ name: Fetch Azure Prices
 
 permissions:
   contents: read        # provider does not commit; orchestrator will
+  id-token: write       # required for OIDC (azure/login@v2)
 
 on:
   workflow_call:
@@ -21,16 +22,25 @@ jobs:
     timeout-minutes: 30
 
     steps:
+      # ------------------------------------------------------------
+      # Checkout (read-only)
+      # ------------------------------------------------------------
       - name: Checkout repo (read-only)
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      # ------------------------------------------------------------
+      # Node setup (LTS)
+      # ------------------------------------------------------------
       - name: Set up Node (LTS)
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
+      # ------------------------------------------------------------
+      # jq (for quick validation)
+      # ------------------------------------------------------------
       - name: Ensure jq (for quick validation)
         run: |
           if ! command -v jq >/dev/null 2>&1; then
@@ -38,15 +48,82 @@ jobs:
             sudo apt-get install -y jq
           fi
 
+      # ------------------------------------------------------------
+      # Azure authentication (OIDC)
+      # ------------------------------------------------------------
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # ------------------------------------------------------------
+      # Generate ARM (management) token for scripts that call ARM/ResourceSkus
+      # ------------------------------------------------------------
+      - name: Generate ARM Token
+        shell: bash
+        run: |
+          set -euo pipefail
+          ARM_TOKEN=$(az account get-access-token \
+            --resource https://management.azure.com/ \
+            --query accessToken -o tsv)
+          if [[ -z "${ARM_TOKEN}" ]]; then
+            echo "::error::Failed to acquire ARM token via OIDC."
+            exit 1
+          fi
+          echo "ARM_TOKEN=${ARM_TOKEN}" >> "$GITHUB_ENV"
+
+      # ------------------------------------------------------------
+      # Optional: quick probe that the token works (diagnostic only)
+      # ------------------------------------------------------------
+      - name: Probe ARM (locations list) [optional]
+        shell: bash
+        env:
+          SUB_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          ARM_TOKEN: ${{ env.ARM_TOKEN }}
+        run: |
+          set -euo pipefail
+          CODE=$(curl -s -o /tmp/arm.json -w "%{http_code}" \
+            -H "Authorization: Bearer ${ARM_TOKEN}" \
+            -H "Content-Type: application/json" \
+            "https://management.azure.com/subscriptions/${SUB_ID}/locations?api-version=2020-01-01")
+          echo "ARM probe HTTP: ${CODE}"
+          if [[ "${CODE}" != "200" ]]; then
+            echo "::warning::ARM probe failed (HTTP ${CODE}). Continuing..."
+          else
+            jq 'keys' /tmp/arm.json | head -n 20 || true
+          fi
+
+      # ------------------------------------------------------------
+      # Ensure output directory
+      # ------------------------------------------------------------
       - name: Ensure output directory
         run: mkdir -p docs/data/azure
 
+      # ------------------------------------------------------------
+      # >>> Run the Azure fetcher (writes docs/data/azure/azure.prices.json)
+      #     RHEL fallback(s) are OPTIONAL — pick ONE style or none.
+      #     If both are present, BUCKET_MAP takes precedence.
+      # ------------------------------------------------------------
       - name: Fetch Azure prices
         run: node scripts/providers/azure.fetch.js
         env:
+          ARM_TOKEN: ${{ env.ARM_TOKEN }}
           AZURE_REGION: "eastus"
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           OUTPUT_PATH: "docs/data/azure/azure.prices.json"
-          AZURE_SKU_MAP_PATH: "scripts/cache/azure.skus.eastus.json"
+
+          # -------------------------------
+          # OPTIONAL RHEL FALLBACKS:
+          # (A) Single fallback (applies to all sizes/families)
+          # AZURE_RHEL_RATE_PER_VCPU: "0.0144"
+
+          # (B) Bucketed fallback (recommended; overrides single rate if both set)
+          #  - 'small'  = 1–4 vCPU
+          #  - 'mid'    = 5–8 vCPU
+          #  - 'big'    = >8 vCPU
+          #  - Families: D = General, F = Compute, E = Memory
           AZURE_RHEL_BUCKET_MAP: >-
             {
               "D": {"small":0.0142,"mid":0.0146,"big":0.0150},
@@ -54,6 +131,9 @@ jobs:
               "E": {"small":0.0141,"mid":0.0145,"big":0.0149}
             }
 
+      # ------------------------------------------------------------
+      # Validate output & show quick stats (counts by OS)
+      # ------------------------------------------------------------
       - name: Validate Azure output
         shell: bash
         run: |
@@ -68,6 +148,9 @@ jobs:
           echo "Counts by OS:"
           jq -r '.compute | group_by(.os) | map({os: .[0].os, count: length})' docs/data/azure/azure.prices.json
 
+      # ------------------------------------------------------------
+      # Upload artifact for orchestrator
+      # ------------------------------------------------------------
       - name: Upload Azure pricing JSON (artifact)
         uses: actions/upload-artifact@v4
         with:
@@ -76,7 +159,9 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-      # Debug steps (optional) can stay as-is if you want
+      # =========================================
+      # OPTIONAL DEBUG MODE — snapshot to docs/data
+      # =========================================
       - name: Debug Publish to docs/data (optional)
         if: ${{ vars.DEBUG_PUBLISH == 'true' }}
         shell: bash
