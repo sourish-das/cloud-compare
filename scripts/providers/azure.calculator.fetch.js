@@ -16,15 +16,32 @@ const OS_TYPES = [
   const page = await browser.newPage();
   await page.goto('https://azure.microsoft.com/en-us/pricing/calculator/', { waitUntil: 'domcontentloaded' });
 
-  // Wait for the calculator product grid to load
+  // Wait for the product grid to load
   await page.waitForSelector('button:has-text("Add to estimate")', { timeout: 20000 });
 
-  // Check if estimator is already open
+  // Check if estimator is open (region dropdown present)
   let estimatorOpen = await page.$('select[name="region"]');
   if (!estimatorOpen) {
-    // Click "Add to estimate" for Virtual Machines
-    await page.click('div:has-text("Virtual Machines") >> button:has-text("Add to estimate")');
+    // Click "Add to estimate" for Virtual Machines (find the correct card)
+    const vmCard = await page.$('div:has-text("Virtual Machines")');
+    if (vmCard) {
+      const addBtn = await vmCard.$('button:has-text("Add to estimate")');
+      if (addBtn) {
+        await addBtn.click();
+      } else {
+        throw new Error('Could not find "Add to estimate" button for Virtual Machines');
+      }
+    } else {
+      throw new Error('Could not find Virtual Machines card');
+    }
     await page.waitForSelector('select[name="region"]', { timeout: 20000 });
+  }
+
+  // If estimator is minimized, expand it
+  const expandBtn = await page.$('button[aria-label*="Expand Virtual Machines"]');
+  if (expandBtn) {
+    await expandBtn.click();
+    await page.waitForSelector('select[name="region"]', { timeout: 10000 });
   }
 
   let allRows = [];
