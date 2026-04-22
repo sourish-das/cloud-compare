@@ -22,17 +22,21 @@ const OS_TYPES = [
   // Check if estimator is open (region dropdown present)
   let estimatorOpen = await page.$('select[name="region"]');
   if (!estimatorOpen) {
-    // Click "Add to estimate" for Virtual Machines (find the correct card)
-    const vmCard = await page.$('div:has-text("Virtual Machines")');
-    if (vmCard) {
-      const addBtn = await vmCard.$('button:has-text("Add to estimate")');
-      if (addBtn) {
-        await addBtn.click();
-      } else {
-        throw new Error('Could not find "Add to estimate" button for Virtual Machines');
+    // Find all "Add to estimate" buttons
+    const addButtons = await page.$$('button:has-text("Add to estimate")');
+    let clicked = false;
+    for (const btn of addButtons) {
+      // Check if the button is inside the Virtual Machines card
+      const parent = await btn.evaluateHandle(node => node.closest('div'));
+      const parentText = await parent.evaluate(node => node.textContent);
+      if (parentText && parentText.includes('Virtual Machines')) {
+        await btn.click();
+        clicked = true;
+        break;
       }
-    } else {
-      throw new Error('Could not find Virtual Machines card');
+    }
+    if (!clicked) {
+      throw new Error('Could not find "Add to estimate" button for Virtual Machines');
     }
     await page.waitForSelector('select[name="region"]', { timeout: 20000 });
   }
