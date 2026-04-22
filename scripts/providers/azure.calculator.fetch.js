@@ -11,26 +11,19 @@ const OS_TYPES = [
   { os: 'Windows', type: '(OS Only)', osLabel: 'Windows' }
 ];
 
-// Series/family mapping for category (optional, can be removed for all series)
-function getCategory(series) {
-  const s = String(series).toUpperCase();
-  if (s.startsWith('D')) return 'general';
-  if (s.startsWith('E')) return 'memory';
-  if (s.startsWith('F')) return 'compute';
-  return null;
-}
-
 (async () => {
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
   await page.goto('https://azure.microsoft.com/en-us/pricing/calculator/', { waitUntil: 'domcontentloaded' });
 
-  // Check if estimator is open; if not, click "Add to estimate" for Virtual Machines
-  if (!(await page.$('select[name="region"]'))) {
-    // Click the "Virtual Machines" card
-    await page.click('text="Virtual Machines"');
-    // Click the "Add to estimate" button
-    await page.click('button:has-text("Add to estimate")');
+  // Wait for the calculator product grid to load
+  await page.waitForSelector('button:has-text("Add to estimate")', { timeout: 20000 });
+
+  // Check if estimator is already open
+  let estimatorOpen = await page.$('select[name="region"]');
+  if (!estimatorOpen) {
+    // Click "Add to estimate" for Virtual Machines
+    await page.click('div:has-text("Virtual Machines") >> button:has-text("Add to estimate")');
     await page.waitForSelector('select[name="region"]', { timeout: 20000 });
   }
 
@@ -60,13 +53,6 @@ function getCategory(series) {
     for (const vm of vmOptions) {
       if (!vm.value || vm.value === 'none') continue;
 
-      // Series/family extraction
-      const seriesMatch = vm.text.match(/^([A-Z]+)[0-9]/i);
-      const series = seriesMatch ? seriesMatch[1] : '';
-      const category = getCategory(series);
-      // If you want all series, comment out the next line:
-      // if (!category) continue; // Only D, E, F series
-
       // Select VM size
       await page.selectOption('select[name="size"]', vm.value);
 
@@ -93,7 +79,9 @@ function getCategory(series) {
 
       const instance = vm.value.toLowerCase().replace(/\s+/g, '_');
       const displayInstance = vm.text;
-      const seriesName = series + '-series';
+      const seriesMatch = vm.text.match(/^([A-Z]+)[0-9]/i);
+      const series = seriesMatch ? seriesMatch[1] : '';
+      const seriesName = series ? series + '-series' : 'other-series';
 
       allRows.push({
         instance,
@@ -107,7 +95,7 @@ function getCategory(series) {
         displayInstance,
         series,
         seriesName,
-        category // can be null if not D/E/F
+        category: 'other'
       });
     }
   }
