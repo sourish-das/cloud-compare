@@ -28,7 +28,7 @@ const OS_TYPES = [
   await page.waitForTimeout(1500);
 
   /* ==================================================
-   * 2️⃣ FIND ALL VM ROWS UNDER "YOUR ESTIMATE"
+   * 2️⃣ FIND ALL VM ROWS
    * ================================================== */
   let vmRows = await page.$$(`text=Virtual Machines`);
   if (!vmRows.length) {
@@ -36,13 +36,23 @@ const OS_TYPES = [
   }
 
   /* ==================================================
-   * 3️⃣ DELETE EXTRA VM ROWS (KEEP FIRST)
+   * 3️⃣ DELETE EXTRA VM ROWS (SAFE – ROW LEVEL ONLY)
    * ================================================== */
   if (vmRows.length > 1) {
     for (let i = vmRows.length - 1; i >= 1; i--) {
-      const deleteBtn = await vmRows[i].evaluateHandle(el =>
-        el.closest('div')?.querySelector('button[aria-label*="Delete"], button svg')
-      );
+      const deleteBtn = await vmRows[i].evaluateHandle(el => {
+        // Walk up to the VM row container
+        let row = el;
+        while (row && !row.querySelector) row = row.parentElement;
+
+        // Find row‑local delete button only
+        const buttons = Array.from(row.querySelectorAll('button'));
+        return buttons.find(b =>
+          b.getAttribute('aria-label') &&
+          b.getAttribute('aria-label').toLowerCase().includes('delete')
+        ) || null;
+      });
+
       if (deleteBtn) {
         await deleteBtn.click();
         await page.waitForTimeout(800);
@@ -63,9 +73,12 @@ const OS_TYPES = [
   });
 
   if (!expanded) {
-    const expandBtn = await mainVmRow.evaluateHandle(el =>
-      el.closest('div')?.querySelector('button')
-    );
+    const expandBtn = await mainVmRow.evaluateHandle(el => {
+      let row = el;
+      while (row && !row.querySelector) row = row.parentElement;
+      return row.querySelector('button');
+    });
+
     if (expandBtn) {
       await expandBtn.click();
       await page.waitForTimeout(1200);
@@ -73,7 +86,7 @@ const OS_TYPES = [
   }
 
   /* ==================================================
-   * 5️⃣ WAIT FOR CONTROLS (VISIBLE)
+   * 5️⃣ WAIT FOR CONTROLS
    * ================================================== */
   await page.waitForSelector('select[name="region"]', { timeout: 30000 });
   await page.waitForSelector('select[name="operatingSystem"]', { timeout: 30000 });
