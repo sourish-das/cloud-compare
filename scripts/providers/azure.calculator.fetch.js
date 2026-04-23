@@ -13,74 +13,33 @@ const OS_TYPES = [
 
 (async () => {
   const browser = await chromium.launch({ headless: true });
-  const page = await browser.newPage({
-    viewport: { width: 1920, height: 1080 }
-  });
+  const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
 
   await page.goto('https://azure.microsoft.com/en-us/pricing/calculator/', {
     waitUntil: 'domcontentloaded'
   });
 
-  /* ==================================================
-   * 1️⃣ SCROLL DOWN (VM IS BELOW FOLD)
-   * ================================================== */
+  // 1️⃣ Scroll – VM estimator is below the fold
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-  await page.waitForTimeout(1500);
+  await page.waitForTimeout(2000);
 
-  /* ==================================================
-   * 2️⃣ FIND VM ROWS (SAFETY CHECK)
-   * ================================================== */
-  let vmRows = await page.$$(`text=Virtual Machines`);
+  // 2️⃣ Safety check – VM must exist
+  const vmRows = await page.$$(`text=Virtual Machines`);
   if (!vmRows.length) {
     throw new Error('Virtual Machines estimator not found after scroll');
   }
 
-  /* ==================================================
-   * 3️⃣ DELETE DUPLICATE VM ROWS (ONLY IF PRESENT)
-   * ================================================== */
-  if (vmRows.length > 1) {
-    for (let i = vmRows.length - 1; i >= 1; i--) {
-      const handle = await vmRows[i].evaluateHandle(el => {
-        const row = el.closest('div');
-        if (!row) return null;
-        return Array.from(row.querySelectorAll('button')).find(b =>
-          b.getAttribute('aria-label')?.toLowerCase().includes('delete')
-        ) || null;
-      });
-
-      const btn = handle.asElement();
-      if (btn) {
-        await btn.click();
-        await page.waitForTimeout(800);
-      }
-    }
-  }
-
-  /* ==================================================
-   * 4️⃣ WAIT FOR CONTROLS (ATTACHED, NOT VISIBLE)
-   * ================================================== */
+  // 3️⃣ Locators (NO waitFor)
   const regionSel = page.locator('select[name="region"]');
   const osSel = page.locator('select[name="operatingSystem"]');
   const typeSel = page.locator('select[name="type"]');
   const tierSel = page.locator('select[name="tier"]');
   const sizeSel = page.locator('select[name="size"]');
 
-  await regionSel.waitFor({ state: 'attached', timeout: 30000 });
-  await osSel.waitFor({ state: 'attached', timeout: 30000 });
-  await typeSel.waitFor({ state: 'attached', timeout: 30000 });
-  await tierSel.waitFor({ state: 'attached', timeout: 30000 });
-  await sizeSel.waitFor({ state: 'attached', timeout: 30000 });
-
-  // Ensure in viewport
-  await regionSel.scrollIntoViewIfNeeded();
-  await page.waitForTimeout(500);
-
-  /* ==================================================
-   * 5️⃣ SCRAPE
-   * ================================================== */
   const rows = [];
 
   for (const { os, type, osLabel } of OS_TYPES) {
+    // ✅ selectOption implicitly waits – this fixes the timeout
     await regionSel.selectOption({ label: REGION });
     await osSel.selectOption({ label: os });
     await typeSel.selectOption({ label: type });
