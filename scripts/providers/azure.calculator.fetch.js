@@ -19,31 +19,23 @@ const OS_TYPES = [
     waitUntil: 'domcontentloaded'
   });
 
-  // 1️⃣ Scroll – VM estimator is below the fold
+  // 1️⃣ Scroll – VM estimator is below fold
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
   await page.waitForTimeout(2000);
 
-  // 2️⃣ Safety check – VM must exist
-  const vmRows = await page.$$(`text=Virtual Machines`);
-  if (!vmRows.length) {
-    throw new Error('Virtual Machines estimator not found after scroll');
-  }
-
-  // 3️⃣ Locators (NO waitFor)
-  const regionSel = page.locator('select[name="region"]');
-  const osSel = page.locator('select[name="operatingSystem"]');
-  const typeSel = page.locator('select[name="type"]');
-  const tierSel = page.locator('select[name="tier"]');
-  const sizeSel = page.locator('select[name="size"]');
+  // 2️⃣ HARD wait: poll DOM until VM form actually exists
+  await page.waitForFunction(() => {
+    return document.querySelector('select[name="region"]');
+  }, { timeout: 60000 });
 
   const rows = [];
 
   for (const { os, type, osLabel } of OS_TYPES) {
-    // ✅ selectOption implicitly waits – this fixes the timeout
-    await regionSel.selectOption({ label: REGION });
-    await osSel.selectOption({ label: os });
-    await typeSel.selectOption({ label: type });
-    await tierSel.selectOption({ label: 'Standard' });
+    // ✅ page.selectOption works once element exists
+    await page.selectOption('select[name="region"]', { label: REGION });
+    await page.selectOption('select[name="operatingSystem"]', { label: os });
+    await page.selectOption('select[name="type"]', { label: type });
+    await page.selectOption('select[name="tier"]', { label: 'Standard' });
 
     await page.waitForTimeout(800);
 
@@ -55,7 +47,7 @@ const OS_TYPES = [
     for (const opt of options) {
       if (!opt.value || opt.value === 'none') continue;
 
-      await sizeSel.selectOption(opt.value);
+      await page.selectOption('select[name="size"]', opt.value);
       await page.waitForTimeout(400);
 
       let price = null, vcpu = null, ram = null;
