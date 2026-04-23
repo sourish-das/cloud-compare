@@ -22,13 +22,13 @@ const OS_TYPES = [
   });
 
   /* ==================================================
-   * 1️⃣ SCROLL TO "YOUR ESTIMATE"
+   * 1️⃣ SCROLL DOWN (VM IS BELOW FOLD)
    * ================================================== */
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
   await page.waitForTimeout(1500);
 
   /* ==================================================
-   * 2️⃣ FIND ALL VM ROWS
+   * 2️⃣ FIND VM ROWS (SAFETY CHECK)
    * ================================================== */
   let vmRows = await page.$$(`text=Virtual Machines`);
   if (!vmRows.length) {
@@ -36,80 +36,55 @@ const OS_TYPES = [
   }
 
   /* ==================================================
-   * 3️⃣ DELETE EXTRA VM ROWS (SAFE – ROW LEVEL ONLY)
+   * 3️⃣ DELETE DUPLICATE VM ROWS (ONLY IF PRESENT)
    * ================================================== */
   if (vmRows.length > 1) {
     for (let i = vmRows.length - 1; i >= 1; i--) {
-      const deleteBtnHandle = await vmRows[i].evaluateHandle(el => {
-        let row = el;
-        while (row && row.parentElement) {
-          if (row.querySelectorAll) break;
-          row = row.parentElement;
-        }
-
-        const buttons = Array.from(row.querySelectorAll('button'));
-        return buttons.find(b =>
-          b.getAttribute('aria-label') &&
-          b.getAttribute('aria-label').toLowerCase().includes('delete')
+      const handle = await vmRows[i].evaluateHandle(el => {
+        const row = el.closest('div');
+        if (!row) return null;
+        return Array.from(row.querySelectorAll('button')).find(b =>
+          b.getAttribute('aria-label')?.toLowerCase().includes('delete')
         ) || null;
       });
 
-      const deleteBtn = deleteBtnHandle.asElement();
-      if (deleteBtn) {
-        await deleteBtn.click();
+      const btn = handle.asElement();
+      if (btn) {
+        await btn.click();
         await page.waitForTimeout(800);
       }
     }
   }
 
-  /* Re‑query after cleanup */
-  vmRows = await page.$$(`text=Virtual Machines`);
-  const mainVmRow = vmRows[0];
-
   /* ==================================================
-   * 4️⃣ EXPAND VM ROW IF COLLAPSED
+   * 4️⃣ WAIT FOR CONTROLS (ATTACHED, NOT VISIBLE)
    * ================================================== */
-  const expanded = await page.evaluate(() => {
-    const size = document.querySelector('select[name="size"]');
-    return size && size.offsetParent !== null;
-  });
+  const regionSel = page.locator('select[name="region"]');
+  const osSel = page.locator('select[name="operatingSystem"]');
+  const typeSel = page.locator('select[name="type"]');
+  const tierSel = page.locator('select[name="tier"]');
+  const sizeSel = page.locator('select[name="size"]');
 
-  if (!expanded) {
-    const expandBtnHandle = await mainVmRow.evaluateHandle(el => {
-      let row = el;
-      while (row && row.parentElement) {
-        if (row.querySelectorAll) break;
-        row = row.parentElement;
-      }
-      return row.querySelector('button');
-    });
+  await regionSel.waitFor({ state: 'attached', timeout: 30000 });
+  await osSel.waitFor({ state: 'attached', timeout: 30000 });
+  await typeSel.waitFor({ state: 'attached', timeout: 30000 });
+  await tierSel.waitFor({ state: 'attached', timeout: 30000 });
+  await sizeSel.waitFor({ state: 'attached', timeout: 30000 });
 
-    const expandBtn = expandBtnHandle.asElement();
-    if (expandBtn) {
-      await expandBtn.click();
-      await page.waitForTimeout(1200);
-    }
-  }
+  // Ensure in viewport
+  await regionSel.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(500);
 
   /* ==================================================
-   * 5️⃣ WAIT FOR CONTROLS
-   * ================================================== */
-  await page.waitForSelector('select[name="region"]', { timeout: 30000 });
-  await page.waitForSelector('select[name="operatingSystem"]', { timeout: 30000 });
-  await page.waitForSelector('select[name="type"]', { timeout: 30000 });
-  await page.waitForSelector('select[name="tier"]', { timeout: 30000 });
-  await page.waitForSelector('select[name="size"]', { timeout: 30000 });
-
-  /* ==================================================
-   * 6️⃣ SCRAPE
+   * 5️⃣ SCRAPE
    * ================================================== */
   const rows = [];
 
   for (const { os, type, osLabel } of OS_TYPES) {
-    await page.selectOption('select[name="region"]', { label: REGION });
-    await page.selectOption('select[name="operatingSystem"]', { label: os });
-    await page.selectOption('select[name="type"]', { label: type });
-    await page.selectOption('select[name="tier"]', { label: 'Standard' });
+    await regionSel.selectOption({ label: REGION });
+    await osSel.selectOption({ label: os });
+    await typeSel.selectOption({ label: type });
+    await tierSel.selectOption({ label: 'Standard' });
 
     await page.waitForTimeout(800);
 
@@ -121,7 +96,7 @@ const OS_TYPES = [
     for (const opt of options) {
       if (!opt.value || opt.value === 'none') continue;
 
-      await page.selectOption('select[name="size"]', opt.value);
+      await sizeSel.selectOption(opt.value);
       await page.waitForTimeout(400);
 
       let price = null, vcpu = null, ram = null;
