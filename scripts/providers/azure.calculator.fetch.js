@@ -40,12 +40,13 @@ const OS_TYPES = [
    * ================================================== */
   if (vmRows.length > 1) {
     for (let i = vmRows.length - 1; i >= 1; i--) {
-      const deleteBtn = await vmRows[i].evaluateHandle(el => {
-        // Walk up to the VM row container
+      const deleteBtnHandle = await vmRows[i].evaluateHandle(el => {
         let row = el;
-        while (row && !row.querySelector) row = row.parentElement;
+        while (row && row.parentElement) {
+          if (row.querySelectorAll) break;
+          row = row.parentElement;
+        }
 
-        // Find row‑local delete button only
         const buttons = Array.from(row.querySelectorAll('button'));
         return buttons.find(b =>
           b.getAttribute('aria-label') &&
@@ -53,6 +54,7 @@ const OS_TYPES = [
         ) || null;
       });
 
+      const deleteBtn = deleteBtnHandle.asElement();
       if (deleteBtn) {
         await deleteBtn.click();
         await page.waitForTimeout(800);
@@ -73,12 +75,16 @@ const OS_TYPES = [
   });
 
   if (!expanded) {
-    const expandBtn = await mainVmRow.evaluateHandle(el => {
+    const expandBtnHandle = await mainVmRow.evaluateHandle(el => {
       let row = el;
-      while (row && !row.querySelector) row = row.parentElement;
+      while (row && row.parentElement) {
+        if (row.querySelectorAll) break;
+        row = row.parentElement;
+      }
       return row.querySelector('button');
     });
 
+    const expandBtn = expandBtnHandle.asElement();
     if (expandBtn) {
       await expandBtn.click();
       await page.waitForTimeout(1200);
