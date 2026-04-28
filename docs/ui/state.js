@@ -20,7 +20,8 @@ export function setArchPref(v) {
 
 /** Default dropdown meta (authoritative for UI if meta missing). */
 export const FALLBACK_META = {
-  os: ['Linux (Open-source)', 'RHEL', 'Windows'],
+  // IMPORTANT: Values must match data rows (UI can display friendly label elsewhere)
+  os: ['Linux', 'RHEL', 'Windows'],
   vcpu: [1, 2, 4, 6, 8, 12, 18, 24],
   ram:  [1, 2, 4, 8, 16, 32, 64, 128]
 };
@@ -59,6 +60,16 @@ function coerceOsList(arr) {
     else if (x && typeof x === 'object' && typeof x.value === 'string' && x.value.trim()) out.push(x.value.trim());
   }
   return out;
+}
+
+function coerceNumList(arr) {
+  if (!Array.isArray(arr)) return [];
+  const out = [];
+  for (const x of arr) {
+    const n = Number(x);
+    if (Number.isFinite(n)) out.push(n);
+  }
+  return Array.from(new Set(out)).sort((a,b)=>a-b);
 }
 
 export function normalizeArch(row) {
@@ -130,7 +141,10 @@ export async function loadPricesAndMeta() {
 
   // Normalize structure (wrapped vs flat)
   let azure = [], aws = [], gcp = [], oci = null, meta = {};
-  const looksWrapped = raw && typeof raw === 'object' && raw.azure && raw.aws && raw.gcp && !Array.isArray(raw.azure) && !Array.isArray(raw.aws) && !Array.isArray(raw.gcp);
+  const looksWrapped = raw && typeof raw === 'object'
+    && raw.azure && raw.aws && raw.gcp
+    && !Array.isArray(raw.azure) && !Array.isArray(raw.aws) && !Array.isArray(raw.gcp);
+
   if (looksWrapped) {
     azure = Array.isArray(raw.azure?.compute) ? raw.azure.compute : [];
     aws   = Array.isArray(raw.aws?.compute)   ? raw.aws.compute   : [];
@@ -148,10 +162,18 @@ export async function loadPricesAndMeta() {
   // Merge storage overrides safely
   mergeStorage(raw);
 
-  // Defensive meta fallback
+  // Defensive meta fallback (IMPORTANT: take vcpu/ram from file if present)
   const fromFileOs = coerceOsList(meta.os);
-  const fallbackOs = coerceOsList(FALLBACK_META.os).length ? coerceOsList(FALLBACK_META.os) : ['Linux (Open-source)','RHEL','Windows'];
-  const normMeta = { os: fromFileOs.length ? fromFileOs : fallbackOs, vcpu: FALLBACK_META.vcpu, ram: FALLBACK_META.ram };
+  const fallbackOs = coerceOsList(FALLBACK_META.os).length ? coerceOsList(FALLBACK_META.os) : ['Linux','RHEL','Windows'];
+
+  const fromFileVcpu = coerceNumList(meta.vcpu);
+  const fromFileRam  = coerceNumList(meta.ram);
+
+  const normMeta = {
+    os:   fromFileOs.length ? fromFileOs : fallbackOs,
+    vcpu: fromFileVcpu.length ? fromFileVcpu : FALLBACK_META.vcpu,
+    ram:  fromFileRam.length  ? fromFileRam  : FALLBACK_META.ram,
+  };
 
   // Only normalize arch here; apply policy later per-OS
   const awsNorm   = mapNormalizeArch(aws);
@@ -212,15 +234,31 @@ function genRankAWS(inst){ const m = String(inst||'').match(/[0-9]{1,2}/); retur
 function genRankAzure(sku){ const m = String(sku||'').toLowerCase().match(/v([0-9]{1,2})/); return m ? _num(m[1]) : 0; }
 function genRankGCP(type){ const s = String(type||'').split('-')[0]; const m = s && s.match(/[a-z]*([0-9]{1,2})[a-z]?/i); return m ? _num(m[1]) : 0; }
 function genRankOCI(shape){ const s = String(shape||''); const m = s.match(/\.E([0-9]+)/i); if (m) return _num(m[1]); if (/\.A4\./i.test(s)) return 4; if (/\.A2\./i.test(s)) return 2; if (/\.A1\./i.test(s)) return 1; return 0; }
-function genRank(row){ const p = String(row?.provider||'').toLowerCase(); const id = row?.instance || row?.displayInstance || ''; if(p==='aws')return genRankAWS(id); if(p==='azure')return genRankAzure(id); if(p==='gcp')return genRankGCP(id); if(p==='oci')return genRankOCI(id); return 0; }
+function genRank(row){
+  const p = String(row?.provider||'').toLowerCase();
+  const id = row?.instance || row?.displayInstance || '';
+  if(p==='aws')return genRankAWS(id);
+  if(p==='azure')return genRankAzure(id);
+  if(p==='gcp')return genRankGCP(id);
+  if(p==='oci')return genRankOCI(id);
+  return 0;
+}
 function srcRank(r){ return r?.source === 'catalog' ? 1 : 0; }
-function sortForAuto(a, b){ return ( (a.totalHr - b.totalHr) || (genRank(b.row) - genRank(a.row)) || ((a.row.vcpu||0) - (b.row.vcpu||0)) || (srcRank(b.row) - srcRank(a.row)) ); }
+function sortForAuto(a, b){
+  return (
+    (a.totalHr - b.totalHr) ||
+    (genRank(b.row) - genRank(a.row)) ||
+    ((a.row.vcpu||0) - (b.row.vcpu||0)) ||
+    (srcRank(b.row) - srcRank(a.row))
+  );
+}
 
 /** Minimal allow-list to avoid very old families in Auto results. */
 export function allowListOK(row){
   const p = String(row?.provider || '').toLowerCase();
   const inst = String(row?.instance || '').toLowerCase();
   if (p === 'aws')   return /^(m[6-9]|c[6-9]|r[6-9]|t4)/.test(inst);
+  // Keep as-is (your current allow-list patterns)
   if (p === 'azure') return /(dv5|das v5|dps v5|ev5|eas v5|eps v5|fsv2)/i.test(inst) || /standard d\d+ps v5/i.test(inst);
   if (p === 'gcp')   return /^(n4|n4d|t2a|t2d|c3|c4|c4a|m3)/.test(inst);
   if (p === 'oci')   return /(VM\.Standard\.E[3-6]\.Flex|VM\.Standard3\.Flex|VM\.Optimized3\.Flex|VM\.Standard\.A[124]\.Flex)/i.test(inst);
@@ -230,7 +268,8 @@ export function allowListOK(row){
 // -------- Candidate prep (AWS/Azure/GCP) --------
 function buildCandidates(rows, inputs) {
   if (!Array.isArray(rows)) return [];
-  const os = String(inputs?.os || 'Linux (Open-source)');
+  // IMPORTANT: use OS value that matches dataset (Linux/RHEL/Windows)
+  const os = String(inputs?.os || 'Linux');
   const pref = effectiveArchPrefForOS(os);
   let list = mapNormalizeArch(rows);
   list = applyArchFilter(list, pref);
@@ -294,7 +333,7 @@ export function recommend(data, inputs) {
 
   // OCI: flatten -> filter by effective policy -> family & overall picks
   const ociRows = flattenOciFamilies(data?.oci || {}, inputs);
-  const pref = effectiveArchPrefForOS(String(inputs?.os || 'Linux (Open-source)'));
+  const pref = effectiveArchPrefForOS(String(inputs?.os || 'Linux'));
   const ociFiltered = applyArchFilter(ociRows, pref).filter(allowListOK);
   const ociWithTotals = ociFiltered.map(r => ({ row: r, totalHr: r.pricePerHourUSD + computeStorageHourly(r, inputs) }));
 
@@ -323,7 +362,8 @@ export function recommend(data, inputs) {
 /* ---------- Optional: minimal global state mirror for utils.js ---------- */
 if (typeof window !== 'undefined') {
   window.state = window.state || {};
-  if (typeof window.state.os === 'undefined') window.state.os = 'Linux (Open-source)';
+  // IMPORTANT: keep the OS value aligned with dataset values
+  if (typeof window.state.os === 'undefined') window.state.os = 'Linux';
   if (typeof window.state.archPolicy === 'undefined') window.state.archPolicy = ARCH_PREF;
 }
 
@@ -335,7 +375,7 @@ export function attachOsSelectSync(selectId = 'osSelect') {
     const v = String(el.value || '').trim();
     if (typeof window !== 'undefined') {
       window.state = window.state || {};
-      window.state.os = v || 'Linux (Open-source)';
+      window.state.os = v || 'Linux';
       if (/windows/i.test(window.state.os)) window.state.archPolicy = 'x86';
     }
   });
