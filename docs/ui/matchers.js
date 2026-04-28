@@ -101,13 +101,15 @@ function isAzureArmInstance(n) {
   const s = String(n || '').toLowerCase();
 
   // Dpsv5, Dplsv5, Epsv5, Epdsv5
-  // (This is used ONLY for Windows blocking in findBestAzure)
+  // Used ONLY for Windows blocking in findBestAzure()
   return /dpsv5|dplsv5|epsv5|epdsv5/.test(s) ||
-         /standard_[de]\d+p(ds|ls|s)_v5/.test(s);
+         /standard_[de]\d+p(ds|pls|ls|s)_v5/.test(s); // ✅ includes 'pls' (Dplsv5)
 }
+
 function isAwsGravitonInstance(n) {
   return /(^|_)t4g|(^|_)c[6-9]g|(^|_)m[6-9]g|(^|_)r[6-9]g/.test(String(n));
 }
+
 export function isGcpArmInstance(n) {
   return /^(T2A|C4A|N4A|A4X)/.test(String(n).toUpperCase());
 }
