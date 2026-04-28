@@ -83,7 +83,10 @@ function isArmArchField(obj) {
 function isArmSkuPattern(provider, skuString) {
   const s = String(skuString ?? '').toLowerCase();
   if (provider === 'aws')   return /(t4g|a1|c\d+g|m\d+g|r\d+g)\b/.test(s) || s.includes('graviton');
-  if (provider === 'azure') return /(dpsv5|dplsv5|epsv5|epdsv5)\b/.test(s);
+  if (provider === 'azure') {
+  return /(dpsv5|dplsv5|epsv5|epdsv5)\b/.test(s) ||
+         /standard_[de]\d+p(ds|pls|ls|s)_v5\b/.test(s);
+}
   if (provider === 'gcp')   return /(t2a|c4a|n4a|a4x)\b/.test(s);
   if (provider === 'oci')   return /\.a1\b|\.a2\b/.test(s) || s.includes('ampere') || s.includes('arm');
   return false;
