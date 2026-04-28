@@ -83,7 +83,7 @@ function isArmArchField(obj) {
 function isArmSkuPattern(provider, skuString) {
   const s = String(skuString ?? '').toLowerCase();
   if (provider === 'aws')   return /(t4g|a1|c\d+g|m\d+g|r\d+g)\b/.test(s) || s.includes('graviton');
-  if (provider === 'azure') return /(dpsv5|dpldsv5|epsv5)\b/.test(s);
+  if (provider === 'azure') return /(dpsv5|dplsv5|epsv5|epdsv5)\b/.test(s);
   if (provider === 'gcp')   return /(t2a|c4a|n4a|a4x)\b/.test(s);
   if (provider === 'oci')   return /\.a1\b|\.a2\b/.test(s) || s.includes('ampere') || s.includes('arm');
   return false;
@@ -120,7 +120,7 @@ function sanitizeFamiliesForWindows(os) {
   const azSel = document.getElementById('azFamily');
   if (azSel) {
     if (isWin && isArmSkuPattern('azure', azSel.value)) azSel.value = '';
-    disableOptionsIfPresent(azSel, ['Dpsv5','Dpldsv5','Epsv5'], isWin);
+    disableOptionsIfPresent(azSel, ['Dpsv5','Dplsv5','Epsv5','Epdsv5'], isWin);
   }
   const gcpSel = document.getElementById('gcpFamily');
   if (gcpSel) {
