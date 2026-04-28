@@ -213,16 +213,50 @@ export function resetCards() {
 /* ================= Normalization + sorting exports ================= */
 export function normalizeArch(row){ if (!row) return row; row.arch = row.arch || row.architecture || null; return row; }
 export function normalizeRows(rows){ return (rows || []).map(r => normalizeArch({ ...r })); }
-export function applyArchFilter(rows, archPref){ if (archPref === 'any') return rows; return (rows || []).filter(r => !r.arch || r.arch === archPref); }
+
+/**
+ * IMPORTANT: Align with state.js arch policy values:
+ *   - 'x86'   : allow x86 + null
+ *   - 'arm'   : arm only
+ *   - 'allow' : no filtering
+ */
+export function applyArchFilter(rows, archPref){
+  const pref = String(archPref || '').toLowerCase();
+  if (pref === 'allow') return rows || [];
+  if (pref === 'arm') return (rows || []).filter(r => {
+    const a = (r.arch || r.architecture || '').toLowerCase();
+    return a === 'arm';
+  });
+  // default x86
+  return (rows || []).filter(r => {
+    const a = (r.arch || r.architecture || null);
+    return (a == null || String(a).toLowerCase() === 'x86');
+  });
+}
 
 function _num(x){ const n = Number(x); return Number.isFinite(n) ? n : 0; }
 export function genRankAWS(inst){ const m = String(inst||'').match(/[0-9]{1,2}/); return m ? _num(m[0]) : 0; }
 export function genRankAzure(sku){ const m = String(sku||'').toLowerCase().match(/v([0-9]{1,2})/); return m ? _num(m[1]) : 0; }
 export function genRankGCP(type){ const s = String(type||'').split('-')[0]; const m = s && s.match(/[a-z]*([0-9]{1,2})[a-z]?/i); return m ? _num(m[1]) : 0; }
 export function genRankOCI(shape){ const s = String(shape||''); const m = s.match(/\.E([0-9]+)/i); if (m) return _num(m[1]); if (/\.A4\./i.test(s)) return 4; if (/\.A2\./i.test(s)) return 2; if (/\.A1\./i.test(s)) return 1; return 0; }
-export function genRank(row){ const p = String(row?.provider||'').toLowerCase(); const id = row?.instance || row?.displayInstance || ''; if(p==='aws')return genRankAWS(id); if(p==='azure')return genRankAzure(id); if(p==='gcp')return genRankGCP(id); if(p==='oci')return genRankOCI(id); return 0; }
+export function genRank(row){
+  const p = String(row?.provider||'').toLowerCase();
+  const id = row?.instance || row?.displayInstance || '';
+  if(p==='aws')return genRankAWS(id);
+  if(p==='azure')return genRankAzure(id);
+  if(p==='gcp')return genRankGCP(id);
+  if(p==='oci')return genRankOCI(id);
+  return 0;
+}
 function srcRank(r){ return r?.source === 'catalog' ? 1 : 0; }
-export function sortForAuto(a, b){ return ((a.totalHr - b.totalHr) || (genRank(b.row) - genRank(a.row)) || ((a.row.vcpu||0) - (b.row.vcpu||0)) || (srcRank(b.row) - srcRank(a.row))); }
+export function sortForAuto(a, b){
+  return (
+    (a.totalHr - b.totalHr) ||
+    (genRank(b.row) - genRank(a.row)) ||
+    ((a.row.vcpu||0) - (b.row.vcpu||0)) ||
+    (srcRank(b.row) - srcRank(a.row))
+  );
+}
 
 /* ---------- Global ARCH POLICY ---------- */
 // Policy from slider (future):
@@ -238,18 +272,29 @@ function _effectiveArchPolicy() {
   const v = String(eff).toLowerCase();
   return (v === 'x86' || v === 'allow' || v === 'arm') ? v : 'x86';
 }
+
 // Robust ARM detector (fallback when row.arch missing)
 function _isArmRow(row) {
   const arch = String(row?.arch || row?.architecture || '').toLowerCase();
   if (arch) return arch === 'arm';
+
   const p = String(row?.provider || '').toLowerCase();
   const id = String(row?.instance || row?.displayInstance || '').toLowerCase();
+
   if (p === 'aws')  return /^a1\./.test(id) || /^t4g\./.test(id) || /\b[cmr]\d+g\./.test(id);
-  if (p === 'azure')return /\b(dpsv5|dplsv5|epsv5)\b/.test(id) || /standard_[de]\d+p(l)?s_v5/.test(id);
+
+  // ✅ Azure ARM families: Dpsv5, Dplsv5, Epsv5, Epdsv5
+  // Also catch instance patterns:
+  //   standard_d4ps_v5, standard_d4pls_v5, standard_e4pds_v5, standard_e4ps_v5
+  if (p === 'azure')
+    return /\b(dpsv5|dplsv5|epsv5|epdsv5)\b/.test(id) ||
+           /standard_[de]\d+p(ds|pls|ls|s)_v5/.test(id);
+
   if (p === 'gcp')  return /\b(n4a|c4a|t2a)-/.test(id);
   if (p === 'oci')  return /\bvm\.standard\.a[124]\.flex\b/.test(id) || /\bstandard\.a[124]\.flex\b/.test(id) || /\bampere\b/.test(id) || /\baltra\b/.test(id);
   return false;
 }
+
 function _archPolicyPass(row, policy) {
   const isArm = _isArmRow(row);
   if (policy === 'x86')  return !isArm;
@@ -264,6 +309,7 @@ export function pickCheapestPerCategory(
 ){
   const cats = ['general','compute','memory'];
   const res = { general: null, compute: null, memory: null };
+
   const withTotals = (rows || [])
     .filter(r => _archPolicyPass(r, String(archPolicy).toLowerCase()))
     .filter(allowListOK)
@@ -271,6 +317,7 @@ export function pickCheapestPerCategory(
       const storageHr = includeStorageHr && typeof storageHrFn === 'function' ? storageHrFn(r) : 0;
       return { row: r, totalHr: (Number(r.pricePerHourUSD) || 0) + (Number(storageHr) || 0) };
     });
+
   for (const c of cats) {
     const pick = withTotals.filter(x => String(x.row.category) === c).sort(sortForAuto)[0]?.row || null;
     res[c] = pick;
