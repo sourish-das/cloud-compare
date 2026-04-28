@@ -15,27 +15,16 @@ concurrency:
 
 jobs:
   # ------------------------------------------------------------
-  # 1) Azure
-  # ------------------------------------------------------------
-  azure:
-    uses: ./.github/workflows/update-azure.yml
-    permissions:
-      contents: read
-      id-token: write
-    secrets: inherit
-
-  # ------------------------------------------------------------
-  # 2) AWS
+  # 1) AWS
   # ------------------------------------------------------------
   aws:
-    needs: azure
     uses: ./.github/workflows/update-aws.yml
     permissions:
       contents: read
     secrets: inherit
 
   # ------------------------------------------------------------
-  # 3) GCP
+  # 2) GCP
   # ------------------------------------------------------------
   gcp:
     needs: aws
@@ -46,7 +35,7 @@ jobs:
     secrets: inherit
 
   # ------------------------------------------------------------
-  # 4) OCI
+  # 3) OCI
   # ------------------------------------------------------------
   oci:
     needs: gcp
@@ -56,10 +45,10 @@ jobs:
     secrets: inherit
 
   # ------------------------------------------------------------
-  # 5) Aggregate & Commit (SINGLE COMMIT OWNER)
+  # 4) Aggregate & Commit (SINGLE COMMIT OWNER)
   # ------------------------------------------------------------
   aggregate:
-    needs: [azure, aws, gcp, oci]
+    needs: [aws, gcp, oci]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -90,15 +79,8 @@ jobs:
           fi
 
       # --------------------------------------------------------
-      # Download provider artifacts
+      # Download provider artifacts (NO AZURE)
       # --------------------------------------------------------
-      - name: Download Azure artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: azure-prices
-          path: _artifacts/azure
-          run-id: ${{ needs.azure.outputs.run_id }}
-
       - name: Download AWS artifact
         uses: actions/download-artifact@v4
         with:
@@ -121,14 +103,17 @@ jobs:
           run-id: ${{ needs.oci.outputs.run_id }}
 
       # --------------------------------------------------------
-      # Validate artifacts & export paths
+      # Validate provider JSONs & export paths
+      # - Azure is read from repo (manual file)
       # --------------------------------------------------------
       - name: Validate provider JSONs
         shell: bash
         run: |
           set -euo pipefail
 
-          AZ_SRC=$(find _artifacts/azure -name '*.json' -print -quit)
+          # Azure is manual: read from repo path
+          AZ_SRC="docs/data/azure/azure.prices.json"
+
           AW_SRC=$(find _artifacts/aws   -name '*.json' -print -quit)
           GC_SRC=$(find _artifacts/gcp   -name '*.json' -print -quit)
           OC_SRC=$(find _artifacts/oci   -name '*.json' -print -quit)
@@ -145,6 +130,7 @@ jobs:
 
       # --------------------------------------------------------
       # Stage provider outputs into docs/
+      # - DO NOT overwrite Azure (manual)
       # --------------------------------------------------------
       - name: Stage provider outputs
         shell: bash
@@ -152,7 +138,7 @@ jobs:
           set -euo pipefail
           mkdir -p docs/data/{azure,aws,gcp,oci}
 
-          cp -f "$AZ_SRC" docs/data/azure/azure.prices.json
+          # Azure is manual: do NOT copy anything into it
           cp -f "$AW_SRC" docs/data/aws/aws.prices.json
           cp -f "$GC_SRC" docs/data/gcp/gcp.prices.json
           cp -f "$OC_SRC" docs/data/oci/oci.prices.json
@@ -171,6 +157,7 @@ jobs:
 
       # --------------------------------------------------------
       # Build FLAT docs/data/prices.json (no timestamps)
+      # - Merge step remains almost same (reads azure file from repo path)
       # --------------------------------------------------------
       - name: Merge into docs/data/prices.json (FLAT)
         shell: bash
@@ -205,6 +192,7 @@ jobs:
 
       # --------------------------------------------------------
       # Commit (single authoritative commit)
+      # - Azure file can still be staged (but it won't be overwritten by this workflow)
       # --------------------------------------------------------
       - name: Commit merged cloud prices
         shell: bash
