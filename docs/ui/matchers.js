@@ -98,7 +98,12 @@ export function gcpFamilyMatch(row, family) {
  * ARM GUARDS (WINDOWS)
  * ============================ */
 function isAzureArmInstance(n) {
-  return /psv2|dpsv5|dpldsv5|epsv5/i.test(String(n));
+  const s = String(n || '').toLowerCase();
+
+  // Dpsv5, Dplsv5, Epsv5, Epdsv5
+  // (This is used ONLY for Windows blocking in findBestAzure)
+  return /dpsv5|dplsv5|epsv5|epdsv5/.test(s) ||
+         /standard_[de]\d+p(ds|ls|s)_v5/.test(s);
 }
 function isAwsGravitonInstance(n) {
   return /(^|_)t4g|(^|_)c[6-9]g|(^|_)m[6-9]g|(^|_)r[6-9]g/.test(String(n));
@@ -185,7 +190,7 @@ export function findBestAzure(list, vcpu, ram, os, family) {
     .filter(x =>
       isOnDemandShared(x) &&
       azureFamilyMatch(x, family) &&
-      (normalizeOs(x.os) === wantOS || x.os === 'Unknown') &&
+      normalizeOs(x.os) === wantOS &&
       (!isWin || !isAzureArmInstance(x.instance))
     )
     .map(x => {
