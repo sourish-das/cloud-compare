@@ -2,10 +2,10 @@
 // Node 18+ (global fetch)
 'use strict';
 
-const fs   = require('fs');
+const fs = require('fs');
 const path = require('path');
+
 const {
-  atomicWrite, // kept for other providers; not used below
   dedupeCheapestByKey,
   warnAndSkipWriteOnEmpty,
   logStart,
@@ -29,38 +29,51 @@ const {
 } = require('../lib/gcp');
 
 // ---------- env / output ----------
-const OUT      = process.env.OUTPUT_PATH || path.join('docs','data','gcp','gcp.prices.json');
-const REGION   = (process.env.GCP_REGION   || 'us-east1').toLowerCase();
-const CURRENCY = (process.env.GCP_CURRENCY || 'USD');
-const API_KEY  = process.env.GCP_PRICE_API_KEY || '';   // Catalog (only if no bearer)
-const PROJECT  = process.env.GCP_PROJECT_ID  || '';     // Compute discovery project
-const MAX_VCPU = Number(process.env.GCP_MAX_VCPU || '128'); // enterprise cap
+const OUT = process.env.OUTPUT_PATH || path.join('docs', 'data', 'gcp', 'gcp.prices.json');
+const REGION = (process.env.GCP_REGION || 'us-east1').toLowerCase();
+const CURRENCY = process.env.GCP_CURRENCY || 'USD';
+const API_KEY = process.env.GCP_PRICE_API_KEY || '';         // Catalog (only if no bearer)
+const PROJECT = process.env.GCP_PROJECT_ID || '';            // Compute discovery project
+const MAX_VCPU = Number(process.env.GCP_MAX_VCPU || '128');  // enterprise cap
 
 // Enterprise policy exclusions (names)
-const EXCLUDE_NAME = /(hyper|extreme|-metal|-lssd)/i;
+// IMPORTANT: do NOT exclude "hypermem" if you want it as memory category.
+// Keep only the truly unwanted patterns here.
+const EXCLUDE_NAME = /(extreme|-metal|-lssd)/i;
 
-// Suffix-only (Calculator-style) classifier for compose path
+// Suffix-only classifier (matches your required mapping)
 function classifyBySuffix(instance) {
-  const m = String(instance).toLowerCase().match(/-(standard|highcpu|highmem|ultramem|megamem)-\d+$/);
+  const m = String(instance)
+    .toLowerCase()
+    .match(/-(standard|highcpu|highmem|ultramem|megamem|hypermem)-\d+$/);
+
   if (!m) return null;
+
   const cls = m[1];
   if (cls === 'highcpu') return 'compute';
-  if (cls === 'highmem' || cls === 'ultramem' || cls === 'megamem') return 'memory';
-  return 'general';
+  if (cls === 'highmem' || cls === 'ultramem' || cls === 'megamem' || cls === 'hypermem') return 'memory';
+  return 'general'; // standard
 }
 
 function withinPolicy(vcpu) {
   return Number.isFinite(vcpu) && vcpu > 0 && vcpu <= MAX_VCPU;
 }
 
-// --------- List SKUs (NO HTML entities in URL) ---------
+// --------- List SKUs ---------
 async function listSkus(serviceId, pageToken = '') {
-  const base = `https://cloudbilling.googleapis.com/v1/services/${serviceId}/skus?currencyCode=${encodeURIComponent(CURRENCY)}&pageSize=5000`;
+  const base = `https://cloudbilling.googleapis.com/v1/services/${serviceId}/skus` +
+    `?currencyCode=${encodeURIComponent(CURRENCY)}` +
+    `&pageSize=5000`;
+
   const bearer = process.env.GCLOUD_ACCESS_TOKEN || process.env.GOOGLE_OAUTH_ACCESS_TOKEN || '';
   const headers = bearer ? { Authorization: `Bearer ${bearer}` } : {};
+
   const url = bearer
     ? (pageToken ? `${base}&pageToken=${encodeURIComponent(pageToken)}` : base)
-    : (pageToken ? `${base}&pageToken=${encodeURIComponent(pageToken)}&key=${API_KEY}` : `${base}&key=${API_KEY}`);
+    : (pageToken
+      ? `${base}&pageToken=${encodeURIComponent(pageToken)}&key=${API_KEY}`
+      : `${base}&key=${API_KEY}`);
+
   const r = await fetch(url, { headers });
   if (!r.ok) {
     const txt = await r.text().catch(() => '');
@@ -69,11 +82,13 @@ async function listSkus(serviceId, pageToken = '') {
   return r.json();
 }
 
-function clamp(x, lo, hi) { return Math.max(lo, Math.min(hi, x)); }
+function clamp(x, lo, hi) {
+  return Math.max(lo, Math.min(hi, x));
+}
 
 // --------- Per-series self-calibration from real per-instance SKUs ---------
 function buildSeriesScaleMap(allSkus, unitRates, region) {
-  const bySeries = {};   // series -> [factor,...]
+  const bySeries = {}; // series -> [factor...]
   const want = String(region || '').toLowerCase();
 
   const inRegion = (sku) => {
@@ -84,19 +99,17 @@ function buildSeriesScaleMap(allSkus, unitRates, region) {
   for (const sku of (allSkus || [])) {
     const cat = (sku && sku.category) || {};
     if (cat.resourceFamily !== 'Compute') continue;
-    if (cat.usageType && !/ondemand/i.test(cat.usageType)) continue; // OnDemand only
+    if (cat.usageType && !/ondemand/i.test(cat.usageType)) continue;
     if (!inRegion(sku)) continue;
 
-    // ground truth per-instance only
     const mt = inferMachineType(sku);
     if (!mt || /^custom-/i.test(mt)) continue;
     if (!isPerInstanceSku(sku, mt)) continue;
 
     const series = mt.split('-')[0].toLowerCase();
-    const rates  = unitRates[series];
+    const rates = unitRates[series];
     if (!rates || !(rates.core > 0) || !(rates.ram > 0)) continue;
 
-    // Linux-only ground truth
     const descTxt = `${sku.description || ''} ${sku.displayName || ''}`;
     if (/windows|sql server|rhel|red hat|suse|sles|sap/i.test(descTxt)) continue;
 
@@ -105,11 +118,12 @@ function buildSeriesScaleMap(allSkus, unitRates, region) {
 
     const a = sku.attributes || {};
     let vcpu = a.vcpu ? Number(a.vcpu) : undefined;
-    let ram  = a.memoryGb ? Number(a.memoryGb) : undefined;
+    let ram = a.memoryGb ? Number(a.memoryGb) : undefined;
+
     if (!Number.isFinite(vcpu) || !Number.isFinite(ram)) {
       const d = deriveVcpuRamFromType(mt);
       if (!Number.isFinite(vcpu)) vcpu = d.vcpu;
-      if (!Number.isFinite(ram))  ram  = d.ram;
+      if (!Number.isFinite(ram)) ram = d.ram;
     }
     if (!Number.isFinite(vcpu) || !Number.isFinite(ram)) continue;
 
@@ -118,18 +132,17 @@ function buildSeriesScaleMap(allSkus, unitRates, region) {
 
     const f = actual / pred;
     if (f > 0.1 && f < 10) {
-      if (!bySeries[series]) bySeries[series] = [];
+      bySeries[series] ??= [];
       bySeries[series].push(f);
     }
   }
 
-  // robust median factor per series (clamped)
   const out = {};
   for (const [series, samples] of Object.entries(bySeries)) {
     samples.sort((a, b) => a - b);
     const mid = samples[Math.floor(samples.length / 2)];
     const factor = clamp(mid, 0.5, 2.0);
-    if (Math.abs(factor - 1) > 0.03) out[series] = factor; // only record meaningful deviations
+    if (Math.abs(factor - 1) > 0.03) out[series] = factor;
   }
   return out;
 }
@@ -151,74 +164,75 @@ async function main() {
     pageToken = nextPageToken || '';
   } while (pageToken);
 
+  console.log(`[GCP] fetched catalog SKUs: ${allSkus.length}`);
+
   // 2) Build OnDemand Core/RAM unit-rate map per series for our region ($/hour per 1 unit)
-  //    (Ensure lib/gcp.js normalizes displayQuantity blocks to per-1 unit.)
   const unitRates = buildSeriesUnitRateMaps(allSkus, REGION);
 
   // 2b) Per-series scale factors from real per-instance rows (Linux)
   const seriesScale = buildSeriesScaleMap(allSkus, unitRates, REGION);
-  if (Object.keys(seriesScale).length) {
-    console.log('[GCP] series-scale factors:', seriesScale);
-  } else {
-    console.log('[GCP] series-scale factors: (none)');
-  }
+  console.log('[GCP] series-scale factors:', Object.keys(seriesScale).length ? seriesScale : '(none)');
 
   // --- ARM series fallback scale from x86 sibling (only if ARM has no ground-truth factor) ---
   (function inheritArmScale() {
     const sib = { n4a: 'n4', c4a: 'c4', t2a: 't2d' };
     for (const [arm, x86] of Object.entries(sib)) {
       if (seriesScale[arm] != null) continue;
-      let factor = seriesScale[x86];
 
-      // If sibling lacks a factor, estimate from unitRates ratio (x86 vs ARM)
+      let factor = seriesScale[x86];
       const xr = unitRates[x86], ar = unitRates[arm];
+
       if (!factor && xr && ar && xr.core > 0 && ar.core > 0 && xr.ram > 0 && ar.ram > 0) {
         const fCore = xr.core / ar.core;
-        const fRam  = xr.ram  / ar.ram;
-        const est   = (fCore + fRam) / 2;
+        const fRam = xr.ram / ar.ram;
+        const est = (fCore + fRam) / 2;
         if (est > 0.5 && est < 2.0) factor = est;
       }
 
-      if (!factor) continue; // nothing to inherit/estimate
+      if (!factor) continue;
       seriesScale[arm] = clamp(Number(factor), 0.5, 2.0);
     }
   })();
 
   // 3) Phase-1: Catalog per-instance SKUs (Linux, exact-region)
   const rows = [];
-  const have = new Set(); // machineType names captured in Phase-1 (lowercase)
+  const have = new Set();
+
   for (const sku of allSkus) {
     const cat = (sku && sku.category) || {};
     if (cat.resourceFamily !== 'Compute') continue;
-    if (cat.usageType && !/ondemand/i.test(cat.usageType)) continue; // on-demand only
+    if (cat.usageType && !/ondemand/i.test(cat.usageType)) continue;
     if (!regionMatches(sku.serviceRegions, REGION)) continue;
 
-    const mt = inferMachineType(sku); // hyphenated predefined type or null
-    if (!mt) continue; // excludes custom-*
-    if (!isPerInstanceSku(sku, mt)) continue; // only true per-instance rows
+    const mt = inferMachineType(sku);
+    if (!mt) continue;
+    if (!isPerInstanceSku(sku, mt)) continue;
 
-    // Treat as Linux unless description explicitly mentions Windows/RHEL/SUSE/SAP
     const readable = (sku.description || sku.displayName || '');
-    if (/windows|sql server|rhel|red hat|suse|sles|sap/i.test(readable)) continue; // Linux-only scope here
+    if (/windows|sql server|rhel|red hat|suse|sles|sap/i.test(readable)) continue;
 
-    // Price normalized to $/hour by lib/gcp.js
     const price = extractHourlyPrice(sku.pricingInfo);
     if (!(price > 0)) continue;
 
-    // vCPU/RAM from attributes or derive from type token
     const a = sku.attributes || {};
     let vcpu = a.vcpu ? Number(a.vcpu) : undefined;
-    let ram  = a.memoryGb ? Number(a.memoryGb) : undefined;
+    let ram = a.memoryGb ? Number(a.memoryGb) : undefined;
+
     if (!Number.isFinite(vcpu) || !Number.isFinite(ram)) {
       const d = deriveVcpuRamFromType(mt);
       if (!Number.isFinite(vcpu)) vcpu = d.vcpu;
-      if (!Number.isFinite(ram))  ram  = d.ram;
+      if (!Number.isFinite(ram)) ram = d.ram;
     }
-    if (!Number.isFinite(vcpu) || !Number.isFinite(ram)) continue;
-    if (!withinPolicy(vcpu)) continue; // enterprise policy: cap very large shapes
 
-    const category = classifyGcpInstance?.(mt) || classifyBySuffix(mt);
+    // If RAM still unknown (common for M*/X*), skip catalog row because we can't compare/size
+    // Those shapes will be handled by discovery+compose where RAM is known.
+    if (!Number.isFinite(vcpu) || !Number.isFinite(ram)) continue;
+
+    if (!withinPolicy(vcpu)) continue;
+
+    const category = (typeof classifyGcpInstance === 'function' ? classifyGcpInstance(mt) : null) || classifyBySuffix(mt);
     if (!category) continue;
+
     const series = mt.split('-')[0].toLowerCase();
 
     rows.push({
@@ -233,24 +247,44 @@ async function main() {
       arch: isGcpArmSeries(series) ? 'arm' : 'x86',
       source: 'catalog'
     });
+
     have.add(mt.toLowerCase());
+  }
+
+  const catalogCount = rows.filter(r => r.source === 'catalog').length;
+  if (catalogCount < 20) {
+    console.warn(`[GCP] WARNING: Low catalog per-instance rows (${catalogCount}). If prices look off, check per-instance SKU detection.`);
+  } else {
+    console.log(`[GCP] catalog per-instance rows: ${catalogCount}`);
   }
 
   // 4) Phase-2: Compose fallback for shapes missing after Phase-1
   if (!PROJECT) throw new Error('[GCP] GCP_PROJECT_ID is required for Compute discovery.');
+
   const accessToken = await getAccessTokenFromADC();
   if (!accessToken) throw new Error('[GCP] GCLOUD_ACCESS_TOKEN is empty.');
+
   const zones = await listRegionZones(PROJECT, REGION, accessToken);
+
   const mtMap = new Map(); // type -> { vcpu, ramGiB }
   for (const z of zones) {
     const mts = await listZoneMachineTypes(PROJECT, z, accessToken);
     for (const mt of mts) {
       const name = String(mt.name || '').toLowerCase();
+
       if (name.startsWith('custom-')) continue;
-      if (!/^[a-z0-9]+-[a-z]+[a-z0-9]*-\d+$/.test(name)) continue; // predefined, hyphen-native
       if (EXCLUDE_NAME.test(name)) continue;
+
+      // Accept the same patterns as listZoneMachineTypes already allows,
+      // but keep a lightweight check to avoid odd names.
+      const okName =
+        /^[a-z0-9]+-[a-z]+[a-z0-9]*-\d+$/i.test(name) ||
+        /^[a-z0-9]+-[a-z]+[a-z0-9]*-[a-z]+-\d+$/i.test(name);
+
+      if (!okName) continue;
+
       if (!mtMap.has(name)) {
-        const vcpu   = Number(mt.guestCpus || 0);
+        const vcpu = Number(mt.guestCpus || 0);
         const ramGiB = Number(mt.memoryMb || 0) / 1024;
         if (vcpu > 0 && ramGiB > 0) mtMap.set(name, { vcpu, ramGiB });
       }
@@ -258,21 +292,20 @@ async function main() {
   }
 
   for (const [type, hw] of mtMap.entries()) {
-    if (have.has(type)) continue; // already got a catalog per-instance row
-    if (!withinPolicy(hw.vcpu)) continue; // cap very large shapes
-    const category = classifyBySuffix(type);
-    if (!category) continue;
-    const series = type.split('-')[0].toLowerCase();
+    if (have.has(type)) continue;
+    if (!withinPolicy(hw.vcpu)) continue;
 
+    const category = (typeof classifyGcpInstance === 'function' ? classifyGcpInstance(type) : null) || classifyBySuffix(type);
+    if (!category) continue;
+
+    const series = type.split('-')[0].toLowerCase();
     const rates = unitRates[series];
     if (!rates || !(rates.core > 0) || !(rates.ram > 0)) continue;
 
-    // Base composed price (per 1 vCPU-hr and per 1 GB-hr)
     const base = hw.vcpu * Number(rates.core) + hw.ramGiB * Number(rates.ram);
 
-    // Apply series calibration if present exactly once
     const factor = Number(seriesScale[series] ?? 1);
-    const price  = base * (factor > 0 ? factor : 1);
+    const price = base * (factor > 0 ? factor : 1);
     if (!(price > 0)) continue;
 
     rows.push({
@@ -289,51 +322,35 @@ async function main() {
     });
   }
 
-  // --- 10× INFLATION FIX-UP (applies to both catalog and composed rows) ---
-  (function fixTenXInflation() {
-    const fixed = [];
-    for (const r of rows) {
-      const ur = unitRates[r.series] || {};
-      const base = (r.vcpu * (ur.core || 0)) + (r.ram * (ur.ram || 0));
-      const pred = base * (seriesScale[r.series] ?? 1);
-      if (pred > 0) {
-        const ratio = r.pricePerHourUSD / pred;
-        // If row is ~10× higher than expected, correct it
-        if (ratio > 8 && ratio < 12) {
-          const old = r.pricePerHourUSD;
-          r.pricePerHourUSD = +(r.pricePerHourUSD / 10).toFixed(6);
-          fixed.push({ instance: r.instance, os: r.os, old, corrected: r.pricePerHourUSD, ratio: +ratio.toFixed(2) });
-        }
-      }
-    }
-    if (fixed.length) {
-      console.warn('[GCP] Fixed 10× inflated rows:', fixed.slice(0, 8));
-      if (fixed.length > 8) console.warn(`[GCP] ...and ${fixed.length - 8} more`);
-    }
-  })();
-
   // 5) Deduplicate / finalize (Linux only)
   const cheapest = dedupeCheapestByKey(rows, r => `${r.instance}-${r.region}-${r.os}`);
-  const counts = cheapest.reduce((acc, r) => { acc[r.category] = (acc[r.category] || 0) + 1; return acc; }, {});
+  const counts = cheapest.reduce((acc, r) => {
+    acc[r.category] = (acc[r.category] || 0) + 1;
+    return acc;
+  }, {});
+
   console.log('[GCP] category-counts:', counts, 'region:', REGION);
   console.log(`[GCP] collected=${rows.length}, cheapest=${cheapest.length}`);
+
   if (warnAndSkipWriteOnEmpty('GCP', cheapest)) return;
 
   // 6) Output
   const meta = {
     os: ['Linux'],
     vcpu: uniqSortedNums(cheapest.map(x => x.vcpu)),
-    ram:  uniqSortedNums(cheapest.map(x => x.ram))
+    ram: uniqSortedNums(cheapest.map(x => x.ram))
   };
+
   const storage = {
     region: REGION,
-    ssd_per_gb_month: 0.10, // Balanced PD (zonal)
-    hdd_per_gb_month: 0.04, // Standard PD (zonal)
+    ssd_per_gb_month: 0.10,
+    hdd_per_gb_month: 0.04,
     hdd_free_gb_per_month: 30
   };
+
   const out = { meta, compute: cheapest, storage };
 
-  // atomic write (temp -> rename) to avoid partial files
+  // Atomic write
   const dir = path.dirname(OUT);
   fs.mkdirSync(dir, { recursive: true });
   const tmp = OUT + '.tmp';
@@ -343,4 +360,7 @@ async function main() {
   logDone(`✅ Wrote ${OUT}`);
 }
 
-main().catch(e => { console.error(e); process.exit(1); });
+main().catch(e => {
+  console.error(e);
+  process.exit(1);
+});
