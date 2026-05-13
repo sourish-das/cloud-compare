@@ -1,12 +1,12 @@
 // scripts/lib/gcp.js
 // Helpers for GCP Retail Prices + Compute discovery (Linux-first)
 // CommonJS (Node 18+, global fetch)
-// Version: 2.6.0 (drop-in fix)
+// Version: 2.6.1 (drop-in fix)
 //  - Generic machineType parsing (no hardcoded series list)
 //  - Adds HYPERMEM support
 //  - Category mapping by suffix only (standard/highcpu/highmem/ultramem/megamem/hypermem)
 //  - Fixes per-instance SKU detection so catalog pricing actually works
-//  - Keeps existing exports for compatibility
+//  - FIX: buildSeriesUnitRateMaps now infers series from text for CPU/RAM unit SKUs
 'use strict';
 
 // Compute Engine service id for Catalog Retail Prices API
@@ -76,7 +76,7 @@ function extractHourlyPrice(pricingInfo) {
     if (usage === 'h' || usage === 'hour' || usage === 'hours') return money;
     if (usage === 's' || usage === 'sec' || usage === 'second' || usage === 'seconds') return money * 3600;
     if (usage === 'min' || usage === 'minute' || usage === 'minutes') return money * 60;
-    if (base  === 's' || base  === 'sec' || base  === 'second' || base  === 'seconds') return money * (k > 0 ? k : 3600);
+    if (base === 's' || base === 'sec' || base === 'second' || base === 'seconds') return money * (k > 0 ? k : 3600);
 
     // Fallback: assume hourly already
     return money;
@@ -100,12 +100,11 @@ function deriveVcpuRamFromType(mt) {
   if (!vcpu) return { vcpu: undefined, ram: undefined };
 
   // For M*/X* families leave RAM undefined; discovery will provide exact RAM if available.
-  // (This prevents wrong fixed ratios for mega/ultra shapes.)
   if (series.startsWith('m') || series.startsWith('x')) return { vcpu, ram: undefined };
 
   if (cls === 'standard') return { vcpu, ram: vcpu * 4 };
   if (cls === 'highmem')  return { vcpu, ram: vcpu * 8 };
-  if (cls === 'hypermem') return { vcpu, ram: vcpu * 8 };  // treat as memory category
+  if (cls === 'hypermem') return { vcpu, ram: vcpu * 8 };
   if (cls === 'highcpu')  return { vcpu, ram: series.startsWith('n1') ? vcpu * 0.9 : vcpu * 2 };
 
   return { vcpu, ram: undefined };
@@ -126,11 +125,6 @@ function regionMatches(serviceRegions, region) {
 // ---------------------------
 // Detect true per-instance SKUs (FIXED)
 // ---------------------------
-// Old implementation was too strict and caused Phase-1 (catalog) to yield ~0 rows.
-// This version:
-//  - excludes unit-rate CPU/RAM/GPU SKUs
-//  - prefers attributes.machineType match when present
-//  - falls back to text includes machine type token
 function isPerInstanceSku(sku, machineType) {
   if (!machineType || /^custom-/i.test(machineType)) return false;
 
@@ -160,7 +154,9 @@ function firstPricingExpressionWithRate(sku) {
 
 // ---------------------------
 // Per-1-unit unit-rate extraction (OnDemand + Linux-only + hourly + CPU/RAM only)
-// Normalizes any block-priced SKU (e.g., "per 10 vCPU") to per 1 vCPU or per 1 GB.
+// Normalizes any block-priced SKU to per 1 vCPU or per 1 GB.
+// FIX: CPU/RAM unit SKUs often do not include full machineType in text.
+//      We now infer the SERIES token from description/displayName/summary.
 // ---------------------------
 function buildSeriesUnitRateMaps(allSkus, region) {
   const out = {}; // { series: { core, ram } }
@@ -175,10 +171,11 @@ function buildSeriesUnitRateMaps(allSkus, region) {
   const hourlyFromExpr = (pricingInfo) => {
     const expr = pricingInfo?.[0]?.pricingExpression;
     if (!expr?.tieredRates?.length) return { moneyPerHour: 0, expr: null };
+
     const base = expr.tieredRates.find(t => Number(t.startUsageAmount || 0) === 0) || expr.tieredRates[0];
     const units = Number(base?.unitPrice?.units || 0);
     const nanos = Number(base?.unitPrice?.nanos || 0);
-    let money = units + nanos / 1e9;
+    const money = units + nanos / 1e9;
 
     const usage = String(expr.usageUnit || '').toLowerCase();
     const baseU = String(expr.baseUnit  || '').toLowerCase();
@@ -208,6 +205,25 @@ function buildSeriesUnitRateMaps(allSkus, region) {
     return 1;
   };
 
+  // NEW: infer series token for CPU/RAM unit SKUs
+  // This avoids hardcoding series lists but still extracts tokens like n4, n2d, c2d, c4a, m4, x4, h4d, t2d, etc.
+  function inferSeriesFromText(text) {
+    const s = String(text || '').toLowerCase();
+    // token pattern: letter + digit + optional 0-2 alphanumerics (e.g., n4, n2d, c2d, c4a, m4, x4, h4d, t2d)
+    const candidates = [...s.matchAll(/\b([a-z][0-9][a-z0-9]{0,2})\b/g)].map(m => m[1]);
+    if (!candidates.length) return null;
+
+    // Prefer longer tokens first so c2d wins over c2, h4d over h4, etc.
+    candidates.sort((a, b) => b.length - a.length);
+
+    // Skip a few potential false positives if they appear
+    const BAD = new Set(['v1', 'v2']);
+    for (const tok of candidates) {
+      if (!BAD.has(tok)) return tok;
+    }
+    return null;
+  }
+
   for (const sku of (allSkus || [])) {
     try {
       if (!sku || !inRegion(sku)) continue;
@@ -224,14 +240,18 @@ function buildSeriesUnitRateMaps(allSkus, region) {
       const rg = sku.category?.resourceGroup;
       if (rg !== 'CPU' && rg !== 'RAM') continue;
 
-      // Series detection: prefer machineType token -> series
+      // Series detection:
+      // 1) try machineType inference (works when SKU text contains full machine type)
+      // 2) fallback infer series token from text (works for unit SKUs)
       let series = null;
       const mt = inferMachineType(sku);
       if (mt) series = mt.split('-')[0].toLowerCase();
+
       if (!series) {
-        // If we can't infer a series reliably, skip this SKU rather than guessing.
-        continue;
+        const desc = `${sku.description || ''} ${sku.displayName || ''} ${sku.summary || ''}`;
+        series = inferSeriesFromText(desc);
       }
+      if (!series) continue;
 
       const { moneyPerHour, expr } = hourlyFromExpr(sku.pricingInfo);
       if (!(moneyPerHour > 0)) continue;
@@ -241,7 +261,7 @@ function buildSeriesUnitRateMaps(allSkus, region) {
 
       out[series] ??= {};
       if (rg === 'CPU') out[series].core = perUnitPerHour;
-      if (rg === 'RAM') out[series].ram  = perUnitPerHour;
+      if (rg === 'RAM') out[series].ram = perUnitPerHour;
     } catch {
       // ignore bad SKU
     }
@@ -264,7 +284,6 @@ function classifyGcpInstance(instance) {
   const cls = m[2];
   if (cls === 'standard') return 'general';
   if (cls === 'highcpu') return 'compute';
-  // highmem/ultramem/megamem/hypermem
   return 'memory';
 }
 
@@ -277,8 +296,8 @@ function getGcpAllowedPrefixes(category) {
 // ---------------------------
 function computeBaseHourlyFromUnitMaps(machineType, unitMaps, opts = {}) {
   if (!machineType || !unitMaps) return { price: null, vcpu: undefined, ram: undefined };
-  let { vcpu, ram } = deriveVcpuRamFromType(machineType);
 
+  let { vcpu, ram } = deriveVcpuRamFromType(machineType);
   if (!Number.isFinite(ram) && Number.isFinite(opts.discoveredRamGiB)) {
     ram = Number(opts.discoveredRamGiB);
   }
@@ -343,7 +362,6 @@ async function listZoneMachineTypes(projectId, zone, accessToken) {
       const name = String(mt.name || '');
       if (/^custom-/i.test(name)) continue;
 
-      // keep your existing name validation
       const okName =
         /^[a-z0-9]+-[a-z]+[a-z0-9]*-\d+$/i.test(name) ||
         /^[a-z0-9]+-[a-z]+[a-z0-9]*-[a-z]+-\d+$/i.test(name);
@@ -369,8 +387,10 @@ function buildWindowsCoreRate(allSkus, region) {
     if (cat.usageType && !/OnDemand/i.test(cat.usageType)) return false;
     return regionMatches(sku.serviceRegions, region);
   };
+
   const BAD = /(byol|ram|memory|gpu|local\s*ssd|commitment|spot|preemptible|sles|rhel|sql|windows\s*(7|8|10|11))/i;
   const candidates = [];
+
   for (const sku of (allSkus || [])) {
     if (!inRegion(sku)) continue;
     const name = String((sku.description || sku.displayName) || '').toLowerCase();
@@ -380,6 +400,7 @@ function buildWindowsCoreRate(allSkus, region) {
     const price = extractHourlyPrice(sku.pricingInfo);
     if (price && price > 0) candidates.push({ price, name });
   }
+
   if (candidates.length === 0) {
     for (const sku of (allSkus || [])) {
       if (!inRegion(sku)) continue;
@@ -390,10 +411,12 @@ function buildWindowsCoreRate(allSkus, region) {
       if (price && price > 0) candidates.push({ price, name });
     }
   }
+
   if (candidates.length > 0) {
     candidates.sort((a, b) => a.price - b.price);
     return candidates[0].price;
   }
+
   return WINDOWS_STANDARD_FALLBACK_RATE;
 }
 
@@ -406,7 +429,6 @@ function isGcpArmSeries(series) {
 
 function isGcpArmMachineType(machineType) {
   if (!machineType) return false;
-  // Generic series token match
   const m = String(machineType).toLowerCase().match(/^([a-z0-9]+)-[a-z]+[a-z0-9]*-\d+$/);
   if (!m) return false;
   return isGcpArmSeries(m[1]);
