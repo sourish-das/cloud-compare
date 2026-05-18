@@ -16,7 +16,7 @@ export function normalizeOs(val) {
  * COMMON FILTERS
  * ============================ */
 export function isOnDemandShared(x) {
-  const bm  = String(x.billingModel || '').toLowerCase();
+  const bm = String(x.billingModel || '').toLowerCase();
   const ten = String(x.tenancyType || '').toLowerCase();
   if ((bm && bm !== 'ondemand') || (ten && ten !== 'shared')) return false;
 
@@ -40,7 +40,7 @@ function scoreInstance(vcpu, ram, wantVcpu, wantRam, family) {
   // never undersize
   if (vcpu < wantVcpu || ram < wantRam) return Infinity;
 
-  // cap RAM explosion except memory
+  // cap RAM explosion except memory (keeps general/compute sane)
   if (family !== 'memory' && ram > wantRam * 2) return Infinity;
 
   // exact match
@@ -61,7 +61,7 @@ export function isAwsInFamily(inst, family) {
     return /^m(6|7)[a-z]*\./.test(s);
   }
   if (family === 'compute') return s.startsWith('c');
-  if (family === 'memory')  return s.startsWith('r');
+  if (family === 'memory') return s.startsWith('r');
   return true;
 }
 
@@ -72,26 +72,39 @@ export function azureFamilyMatch(row, family) {
 
   if (family === 'compute') return inst.startsWith('standard_f');
   if (family === 'general') return inst.startsWith('standard_d') || inst.startsWith('standard_b');
-  if (family === 'memory')  return inst.startsWith('standard_e') || inst.startsWith('standard_m');
+  if (family === 'memory') return inst.startsWith('standard_e') || inst.startsWith('standard_m');
 
   return true;
 }
 
-export function isGcpInFamily(inst, family) {
-  if (!family) return true;
-  const n = String(inst).toUpperCase();
-
-  if (family === 'memory')  return /^M[1-4]/.test(n);
-  if (family === 'compute') return /^(C2|C2D|H3|H4D)/.test(n);
-  if (family === 'general')
-    return /^(E2|N1|N2|N2D|N4|N4A|N4D|T2A|T2D)/.test(n);
-
-  return true;
-}
-
+/* ==========================================================
+ * ✅ GCP FAMILY MATCH (DROP-IN FIX)
+ * Your agreed mapping is suffix-based:
+ *   General -> -standard-
+ *   Compute -> -highcpu-
+ *   Memory  -> -highmem- | -megamem- | -ultramem- | -hypermem-
+ *
+ * This replaces the old series-based matcher that caused:
+ *   - General returning n4-highcpu-*
+ *   - Memory ignoring n4-highmem-* and jumping to huge m4-*
+ * ========================================================== */
 export function gcpFamilyMatch(row, family) {
   if (!family) return true;
-  return isGcpInFamily(row?.instance, family);
+
+  // Prefer the dataset category if present (gcp.prices.json provides this)
+  const cat = String(row?.category || '').toLowerCase();
+  const fam = String(family || '').toLowerCase();
+  if (cat === 'general' || cat === 'compute' || cat === 'memory') {
+    return cat === fam;
+  }
+
+  // Fallback to instance-name suffix detection
+  const inst = String(row?.instance || '').toLowerCase();
+  if (fam === 'general') return /-standard-\d+$/.test(inst);
+  if (fam === 'compute') return /-highcpu-\d+$/.test(inst);
+  if (fam === 'memory') return /-(highmem|megamem|ultramem|hypermem)-\d+$/.test(inst);
+
+  return true;
 }
 
 /* ============================
@@ -99,11 +112,9 @@ export function gcpFamilyMatch(row, family) {
  * ============================ */
 function isAzureArmInstance(n) {
   const s = String(n || '').toLowerCase();
-
   // Dpsv5, Dplsv5, Epsv5, Epdsv5
-  // Used ONLY for Windows blocking in findBestAzure()
   return /dpsv5|dplsv5|epsv5|epdsv5/.test(s) ||
-         /standard_[de]\d+p(ds|pls|ls|s)_v5/.test(s); // ✅ includes 'pls' (Dplsv5)
+    /standard_[de]\d+p(ds|pls|ls|s)_v5/.test(s);
 }
 
 function isAwsGravitonInstance(n) {
@@ -117,9 +128,9 @@ export function isGcpArmInstance(n) {
 /* ============================
  * GENERATION RANKING
  * ============================ */
-function genRankAws(i){ return +(String(i).match(/[a-z]+(\d+)/)?.[1] || 0); }
-function genRankAzure(i){ return +(String(i).toLowerCase().match(/_v(\d+)/)?.[1] || 0); }
-function genRankGcp(i){ return +(String(i).split('-')[0].match(/[a-z]+(\d+)/)?.[1] || 0); }
+function genRankAws(i) { return +(String(i).match(/[a-z]+(\d+)/)?.[1] || 0); }
+function genRankAzure(i) { return +(String(i).toLowerCase().match(/_v(\d+)/)?.[1] || 0); }
+function genRankGcp(i) { return +(String(i).split('-')[0].match(/[a-z]+(\d+)/)?.[1] || 0); }
 
 /* ============================
  * AZURE SPEC INFERENCE
@@ -131,32 +142,50 @@ export function inferAzureCoresRamFromName(name) {
 
   const perCore =
     n.startsWith('standard_d') ? 4 :
-    n.startsWith('standard_f') ? 4 :   // ✅ F2ads v7 = 2 vCPU / 8 GB
-    n.startsWith('standard_e') ? 8 :
-    n.startsWith('standard_b') ? 4 :
-    n.startsWith('standard_m') ? 16 : null;
+      n.startsWith('standard_f') ? 4 :
+        n.startsWith('standard_e') ? 8 :
+          n.startsWith('standard_b') ? 4 :
+            n.startsWith('standard_m') ? 16 : null;
 
   return { vcpu: cores, ram: perCore ? cores * perCore : null };
 }
 
 /* ============================
- * GENERIC PICKER (Exact → Near → Latest)
+ * GENERIC PICKER (Exact → Near → Latest → Cheapest tie-break)
  * ============================ */
 function pickBest(rows, wantVcpu, wantRam, family, genFn) {
   // exact first
   const exact = rows.filter(r => r.vcpu === wantVcpu && r.ram === wantRam);
   if (exact.length) {
-    return exact.sort((a,b) => genFn(b.instance) - genFn(a.instance))[0];
+    exact.sort((a, b) =>
+      (genFn(b.instance) - genFn(a.instance)) ||
+      (Number(a.pricePerHourUSD) - Number(b.pricePerHourUSD))
+    );
+    return exact[0];
   }
 
-  let best = null, bestScore = Infinity, bestGen = -1;
+  let best = null;
+  let bestScore = Infinity;
+  let bestGen = -1;
+  let bestPrice = Infinity;
+
   for (const r of rows) {
     const score = scoreInstance(r.vcpu, r.ram, wantVcpu, wantRam, family);
     if (!isFinite(score)) continue;
 
     const gen = genFn(r.instance);
-    if (score < bestScore || (score === bestScore && gen > bestGen)) {
-      best = r; bestScore = score; bestGen = gen;
+    const price = Number(r.pricePerHourUSD);
+    const p = Number.isFinite(price) ? price : Infinity;
+
+    if (
+      score < bestScore ||
+      (score === bestScore && gen > bestGen) ||
+      (score === bestScore && gen === bestGen && p < bestPrice)
+    ) {
+      best = r;
+      bestScore = score;
+      bestGen = gen;
+      bestPrice = p;
     }
   }
   return best;
@@ -169,12 +198,12 @@ export function findBestAws(list, vcpu, ram, os, family) {
   const wantOS = normalizeOs(os);
   const isWin = wantOS === 'windows';
 
-  const rows = list.filter(x =>
+  const rows = (list || []).filter(x =>
     isOnDemandShared(x) &&
     normalizeOs(x.os) === wantOS &&
     isAwsInFamily(x.instance, family) &&
     isFinite(x.vcpu) && isFinite(x.ram) &&
-    genRankAws(x.instance) >= 6 &&          // block m3/m4
+    genRankAws(x.instance) >= 6 &&
     (!isWin || !isAwsGravitonInstance(x.instance))
   );
 
@@ -188,7 +217,7 @@ export function findBestAzure(list, vcpu, ram, os, family) {
   const wantOS = normalizeOs(os);
   const isWin = wantOS === 'windows';
 
-  const rows = list
+  const rows = (list || [])
     .filter(x =>
       isOnDemandShared(x) &&
       azureFamilyMatch(x, family) &&
@@ -213,7 +242,7 @@ export function findBestGcp(list, vcpu, ram, os, family) {
   const wantOS = normalizeOs(os);
   const isWin = wantOS === 'windows';
 
-  const rows = list.filter(x =>
+  const rows = (list || []).filter(x =>
     normalizeOs(x.os) === wantOS &&
     gcpFamilyMatch(x, family) &&
     isFinite(x.vcpu) && isFinite(x.ram) &&
@@ -231,9 +260,9 @@ export function findBestOci(ociCompute, vcpu, ram, os, options = {}) {
   const isWin = wantOS === 'windows';
   const isRhel = wantOS === 'rhel';
 
-  const L = ociCompute.linux || {};
-  const W = ociCompute.windows || {};
-  const R = ociCompute.rhel || {};
+  const L = ociCompute?.linux || {};
+  const W = ociCompute?.windows || {};
+  const R = ociCompute?.rhel || {};
 
   const proc = String(options.processor || 'auto').toLowerCase();
   const mode = String(options.mode || 'auto').toLowerCase();
@@ -269,7 +298,7 @@ export function findBestOci(ociCompute, vcpu, ram, os, options = {}) {
   (L.intel || []).forEach(e => add(e, 'intel'));
 
   if (proc !== 'auto' && mode === 'latest') {
-    return candidates.sort((a,b) => (b.gen||0)-(a.gen||0))[0];
+    return candidates.sort((a, b) => (b.gen || 0) - (a.gen || 0))[0];
   }
-  return candidates.sort((a,b) => a.pricePerHourUSD - b.pricePerHourUSD)[0];
+  return candidates.sort((a, b) => a.pricePerHourUSD - b.pricePerHourUSD)[0];
 }
