@@ -174,7 +174,7 @@ console.log('[GCP] SKUs with attributes.machineType:', mtAttrCount);
 // 2) Build OnDemand Core/RAM unit-rate map per series for our region ($/hour per 1 unit)
 const unitRates = buildSeriesUnitRateMaps(allSkus, REGION);
 
-// ---- DEBUG + FAIL-FAST (ADD THIS) ----
+console.log('[GCP] unitRates keys:', Object.keys(unitRates || {}).sort().join(','));
 console.log('[GCP] unitRates series count:', Object.keys(unitRates || {}).length);
 console.log('[GCP] unitRates sample:', {
   n4:  unitRates?.n4,
@@ -311,6 +311,12 @@ console.log('[GCP] series-scale factors:', Object.keys(seriesScale).length ? ser
     }
   }
 
+// ---- DIAG: discovery coverage ----
+const discoveredSeries = [...new Set([...mtMap.keys()].map(n => n.split('-')[0]))].sort();
+console.log('[GCP] discovery series:', discoveredSeries.join(','));
+console.log('[GCP] discovery machineTypes:', mtMap.size);
+// ---- END DIAG ----
+  
   for (const [type, hw] of mtMap.entries()) {
     if (have.has(type)) continue;
     if (!withinPolicy(hw.vcpu)) continue;
