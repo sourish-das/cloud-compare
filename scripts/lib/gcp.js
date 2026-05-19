@@ -271,7 +271,14 @@ function buildSeriesUnitRateMaps(allSkus, region) {
       const mt = inferMachineType(sku);
       if (mt) series = mt.split('-')[0].toLowerCase();
       if (!series) series = inferSeriesFromText(blob);
-      if (!series) continue;
+
+      // NEW: fallback for short series tokens that generic regex may miss
+      if (!series) {
+      const m = blob.match(/\b(n1|c2|m1|m2)\b/i);
+      if (m) series = m[1].toLowerCase();
+      }
+
+if (!series) continue;
 
       // Price/hr
       const { hr, expr } = hourlyFromExpr(sku.pricingInfo);
