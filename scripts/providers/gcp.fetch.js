@@ -164,7 +164,12 @@ async function main() {
     pageToken = nextPageToken || '';
   } while (pageToken);
 
-  console.log(`[GCP] fetched catalog SKUs: ${allSkus.length}`);
+console.log(`[GCP] fetched catalog SKUs: ${allSkus.length}`);
+
+// ---- DIAG: how many SKUs carry machineType in attributes (helps Phase-1) ----
+const mtAttrCount = allSkus.filter(s => s?.attributes?.machineType).length;
+console.log('[GCP] SKUs with attributes.machineType:', mtAttrCount);
+// ---- END DIAG ----
 
 // 2) Build OnDemand Core/RAM unit-rate map per series for our region ($/hour per 1 unit)
 const unitRates = buildSeriesUnitRateMaps(allSkus, REGION);
