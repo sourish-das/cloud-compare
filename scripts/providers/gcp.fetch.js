@@ -166,12 +166,27 @@ async function main() {
 
   console.log(`[GCP] fetched catalog SKUs: ${allSkus.length}`);
 
-  // 2) Build OnDemand Core/RAM unit-rate map per series for our region ($/hour per 1 unit)
-  const unitRates = buildSeriesUnitRateMaps(allSkus, REGION);
+// 2) Build OnDemand Core/RAM unit-rate map per series for our region ($/hour per 1 unit)
+const unitRates = buildSeriesUnitRateMaps(allSkus, REGION);
 
-  // 2b) Per-series scale factors from real per-instance rows (Linux)
-  const seriesScale = buildSeriesScaleMap(allSkus, unitRates, REGION);
-  console.log('[GCP] series-scale factors:', Object.keys(seriesScale).length ? seriesScale : '(none)');
+// ---- DEBUG + FAIL-FAST (ADD THIS) ----
+console.log('[GCP] unitRates series count:', Object.keys(unitRates || {}).length);
+console.log('[GCP] unitRates sample:', {
+  n4:  unitRates?.n4,
+  n4d: unitRates?.n4d,
+  c4:  unitRates?.c4,
+  c2d: unitRates?.c2d,
+  m4:  unitRates?.m4
+});
+
+if (Object.keys(unitRates || {}).length < 5) {
+  throw new Error('[GCP] unitRates too small; aborting to avoid writing empty/incorrect output');
+}
+// ---- END DEBUG + FAIL-FAST ----
+
+// 2b) Per-series scale factors from real per-instance rows (Linux)
+const seriesScale = buildSeriesScaleMap(allSkus, unitRates, REGION);
+console.log('[GCP] series-scale factors:', Object.keys(seriesScale).length ? seriesScale : '(none)');
 
   // --- ARM series fallback scale from x86 sibling (only if ARM has no ground-truth factor) ---
   (function inheritArmScale() {
