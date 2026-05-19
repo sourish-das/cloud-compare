@@ -123,20 +123,39 @@ function regionMatches(serviceRegions, region) {
 }
 
 // ---------------------------
-// Detect true per-instance SKUs (FIXED)
+// Detect true per-instance SKUs (IMPROVED)
 // ---------------------------
 function isPerInstanceSku(sku, machineType) {
   if (!machineType || /^custom-/i.test(machineType)) return false;
 
+  // exclude unit-rate rows
   const rg = sku?.category?.resourceGroup;
-  // Unit rate rows are not per-instance VM prices
   if (rg === 'CPU' || rg === 'RAM' || rg === 'GPU') return false;
 
+  // strongest match: attributes.machineType
   const mtAttr = sku?.attributes?.machineType;
   if (mtAttr && String(mtAttr).toLowerCase() === String(machineType).toLowerCase()) return true;
 
+  // fallback: description contains full machine type
   const txt = String(sku?.description || sku?.displayName || '').toLowerCase();
-  return txt.includes(String(machineType).toLowerCase());
+  const mt = String(machineType).toLowerCase();
+  if (txt.includes(mt)) return true;
+
+  // fallback: series + class + size signature
+  const parts = mt.split('-');
+  if (parts.length >= 3) {
+    const [series, cls, size] = parts;
+    if (txt.includes(series) && txt.includes(size)) {
+      if (cls === 'standard' && txt.includes('standard')) return true;
+      if (cls === 'highcpu'  && txt.includes('highcpu'))  return true;
+      if (cls === 'highmem'  && txt.includes('highmem'))  return true;
+      if (cls === 'megamem'  && txt.includes('megamem'))  return true;
+      if (cls === 'ultramem' && txt.includes('ultramem')) return true;
+      if (cls === 'hypermem' && txt.includes('hypermem')) return true;
+    }
+  }
+
+  return false;
 }
 
 // ---------------------------
