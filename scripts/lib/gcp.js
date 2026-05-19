@@ -167,7 +167,16 @@ function buildSeriesUnitRateMaps(allSkus, region) {
     return sr.has(want) || (want.startsWith('us-') && sr.has('us')) || sr.has('global');
   };
 
-  // Convert pricingExpression to $/hour
+  // Median helper (robust against outliers)
+  const median = (arr) => {
+    if (!arr || arr.length === 0) return null;
+    const a = [...arr].filter(Number.isFinite).sort((x, y) => x - y);
+    if (!a.length) return null;
+    const mid = Math.floor(a.length / 2);
+    return (a.length % 2) ? a[mid] : (a[mid - 1] + a[mid]) / 2;
+  };
+
+  // Convert pricingExpression tier-0 to $/hour
   const hourlyFromExpr = (pricingInfo) => {
     const expr = pricingInfo?.[0]?.pricingExpression;
     if (!expr?.tieredRates?.length) return { moneyPerHour: 0, expr: null };
@@ -178,22 +187,24 @@ function buildSeriesUnitRateMaps(allSkus, region) {
     const money = units + nanos / 1e9;
 
     const usage = String(expr.usageUnit || '').toLowerCase();
-    const baseU = String(expr.baseUnit  || '').toLowerCase();
-    const k     = Number(expr.baseUnitConversionFactor || 1);
+    const baseU = String(expr.baseUnit || '').toLowerCase();
+    const k = Number(expr.baseUnitConversionFactor || 1);
 
     if (usage === 'h' || usage === 'hour' || usage === 'hours') return { moneyPerHour: money, expr };
     if (usage === 's' || usage === 'sec' || usage === 'second' || usage === 'seconds') return { moneyPerHour: money * 3600, expr };
     if (usage === 'min' || usage === 'minute' || usage === 'minutes') return { moneyPerHour: money * 60, expr };
     if (baseU === 's' || baseU === 'sec' || baseU === 'second' || baseU === 'seconds') return { moneyPerHour: money * (k > 0 ? k : 3600), expr };
+
     return { moneyPerHour: money, expr };
   };
 
-  // Detect block size (e.g., per 10 vCPU or per 10 GiB)
+  // Detect block size safely:
+  // 1) Prefer explicit text ("per 10 vcpu", "for 10 gib")
+  // 2) Only trust displayQuantity if text supports it (prevents 10× underpricing)
   const detectUnitsPerPrice = (sku, expr, rg /* 'CPU'|'RAM' */) => {
-    const dq = Number(expr?.displayQuantity || 0);
-    if (dq > 0) return dq;
+    const txt = `${sku.description || ''} ${sku.displayName || ''} ${sku.summary || ''}`.toLowerCase();
 
-    const txt = `${sku.description || ''} ${sku.displayName || ''}`.toLowerCase();
+    // Explicit text parsing first
     const m = txt.match(/\b(?:per|for)(?:\s*block\s*of)?\s*-?\s*(\d+)\s*(vcpu|core|cores|gb|gib|ram|memory)\b/);
     if (m) {
       const n = Number(m[1]);
@@ -202,27 +213,34 @@ function buildSeriesUnitRateMaps(allSkus, region) {
         if (rg === 'RAM' && /\b(gb|gib|ram|memory)\b/.test(m[2])) return n;
       }
     }
+
+    // displayQuantity only if supported by text
+    const dq = Number(expr?.displayQuantity || 0);
+    if (dq > 1) {
+      const ok =
+        txt.includes(`per ${dq}`) ||
+        new RegExp(`\\b${dq}\\s*(vcpu|core|cores|gb|gib|ram|memory)\\b`).test(txt);
+      if (ok) return dq;
+    }
+
     return 1;
   };
 
-  // NEW: infer series token for CPU/RAM unit SKUs
-  // This avoids hardcoding series lists but still extracts tokens like n4, n2d, c2d, c4a, m4, x4, h4d, t2d, etc.
+  // Infer series token from text (keeps your “no hardcoded series list” approach)
   function inferSeriesFromText(text) {
     const s = String(text || '').toLowerCase();
-    // token pattern: letter + digit + optional 0-2 alphanumerics (e.g., n4, n2d, c2d, c4a, m4, x4, h4d, t2d)
     const candidates = [...s.matchAll(/\b([a-z][0-9][a-z0-9]{0,2})\b/g)].map(m => m[1]);
     if (!candidates.length) return null;
 
-    // Prefer longer tokens first so c2d wins over c2, h4d over h4, etc.
     candidates.sort((a, b) => b.length - a.length);
 
-    // Skip a few potential false positives if they appear
-    const BAD = new Set(['v1', 'v2']);
-    for (const tok of candidates) {
-      if (!BAD.has(tok)) return tok;
-    }
+    const BAD = new Set(['v1', 'v2', 'g1', 's1']);
+    for (const tok of candidates) if (!BAD.has(tok)) return tok;
     return null;
   }
+
+  // Collect candidate rates per series (median later)
+  const buckets = {}; // { series: { cpu: [], ram: [] } }
 
   for (const sku of (allSkus || [])) {
     try {
@@ -232,25 +250,27 @@ function buildSeriesUnitRateMaps(allSkus, region) {
       const usageType = String(sku.category?.usageType || '');
       if (!/ondemand/i.test(usageType)) continue;
 
-      // Linux-only (skip OS uplifts from unit-rate base)
-      const plain = `${sku.description || ''} ${sku.summary || ''}`;
-      if (/windows|sql server|rhel|red hat|suse|sles|sap/i.test(plain)) continue;
-
       // CPU/RAM only
       const rg = sku.category?.resourceGroup;
       if (rg !== 'CPU' && rg !== 'RAM') continue;
 
-      // Series detection:
-      // 1) try machineType inference (works when SKU text contains full machine type)
-      // 2) fallback infer series token from text (works for unit SKUs)
+      // Time-based unit only (avoid odd units poisoning rates)
+      const usageUnit = String(sku.category?.usageUnit || '');
+      if (!/hour|h|sec|s|min|minute/i.test(usageUnit)) continue;
+
+      // Linux-only base (exclude OS uplift SKUs)
+      const plain = `${sku.description || ''} ${sku.summary || ''}`.toLowerCase();
+      if (/windows|sql server|rhel|red hat|suse|sles|sap/i.test(plain)) continue;
+
+      // Exclude noisy variants from unit-rate base
+      const blob = `${sku.description || ''} ${sku.displayName || ''} ${sku.summary || ''}`.toLowerCase();
+      if (/spot|preemptible|commit|commitment|reserved|cud|sole\s*tenant|sole\s*tenancy/i.test(blob)) continue;
+
+      // Series detection (try machineType first, else text token)
       let series = null;
       const mt = inferMachineType(sku);
       if (mt) series = mt.split('-')[0].toLowerCase();
-
-      if (!series) {
-        const desc = `${sku.description || ''} ${sku.displayName || ''} ${sku.summary || ''}`;
-        series = inferSeriesFromText(desc);
-      }
+      if (!series) series = inferSeriesFromText(blob);
       if (!series) continue;
 
       const { moneyPerHour, expr } = hourlyFromExpr(sku.pricingInfo);
@@ -258,13 +278,21 @@ function buildSeriesUnitRateMaps(allSkus, region) {
 
       const block = detectUnitsPerPrice(sku, expr, rg);
       const perUnitPerHour = moneyPerHour / (block > 0 ? block : 1);
+      if (!(perUnitPerHour > 0)) continue;
 
-      out[series] ??= {};
-      if (rg === 'CPU') out[series].core = perUnitPerHour;
-      if (rg === 'RAM') out[series].ram = perUnitPerHour;
+      buckets[series] ??= { cpu: [], ram: [] };
+      if (rg === 'CPU') buckets[series].cpu.push(perUnitPerHour);
+      if (rg === 'RAM') buckets[series].ram.push(perUnitPerHour);
     } catch {
       // ignore bad SKU
     }
+  }
+
+  // Build final map using medians
+  for (const [series, b] of Object.entries(buckets)) {
+    const core = median(b.cpu);
+    const ram = median(b.ram);
+    if (core > 0 && ram > 0) out[series] = { core, ram };
   }
 
   return out;
