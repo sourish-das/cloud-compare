@@ -441,7 +441,7 @@ function buildWindowsCoreRate(allSkus, region) {
 }
 
 // ---------------------------
-// RHEL uplift discovery (per vCPU-hour) (NEW)
+// RHEL uplift discovery (per vCPU-hour)
 // ---------------------------
 // Your examples show ~0.026 $/vCPU-hr for RHEL; keep env override.
 const RHEL_STANDARD_FALLBACK_RATE =
@@ -455,36 +455,49 @@ function buildRhelCoreRate(allSkus, region) {
     return regionMatches(sku.serviceRegions, region);
   };
 
-  const BAD = /(byol|gpu|local\s*ssd|commitment|spot|preemptible|sles|suse|sql|windows)/i;
+  // Avoid unrelated/variant SKUs that can inflate uplift
+  const BAD = /(byol|gpu|local\s*ssd|commitment|spot|preemptible|sles|suse|sql|windows|sap|sole\s*tenant|premium|extended)/i;
+
   const candidates = [];
 
-  // Prefer explicit license/core/vcpu SKUs
   for (const sku of (allSkus || [])) {
     if (!inRegion(sku)) continue;
-    const name = String((sku.description || sku.displayName) || '').toLowerCase();
-    if (!/(rhel|red hat)/.test(name)) continue;
-    if (!/(license|licensing|core|vcpu)/.test(name)) continue;
-    if (BAD.test(name)) continue;
 
-    const price = extractHourlyPrice(sku.pricingInfo);
-    if (price && price > 0) candidates.push({ price, name });
-  }
+    // IMPORTANT: exclude CPU/RAM/GPU unit SKUs that may mention RHEL
+    const rg = sku?.category?.resourceGroup;
+    if (rg === 'CPU' || rg === 'RAM' || rg === 'GPU') continue;
 
-  // Looser fallback (still filtered)
-  if (!candidates.length) {
-    for (const sku of (allSkus || [])) {
-      if (!inRegion(sku)) continue;
-      const name = String((sku.description || sku.displayName) || '').toLowerCase();
-      if (!/(rhel|red hat)/.test(name) || BAD.test(name)) continue;
+    const blob = `${sku.description || ''} ${sku.displayName || ''} ${sku.summary || ''}`.toLowerCase();
+    if (!/(rhel|red hat)/.test(blob)) continue;
 
-      const price = extractHourlyPrice(sku.pricingInfo);
-      if (price && price > 0) candidates.push({ price, name });
+    // Require license wording (keeps us on the uplift SKUs)
+    if (!/(license|licensing)/.test(blob)) continue;
+    if (BAD.test(blob)) continue;
+
+    const hourly = extractHourlyPrice(sku.pricingInfo);
+    if (!(hourly > 0)) continue;
+
+    // Normalize block pricing when the text supports it
+    let perVcpu = hourly;
+    const expr = sku?.pricingInfo?.[0]?.pricingExpression;
+    const dq = Number(expr?.displayQuantity || 0);
+    if (dq > 1) {
+      const ok =
+        blob.includes(`per ${dq}`) ||
+        new RegExp(`\\b${dq}\\s*(vcpu|core|cores)\\b`).test(blob);
+      if (ok) perVcpu = hourly / dq;
     }
+
+    if (perVcpu > 0) candidates.push(perVcpu);
   }
 
-  if (candidates.length > 0) {
-    candidates.sort((a, b) => a.price - b.price);
-    return candidates[0].price;
+  if (candidates.length) {
+    // median is robust vs outliers
+    candidates.sort((a, b) => a - b);
+    const mid = candidates[Math.floor(candidates.length / 2)];
+
+    // clamp to sane PAYG RHEL band (prevents bad SKU spikes)
+    return Math.max(0.02, Math.min(0.035, mid));
   }
 
   return RHEL_STANDARD_FALLBACK_RATE;
