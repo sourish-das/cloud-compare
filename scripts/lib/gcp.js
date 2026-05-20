@@ -7,13 +7,20 @@
 const CE_SERVICE_ID = '6F81-5844-456A';
 
 // UI allow-lists (exported for completeness; not used by pricing logic)
+
 const GCP_SERIES_ALLOW = {
-  general: ['E2', 'N1', 'N2', 'N2D', 'N4', 'N4A', 'N4D', 'T2A', 'T2D'],
-  compute: ['C2', 'C2D', 'C3', 'C3D', 'C4', 'C4D', 'C4A', 'H3', 'H4', 'H4D'],
-  memory:  ['M1', 'M2', 'M3', 'M4', 'X4']
+  general: ['C4D', 'C4A', 'C4', 'N4', 'N4D', 'N4A', 'C3', 'C3D', 'T2D', 'T2A', 'N2', 'N2D', 'N1', 'E2'],
+  compute: ['C2', 'C2D', 'H3', 'H4D'],
+  memory:  ['M1', 'M2', 'M3', 'M4']
 };
 
 const ARM_SERIES = new Set(['t2a', 'c4a', 'n4a']);
+
+// Exclude families you requested (accelerator + storage optimized)
+const EXCLUDED_SERIES = new Set(['a2', 'a3', 'a4', 'g2', 'g4', 'z3']);
+function isExcludedSeries(series) {
+  return EXCLUDED_SERIES.has(String(series || '').toLowerCase());
+}
 
 const GCP_EXAMPLE_INSTANCES = {
   general: ['e2-standard-2', 'n2-standard-4', 't2a-standard-4', 'n4-standard-4'],
@@ -264,6 +271,9 @@ function buildSeriesUnitRateMaps(allSkus, region) {
 
       if (!series) continue;
 
+      // ✅ exclude a2/a3/a4/g2/g4/z3 from unit rates
+      if (isExcludedSeries(series)) continue;
+
       const { hr, expr } = hourlyFromExpr(sku.pricingInfo);
       if (!(hr > 0)) continue;
 
@@ -441,11 +451,12 @@ function buildWindowsCoreRate(allSkus, region) {
 }
 
 // ---------------------------
-// RHEL uplift discovery (per vCPU-hour)
+// RHEL uplift discovery (per vCPU-hour) (FIXED)
 // ---------------------------
-// Your examples show ~0.026 $/vCPU-hr for RHEL; keep env override.
+// Your calculator comparisons indicate PAYG RHEL uplift is ~0.013–0.015 $/vCPU-hr.
+// Allow override via env: GCP_RHEL_RATE_PER_VCPU
 const RHEL_STANDARD_FALLBACK_RATE =
-  Number(process.env.GCP_RHEL_RATE_PER_VCPU || 0) || 0.026;
+  Number(process.env.GCP_RHEL_RATE_PER_VCPU || 0) || 0.0135;
 
 function buildRhelCoreRate(allSkus, region) {
   const inRegion = (sku) => {
@@ -455,9 +466,7 @@ function buildRhelCoreRate(allSkus, region) {
     return regionMatches(sku.serviceRegions, region);
   };
 
-  // Avoid unrelated/variant SKUs that can inflate uplift
   const BAD = /(byol|gpu|local\s*ssd|commitment|spot|preemptible|sles|suse|sql|windows|sap|sole\s*tenant|premium|extended)/i;
-
   const candidates = [];
 
   for (const sku of (allSkus || [])) {
@@ -477,27 +486,21 @@ function buildRhelCoreRate(allSkus, region) {
     const hourly = extractHourlyPrice(sku.pricingInfo);
     if (!(hourly > 0)) continue;
 
-    // Normalize block pricing when the text supports it
-    let perVcpu = hourly;
+    // ✅ KEY FIX: license SKUs are often block-priced (displayQuantity=2 etc.)
+    // Always normalize by displayQuantity when present (>1).
     const expr = sku?.pricingInfo?.[0]?.pricingExpression;
     const dq = Number(expr?.displayQuantity || 0);
-    if (dq > 1) {
-      const ok =
-        blob.includes(`per ${dq}`) ||
-        new RegExp(`\\b${dq}\\s*(vcpu|core|cores)\\b`).test(blob);
-      if (ok) perVcpu = hourly / dq;
-    }
+    const perVcpu = dq > 1 ? (hourly / dq) : hourly;
 
     if (perVcpu > 0) candidates.push(perVcpu);
   }
 
   if (candidates.length) {
-    // median is robust vs outliers
     candidates.sort((a, b) => a - b);
     const mid = candidates[Math.floor(candidates.length / 2)];
 
-    // clamp to sane PAYG RHEL band (prevents bad SKU spikes)
-    return Math.max(0.02, Math.min(0.035, mid));
+    // clamp to sane PAYG band based on your evidence
+    return Math.max(0.01, Math.min(0.02, mid));
   }
 
   return RHEL_STANDARD_FALLBACK_RATE;
