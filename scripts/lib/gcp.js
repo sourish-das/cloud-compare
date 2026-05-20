@@ -1,10 +1,5 @@
 // scripts/lib/gcp.js
-// Helpers for GCP Retail Prices + Compute discovery (Linux-first)
-// CommonJS (Node 18+, global fetch)
-// Version: 2.7.0
-//  - Generic machineType parsing (no hardcoded series list)
-//  - Category mapping by suffix only (standard/highcpu/highmem/ultramem/megamem/hypermem)
-//  - Adds Windows + RHEL uplift discovery helpers (per vCPU-hour)
+// Helpers for GCP Retail Prices + RHEL/Windows synthesis
 
 'use strict';
 
