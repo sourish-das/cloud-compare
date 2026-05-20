@@ -238,7 +238,7 @@ async function main() {
 
   // Optional safety clamp to avoid bad spikes
   windowsUplift = clamp(Number(windowsUplift || 0.048), 0.03, 0.08);
-  rhelUplift = clamp(Number(rhelUplift || 0.026), 0.01, 0.06);
+  rhelUplift = clamp(Number(rhelUplift || 0.026), 0.02, 0.035);
 
   console.log('[GCP] OS uplifts ($/vCPU-hr):', { windowsUplift, rhelUplift });
 
