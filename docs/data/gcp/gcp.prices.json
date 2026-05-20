@@ -9,9 +9,7 @@
       1,
       2,
       4,
-      6,
       8,
-      12,
       16,
       22,
       24,
@@ -39,12 +37,10 @@
       8,
       15,
       16,
-      22,
       30,
       31,
       32,
       44,
-      45,
       48,
       59,
       60,
@@ -137,7 +133,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 7.109872
+      "pricePerHourUSD": 5.709872
     },
     {
       "instance": "c2d-highcpu-16",
@@ -173,7 +169,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.015696
+      "pricePerHourUSD": 0.815696
     },
     {
       "instance": "c2d-highcpu-2",
@@ -209,7 +205,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.126962
+      "pricePerHourUSD": 0.101962
     },
     {
       "instance": "c2d-highcpu-32",
@@ -245,7 +241,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 2.031392
+      "pricePerHourUSD": 1.631392
     },
     {
       "instance": "c2d-highcpu-4",
@@ -281,7 +277,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.253924
+      "pricePerHourUSD": 0.203924
     },
     {
       "instance": "c2d-highcpu-56",
@@ -317,7 +313,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 3.554936
+      "pricePerHourUSD": 2.854936
     },
     {
       "instance": "c2d-highcpu-8",
@@ -353,7 +349,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.507848
+      "pricePerHourUSD": 0.407848
     },
     {
       "instance": "c2d-highmem-112",
@@ -389,7 +385,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 9.77032
+      "pricePerHourUSD": 8.37032
     },
     {
       "instance": "c2d-highmem-16",
@@ -425,7 +421,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.39576
+      "pricePerHourUSD": 1.19576
     },
     {
       "instance": "c2d-highmem-2",
@@ -461,7 +457,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.17447
+      "pricePerHourUSD": 0.14947
     },
     {
       "instance": "c2d-highmem-32",
@@ -497,7 +493,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 2.79152
+      "pricePerHourUSD": 2.39152
     },
     {
       "instance": "c2d-highmem-4",
@@ -533,7 +529,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.34894
+      "pricePerHourUSD": 0.29894
     },
     {
       "instance": "c2d-highmem-56",
@@ -569,7 +565,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 4.88516
+      "pricePerHourUSD": 4.18516
     },
     {
       "instance": "c2d-highmem-8",
@@ -605,7 +601,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.69788
+      "pricePerHourUSD": 0.59788
     },
     {
       "instance": "c2d-standard-112",
@@ -641,7 +637,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 7.996688
+      "pricePerHourUSD": 6.596688
     },
     {
       "instance": "c2d-standard-16",
@@ -677,7 +673,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.142384
+      "pricePerHourUSD": 0.942384
     },
     {
       "instance": "c2d-standard-2",
@@ -713,7 +709,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.142798
+      "pricePerHourUSD": 0.117798
     },
     {
       "instance": "c2d-standard-32",
@@ -749,7 +745,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 2.284768
+      "pricePerHourUSD": 1.884768
     },
     {
       "instance": "c2d-standard-4",
@@ -785,7 +781,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.285596
+      "pricePerHourUSD": 0.235596
     },
     {
       "instance": "c2d-standard-56",
@@ -821,7 +817,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 3.998344
+      "pricePerHourUSD": 3.298344
     },
     {
       "instance": "c2d-standard-8",
@@ -857,7 +853,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.571192
+      "pricePerHourUSD": 0.471192
     },
     {
       "instance": "c3-highcpu-22",
@@ -893,7 +889,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.507572
+      "pricePerHourUSD": 1.232572
     },
     {
       "instance": "c3-highcpu-4",
@@ -929,7 +925,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.274104
+      "pricePerHourUSD": 0.224104
     },
     {
       "instance": "c3-highcpu-44",
@@ -965,7 +961,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 3.015144
+      "pricePerHourUSD": 2.465144
     },
     {
       "instance": "c3-highcpu-8",
@@ -1001,7 +997,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.548208
+      "pricePerHourUSD": 0.448208
     },
     {
       "instance": "c3-highcpu-88",
@@ -1037,7 +1033,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 6.030288
+      "pricePerHourUSD": 4.930288
     },
     {
       "instance": "c3-highmem-22",
@@ -1073,7 +1069,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 2.027388
+      "pricePerHourUSD": 1.752388
     },
     {
       "instance": "c3-highmem-4",
@@ -1109,7 +1105,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.368616
+      "pricePerHourUSD": 0.318616
     },
     {
       "instance": "c3-highmem-44",
@@ -1145,7 +1141,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 4.054776
+      "pricePerHourUSD": 3.504776
     },
     {
       "instance": "c3-highmem-8",
@@ -1181,7 +1177,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.737232
+      "pricePerHourUSD": 0.637232
     },
     {
       "instance": "c3-highmem-88",
@@ -1217,7 +1213,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 8.109552
+      "pricePerHourUSD": 7.009552
     },
     {
       "instance": "c3-standard-22",
@@ -1253,7 +1249,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.680844
+      "pricePerHourUSD": 1.405844
     },
     {
       "instance": "c3-standard-4",
@@ -1289,7 +1285,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.305608
+      "pricePerHourUSD": 0.255608
     },
     {
       "instance": "c3-standard-44",
@@ -1325,7 +1321,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 3.361688
+      "pricePerHourUSD": 2.811688
     },
     {
       "instance": "c3-standard-8",
@@ -1361,7 +1357,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.611216
+      "pricePerHourUSD": 0.511216
     },
     {
       "instance": "c3-standard-88",
@@ -1397,7 +1393,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 6.723376
+      "pricePerHourUSD": 5.623376
     },
     {
       "instance": "c3d-highcpu-16",
@@ -1433,7 +1429,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.015696
+      "pricePerHourUSD": 0.815696
     },
     {
       "instance": "c3d-highcpu-30",
@@ -1469,7 +1465,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.900471
+      "pricePerHourUSD": 1.525471
     },
     {
       "instance": "c3d-highcpu-4",
@@ -1505,7 +1501,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.253924
+      "pricePerHourUSD": 0.203924
     },
     {
       "instance": "c3d-highcpu-60",
@@ -1541,7 +1537,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 3.800942
+      "pricePerHourUSD": 3.050942
     },
     {
       "instance": "c3d-highcpu-8",
@@ -1577,7 +1573,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.507848
+      "pricePerHourUSD": 0.407848
     },
     {
       "instance": "c3d-highcpu-90",
@@ -1613,7 +1609,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 5.701413
+      "pricePerHourUSD": 4.576413
     },
     {
       "instance": "c3d-highmem-16",
@@ -1649,7 +1645,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.39576
+      "pricePerHourUSD": 1.19576
     },
     {
       "instance": "c3d-highmem-30",
@@ -1685,7 +1681,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 2.61705
+      "pricePerHourUSD": 2.24205
     },
     {
       "instance": "c3d-highmem-4",
@@ -1721,7 +1717,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.34894
+      "pricePerHourUSD": 0.29894
     },
     {
       "instance": "c3d-highmem-60",
@@ -1757,7 +1753,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 5.2341
+      "pricePerHourUSD": 4.4841
     },
     {
       "instance": "c3d-highmem-8",
@@ -1793,7 +1789,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.69788
+      "pricePerHourUSD": 0.59788
     },
     {
       "instance": "c3d-highmem-90",
@@ -1829,7 +1825,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 7.85115
+      "pricePerHourUSD": 6.72615
     },
     {
       "instance": "c3d-standard-16",
@@ -1865,7 +1861,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.142384
+      "pricePerHourUSD": 0.942384
     },
     {
       "instance": "c3d-standard-30",
@@ -1901,7 +1897,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 2.14197
+      "pricePerHourUSD": 1.76697
     },
     {
       "instance": "c3d-standard-4",
@@ -1937,7 +1933,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.285596
+      "pricePerHourUSD": 0.235596
     },
     {
       "instance": "c3d-standard-60",
@@ -1973,7 +1969,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 4.28394
+      "pricePerHourUSD": 3.53394
     },
     {
       "instance": "c3d-standard-8",
@@ -2009,7 +2005,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.571192
+      "pricePerHourUSD": 0.471192
     },
     {
       "instance": "c3d-standard-90",
@@ -2045,7 +2041,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 6.42591
+      "pricePerHourUSD": 5.30091
     },
     {
       "instance": "c4-highcpu-16",
@@ -2081,7 +2077,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.096416
+      "pricePerHourUSD": 0.896416
     },
     {
       "instance": "c4-highcpu-2",
@@ -2117,7 +2113,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.137052
+      "pricePerHourUSD": 0.112052
     },
     {
       "instance": "c4-highcpu-24",
@@ -2153,7 +2149,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.644624
+      "pricePerHourUSD": 1.344624
     },
     {
       "instance": "c4-highcpu-32",
@@ -2189,7 +2185,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 2.192832
+      "pricePerHourUSD": 1.792832
     },
     {
       "instance": "c4-highcpu-4",
@@ -2225,7 +2221,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.274104
+      "pricePerHourUSD": 0.224104
     },
     {
       "instance": "c4-highcpu-48",
@@ -2261,7 +2257,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 3.289248
+      "pricePerHourUSD": 2.689248
     },
     {
       "instance": "c4-highcpu-8",
@@ -2297,7 +2293,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.548208
+      "pricePerHourUSD": 0.448208
     },
     {
       "instance": "c4-highcpu-96",
@@ -2333,7 +2329,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 6.578496
+      "pricePerHourUSD": 5.378496
     },
     {
       "instance": "c4-highmem-16",
@@ -2369,7 +2365,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.458712
+      "pricePerHourUSD": 1.258712
     },
     {
       "instance": "c4-highmem-2",
@@ -2405,7 +2401,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.18037
+      "pricePerHourUSD": 0.15537
     },
     {
       "instance": "c4-highmem-24",
@@ -2441,7 +2437,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 2.188068
+      "pricePerHourUSD": 1.888068
     },
     {
       "instance": "c4-highmem-32",
@@ -2477,7 +2473,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 2.917424
+      "pricePerHourUSD": 2.517424
     },
     {
       "instance": "c4-highmem-4",
@@ -2513,7 +2509,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.364678
+      "pricePerHourUSD": 0.314678
     },
     {
       "instance": "c4-highmem-48",
@@ -2549,7 +2545,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 4.376136
+      "pricePerHourUSD": 3.776136
     },
     {
       "instance": "c4-highmem-8",
@@ -2585,7 +2581,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.729356
+      "pricePerHourUSD": 0.629356
     },
     {
       "instance": "c4-highmem-96",
@@ -2621,7 +2617,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 8.752272
+      "pricePerHourUSD": 7.552272
     },
     {
       "instance": "c4-standard-16",
@@ -2657,7 +2653,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.20668
+      "pricePerHourUSD": 1.00668
     },
     {
       "instance": "c4-standard-2",
@@ -2693,7 +2689,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.148866
+      "pricePerHourUSD": 0.123866
     },
     {
       "instance": "c4-standard-24",
@@ -2729,7 +2725,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.81002
+      "pricePerHourUSD": 1.51002
     },
     {
       "instance": "c4-standard-32",
@@ -2765,7 +2761,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 2.41336
+      "pricePerHourUSD": 2.01336
     },
     {
       "instance": "c4-standard-4",
@@ -2801,7 +2797,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.30167
+      "pricePerHourUSD": 0.25167
     },
     {
       "instance": "c4-standard-48",
@@ -2837,7 +2833,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 3.62004
+      "pricePerHourUSD": 3.02004
     },
     {
       "instance": "c4-standard-8",
@@ -2873,7 +2869,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.60334
+      "pricePerHourUSD": 0.50334
     },
     {
       "instance": "c4-standard-96",
@@ -2909,7 +2905,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 7.24008
+      "pricePerHourUSD": 6.04008
     },
     {
       "instance": "c4a-highcpu-1",
@@ -2933,7 +2929,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.068516
+      "pricePerHourUSD": 0.056016
     },
     {
       "instance": "c4a-highcpu-16",
@@ -2957,7 +2953,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.096249
+      "pricePerHourUSD": 0.896249
     },
     {
       "instance": "c4a-highcpu-2",
@@ -2981,7 +2977,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.137031
+      "pricePerHourUSD": 0.112031
     },
     {
       "instance": "c4a-highcpu-32",
@@ -3005,7 +3001,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 2.192498
+      "pricePerHourUSD": 1.792498
     },
     {
       "instance": "c4a-highcpu-4",
@@ -3029,7 +3025,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.274062
+      "pricePerHourUSD": 0.224062
     },
     {
       "instance": "c4a-highcpu-48",
@@ -3053,7 +3049,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 3.288747
+      "pricePerHourUSD": 2.688747
     },
     {
       "instance": "c4a-highcpu-64",
@@ -3077,7 +3073,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 4.384996
+      "pricePerHourUSD": 3.584996
     },
     {
       "instance": "c4a-highcpu-72",
@@ -3101,7 +3097,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 4.933121
+      "pricePerHourUSD": 4.033121
     },
     {
       "instance": "c4a-highcpu-8",
@@ -3125,7 +3121,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.548125
+      "pricePerHourUSD": 0.448125
     },
     {
       "instance": "c4a-highmem-1",
@@ -3149,7 +3145,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.092153
+      "pricePerHourUSD": 0.079653
     },
     {
       "instance": "c4a-highmem-16",
@@ -3173,7 +3169,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.474445
+      "pricePerHourUSD": 1.274445
     },
     {
       "instance": "c4a-highmem-2",
@@ -3197,7 +3193,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.184306
+      "pricePerHourUSD": 0.159306
     },
     {
       "instance": "c4a-highmem-32",
@@ -3221,7 +3217,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 2.948889
+      "pricePerHourUSD": 2.548889
     },
     {
       "instance": "c4a-highmem-4",
@@ -3245,7 +3241,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.368611
+      "pricePerHourUSD": 0.318611
     },
     {
       "instance": "c4a-highmem-48",
@@ -3269,7 +3265,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 4.423334
+      "pricePerHourUSD": 3.823334
     },
     {
       "instance": "c4a-highmem-64",
@@ -3293,7 +3289,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 5.897778
+      "pricePerHourUSD": 5.097778
     },
     {
       "instance": "c4a-highmem-72",
@@ -3317,7 +3313,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 6.635
+      "pricePerHourUSD": 5.735
     },
     {
       "instance": "c4a-highmem-8",
@@ -3341,7 +3337,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.737222
+      "pricePerHourUSD": 0.637222
     },
     {
       "instance": "c4a-standard-1",
@@ -3365,7 +3361,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.076395
+      "pricePerHourUSD": 0.063895
     },
     {
       "instance": "c4a-standard-16",
@@ -3389,7 +3385,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.222314
+      "pricePerHourUSD": 1.022314
     },
     {
       "instance": "c4a-standard-2",
@@ -3413,7 +3409,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.152789
+      "pricePerHourUSD": 0.127789
     },
     {
       "instance": "c4a-standard-32",
@@ -3437,7 +3433,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 2.444628
+      "pricePerHourUSD": 2.044628
     },
     {
       "instance": "c4a-standard-4",
@@ -3461,7 +3457,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.305579
+      "pricePerHourUSD": 0.255579
     },
     {
       "instance": "c4a-standard-48",
@@ -3485,7 +3481,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 3.666943
+      "pricePerHourUSD": 3.066943
     },
     {
       "instance": "c4a-standard-64",
@@ -3509,7 +3505,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 4.889257
+      "pricePerHourUSD": 4.089257
     },
     {
       "instance": "c4a-standard-72",
@@ -3533,7 +3529,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 5.500414
+      "pricePerHourUSD": 4.600414
     },
     {
       "instance": "c4a-standard-8",
@@ -3557,7 +3553,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.611157
+      "pricePerHourUSD": 0.511157
     },
     {
       "instance": "c4d-highcpu-16",
@@ -3593,7 +3589,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.044123
+      "pricePerHourUSD": 0.844123
     },
     {
       "instance": "c4d-highcpu-2",
@@ -3629,7 +3625,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.127894
+      "pricePerHourUSD": 0.102894
     },
     {
       "instance": "c4d-highcpu-32",
@@ -3665,7 +3661,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 2.088247
+      "pricePerHourUSD": 1.688247
     },
     {
       "instance": "c4d-highcpu-4",
@@ -3701,7 +3697,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.259283
+      "pricePerHourUSD": 0.209283
     },
     {
       "instance": "c4d-highcpu-48",
@@ -3737,7 +3733,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 3.13237
+      "pricePerHourUSD": 2.53237
     },
     {
       "instance": "c4d-highcpu-64",
@@ -3773,7 +3769,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 4.176493
+      "pricePerHourUSD": 3.376493
     },
     {
       "instance": "c4d-highcpu-8",
@@ -3809,7 +3805,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.522062
+      "pricePerHourUSD": 0.422062
     },
     {
       "instance": "c4d-highcpu-96",
@@ -3845,7 +3841,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 6.26474
+      "pricePerHourUSD": 5.06474
     },
     {
       "instance": "c4d-highmem-16",
@@ -3881,7 +3877,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.379699
+      "pricePerHourUSD": 1.179699
     },
     {
       "instance": "c4d-highmem-2",
@@ -3917,7 +3913,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.169841
+      "pricePerHourUSD": 0.144841
     },
     {
       "instance": "c4d-highmem-32",
@@ -3953,7 +3949,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 2.759398
+      "pricePerHourUSD": 2.359398
     },
     {
       "instance": "c4d-highmem-4",
@@ -3989,7 +3985,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.343177
+      "pricePerHourUSD": 0.293177
     },
     {
       "instance": "c4d-highmem-48",
@@ -4025,7 +4021,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 4.139096
+      "pricePerHourUSD": 3.539096
     },
     {
       "instance": "c4d-highmem-64",
@@ -4061,7 +4057,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 5.518795
+      "pricePerHourUSD": 4.718795
     },
     {
       "instance": "c4d-highmem-8",
@@ -4097,7 +4093,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.689849
+      "pricePerHourUSD": 0.589849
     },
     {
       "instance": "c4d-highmem-96",
@@ -4133,7 +4129,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 8.278193
+      "pricePerHourUSD": 7.078193
     },
     {
       "instance": "c4d-standard-16",
@@ -4169,7 +4165,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.155982
+      "pricePerHourUSD": 0.955982
     },
     {
       "instance": "c4d-standard-2",
@@ -4205,7 +4201,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.141876
+      "pricePerHourUSD": 0.116876
     },
     {
       "instance": "c4d-standard-32",
@@ -4241,7 +4237,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 2.311964
+      "pricePerHourUSD": 1.911964
     },
     {
       "instance": "c4d-standard-4",
@@ -4277,7 +4273,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.287248
+      "pricePerHourUSD": 0.237248
     },
     {
       "instance": "c4d-standard-48",
@@ -4313,7 +4309,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 3.467946
+      "pricePerHourUSD": 2.867946
     },
     {
       "instance": "c4d-standard-64",
@@ -4349,7 +4345,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 4.623927
+      "pricePerHourUSD": 3.823927
     },
     {
       "instance": "c4d-standard-8",
@@ -4385,7 +4381,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.577991
+      "pricePerHourUSD": 0.477991
     },
     {
       "instance": "c4d-standard-96",
@@ -4421,7 +4417,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 6.935891
+      "pricePerHourUSD": 5.735891
     },
     {
       "instance": "e2-highcpu-16",
@@ -4457,7 +4453,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.821656
+      "pricePerHourUSD": 0.621656
     },
     {
       "instance": "e2-highcpu-2",
@@ -4493,7 +4489,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.102707
+      "pricePerHourUSD": 0.077707
     },
     {
       "instance": "e2-highcpu-32",
@@ -4529,7 +4525,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.643312
+      "pricePerHourUSD": 1.243312
     },
     {
       "instance": "e2-highcpu-4",
@@ -4565,7 +4561,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.205414
+      "pricePerHourUSD": 0.155414
     },
     {
       "instance": "e2-highcpu-8",
@@ -4601,7 +4597,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.410828
+      "pricePerHourUSD": 0.310828
     },
     {
       "instance": "e2-highmem-16",
@@ -4637,7 +4633,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.157277
+      "pricePerHourUSD": 0.957277
     },
     {
       "instance": "e2-highmem-2",
@@ -4673,7 +4669,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.14466
+      "pricePerHourUSD": 0.11966
     },
     {
       "instance": "e2-highmem-4",
@@ -4709,7 +4705,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.289319
+      "pricePerHourUSD": 0.239319
     },
     {
       "instance": "e2-highmem-8",
@@ -4745,7 +4741,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.578639
+      "pricePerHourUSD": 0.478639
     },
     {
       "instance": "e2-standard-16",
@@ -4781,7 +4777,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.965494
+      "pricePerHourUSD": 0.765494
     },
     {
       "instance": "e2-standard-2",
@@ -4817,7 +4813,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.120687
+      "pricePerHourUSD": 0.095687
     },
     {
       "instance": "e2-standard-32",
@@ -4853,7 +4849,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.930987
+      "pricePerHourUSD": 1.530987
     },
     {
       "instance": "e2-standard-4",
@@ -4889,7 +4885,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.241373
+      "pricePerHourUSD": 0.191373
     },
     {
       "instance": "e2-standard-8",
@@ -4925,367 +4921,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.482747
-    },
-    {
-      "instance": "g2-standard-12",
-      "category": "general",
-      "vcpu": 12,
-      "ram": 48,
-      "region": "us-east1",
-      "series": "g2",
-      "arch": "x86",
-      "source": "composed",
-      "os": "Linux",
-      "pricePerHourUSD": 0.451385
-    },
-    {
-      "instance": "g2-standard-12",
-      "category": "general",
-      "vcpu": 12,
-      "ram": 48,
-      "region": "us-east1",
-      "series": "g2",
-      "arch": "x86",
-      "source": "derived",
-      "os": "Windows",
-      "pricePerHourUSD": 1.027385
-    },
-    {
-      "instance": "g2-standard-12",
-      "category": "general",
-      "vcpu": 12,
-      "ram": 48,
-      "region": "us-east1",
-      "series": "g2",
-      "arch": "x86",
-      "source": "derived",
-      "os": "RHEL",
-      "pricePerHourUSD": 0.763385
-    },
-    {
-      "instance": "g2-standard-16",
-      "category": "general",
-      "vcpu": 16,
-      "ram": 64,
-      "region": "us-east1",
-      "series": "g2",
-      "arch": "x86",
-      "source": "composed",
-      "os": "Linux",
-      "pricePerHourUSD": 0.601847
-    },
-    {
-      "instance": "g2-standard-16",
-      "category": "general",
-      "vcpu": 16,
-      "ram": 64,
-      "region": "us-east1",
-      "series": "g2",
-      "arch": "x86",
-      "source": "derived",
-      "os": "Windows",
-      "pricePerHourUSD": 1.369847
-    },
-    {
-      "instance": "g2-standard-16",
-      "category": "general",
-      "vcpu": 16,
-      "ram": 64,
-      "region": "us-east1",
-      "series": "g2",
-      "arch": "x86",
-      "source": "derived",
-      "os": "RHEL",
-      "pricePerHourUSD": 1.017847
-    },
-    {
-      "instance": "g2-standard-24",
-      "category": "general",
-      "vcpu": 24,
-      "ram": 96,
-      "region": "us-east1",
-      "series": "g2",
-      "arch": "x86",
-      "source": "composed",
-      "os": "Linux",
-      "pricePerHourUSD": 0.902771
-    },
-    {
-      "instance": "g2-standard-24",
-      "category": "general",
-      "vcpu": 24,
-      "ram": 96,
-      "region": "us-east1",
-      "series": "g2",
-      "arch": "x86",
-      "source": "derived",
-      "os": "Windows",
-      "pricePerHourUSD": 2.054771
-    },
-    {
-      "instance": "g2-standard-24",
-      "category": "general",
-      "vcpu": 24,
-      "ram": 96,
-      "region": "us-east1",
-      "series": "g2",
-      "arch": "x86",
-      "source": "derived",
-      "os": "RHEL",
-      "pricePerHourUSD": 1.526771
-    },
-    {
-      "instance": "g2-standard-32",
-      "category": "general",
-      "vcpu": 32,
-      "ram": 128,
-      "region": "us-east1",
-      "series": "g2",
-      "arch": "x86",
-      "source": "composed",
-      "os": "Linux",
-      "pricePerHourUSD": 1.203695
-    },
-    {
-      "instance": "g2-standard-32",
-      "category": "general",
-      "vcpu": 32,
-      "ram": 128,
-      "region": "us-east1",
-      "series": "g2",
-      "arch": "x86",
-      "source": "derived",
-      "os": "Windows",
-      "pricePerHourUSD": 2.739695
-    },
-    {
-      "instance": "g2-standard-32",
-      "category": "general",
-      "vcpu": 32,
-      "ram": 128,
-      "region": "us-east1",
-      "series": "g2",
-      "arch": "x86",
-      "source": "derived",
-      "os": "RHEL",
-      "pricePerHourUSD": 2.035695
-    },
-    {
-      "instance": "g2-standard-4",
-      "category": "general",
-      "vcpu": 4,
-      "ram": 16,
-      "region": "us-east1",
-      "series": "g2",
-      "arch": "x86",
-      "source": "composed",
-      "os": "Linux",
-      "pricePerHourUSD": 0.150462
-    },
-    {
-      "instance": "g2-standard-4",
-      "category": "general",
-      "vcpu": 4,
-      "ram": 16,
-      "region": "us-east1",
-      "series": "g2",
-      "arch": "x86",
-      "source": "derived",
-      "os": "Windows",
-      "pricePerHourUSD": 0.342462
-    },
-    {
-      "instance": "g2-standard-4",
-      "category": "general",
-      "vcpu": 4,
-      "ram": 16,
-      "region": "us-east1",
-      "series": "g2",
-      "arch": "x86",
-      "source": "derived",
-      "os": "RHEL",
-      "pricePerHourUSD": 0.254462
-    },
-    {
-      "instance": "g2-standard-48",
-      "category": "general",
-      "vcpu": 48,
-      "ram": 192,
-      "region": "us-east1",
-      "series": "g2",
-      "arch": "x86",
-      "source": "composed",
-      "os": "Linux",
-      "pricePerHourUSD": 1.805542
-    },
-    {
-      "instance": "g2-standard-48",
-      "category": "general",
-      "vcpu": 48,
-      "ram": 192,
-      "region": "us-east1",
-      "series": "g2",
-      "arch": "x86",
-      "source": "derived",
-      "os": "Windows",
-      "pricePerHourUSD": 4.109542
-    },
-    {
-      "instance": "g2-standard-48",
-      "category": "general",
-      "vcpu": 48,
-      "ram": 192,
-      "region": "us-east1",
-      "series": "g2",
-      "arch": "x86",
-      "source": "derived",
-      "os": "RHEL",
-      "pricePerHourUSD": 3.053542
-    },
-    {
-      "instance": "g2-standard-8",
-      "category": "general",
-      "vcpu": 8,
-      "ram": 32,
-      "region": "us-east1",
-      "series": "g2",
-      "arch": "x86",
-      "source": "composed",
-      "os": "Linux",
-      "pricePerHourUSD": 0.300924
-    },
-    {
-      "instance": "g2-standard-8",
-      "category": "general",
-      "vcpu": 8,
-      "ram": 32,
-      "region": "us-east1",
-      "series": "g2",
-      "arch": "x86",
-      "source": "derived",
-      "os": "Windows",
-      "pricePerHourUSD": 0.684924
-    },
-    {
-      "instance": "g2-standard-8",
-      "category": "general",
-      "vcpu": 8,
-      "ram": 32,
-      "region": "us-east1",
-      "series": "g2",
-      "arch": "x86",
-      "source": "derived",
-      "os": "RHEL",
-      "pricePerHourUSD": 0.508924
-    },
-    {
-      "instance": "g2-standard-96",
-      "category": "general",
-      "vcpu": 96,
-      "ram": 384,
-      "region": "us-east1",
-      "series": "g2",
-      "arch": "x86",
-      "source": "composed",
-      "os": "Linux",
-      "pricePerHourUSD": 3.611084
-    },
-    {
-      "instance": "g2-standard-96",
-      "category": "general",
-      "vcpu": 96,
-      "ram": 384,
-      "region": "us-east1",
-      "series": "g2",
-      "arch": "x86",
-      "source": "derived",
-      "os": "Windows",
-      "pricePerHourUSD": 8.219084
-    },
-    {
-      "instance": "g2-standard-96",
-      "category": "general",
-      "vcpu": 96,
-      "ram": 384,
-      "region": "us-east1",
-      "series": "g2",
-      "arch": "x86",
-      "source": "derived",
-      "os": "RHEL",
-      "pricePerHourUSD": 6.107084
-    },
-    {
-      "instance": "g4-standard-48",
-      "category": "general",
-      "vcpu": 48,
-      "ram": 180,
-      "region": "us-east1",
-      "series": "g4",
-      "arch": "x86",
-      "source": "composed",
-      "os": "Linux",
-      "pricePerHourUSD": 2.55321
-    },
-    {
-      "instance": "g4-standard-48",
-      "category": "general",
-      "vcpu": 48,
-      "ram": 180,
-      "region": "us-east1",
-      "series": "g4",
-      "arch": "x86",
-      "source": "derived",
-      "os": "Windows",
-      "pricePerHourUSD": 4.85721
-    },
-    {
-      "instance": "g4-standard-48",
-      "category": "general",
-      "vcpu": 48,
-      "ram": 180,
-      "region": "us-east1",
-      "series": "g4",
-      "arch": "x86",
-      "source": "derived",
-      "os": "RHEL",
-      "pricePerHourUSD": 3.80121
-    },
-    {
-      "instance": "g4-standard-96",
-      "category": "general",
-      "vcpu": 96,
-      "ram": 360,
-      "region": "us-east1",
-      "series": "g4",
-      "arch": "x86",
-      "source": "composed",
-      "os": "Linux",
-      "pricePerHourUSD": 5.10642
-    },
-    {
-      "instance": "g4-standard-96",
-      "category": "general",
-      "vcpu": 96,
-      "ram": 360,
-      "region": "us-east1",
-      "series": "g4",
-      "arch": "x86",
-      "source": "derived",
-      "os": "Windows",
-      "pricePerHourUSD": 9.71442
-    },
-    {
-      "instance": "g4-standard-96",
-      "category": "general",
-      "vcpu": 96,
-      "ram": 360,
-      "region": "us-east1",
-      "series": "g4",
-      "arch": "x86",
-      "source": "derived",
-      "os": "RHEL",
-      "pricePerHourUSD": 7.60242
+      "pricePerHourUSD": 0.382747
     },
     {
       "instance": "m3-megamem-128",
@@ -5321,7 +4957,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 17.7376
+      "pricePerHourUSD": 16.1376
     },
     {
       "instance": "m3-megamem-64",
@@ -5357,7 +4993,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 8.8688
+      "pricePerHourUSD": 8.0688
     },
     {
       "instance": "m3-ultramem-128",
@@ -5393,7 +5029,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 27.6928
+      "pricePerHourUSD": 26.0928
     },
     {
       "instance": "m3-ultramem-32",
@@ -5429,7 +5065,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 6.9232
+      "pricePerHourUSD": 6.5232
     },
     {
       "instance": "m3-ultramem-64",
@@ -5465,7 +5101,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 13.8464
+      "pricePerHourUSD": 13.0464
     },
     {
       "instance": "m4-hypermem-16",
@@ -5501,7 +5137,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.841814
+      "pricePerHourUSD": 1.641814
     },
     {
       "instance": "m4-hypermem-32",
@@ -5537,7 +5173,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 3.683629
+      "pricePerHourUSD": 3.283629
     },
     {
       "instance": "m4-hypermem-64",
@@ -5573,7 +5209,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 7.367258
+      "pricePerHourUSD": 6.567258
     },
     {
       "instance": "m4-megamem-112",
@@ -5609,7 +5245,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 11.759341
+      "pricePerHourUSD": 10.359341
     },
     {
       "instance": "m4-megamem-28",
@@ -5645,7 +5281,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 2.939835
+      "pricePerHourUSD": 2.589835
     },
     {
       "instance": "m4-megamem-56",
@@ -5681,7 +5317,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 5.87967
+      "pricePerHourUSD": 5.17967
     },
     {
       "instance": "m4-ultramem-112",
@@ -5717,7 +5353,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 18.559501
+      "pricePerHourUSD": 17.159501
     },
     {
       "instance": "m4-ultramem-56",
@@ -5753,7 +5389,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 9.27975
+      "pricePerHourUSD": 8.57975
     },
     {
       "instance": "n2-highcpu-16",
@@ -5789,7 +5425,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.005602
+      "pricePerHourUSD": 0.805602
     },
     {
       "instance": "n2-highcpu-2",
@@ -5825,7 +5461,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.1257
+      "pricePerHourUSD": 0.1007
     },
     {
       "instance": "n2-highcpu-32",
@@ -5861,7 +5497,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 2.011204
+      "pricePerHourUSD": 1.611204
     },
     {
       "instance": "n2-highcpu-4",
@@ -5897,7 +5533,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.2514
+      "pricePerHourUSD": 0.2014
     },
     {
       "instance": "n2-highcpu-48",
@@ -5933,7 +5569,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 3.016806
+      "pricePerHourUSD": 2.416806
     },
     {
       "instance": "n2-highcpu-64",
@@ -5969,7 +5605,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 4.022408
+      "pricePerHourUSD": 3.222408
     },
     {
       "instance": "n2-highcpu-8",
@@ -6005,7 +5641,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.502801
+      "pricePerHourUSD": 0.402801
     },
     {
       "instance": "n2-highcpu-80",
@@ -6041,7 +5677,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 5.02801
+      "pricePerHourUSD": 4.02801
     },
     {
       "instance": "n2-highcpu-96",
@@ -6077,7 +5713,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 6.033612
+      "pricePerHourUSD": 4.833612
     },
     {
       "instance": "n2-highmem-128",
@@ -6113,7 +5749,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 11.31917
+      "pricePerHourUSD": 9.71917
     },
     {
       "instance": "n2-highmem-16",
@@ -6149,7 +5785,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.503873
+      "pricePerHourUSD": 1.303873
     },
     {
       "instance": "n2-highmem-2",
@@ -6185,7 +5821,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.187984
+      "pricePerHourUSD": 0.162984
     },
     {
       "instance": "n2-highmem-32",
@@ -6221,7 +5857,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 3.007746
+      "pricePerHourUSD": 2.607746
     },
     {
       "instance": "n2-highmem-4",
@@ -6257,7 +5893,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.375968
+      "pricePerHourUSD": 0.325968
     },
     {
       "instance": "n2-highmem-48",
@@ -6293,7 +5929,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 4.51162
+      "pricePerHourUSD": 3.91162
     },
     {
       "instance": "n2-highmem-64",
@@ -6329,7 +5965,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 6.015493
+      "pricePerHourUSD": 5.215493
     },
     {
       "instance": "n2-highmem-8",
@@ -6365,7 +6001,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.751937
+      "pricePerHourUSD": 0.651937
     },
     {
       "instance": "n2-highmem-80",
@@ -6401,7 +6037,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 7.519366
+      "pricePerHourUSD": 6.519366
     },
     {
       "instance": "n2-highmem-96",
@@ -6437,7 +6073,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 9.023239
+      "pricePerHourUSD": 7.823239
     },
     {
       "instance": "n2-standard-128",
@@ -6473,7 +6109,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 9.753174
+      "pricePerHourUSD": 8.153174
     },
     {
       "instance": "n2-standard-16",
@@ -6509,7 +6145,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.219147
+      "pricePerHourUSD": 1.019147
     },
     {
       "instance": "n2-standard-2",
@@ -6545,7 +6181,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.152393
+      "pricePerHourUSD": 0.127393
     },
     {
       "instance": "n2-standard-32",
@@ -6581,7 +6217,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 2.438294
+      "pricePerHourUSD": 2.038294
     },
     {
       "instance": "n2-standard-4",
@@ -6617,7 +6253,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.304787
+      "pricePerHourUSD": 0.254787
     },
     {
       "instance": "n2-standard-48",
@@ -6653,7 +6289,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 3.65744
+      "pricePerHourUSD": 3.05744
     },
     {
       "instance": "n2-standard-64",
@@ -6689,7 +6325,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 4.876587
+      "pricePerHourUSD": 4.076587
     },
     {
       "instance": "n2-standard-8",
@@ -6725,7 +6361,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.609573
+      "pricePerHourUSD": 0.509573
     },
     {
       "instance": "n2-standard-80",
@@ -6761,7 +6397,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 6.095734
+      "pricePerHourUSD": 5.095734
     },
     {
       "instance": "n2-standard-96",
@@ -6797,7 +6433,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 7.314881
+      "pricePerHourUSD": 6.114881
     },
     {
       "instance": "n2d-highcpu-128",
@@ -6833,7 +6469,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 7.431661
+      "pricePerHourUSD": 5.831661
     },
     {
       "instance": "n2d-highcpu-16",
@@ -6869,7 +6505,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.928958
+      "pricePerHourUSD": 0.728958
     },
     {
       "instance": "n2d-highcpu-2",
@@ -6905,7 +6541,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.11612
+      "pricePerHourUSD": 0.09112
     },
     {
       "instance": "n2d-highcpu-32",
@@ -6941,7 +6577,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.857915
+      "pricePerHourUSD": 1.457915
     },
     {
       "instance": "n2d-highcpu-4",
@@ -6977,7 +6613,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.232239
+      "pricePerHourUSD": 0.182239
     },
     {
       "instance": "n2d-highcpu-48",
@@ -7013,7 +6649,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 2.786873
+      "pricePerHourUSD": 2.186873
     },
     {
       "instance": "n2d-highcpu-64",
@@ -7049,7 +6685,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 3.71583
+      "pricePerHourUSD": 2.91583
     },
     {
       "instance": "n2d-highcpu-8",
@@ -7085,7 +6721,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.464479
+      "pricePerHourUSD": 0.364479
     },
     {
       "instance": "n2d-highcpu-80",
@@ -7121,7 +6757,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 4.644788
+      "pricePerHourUSD": 3.644788
     },
     {
       "instance": "n2d-highcpu-96",
@@ -7157,7 +6793,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 5.573746
+      "pricePerHourUSD": 4.373746
     },
     {
       "instance": "n2d-highmem-16",
@@ -7193,7 +6829,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.362431
+      "pricePerHourUSD": 1.162431
     },
     {
       "instance": "n2d-highmem-2",
@@ -7229,7 +6865,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.170304
+      "pricePerHourUSD": 0.145304
     },
     {
       "instance": "n2d-highmem-32",
@@ -7265,7 +6901,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 2.724862
+      "pricePerHourUSD": 2.324862
     },
     {
       "instance": "n2d-highmem-4",
@@ -7301,7 +6937,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.340608
+      "pricePerHourUSD": 0.290608
     },
     {
       "instance": "n2d-highmem-48",
@@ -7337,7 +6973,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 4.087294
+      "pricePerHourUSD": 3.487294
     },
     {
       "instance": "n2d-highmem-64",
@@ -7373,7 +7009,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 5.449725
+      "pricePerHourUSD": 4.649725
     },
     {
       "instance": "n2d-highmem-8",
@@ -7409,7 +7045,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.681216
+      "pricePerHourUSD": 0.581216
     },
     {
       "instance": "n2d-highmem-80",
@@ -7445,7 +7081,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 6.812156
+      "pricePerHourUSD": 5.812156
     },
     {
       "instance": "n2d-highmem-96",
@@ -7481,7 +7117,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 8.174587
+      "pricePerHourUSD": 6.974587
     },
     {
       "instance": "n2d-standard-128",
@@ -7517,7 +7153,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 8.917856
+      "pricePerHourUSD": 7.317856
     },
     {
       "instance": "n2d-standard-16",
@@ -7553,7 +7189,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.114732
+      "pricePerHourUSD": 0.914732
     },
     {
       "instance": "n2d-standard-2",
@@ -7589,7 +7225,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.139342
+      "pricePerHourUSD": 0.114341
     },
     {
       "instance": "n2d-standard-32",
@@ -7625,7 +7261,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 2.229464
+      "pricePerHourUSD": 1.829464
     },
     {
       "instance": "n2d-standard-4",
@@ -7661,7 +7297,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.278683
+      "pricePerHourUSD": 0.228683
     },
     {
       "instance": "n2d-standard-48",
@@ -7697,7 +7333,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 3.344196
+      "pricePerHourUSD": 2.744196
     },
     {
       "instance": "n2d-standard-64",
@@ -7733,7 +7369,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 4.458928
+      "pricePerHourUSD": 3.658928
     },
     {
       "instance": "n2d-standard-8",
@@ -7769,7 +7405,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.557366
+      "pricePerHourUSD": 0.457366
     },
     {
       "instance": "n2d-standard-80",
@@ -7805,7 +7441,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 5.57366
+      "pricePerHourUSD": 4.57366
     },
     {
       "instance": "n2d-standard-96",
@@ -7841,7 +7477,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 6.688392
+      "pricePerHourUSD": 5.488392
     },
     {
       "instance": "n4-highcpu-16",
@@ -7877,7 +7513,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.046464
+      "pricePerHourUSD": 0.846464
     },
     {
       "instance": "n4-highcpu-2",
@@ -7913,7 +7549,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.130808
+      "pricePerHourUSD": 0.105808
     },
     {
       "instance": "n4-highcpu-32",
@@ -7949,7 +7585,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 2.092928
+      "pricePerHourUSD": 1.692928
     },
     {
       "instance": "n4-highcpu-4",
@@ -7985,7 +7621,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.261616
+      "pricePerHourUSD": 0.211616
     },
     {
       "instance": "n4-highcpu-48",
@@ -8021,7 +7657,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 3.139392
+      "pricePerHourUSD": 2.539392
     },
     {
       "instance": "n4-highcpu-64",
@@ -8057,7 +7693,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 4.185856
+      "pricePerHourUSD": 3.385856
     },
     {
       "instance": "n4-highcpu-8",
@@ -8093,7 +7729,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.523232
+      "pricePerHourUSD": 0.423232
     },
     {
       "instance": "n4-highcpu-80",
@@ -8129,7 +7765,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 5.23232
+      "pricePerHourUSD": 4.23232
     },
     {
       "instance": "n4-highmem-16",
@@ -8165,7 +7801,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.403296
+      "pricePerHourUSD": 1.203296
     },
     {
       "instance": "n4-highmem-2",
@@ -8201,7 +7837,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.175412
+      "pricePerHourUSD": 0.150412
     },
     {
       "instance": "n4-highmem-32",
@@ -8237,7 +7873,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 2.806592
+      "pricePerHourUSD": 2.406592
     },
     {
       "instance": "n4-highmem-4",
@@ -8273,7 +7909,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.350824
+      "pricePerHourUSD": 0.300824
     },
     {
       "instance": "n4-highmem-48",
@@ -8309,7 +7945,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 4.209888
+      "pricePerHourUSD": 3.609888
     },
     {
       "instance": "n4-highmem-64",
@@ -8345,7 +7981,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 5.613184
+      "pricePerHourUSD": 4.813184
     },
     {
       "instance": "n4-highmem-8",
@@ -8381,7 +8017,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.701648
+      "pricePerHourUSD": 0.601648
     },
     {
       "instance": "n4-highmem-80",
@@ -8417,7 +8053,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 7.01648
+      "pricePerHourUSD": 6.01648
     },
     {
       "instance": "n4-standard-16",
@@ -8453,7 +8089,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.165408
+      "pricePerHourUSD": 0.965408
     },
     {
       "instance": "n4-standard-2",
@@ -8489,7 +8125,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.145676
+      "pricePerHourUSD": 0.120676
     },
     {
       "instance": "n4-standard-32",
@@ -8525,7 +8161,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 2.330816
+      "pricePerHourUSD": 1.930816
     },
     {
       "instance": "n4-standard-4",
@@ -8561,7 +8197,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.291352
+      "pricePerHourUSD": 0.241352
     },
     {
       "instance": "n4-standard-48",
@@ -8597,7 +8233,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 3.496224
+      "pricePerHourUSD": 2.896224
     },
     {
       "instance": "n4-standard-64",
@@ -8633,7 +8269,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 4.661632
+      "pricePerHourUSD": 3.861632
     },
     {
       "instance": "n4-standard-8",
@@ -8669,7 +8305,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.582704
+      "pricePerHourUSD": 0.482704
     },
     {
       "instance": "n4-standard-80",
@@ -8705,7 +8341,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 5.82704
+      "pricePerHourUSD": 4.82704
     },
     {
       "instance": "n4a-highcpu-1",
@@ -8729,7 +8365,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.065374
+      "pricePerHourUSD": 0.052874
     },
     {
       "instance": "n4a-highcpu-16",
@@ -8753,7 +8389,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.045985
+      "pricePerHourUSD": 0.845985
     },
     {
       "instance": "n4a-highcpu-2",
@@ -8777,7 +8413,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.130748
+      "pricePerHourUSD": 0.105748
     },
     {
       "instance": "n4a-highcpu-32",
@@ -8801,7 +8437,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 2.091971
+      "pricePerHourUSD": 1.691971
     },
     {
       "instance": "n4a-highcpu-4",
@@ -8825,7 +8461,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.261496
+      "pricePerHourUSD": 0.211496
     },
     {
       "instance": "n4a-highcpu-48",
@@ -8849,7 +8485,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 3.137956
+      "pricePerHourUSD": 2.537956
     },
     {
       "instance": "n4a-highcpu-64",
@@ -8873,7 +8509,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 4.183942
+      "pricePerHourUSD": 3.383942
     },
     {
       "instance": "n4a-highcpu-8",
@@ -8897,7 +8533,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.522993
+      "pricePerHourUSD": 0.422993
     },
     {
       "instance": "n4a-highmem-1",
@@ -8921,7 +8557,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.087703
+      "pricePerHourUSD": 0.075203
     },
     {
       "instance": "n4a-highmem-16",
@@ -8945,7 +8581,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.403254
+      "pricePerHourUSD": 1.203254
     },
     {
       "instance": "n4a-highmem-2",
@@ -8969,7 +8605,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.175407
+      "pricePerHourUSD": 0.150407
     },
     {
       "instance": "n4a-highmem-32",
@@ -8993,7 +8629,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 2.806508
+      "pricePerHourUSD": 2.406508
     },
     {
       "instance": "n4a-highmem-4",
@@ -9017,7 +8653,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.350813
+      "pricePerHourUSD": 0.300813
     },
     {
       "instance": "n4a-highmem-48",
@@ -9041,7 +8677,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 4.209761
+      "pricePerHourUSD": 3.609761
     },
     {
       "instance": "n4a-highmem-64",
@@ -9065,7 +8701,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 5.613015
+      "pricePerHourUSD": 4.813015
     },
     {
       "instance": "n4a-highmem-8",
@@ -9089,7 +8725,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.701627
+      "pricePerHourUSD": 0.601627
     },
     {
       "instance": "n4a-standard-1",
@@ -9113,7 +8749,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.072817
+      "pricePerHourUSD": 0.060317
     },
     {
       "instance": "n4a-standard-16",
@@ -9137,7 +8773,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.165075
+      "pricePerHourUSD": 0.965075
     },
     {
       "instance": "n4a-standard-2",
@@ -9161,7 +8797,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.145634
+      "pricePerHourUSD": 0.120634
     },
     {
       "instance": "n4a-standard-32",
@@ -9185,7 +8821,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 2.33015
+      "pricePerHourUSD": 1.93015
     },
     {
       "instance": "n4a-standard-4",
@@ -9209,7 +8845,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.291269
+      "pricePerHourUSD": 0.241269
     },
     {
       "instance": "n4a-standard-48",
@@ -9233,7 +8869,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 3.495225
+      "pricePerHourUSD": 2.895225
     },
     {
       "instance": "n4a-standard-64",
@@ -9257,7 +8893,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 4.6603
+      "pricePerHourUSD": 3.8603
     },
     {
       "instance": "n4a-standard-8",
@@ -9281,7 +8917,7 @@
       "arch": "arm",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.582537
+      "pricePerHourUSD": 0.482537
     },
     {
       "instance": "n4d-highcpu-16",
@@ -9317,7 +8953,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.00464
+      "pricePerHourUSD": 0.80464
     },
     {
       "instance": "n4d-highcpu-2",
@@ -9353,7 +8989,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.12558
+      "pricePerHourUSD": 0.10058
     },
     {
       "instance": "n4d-highcpu-32",
@@ -9389,7 +9025,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 2.00928
+      "pricePerHourUSD": 1.60928
     },
     {
       "instance": "n4d-highcpu-4",
@@ -9425,7 +9061,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.25116
+      "pricePerHourUSD": 0.20116
     },
     {
       "instance": "n4d-highcpu-48",
@@ -9461,7 +9097,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 3.01392
+      "pricePerHourUSD": 2.41392
     },
     {
       "instance": "n4d-highcpu-64",
@@ -9497,7 +9133,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 4.01856
+      "pricePerHourUSD": 3.21856
     },
     {
       "instance": "n4d-highcpu-8",
@@ -9533,7 +9169,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.50232
+      "pricePerHourUSD": 0.40232
     },
     {
       "instance": "n4d-highcpu-80",
@@ -9569,7 +9205,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 5.0232
+      "pricePerHourUSD": 4.0232
     },
     {
       "instance": "n4d-highcpu-96",
@@ -9605,7 +9241,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 6.02784
+      "pricePerHourUSD": 4.82784
     },
     {
       "instance": "n4d-highmem-16",
@@ -9641,7 +9277,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.338336
+      "pricePerHourUSD": 1.138336
     },
     {
       "instance": "n4d-highmem-2",
@@ -9677,7 +9313,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.167292
+      "pricePerHourUSD": 0.142292
     },
     {
       "instance": "n4d-highmem-32",
@@ -9713,7 +9349,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 2.676672
+      "pricePerHourUSD": 2.276672
     },
     {
       "instance": "n4d-highmem-4",
@@ -9749,7 +9385,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.334584
+      "pricePerHourUSD": 0.284584
     },
     {
       "instance": "n4d-highmem-48",
@@ -9785,7 +9421,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 4.015008
+      "pricePerHourUSD": 3.415008
     },
     {
       "instance": "n4d-highmem-64",
@@ -9821,7 +9457,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 5.353344
+      "pricePerHourUSD": 4.553344
     },
     {
       "instance": "n4d-highmem-8",
@@ -9857,7 +9493,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.669168
+      "pricePerHourUSD": 0.569168
     },
     {
       "instance": "n4d-highmem-80",
@@ -9893,7 +9529,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 6.69168
+      "pricePerHourUSD": 5.69168
     },
     {
       "instance": "n4d-highmem-96",
@@ -9929,7 +9565,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 8.030016
+      "pricePerHourUSD": 6.830016
     },
     {
       "instance": "n4d-standard-16",
@@ -9965,7 +9601,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.115872
+      "pricePerHourUSD": 0.915872
     },
     {
       "instance": "n4d-standard-2",
@@ -10001,7 +9637,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.139484
+      "pricePerHourUSD": 0.114484
     },
     {
       "instance": "n4d-standard-32",
@@ -10037,7 +9673,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 2.231744
+      "pricePerHourUSD": 1.831744
     },
     {
       "instance": "n4d-standard-4",
@@ -10073,7 +9709,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.278968
+      "pricePerHourUSD": 0.228968
     },
     {
       "instance": "n4d-standard-48",
@@ -10109,7 +9745,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 3.347616
+      "pricePerHourUSD": 2.747616
     },
     {
       "instance": "n4d-standard-64",
@@ -10145,7 +9781,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 4.463488
+      "pricePerHourUSD": 3.663488
     },
     {
       "instance": "n4d-standard-8",
@@ -10181,7 +9817,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.557936
+      "pricePerHourUSD": 0.457936
     },
     {
       "instance": "n4d-standard-80",
@@ -10217,7 +9853,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 5.57936
+      "pricePerHourUSD": 4.57936
     },
     {
       "instance": "n4d-standard-96",
@@ -10253,7 +9889,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 6.695232
+      "pricePerHourUSD": 5.495232
     },
     {
       "instance": "t2d-standard-1",
@@ -10289,7 +9925,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.068246
+      "pricePerHourUSD": 0.055746
     },
     {
       "instance": "t2d-standard-16",
@@ -10325,7 +9961,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 1.091936
+      "pricePerHourUSD": 0.891936
     },
     {
       "instance": "t2d-standard-2",
@@ -10361,7 +9997,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.136492
+      "pricePerHourUSD": 0.111492
     },
     {
       "instance": "t2d-standard-32",
@@ -10397,7 +10033,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 2.183872
+      "pricePerHourUSD": 1.783872
     },
     {
       "instance": "t2d-standard-4",
@@ -10433,7 +10069,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.272984
+      "pricePerHourUSD": 0.222984
     },
     {
       "instance": "t2d-standard-48",
@@ -10469,7 +10105,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 3.275808
+      "pricePerHourUSD": 2.675808
     },
     {
       "instance": "t2d-standard-60",
@@ -10505,7 +10141,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 4.09476
+      "pricePerHourUSD": 3.34476
     },
     {
       "instance": "t2d-standard-8",
@@ -10541,151 +10177,7 @@
       "arch": "x86",
       "source": "derived",
       "os": "RHEL",
-      "pricePerHourUSD": 0.545968
-    },
-    {
-      "instance": "z3-highmem-88",
-      "category": "memory",
-      "vcpu": 88,
-      "ram": 704,
-      "region": "us-east1",
-      "series": "z3",
-      "arch": "x86",
-      "source": "composed",
-      "os": "Linux",
-      "pricePerHourUSD": 9.054804
-    },
-    {
-      "instance": "z3-highmem-88",
-      "category": "memory",
-      "vcpu": 88,
-      "ram": 704,
-      "region": "us-east1",
-      "series": "z3",
-      "arch": "x86",
-      "source": "derived",
-      "os": "Windows",
-      "pricePerHourUSD": 13.278804
-    },
-    {
-      "instance": "z3-highmem-88",
-      "category": "memory",
-      "vcpu": 88,
-      "ram": 704,
-      "region": "us-east1",
-      "series": "z3",
-      "arch": "x86",
-      "source": "derived",
-      "os": "RHEL",
-      "pricePerHourUSD": 11.342804
-    },
-    {
-      "instance": "g4-standard-12",
-      "category": "general",
-      "vcpu": 12,
-      "ram": 45,
-      "region": "us-east1",
-      "series": "g4",
-      "arch": "x86",
-      "source": "composed",
-      "os": "Linux",
-      "pricePerHourUSD": 0.638302
-    },
-    {
-      "instance": "g4-standard-12",
-      "category": "general",
-      "vcpu": 12,
-      "ram": 45,
-      "region": "us-east1",
-      "series": "g4",
-      "arch": "x86",
-      "source": "derived",
-      "os": "Windows",
-      "pricePerHourUSD": 1.214303
-    },
-    {
-      "instance": "g4-standard-12",
-      "category": "general",
-      "vcpu": 12,
-      "ram": 45,
-      "region": "us-east1",
-      "series": "g4",
-      "arch": "x86",
-      "source": "derived",
-      "os": "RHEL",
-      "pricePerHourUSD": 0.950303
-    },
-    {
-      "instance": "g4-standard-24",
-      "category": "general",
-      "vcpu": 24,
-      "ram": 90,
-      "region": "us-east1",
-      "series": "g4",
-      "arch": "x86",
-      "source": "composed",
-      "os": "Linux",
-      "pricePerHourUSD": 1.276605
-    },
-    {
-      "instance": "g4-standard-24",
-      "category": "general",
-      "vcpu": 24,
-      "ram": 90,
-      "region": "us-east1",
-      "series": "g4",
-      "arch": "x86",
-      "source": "derived",
-      "os": "Windows",
-      "pricePerHourUSD": 2.428605
-    },
-    {
-      "instance": "g4-standard-24",
-      "category": "general",
-      "vcpu": 24,
-      "ram": 90,
-      "region": "us-east1",
-      "series": "g4",
-      "arch": "x86",
-      "source": "derived",
-      "os": "RHEL",
-      "pricePerHourUSD": 1.900605
-    },
-    {
-      "instance": "g4-standard-6",
-      "category": "general",
-      "vcpu": 6,
-      "ram": 22,
-      "region": "us-east1",
-      "series": "g4",
-      "arch": "x86",
-      "source": "composed",
-      "os": "Linux",
-      "pricePerHourUSD": 0.31695
-    },
-    {
-      "instance": "g4-standard-6",
-      "category": "general",
-      "vcpu": 6,
-      "ram": 22,
-      "region": "us-east1",
-      "series": "g4",
-      "arch": "x86",
-      "source": "derived",
-      "os": "Windows",
-      "pricePerHourUSD": 0.60495
-    },
-    {
-      "instance": "g4-standard-6",
-      "category": "general",
-      "vcpu": 6,
-      "ram": 22,
-      "region": "us-east1",
-      "series": "g4",
-      "arch": "x86",
-      "source": "derived",
-      "os": "RHEL",
-      "pricePerHourUSD": 0.47295
+      "pricePerHourUSD": 0.445968
     }
   ],
   "storage": {
