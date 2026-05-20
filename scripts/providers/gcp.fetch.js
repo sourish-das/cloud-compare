@@ -17,7 +17,7 @@ const {
   CE_SERVICE_ID,
   buildSeriesUnitRateMaps,
 
-  // NEW: OS uplift helpers (make sure gcp.js exports these)
+  // OS uplift helpers (from gcp.js)
   buildWindowsCoreRate,
   buildRhelCoreRate,
 
@@ -43,8 +43,13 @@ const MAX_VCPU = Number(process.env.GCP_MAX_VCPU || '128');  // enterprise cap
 
 // Enterprise policy exclusions (names)
 // IMPORTANT: do NOT exclude "hypermem" if you want it as memory category.
-// Keep only the truly unwanted patterns here.
 const EXCLUDE_NAME = /(extreme|-metal|-lssd)/i;
+
+// Exclude accelerator/storage optimized series (as requested)
+function excludedSeries(series) {
+  const s = String(series || '').toLowerCase();
+  return s === 'a2' || s === 'a3' || s === 'a4' || s === 'g2' || s === 'g4' || s === 'z3';
+}
 
 // Suffix-only classifier (matches your required mapping)
 function classifyBySuffix(instance) {
@@ -113,6 +118,8 @@ function buildSeriesScaleMap(allSkus, unitRates, region) {
     if (!isPerInstanceSku(sku, mt)) continue;
 
     const series = mt.split('-')[0].toLowerCase();
+    if (excludedSeries(series)) continue;
+
     const rates = unitRates[series];
     if (!rates || !(rates.core > 0) || !(rates.ram > 0)) continue;
 
@@ -153,12 +160,12 @@ function buildSeriesScaleMap(allSkus, unitRates, region) {
   return out;
 }
 
-// --------- OS variant row emission (NEW) ---------
+// --------- OS variant row emission ---------
 function pushOsVariants(rows, baseRow, linuxPrice, windowsUplift, rhelUplift) {
   const linux = Number(linuxPrice);
   if (!(linux > 0)) return;
 
-  // Always emit Linux (keep source as catalog/composed)
+  // Always emit Linux
   rows.push({
     ...baseRow,
     os: 'Linux',
@@ -170,7 +177,7 @@ function pushOsVariants(rows, baseRow, linuxPrice, windowsUplift, rhelUplift) {
 
   const arch = String(baseRow.arch || '').toLowerCase();
 
-  // Windows: only for x86 (your UI policy blocks ARM for Windows)
+  // Windows: only for x86 (UI policy blocks ARM for Windows)
   if (arch !== 'arm') {
     rows.push({
       ...baseRow,
@@ -180,8 +187,7 @@ function pushOsVariants(rows, baseRow, linuxPrice, windowsUplift, rhelUplift) {
     });
   }
 
-  // RHEL: generally supported on ARM too; keep it enabled.
-  // If you want to block RHEL on ARM as well, add: `if (arch !== 'arm') { ... }`
+  // RHEL: keep enabled (if you want to block RHEL on ARM, wrap with arch !== 'arm')
   rows.push({
     ...baseRow,
     os: 'RHEL',
@@ -231,14 +237,15 @@ async function main() {
     throw new Error('[GCP] unitRates too small; aborting to avoid writing empty/incorrect output');
   }
 
-  // 2a) OS uplifts (NEW)
-  // Use catalog-derived if found; gcp.js fallbacks handle defaults (~0.048 Windows, ~0.026 RHEL)
+  // 2a) OS uplifts
   let windowsUplift = buildWindowsCoreRate(allSkus, REGION);
   let rhelUplift = buildRhelCoreRate(allSkus, REGION);
 
-  // Optional safety clamp to avoid bad spikes
+  // Windows is typically ~0.048
   windowsUplift = clamp(Number(windowsUplift || 0.048), 0.03, 0.08);
-  rhelUplift = clamp(Number(rhelUplift || 0.026), 0.02, 0.035);
+
+  // RHEL corrected band (your gcp.js fallback ~0.0135)
+  rhelUplift = clamp(Number(rhelUplift || 0.0135), 0.01, 0.02);
 
   console.log('[GCP] OS uplifts ($/vCPU-hr):', { windowsUplift, rhelUplift });
 
@@ -281,7 +288,10 @@ async function main() {
     if (!mt) continue;
     if (!isPerInstanceSku(sku, mt)) continue;
 
-    // keep Phase-1 Linux-only to avoid double counting license SKUs
+    const series = mt.split('-')[0].toLowerCase();
+    if (excludedSeries(series)) continue;
+
+    // Keep Phase-1 Linux-only to avoid double counting license SKUs
     const readable = (sku.description || sku.displayName || '');
     if (/windows|sql server|rhel|red hat|suse|sles|sap/i.test(readable)) continue;
 
@@ -298,7 +308,7 @@ async function main() {
       if (!Number.isFinite(ram)) ram = d.ram;
     }
 
-    // If RAM still unknown (common for M*/X*), skip catalog row because we can't compare/size
+    // If RAM still unknown (common for M*/X*), skip catalog row
     if (!Number.isFinite(vcpu) || !Number.isFinite(ram)) continue;
 
     if (!withinPolicy(vcpu)) continue;
@@ -306,7 +316,6 @@ async function main() {
     const category = (typeof classifyGcpInstance === 'function' ? classifyGcpInstance(mt) : null) || classifyBySuffix(mt);
     if (!category) continue;
 
-    const series = mt.split('-')[0].toLowerCase();
     const baseRow = {
       instance: mt.toLowerCase(),
       category,
@@ -370,10 +379,12 @@ async function main() {
     if (have.has(type)) continue;
     if (!withinPolicy(hw.vcpu)) continue;
 
+    const series = type.split('-')[0].toLowerCase();
+    if (excludedSeries(series)) continue;
+
     const category = (typeof classifyGcpInstance === 'function' ? classifyGcpInstance(type) : null) || classifyBySuffix(type);
     if (!category) continue;
 
-    const series = type.split('-')[0].toLowerCase();
     const rates = unitRates[series];
     if (!rates || !(rates.core > 0) || !(rates.ram > 0)) continue;
 
