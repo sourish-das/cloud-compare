@@ -16,6 +16,11 @@ const {
 const {
   CE_SERVICE_ID,
   buildSeriesUnitRateMaps,
+
+  // NEW: OS uplift helpers (make sure gcp.js exports these)
+  buildWindowsCoreRate,
+  buildRhelCoreRate,
+
   getAccessTokenFromADC,
   listRegionZones,
   listZoneMachineTypes,
@@ -61,7 +66,8 @@ function withinPolicy(vcpu) {
 
 // --------- List SKUs ---------
 async function listSkus(serviceId, pageToken = '') {
-  const base = `https://cloudbilling.googleapis.com/v1/services/${serviceId}/skus` +
+  const base =
+    `https://cloudbilling.googleapis.com/v1/services/${serviceId}/skus` +
     `?currencyCode=${encodeURIComponent(CURRENCY)}` +
     `&pageSize=5000`;
 
@@ -86,7 +92,7 @@ function clamp(x, lo, hi) {
   return Math.max(lo, Math.min(hi, x));
 }
 
-// --------- Per-series self-calibration from real per-instance SKUs ---------
+// --------- Per-series self-calibration from real per-instance SKUs (Linux only) ---------
 function buildSeriesScaleMap(allSkus, unitRates, region) {
   const bySeries = {}; // series -> [factor...]
   const want = String(region || '').toLowerCase();
@@ -147,8 +153,45 @@ function buildSeriesScaleMap(allSkus, unitRates, region) {
   return out;
 }
 
+// --------- OS variant row emission (NEW) ---------
+function pushOsVariants(rows, baseRow, linuxPrice, windowsUplift, rhelUplift) {
+  const linux = Number(linuxPrice);
+  if (!(linux > 0)) return;
+
+  // Always emit Linux (keep source as catalog/composed)
+  rows.push({
+    ...baseRow,
+    os: 'Linux',
+    pricePerHourUSD: +linux.toFixed(6)
+  });
+
+  const vcpu = Number(baseRow.vcpu);
+  if (!(vcpu > 0)) return;
+
+  const arch = String(baseRow.arch || '').toLowerCase();
+
+  // Windows: only for x86 (your UI policy blocks ARM for Windows)
+  if (arch !== 'arm') {
+    rows.push({
+      ...baseRow,
+      os: 'Windows',
+      source: 'derived',
+      pricePerHourUSD: +(linux + vcpu * Number(windowsUplift || 0)).toFixed(6)
+    });
+  }
+
+  // RHEL: generally supported on ARM too; keep it enabled.
+  // If you want to block RHEL on ARM as well, add: `if (arch !== 'arm') { ... }`
+  rows.push({
+    ...baseRow,
+    os: 'RHEL',
+    source: 'derived',
+    pricePerHourUSD: +(linux + vcpu * Number(rhelUplift || 0)).toFixed(6)
+  });
+}
+
 async function main() {
-  logStart(`[GCP] Linux hybrid fetch (per-instance first, compose fallback) [region=${REGION}]`);
+  logStart(`[GCP] Hybrid fetch + OS variants (Linux base + Windows/RHEL uplift) [region=${REGION}]`);
 
   // Preconditions
   if (!process.env.GCLOUD_ACCESS_TOKEN && !API_KEY) {
@@ -164,34 +207,44 @@ async function main() {
     pageToken = nextPageToken || '';
   } while (pageToken);
 
-console.log(`[GCP] fetched catalog SKUs: ${allSkus.length}`);
+  console.log(`[GCP] fetched catalog SKUs: ${allSkus.length}`);
 
-// ---- DIAG: how many SKUs carry machineType in attributes (helps Phase-1) ----
-const mtAttrCount = allSkus.filter(s => s?.attributes?.machineType).length;
-console.log('[GCP] SKUs with attributes.machineType:', mtAttrCount);
-// ---- END DIAG ----
+  // ---- DIAG: how many SKUs carry machineType in attributes (helps Phase-1) ----
+  const mtAttrCount = allSkus.filter(s => s?.attributes?.machineType).length;
+  console.log('[GCP] SKUs with attributes.machineType:', mtAttrCount);
+  // ---- END DIAG ----
 
-// 2) Build OnDemand Core/RAM unit-rate map per series for our region ($/hour per 1 unit)
-const unitRates = buildSeriesUnitRateMaps(allSkus, REGION);
+  // 2) Build OnDemand Core/RAM unit-rate map per series for our region ($/hour per 1 unit)
+  const unitRates = buildSeriesUnitRateMaps(allSkus, REGION);
 
-console.log('[GCP] unitRates keys:', Object.keys(unitRates || {}).sort().join(','));
-console.log('[GCP] unitRates series count:', Object.keys(unitRates || {}).length);
-console.log('[GCP] unitRates sample:', {
-  n4:  unitRates?.n4,
-  n4d: unitRates?.n4d,
-  c4:  unitRates?.c4,
-  c2d: unitRates?.c2d,
-  m4:  unitRates?.m4
-});
+  console.log('[GCP] unitRates keys:', Object.keys(unitRates || {}).sort().join(','));
+  console.log('[GCP] unitRates series count:', Object.keys(unitRates || {}).length);
+  console.log('[GCP] unitRates sample:', {
+    n4: unitRates?.n4,
+    n4d: unitRates?.n4d,
+    c4: unitRates?.c4,
+    c2d: unitRates?.c2d,
+    m4: unitRates?.m4
+  });
 
-if (Object.keys(unitRates || {}).length < 5) {
-  throw new Error('[GCP] unitRates too small; aborting to avoid writing empty/incorrect output');
-}
-// ---- END DEBUG + FAIL-FAST ----
+  if (Object.keys(unitRates || {}).length < 5) {
+    throw new Error('[GCP] unitRates too small; aborting to avoid writing empty/incorrect output');
+  }
 
-// 2b) Per-series scale factors from real per-instance rows (Linux)
-const seriesScale = buildSeriesScaleMap(allSkus, unitRates, REGION);
-console.log('[GCP] series-scale factors:', Object.keys(seriesScale).length ? seriesScale : '(none)');
+  // 2a) OS uplifts (NEW)
+  // Use catalog-derived if found; gcp.js fallbacks handle defaults (~0.048 Windows, ~0.026 RHEL)
+  let windowsUplift = buildWindowsCoreRate(allSkus, REGION);
+  let rhelUplift = buildRhelCoreRate(allSkus, REGION);
+
+  // Optional safety clamp to avoid bad spikes
+  windowsUplift = clamp(Number(windowsUplift || 0.048), 0.03, 0.08);
+  rhelUplift = clamp(Number(rhelUplift || 0.026), 0.01, 0.06);
+
+  console.log('[GCP] OS uplifts ($/vCPU-hr):', { windowsUplift, rhelUplift });
+
+  // 2b) Per-series scale factors from real per-instance rows (Linux)
+  const seriesScale = buildSeriesScaleMap(allSkus, unitRates, REGION);
+  console.log('[GCP] series-scale factors:', Object.keys(seriesScale).length ? seriesScale : '(none)');
 
   // --- ARM series fallback scale from x86 sibling (only if ARM has no ground-truth factor) ---
   (function inheritArmScale() {
@@ -214,7 +267,7 @@ console.log('[GCP] series-scale factors:', Object.keys(seriesScale).length ? ser
     }
   })();
 
-  // 3) Phase-1: Catalog per-instance SKUs (Linux, exact-region)
+  // 3) Phase-1: Catalog per-instance SKUs (Linux base; then derive OS variants)
   const rows = [];
   const have = new Set();
 
@@ -228,6 +281,7 @@ console.log('[GCP] series-scale factors:', Object.keys(seriesScale).length ? ser
     if (!mt) continue;
     if (!isPerInstanceSku(sku, mt)) continue;
 
+    // keep Phase-1 Linux-only to avoid double counting license SKUs
     const readable = (sku.description || sku.displayName || '');
     if (/windows|sql server|rhel|red hat|suse|sles|sap/i.test(readable)) continue;
 
@@ -245,7 +299,6 @@ console.log('[GCP] series-scale factors:', Object.keys(seriesScale).length ? ser
     }
 
     // If RAM still unknown (common for M*/X*), skip catalog row because we can't compare/size
-    // Those shapes will be handled by discovery+compose where RAM is known.
     if (!Number.isFinite(vcpu) || !Number.isFinite(ram)) continue;
 
     if (!withinPolicy(vcpu)) continue;
@@ -254,31 +307,29 @@ console.log('[GCP] series-scale factors:', Object.keys(seriesScale).length ? ser
     if (!category) continue;
 
     const series = mt.split('-')[0].toLowerCase();
-
-    rows.push({
+    const baseRow = {
       instance: mt.toLowerCase(),
       category,
       vcpu,
       ram,
-      pricePerHourUSD: +Number(price).toFixed(6),
       region: REGION,
-      os: 'Linux',
       series,
       arch: isGcpArmSeries(series) ? 'arm' : 'x86',
       source: 'catalog'
-    });
+    };
 
+    pushOsVariants(rows, baseRow, Number(price), windowsUplift, rhelUplift);
     have.add(mt.toLowerCase());
   }
 
-  const catalogCount = rows.filter(r => r.source === 'catalog').length;
-  if (catalogCount < 20) {
-    console.warn(`[GCP] WARNING: Low catalog per-instance rows (${catalogCount}). If prices look off, check per-instance SKU detection.`);
+  const catalogLinuxCount = rows.filter(r => r.source === 'catalog' && r.os === 'Linux').length;
+  if (catalogLinuxCount < 20) {
+    console.warn(`[GCP] WARNING: Low catalog per-instance Linux rows (${catalogLinuxCount}). Composed fallback will dominate.`);
   } else {
-    console.log(`[GCP] catalog per-instance rows: ${catalogCount}`);
+    console.log(`[GCP] catalog per-instance Linux rows: ${catalogLinuxCount}`);
   }
 
-  // 4) Phase-2: Compose fallback for shapes missing after Phase-1
+  // 4) Phase-2: Compose fallback for shapes missing after Phase-1 (Linux base; then derive OS variants)
   if (!PROJECT) throw new Error('[GCP] GCP_PROJECT_ID is required for Compute discovery.');
 
   const accessToken = await getAccessTokenFromADC();
@@ -295,8 +346,6 @@ console.log('[GCP] series-scale factors:', Object.keys(seriesScale).length ? ser
       if (name.startsWith('custom-')) continue;
       if (EXCLUDE_NAME.test(name)) continue;
 
-      // Accept the same patterns as listZoneMachineTypes already allows,
-      // but keep a lightweight check to avoid odd names.
       const okName =
         /^[a-z0-9]+-[a-z]+[a-z0-9]*-\d+$/i.test(name) ||
         /^[a-z0-9]+-[a-z]+[a-z0-9]*-[a-z]+-\d+$/i.test(name);
@@ -311,12 +360,12 @@ console.log('[GCP] series-scale factors:', Object.keys(seriesScale).length ? ser
     }
   }
 
-// ---- DIAG: discovery coverage ----
-const discoveredSeries = [...new Set([...mtMap.keys()].map(n => n.split('-')[0]))].sort();
-console.log('[GCP] discovery series:', discoveredSeries.join(','));
-console.log('[GCP] discovery machineTypes:', mtMap.size);
-// ---- END DIAG ----
-  
+  // ---- DIAG: discovery coverage ----
+  const discoveredSeries = [...new Set([...mtMap.keys()].map(n => n.split('-')[0]))].sort();
+  console.log('[GCP] discovery series:', discoveredSeries.join(','));
+  console.log('[GCP] discovery machineTypes:', mtMap.size);
+  // ---- END DIAG ----
+
   for (const [type, hw] of mtMap.entries()) {
     if (have.has(type)) continue;
     if (!withinPolicy(hw.vcpu)) continue;
@@ -331,38 +380,45 @@ console.log('[GCP] discovery machineTypes:', mtMap.size);
     const base = hw.vcpu * Number(rates.core) + hw.ramGiB * Number(rates.ram);
 
     const factor = Number(seriesScale[series] ?? 1);
-    const price = base * (factor > 0 ? factor : 1);
-    if (!(price > 0)) continue;
+    const linuxPrice = base * (factor > 0 ? factor : 1);
+    if (!(linuxPrice > 0)) continue;
 
-    rows.push({
+    const baseRow = {
       instance: type,
       category,
       vcpu: hw.vcpu,
       ram: +hw.ramGiB.toFixed(2),
-      pricePerHourUSD: +price.toFixed(6),
       region: REGION,
-      os: 'Linux',
       series,
       arch: isGcpArmSeries(series) ? 'arm' : 'x86',
       source: 'composed'
-    });
+    };
+
+    pushOsVariants(rows, baseRow, linuxPrice, windowsUplift, rhelUplift);
   }
 
-  // 5) Deduplicate / finalize (Linux only)
+  // 5) Deduplicate / finalize (Linux + Windows + RHEL)
   const cheapest = dedupeCheapestByKey(rows, r => `${r.instance}-${r.region}-${r.os}`);
+
   const counts = cheapest.reduce((acc, r) => {
     acc[r.category] = (acc[r.category] || 0) + 1;
     return acc;
   }, {});
 
-  console.log('[GCP] category-counts:', counts, 'region:', REGION);
+  const osCounts = cheapest.reduce((acc, r) => {
+    const k = String(r.os || 'unknown');
+    acc[k] = (acc[k] || 0) + 1;
+    return acc;
+  }, {});
+
+  console.log('[GCP] category-counts:', counts, 'os-counts:', osCounts, 'region:', REGION);
   console.log(`[GCP] collected=${rows.length}, cheapest=${cheapest.length}`);
 
   if (warnAndSkipWriteOnEmpty('GCP', cheapest)) return;
 
   // 6) Output
   const meta = {
-    os: ['Linux'],
+    os: ['Linux', 'RHEL', 'Windows'],
     vcpu: uniqSortedNums(cheapest.map(x => x.vcpu)),
     ram: uniqSortedNums(cheapest.map(x => x.ram))
   };
