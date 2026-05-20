@@ -29,12 +29,12 @@ const OUT = process.env.OUTPUT_PATH || path.join("docs", "data", "aws", "aws.pri
  * Fetch the regional EC2 public price index JSON.
  */
 async function fetchAwsIndex() {
-  logStart(`[AWS] EC2 PAYG ${REGION}`);
+  logStart(`[AWS] EC2 PAYG ${REGION} ...`);
   const url = `https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/current/${REGION}/index.json`;
   const r = await fetch(url);
   if (!r.ok) throw new Error(`[AWS] Pricing HTTP ${r.status}`);
   const j = await r.json();
-  logDone(`[AWS] products=${Object.keys(j.products || {}).length}`);
+  logDone(`✅ [AWS] products=${Object.keys(j.products || {}).length} done`);
   return j;
 }
 
@@ -44,22 +44,26 @@ async function fetchAwsIndex() {
  */
 function pickHourlyUsdMin(onDemandTermsForSku) {
   if (!onDemandTermsForSku) return null;
-  const termKey = Object.keys(onDemandTermsForSku)[0];
-  if (!termKey) return null;
-  const dims = onDemandTermsForSku[termKey]?.priceDimensions || {};
+
   let best = null;
 
-  for (const dimKey of Object.keys(dims)) {
-    const dim = dims[dimKey];
-    const unit = String(dim?.unit || "").toLowerCase();
+  // AWS can have multiple term keys per SKU; scan all to be safe
+  for (const termKey of Object.keys(onDemandTermsForSku)) {
+    const dims = onDemandTermsForSku?.[termKey]?.priceDimensions || {};
+    for (const dimKey of Object.keys(dims)) {
+      const dim = dims[dimKey];
+      const unit = String(dim?.unit || "").toLowerCase();
 
-    // Accept units like "Hrs", "Hrs.", "Hour", "Hours"
-    if (!(unit.startsWith("hrs") || unit.startsWith("hour"))) continue;
+      // Accept units like "Hrs", "Hrs.", "Hour", "Hours"
+      if (!(unit.startsWith("hrs") || unit.startsWith("hour"))) continue;
 
-    const usd = Number(dim?.pricePerUnit?.USD);
-    if (!Number.isFinite(usd) || usd <= 0) continue;
-    if (best === null || usd < best) best = usd;
+      const usd = Number(dim?.pricePerUnit?.USD);
+      if (!Number.isFinite(usd) || usd <= 0) continue;
+
+      if (best === null || usd < best) best = usd;
+    }
   }
+
   return best;
 }
 
@@ -70,15 +74,17 @@ function parseGiB(memStr) {
   return Number.isFinite(n) ? n : null;
 }
 
-/** Normalize OS label (Windows | RHEL | Linux) */
-function normOs(val) {
-  const s = String(val || "").toLowerCase();
-  if (s.startsWith("win")) return "Windows";
-  if (/\bred\s*hat\b|\brhel\b/.test(s)) return "RHEL";
+/** Normalize OS label for our dataset (Windows | RHEL | Linux) */
+function normOsForRow({ isLinux, isWinOK, isRhelOK, osRaw }) {
+  if (isWinOK) return "Windows";
+  if (isRhelOK) return "RHEL";
+  // Prefer explicit Linux; fallback to parsing any "linux-like" value
+  const s = String(osRaw || "").toLowerCase();
+  if (isLinux || s.includes("linux")) return "Linux";
   return "Linux";
 }
 
-/** Check for clean Windows license-included (no SQL, no BYOL) */
+/** Check for clean Windows Server license-included (no SQL, no BYOL) */
 function isWindowsLicenseIncluded(attrs) {
   const os = String(attrs?.operatingSystem || "");
   if (os !== "Windows") return false;
@@ -87,6 +93,7 @@ function isWindowsLicenseIncluded(attrs) {
   if (lm && lm !== "License Included") return false;
 
   const pre = String(attrs?.preInstalledSw || "");
+  // This is the critical part: excludes SQL Std/Ent/Web, etc.
   if (pre && pre !== "NA") return false;
 
   return true;
@@ -109,7 +116,7 @@ function deriveRegionUplifts(rows) {
 
   for (const [, arr] of byKey) {
     const linux = arr.find(x => String(x.os).toLowerCase() === "linux");
-    const rhel  = arr.find(x => String(x.os).toLowerCase() === "rhel");
+    const rhel = arr.find(x => String(x.os).toLowerCase() === "rhel");
     if (!linux || !rhel) continue;
 
     const v = Number(linux.vcpu);
@@ -138,7 +145,6 @@ function deriveRegionUplifts(rows) {
 /** Detect AWS architecture from instance type */
 function detectAwsArch(instanceType = "") {
   const t = String(instanceType).toLowerCase();
-  // Known Graviton / ARM families: a1, t4g, c*g, m*g, r*g (including future gens)
   if (/^a1\./.test(t)) return "arm";
   if (/(^|\.)(t4g|c[6-9]g|m[6-9]g|r[6-9]g|c[1-9][0-9]g|m[1-9][0-9]g|r[1-9][0-9]g)(\.|$)/.test(t)) return "arm";
   return "x86";
@@ -172,22 +178,27 @@ async function main() {
     const isLinux = (osRaw === "Linux");
     const isWinOK = isWindowsLicenseIncluded(a);
 
+    // RHEL only if plain (no SQL/SAP/HA, no BYOL)
     const isRhelOK = isPlainRhel(a, {
-      productName: p.productName,
-      skuName: a.instanceType || a.sku || "",
-      meterName: a.usagetype || ""
+      productName: p.productName || "",
+      skuName: a.sku || a.instanceType || "",
+      meterName: a.usagetype || a.operation || ""
     });
 
     if (!(isLinux || isWinOK || isRhelOK)) continue;
 
-    // CHANGE: do NOT skip Windows on Graviton here; let the UI decide later.
-    // if (isWinOK && isAwsGravitonInstance(inst)) continue;
-
+    // Price for this SKU
     const price = pickHourlyUsdMin(onDemandTerms[sku]);
     if (!(price > 0)) continue;
 
-    const vcpu = a.vcpu ? Number(a.vcpu) : null;
+    // Specs
+    const vcpu = Number(a.vcpu);
     const ram = parseGiB(a.memory);
+    if (!Number.isFinite(vcpu) || vcpu <= 0) continue;
+    if (!Number.isFinite(ram) || ram <= 0) continue;
+
+    // Windows cannot run on Graviton; keep dataset clean
+    if (isWinOK && isAwsGravitonInstance(inst)) continue;
 
     const architecture = detectAwsArch(inst);
 
@@ -197,9 +208,9 @@ async function main() {
       ram,
       pricePerHourUSD: price,
       region: REGION,
-      os: normOs(osRaw),
+      os: normOsForRow({ isLinux, isWinOK, isRhelOK, osRaw }),
       architecture,
-      source: "catalog"
+      source: isLinux ? "catalog" : isWinOK ? "catalog+win" : "catalog+rhel"
     });
   }
 
@@ -208,7 +219,7 @@ async function main() {
     const learned = deriveRegionUplifts(rows);
     if (learned.arm != null || learned.x86 != null) {
       const rateMap = {};
-      rateMap[REGION] = null;              // region entry not used when arch keys exist
+      rateMap[REGION] = null;
       if (learned.arm != null) rateMap._arm = learned.arm;
       if (learned.x86 != null) rateMap._x86 = learned.x86;
 
@@ -221,21 +232,21 @@ async function main() {
     console.warn(`[AWS] Failed to learn RHEL uplift:`, e?.message || e);
   }
 
-  // Synthesize Windows rows (if missing)
+  // Synthesize Windows rows (only if STILL missing)
   const beforeWin = rows.filter(r => r.os === "Windows").length;
   if (beforeWin === 0) {
     const added = synthesizeAwsWindowsRows(rows);
     console.log(`[AWS] Windows rows missing; synthesized ${added} rows.`);
   }
 
-  // Synthesize RHEL rows (if missing) — will use learned rates when present
+  // Synthesize RHEL rows (only if STILL missing)
   const beforeRhel = rows.filter(r => r.os === "RHEL").length;
   if (beforeRhel === 0) {
     const added = synthesizeAwsRhelRows(rows);
     console.log(`[AWS] RHEL rows missing; synthesized ${added} rows.`);
   }
 
-  // Remove SQL/HA/SAP variants defensively
+  // Remove SQL/HA/SAP variants defensively (RHEL)
   const hardened = filterOnlyPlainRhel(rows);
 
   // Deduplicate lowest price for each (instance, region, OS)
@@ -260,7 +271,6 @@ async function main() {
     os: ["Linux", "RHEL", "Windows"],
     vcpu: uniqSortedNums(cheapest.map(x => x.vcpu)),
     ram: uniqSortedNums(cheapest.map(x => x.ram))
-    // Intentionally not adding architecture axis to meta yet
   };
 
   const storage = {
