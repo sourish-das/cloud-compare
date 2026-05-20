@@ -1,18 +1,17 @@
 // scripts/lib/gcp.js
 // Helpers for GCP Retail Prices + Compute discovery (Linux-first)
 // CommonJS (Node 18+, global fetch)
-// Version: 2.6.1 (drop-in fix)
+// Version: 2.7.0
 //  - Generic machineType parsing (no hardcoded series list)
-//  - Adds HYPERMEM support
 //  - Category mapping by suffix only (standard/highcpu/highmem/ultramem/megamem/hypermem)
-//  - Fixes per-instance SKU detection so catalog pricing actually works
-//  - FIX: buildSeriesUnitRateMaps now infers series from text for CPU/RAM unit SKUs
+//  - Adds Windows + RHEL uplift discovery helpers (per vCPU-hour)
+
 'use strict';
 
 // Compute Engine service id for Catalog Retail Prices API
 const CE_SERVICE_ID = '6F81-5844-456A';
 
-// UI helpers (exported for completeness; not used for pricing logic)
+// UI allow-lists (exported for completeness; not used by pricing logic)
 const GCP_SERIES_ALLOW = {
   general: ['E2', 'N1', 'N2', 'N2D', 'N4', 'N4A', 'N4D', 'T2A', 'T2D'],
   compute: ['C2', 'C2D', 'C3', 'C3D', 'C4', 'C4D', 'C4A', 'H3', 'H4', 'H4D'],
@@ -32,7 +31,6 @@ const GCP_EXAMPLE_INSTANCES = {
 // ---------------------------
 
 // Accept ANY series token, but only known class suffixes.
-// This supports "fetch everything available" while keeping classification rules stable.
 const MT_RE_IN_TEXT = /\b([a-z0-9]+)-(standard|highcpu|highmem|ultramem|megamem|hypermem)-(\d+)\b/i;
 
 function inferMachineType(sku) {
@@ -50,14 +48,13 @@ function inferMachineType(sku) {
 }
 
 // ---------------------------
-// Time-only normalization to $/hour
+// Time normalization to $/hour
 // ---------------------------
 function extractHourlyPrice(pricingInfo) {
   for (const p of (pricingInfo || [])) {
     const pe = p && p.pricingExpression;
     if (!pe) continue;
 
-    // Choose tier with startUsageAmount = 0 if present
     let tr = null;
     if (Array.isArray(pe.tieredRates) && pe.tieredRates.length) {
       tr = pe.tieredRates.find(t => Number(t.startUsageAmount || 0) === 0) || pe.tieredRates[0];
@@ -65,20 +62,18 @@ function extractHourlyPrice(pricingInfo) {
     const rate = tr && tr.unitPrice;
     if (!rate) continue;
 
-    let money = Number(rate.units || 0) + Number(rate.nanos || 0) / 1e9;
+    const money = Number(rate.units || 0) + Number(rate.nanos || 0) / 1e9;
     if (!(money > 0)) continue;
 
     const usage = String(pe.usageUnit || '').toLowerCase();
     const base  = String(pe.baseUnit  || '').toLowerCase();
     const k     = Number(pe.baseUnitConversionFactor || 1);
 
-    // Convert to hourly
     if (usage === 'h' || usage === 'hour' || usage === 'hours') return money;
     if (usage === 's' || usage === 'sec' || usage === 'second' || usage === 'seconds') return money * 3600;
     if (usage === 'min' || usage === 'minute' || usage === 'minutes') return money * 60;
-    if (base === 's' || base === 'sec' || base === 'second' || base === 'seconds') return money * (k > 0 ? k : 3600);
+    if (base  === 's' || base  === 'sec' || base  === 'second' || base  === 'seconds') return money * (k > 0 ? k : 3600);
 
-    // Fallback: assume hourly already
     return money;
   }
   return null;
@@ -99,7 +94,7 @@ function deriveVcpuRamFromType(mt) {
   const vcpu   = Number(m[3]);
   if (!vcpu) return { vcpu: undefined, ram: undefined };
 
-  // For M*/X* families leave RAM undefined; discovery will provide exact RAM if available.
+  // For M*/X* families leave RAM undefined; discovery provides exact RAM.
   if (series.startsWith('m') || series.startsWith('x')) return { vcpu, ram: undefined };
 
   if (cls === 'standard') return { vcpu, ram: vcpu * 4 };
@@ -123,25 +118,21 @@ function regionMatches(serviceRegions, region) {
 }
 
 // ---------------------------
-// Detect true per-instance SKUs (IMPROVED)
+// Detect per-instance SKUs (kept, even if some feeds have mtAttrCount=0)
 // ---------------------------
 function isPerInstanceSku(sku, machineType) {
   if (!machineType || /^custom-/i.test(machineType)) return false;
 
-  // exclude unit-rate rows
   const rg = sku?.category?.resourceGroup;
   if (rg === 'CPU' || rg === 'RAM' || rg === 'GPU') return false;
 
-  // strongest match: attributes.machineType
   const mtAttr = sku?.attributes?.machineType;
   if (mtAttr && String(mtAttr).toLowerCase() === String(machineType).toLowerCase()) return true;
 
-  // fallback: description contains full machine type
   const txt = String(sku?.description || sku?.displayName || '').toLowerCase();
   const mt = String(machineType).toLowerCase();
   if (txt.includes(mt)) return true;
 
-  // fallback: series + class + size signature
   const parts = mt.split('-');
   if (parts.length >= 3) {
     const [series, cls, size] = parts;
@@ -154,7 +145,6 @@ function isPerInstanceSku(sku, machineType) {
       if (cls === 'hypermem' && txt.includes('hypermem')) return true;
     }
   }
-
   return false;
 }
 
@@ -172,10 +162,7 @@ function firstPricingExpressionWithRate(sku) {
 }
 
 // ---------------------------
-// Per-1-unit unit-rate extraction (OnDemand + Linux-only + hourly + CPU/RAM only)
-// Normalizes any block-priced SKU to per 1 vCPU or per 1 GB.
-// FIX: CPU/RAM unit SKUs often do not include full machineType in text.
-//      We now infer the SERIES token from description/displayName/summary.
+// Unit-rate extraction: per 1 vCPU-hour and per 1 GiB-hour (Linux base)
 // ---------------------------
 function buildSeriesUnitRateMaps(allSkus, region) {
   const out = {};
@@ -226,7 +213,7 @@ function buildSeriesUnitRateMaps(allSkus, region) {
   const detectUnitsPerPrice = (sku, expr, rg) => {
     const txt = `${sku.description || ''} ${sku.displayName || ''} ${sku.summary || ''}`.toLowerCase();
 
-    // explicit "per 10 vcpu" etc. first
+    // explicit "per 10 vcpu" etc.
     const m = txt.match(/\b(?:per|for)(?:\s*block\s*of)?\s*-?\s*(\d+)\s*(vcpu|core|cores|gb|gib|ram|memory)\b/);
     if (m) {
       const n = Number(m[1]);
@@ -236,10 +223,12 @@ function buildSeriesUnitRateMaps(allSkus, region) {
       }
     }
 
-    // displayQuantity only if text supports it
+    // displayQuantity only if supported by text (prevents 10× underpricing)
     const dq = Number(expr?.displayQuantity || 0);
     if (dq > 1) {
-      const ok = txt.includes(`per ${dq}`) || new RegExp(`\\b${dq}\\s*(vcpu|core|cores|gb|gib|ram|memory)\\b`).test(txt);
+      const ok =
+        txt.includes(`per ${dq}`) ||
+        new RegExp(`\\b${dq}\\s*(vcpu|core|cores|gb|gib|ram|memory)\\b`).test(txt);
       if (ok) return dq;
     }
 
@@ -272,15 +261,14 @@ function buildSeriesUnitRateMaps(allSkus, region) {
       if (mt) series = mt.split('-')[0].toLowerCase();
       if (!series) series = inferSeriesFromText(blob);
 
-      // NEW: fallback for short series tokens that generic regex may miss
+      // Short-token fallback (fixes missing n1/c2/m1/m2)
       if (!series) {
-      const m = blob.match(/\b(n1|c2|m1|m2)\b/i);
-      if (m) series = m[1].toLowerCase();
+        const m2 = blob.match(/\b(n1|c2|m1|m2)\b/i);
+        if (m2) series = m2[1].toLowerCase();
       }
 
-if (!series) continue;
+      if (!series) continue;
 
-      // Price/hr
       const { hr, expr } = hourlyFromExpr(sku.pricingInfo);
       if (!(hr > 0)) continue;
 
@@ -292,7 +280,7 @@ if (!series) continue;
       if (rg === 'CPU') buckets[series].cpu.push(perUnit);
       else buckets[series].ram.push(perUnit);
     } catch {
-      // ignore bad sku
+      // ignore bad SKU
     }
   }
 
@@ -306,7 +294,7 @@ if (!series) continue;
 }
 
 // ---------------------------
-// Classification helpers (by suffix only, as requested)
+// Classification helpers (suffix only)
 // ---------------------------
 function classifyGcpInstance(instance) {
   if (!instance) return null;
@@ -411,9 +399,11 @@ async function listZoneMachineTypes(projectId, zone, accessToken) {
 }
 
 // ---------------------------
-// Windows uplift discovery (compat; not used in Linux baseline)
+// Windows uplift discovery (per vCPU-hour)
 // ---------------------------
-const WINDOWS_STANDARD_FALLBACK_RATE = Number(process.env.GCP_WINDOWS_RATE_PER_VCPU || 0) || 0.046;
+// Your examples show ~0.048 $/vCPU-hr for Windows; keep env override.
+const WINDOWS_STANDARD_FALLBACK_RATE =
+  Number(process.env.GCP_WINDOWS_RATE_PER_VCPU || 0) || 0.048;
 
 function buildWindowsCoreRate(allSkus, region) {
   const inRegion = (sku) => {
@@ -456,6 +446,56 @@ function buildWindowsCoreRate(allSkus, region) {
 }
 
 // ---------------------------
+// RHEL uplift discovery (per vCPU-hour) (NEW)
+// ---------------------------
+// Your examples show ~0.026 $/vCPU-hr for RHEL; keep env override.
+const RHEL_STANDARD_FALLBACK_RATE =
+  Number(process.env.GCP_RHEL_RATE_PER_VCPU || 0) || 0.026;
+
+function buildRhelCoreRate(allSkus, region) {
+  const inRegion = (sku) => {
+    const cat = (sku && sku.category) || {};
+    if (cat.resourceFamily !== 'Compute') return false;
+    if (cat.usageType && !/OnDemand/i.test(cat.usageType)) return false;
+    return regionMatches(sku.serviceRegions, region);
+  };
+
+  const BAD = /(byol|gpu|local\s*ssd|commitment|spot|preemptible|sles|suse|sql|windows)/i;
+  const candidates = [];
+
+  // Prefer explicit license/core/vcpu SKUs
+  for (const sku of (allSkus || [])) {
+    if (!inRegion(sku)) continue;
+    const name = String((sku.description || sku.displayName) || '').toLowerCase();
+    if (!/(rhel|red hat)/.test(name)) continue;
+    if (!/(license|licensing|core|vcpu)/.test(name)) continue;
+    if (BAD.test(name)) continue;
+
+    const price = extractHourlyPrice(sku.pricingInfo);
+    if (price && price > 0) candidates.push({ price, name });
+  }
+
+  // Looser fallback (still filtered)
+  if (!candidates.length) {
+    for (const sku of (allSkus || [])) {
+      if (!inRegion(sku)) continue;
+      const name = String((sku.description || sku.displayName) || '').toLowerCase();
+      if (!/(rhel|red hat)/.test(name) || BAD.test(name)) continue;
+
+      const price = extractHourlyPrice(sku.pricingInfo);
+      if (price && price > 0) candidates.push({ price, name });
+    }
+  }
+
+  if (candidates.length > 0) {
+    candidates.sort((a, b) => a.price - b.price);
+    return candidates[0].price;
+  }
+
+  return RHEL_STANDARD_FALLBACK_RATE;
+}
+
+// ---------------------------
 // Arch helpers
 // ---------------------------
 function isGcpArmSeries(series) {
@@ -464,7 +504,7 @@ function isGcpArmSeries(series) {
 
 function isGcpArmMachineType(machineType) {
   if (!machineType) return false;
-  const m = String(machineType).toLowerCase().match(/^([a-z0-9]+)-[a-z]+[a-z0-9]*-\d+$/);
+  const m = String(machineType).toLowerCase().match(/^([a-z0-9]+)-/);
   if (!m) return false;
   return isGcpArmSeries(m[1]);
 }
@@ -483,13 +523,16 @@ module.exports = {
   deriveVcpuRamFromType,
   regionMatches,
   isPerInstanceSku,
+  firstPricingExpressionWithRate,
+  buildSeriesUnitRateMaps,
+  computeBaseHourlyFromUnitMaps,
   getAccessTokenFromADC,
   listRegionZones,
   listZoneMachineTypes,
-  buildSeriesUnitRateMaps,
-  computeBaseHourlyFromUnitMaps,
   buildWindowsCoreRate,
   WINDOWS_STANDARD_FALLBACK_RATE,
+  buildRhelCoreRate,
+  RHEL_STANDARD_FALLBACK_RATE,
   isGcpArmSeries,
   isGcpArmMachineType
 };
