@@ -44,17 +44,14 @@ async function fetchAwsIndex() {
  */
 function pickHourlyUsdMin(onDemandTermsForSku) {
   if (!onDemandTermsForSku) return null;
-
   let best = null;
 
-  // AWS can have multiple term keys per SKU; scan all to be safe
+  // Scan all term keys & dimensions (some SKUs have >1)
   for (const termKey of Object.keys(onDemandTermsForSku)) {
     const dims = onDemandTermsForSku?.[termKey]?.priceDimensions || {};
     for (const dimKey of Object.keys(dims)) {
       const dim = dims[dimKey];
       const unit = String(dim?.unit || "").toLowerCase();
-
-      // Accept units like "Hrs", "Hrs.", "Hour", "Hours"
       if (!(unit.startsWith("hrs") || unit.startsWith("hour"))) continue;
 
       const usd = Number(dim?.pricePerUnit?.USD);
@@ -74,72 +71,59 @@ function parseGiB(memStr) {
   return Number.isFinite(n) ? n : null;
 }
 
-/** Normalize OS label for our dataset (Windows | RHEL | Linux) */
-function normOsForRow({ isLinux, isWinOK, isRhelOK, osRaw }) {
-  if (isWinOK) return "Windows";
-  if (isRhelOK) return "RHEL";
-  // Prefer explicit Linux; fallback to parsing any "linux-like" value
-  const s = String(osRaw || "").toLowerCase();
-  if (isLinux || s.includes("linux")) return "Linux";
-  return "Linux";
-}
-
-/** Check for clean Windows Server license-included (no SQL, no BYOL) */
-function isWindowsLicenseIncluded(attrs) {
+/** Windows Server only: license included, no SQL, no BYOL */
+function isWindowsServerOnly(attrs) {
   const os = String(attrs?.operatingSystem || "");
   if (os !== "Windows") return false;
 
-  const lm = String(attrs?.licenseModel || "");
-  if (lm && lm !== "License Included") return false;
-
-  const pre = String(attrs?.preInstalledSw || "");
-  // This is the critical part: excludes SQL Std/Ent/Web, etc.
+  // preInstalledSw must be NA to exclude SQL Std/Ent/Web
+  const pre = String(attrs?.preInstalledSw || "").trim();
   if (pre && pre !== "NA") return false;
+
+  // licenseModel varies in AWS feed; accept common “license included” equivalents
+  const lm = String(attrs?.licenseModel || "").trim();
+  if (lm && !["License Included", "No License required", "NA"].includes(lm)) return false;
 
   return true;
 }
 
-/**
- * Learn median per‑vCPU RHEL uplift from rows that have BOTH Linux and RHEL
- * for the same (instance, region). Separate buckets for ARM and x86.
- */
-function deriveRegionUplifts(rows) {
-  const pairs = { arm: [], x86: [] };
+/** Plain RHEL: exclude SQL/SAP/HA/BYOL, accept licenseModel variants */
+function isPlainRhelLocal(attrs) {
+  const os = String(attrs?.operatingSystem || "");
+  if (!(os === "RHEL" || os === "Red Hat Enterprise Linux")) return false;
 
-  // Group by (instance, region)
-  const byKey = new Map();
-  for (const r of rows) {
-    const k = `${r.instance}||${r.region}`;
-    if (!byKey.has(k)) byKey.set(k, []);
-    byKey.get(k).push(r);
-  }
+  const pre = String(attrs?.preInstalledSw || "").trim();
+  if (pre && pre !== "NA") return false;
 
-  for (const [, arr] of byKey) {
-    const linux = arr.find(x => String(x.os).toLowerCase() === "linux");
-    const rhel = arr.find(x => String(x.os).toLowerCase() === "rhel");
-    if (!linux || !rhel) continue;
+  const lm = String(attrs?.licenseModel || "").trim();
+  // RHEL is typically "License Included", but allow empty/NA/No License required
+  if (lm && !["License Included", "No License required", "NA"].includes(lm)) return false;
 
-    const v = Number(linux.vcpu);
-    const pL = Number(linux.pricePerHourUSD);
-    const pR = Number(rhel.pricePerHourUSD);
-    if (!Number.isFinite(v) || v <= 0 || !Number.isFinite(pL) || !Number.isFinite(pR) || pR <= pL) continue;
+  const blob = [
+    attrs?.usagetype,
+    attrs?.operation,
+    attrs?.softwareType,
+    attrs?.productDescription
+  ].filter(Boolean).join(" ").toLowerCase();
 
-    const inst = String(linux.instance || "").toLowerCase();
-    const isArm = /^a1\./.test(inst) || /(^|\.)(c[6-9]g|m[6-9]g|r[6-9]g|t4g)(\.|$)/.test(inst);
-    const bucket = isArm ? "arm" : "x86";
+  // defensive keyword blocks
+  if (blob.includes("sql")) return false;
+  if (blob.includes("sap")) return false;
+  if (blob.includes("ha")) return false;
 
-    const uplift = (pR - pL) / v; // $/vCPU/hr
-    if (uplift > 0 && uplift < 0.1) pairs[bucket].push(uplift);
-  }
+  return true;
+}
 
-  const median = (arr) => {
-    if (!arr.length) return null;
-    const s = arr.slice().sort((a, b) => a - b);
-    const i = Math.floor(s.length / 2);
-    return (s.length % 2) ? s[i] : (s[i - 1] + s[i]) / 2;
-  };
-
-  return { arm: median(pairs.arm), x86: median(pairs.x86) };
+/** Normalize OS label for output */
+function normOsOut(isLinux, isWin, isRhel, osRaw) {
+  if (isWin) return "Windows";
+  if (isRhel) return "RHEL";
+  if (isLinux) return "Linux";
+  // fallback
+  const s = String(osRaw || "").toLowerCase();
+  if (s.includes("rhel") || s.includes("red hat")) return "RHEL";
+  if (s.includes("win")) return "Windows";
+  return "Linux";
 }
 
 /** Detect AWS architecture from instance type */
@@ -158,6 +142,9 @@ async function main() {
 
   const rows = [];
 
+  // small debug counters (helps verify we are collecting Windows/RHEL now)
+  let seenLinux = 0, seenWin = 0, seenRhel = 0;
+
   for (const sku in products) {
     const p = products[sku];
     if (!p || p.productFamily !== "Compute Instance") continue;
@@ -173,23 +160,18 @@ async function main() {
     if (a.tenancy !== "Shared") continue;
     if (!["Used", "Normal"].includes(a.capacitystatus)) continue;
 
-    // OS classification
     const osRaw = String(a.operatingSystem || "");
     const isLinux = (osRaw === "Linux");
-    const isWinOK = isWindowsLicenseIncluded(a);
+    const isWinOK = isWindowsServerOnly(a);
 
-    // RHEL only if plain (no SQL/SAP/HA, no BYOL)
+    // Prefer shared lib check, but also allow local fallback to avoid “0 RHEL rows”
     const isRhelOK = isPlainRhel(a, {
       productName: p.productName || "",
       skuName: a.sku || a.instanceType || "",
       meterName: a.usagetype || a.operation || ""
-    });
+    }) || isPlainRhelLocal(a);
 
     if (!(isLinux || isWinOK || isRhelOK)) continue;
-
-    // Price for this SKU
-    const price = pickHourlyUsdMin(onDemandTerms[sku]);
-    if (!(price > 0)) continue;
 
     // Specs
     const vcpu = Number(a.vcpu);
@@ -200,7 +182,16 @@ async function main() {
     // Windows cannot run on Graviton; keep dataset clean
     if (isWinOK && isAwsGravitonInstance(inst)) continue;
 
+    // Price for this SKU
+    const price = pickHourlyUsdMin(onDemandTerms[sku]);
+    if (!(price > 0)) continue;
+
     const architecture = detectAwsArch(inst);
+
+    const osOut = normOsOut(isLinux, isWinOK, isRhelOK, osRaw);
+    if (osOut === "Linux") seenLinux++;
+    else if (osOut === "Windows") seenWin++;
+    else if (osOut === "RHEL") seenRhel++;
 
     rows.push({
       instance: inst,
@@ -208,29 +199,13 @@ async function main() {
       ram,
       pricePerHourUSD: price,
       region: REGION,
-      os: normOsForRow({ isLinux, isWinOK, isRhelOK, osRaw }),
+      os: osOut,
       architecture,
-      source: isLinux ? "catalog" : isWinOK ? "catalog+win" : "catalog+rhel"
+      source: osOut === "Linux" ? "catalog" : osOut === "Windows" ? "catalog+win" : "catalog+rhel"
     });
   }
 
-  // --- Learn region uplift(s) from any Linux+RHEL pairs (ARM / x86)
-  try {
-    const learned = deriveRegionUplifts(rows);
-    if (learned.arm != null || learned.x86 != null) {
-      const rateMap = {};
-      rateMap[REGION] = null;
-      if (learned.arm != null) rateMap._arm = learned.arm;
-      if (learned.x86 != null) rateMap._x86 = learned.x86;
-
-      process.env.AWS_RHEL_RATE_PER_VCPU_MAP = JSON.stringify(rateMap);
-      console.log(`[AWS] Learned RHEL uplift(s):`, learned);
-    } else {
-      console.log(`[AWS] No Linux+RHEL pairs found to learn uplift this run.`);
-    }
-  } catch (e) {
-    console.warn(`[AWS] Failed to learn RHEL uplift:`, e?.message || e);
-  }
+  console.log(`[AWS] pre-synth counts: Linux=${seenLinux}, Windows=${seenWin}, RHEL=${seenRhel}`);
 
   // Synthesize Windows rows (only if STILL missing)
   const beforeWin = rows.filter(r => r.os === "Windows").length;
