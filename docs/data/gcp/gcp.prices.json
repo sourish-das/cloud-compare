@@ -5140,6 +5140,42 @@
       "pricePerHourUSD": 1.641814
     },
     {
+      "instance": "m4-hypermem-2",
+      "category": "memory",
+      "vcpu": 2,
+      "ram": 31,
+      "region": "us-east1",
+      "series": "m4",
+      "arch": "x86",
+      "source": "composed",
+      "os": "Linux",
+      "pricePerHourUSD": 0.178227
+    },
+    {
+      "instance": "m4-hypermem-2",
+      "category": "memory",
+      "vcpu": 2,
+      "ram": 31,
+      "region": "us-east1",
+      "series": "m4",
+      "arch": "x86",
+      "source": "derived",
+      "os": "Windows",
+      "pricePerHourUSD": 0.274227
+    },
+    {
+      "instance": "m4-hypermem-2",
+      "category": "memory",
+      "vcpu": 2,
+      "ram": 31,
+      "region": "us-east1",
+      "series": "m4",
+      "arch": "x86",
+      "source": "derived",
+      "os": "RHEL",
+      "pricePerHourUSD": 0.205227
+    },
+    {
       "instance": "m4-hypermem-32",
       "category": "memory",
       "vcpu": 32,
@@ -5176,6 +5212,42 @@
       "pricePerHourUSD": 3.283629
     },
     {
+      "instance": "m4-hypermem-4",
+      "category": "memory",
+      "vcpu": 4,
+      "ram": 62,
+      "region": "us-east1",
+      "series": "m4",
+      "arch": "x86",
+      "source": "composed",
+      "os": "Linux",
+      "pricePerHourUSD": 0.356454
+    },
+    {
+      "instance": "m4-hypermem-4",
+      "category": "memory",
+      "vcpu": 4,
+      "ram": 62,
+      "region": "us-east1",
+      "series": "m4",
+      "arch": "x86",
+      "source": "derived",
+      "os": "Windows",
+      "pricePerHourUSD": 0.548454
+    },
+    {
+      "instance": "m4-hypermem-4",
+      "category": "memory",
+      "vcpu": 4,
+      "ram": 62,
+      "region": "us-east1",
+      "series": "m4",
+      "arch": "x86",
+      "source": "derived",
+      "os": "RHEL",
+      "pricePerHourUSD": 0.410454
+    },
+    {
       "instance": "m4-hypermem-64",
       "category": "memory",
       "vcpu": 64,
@@ -5210,6 +5282,42 @@
       "source": "derived",
       "os": "RHEL",
       "pricePerHourUSD": 6.567258
+    },
+    {
+      "instance": "m4-hypermem-8",
+      "category": "memory",
+      "vcpu": 8,
+      "ram": 124,
+      "region": "us-east1",
+      "series": "m4",
+      "arch": "x86",
+      "source": "composed",
+      "os": "Linux",
+      "pricePerHourUSD": 0.712907
+    },
+    {
+      "instance": "m4-hypermem-8",
+      "category": "memory",
+      "vcpu": 8,
+      "ram": 124,
+      "region": "us-east1",
+      "series": "m4",
+      "arch": "x86",
+      "source": "derived",
+      "os": "Windows",
+      "pricePerHourUSD": 1.096907
+    },
+    {
+      "instance": "m4-hypermem-8",
+      "category": "memory",
+      "vcpu": 8,
+      "ram": 124,
+      "region": "us-east1",
+      "series": "m4",
+      "arch": "x86",
+      "source": "derived",
+      "os": "RHEL",
+      "pricePerHourUSD": 0.820907
     },
     {
       "instance": "m4-megamem-112",
@@ -5428,6 +5536,42 @@
       "pricePerHourUSD": 2.782466
     },
     {
+      "instance": "m4n-hypermem-2",
+      "category": "memory",
+      "vcpu": 2,
+      "ram": 31,
+      "region": "us-east1",
+      "series": "m4n",
+      "arch": "x86",
+      "source": "composed",
+      "os": "Linux",
+      "pricePerHourUSD": 0.320808
+    },
+    {
+      "instance": "m4n-hypermem-2",
+      "category": "memory",
+      "vcpu": 2,
+      "ram": 31,
+      "region": "us-east1",
+      "series": "m4n",
+      "arch": "x86",
+      "source": "derived",
+      "os": "Windows",
+      "pricePerHourUSD": 0.416808
+    },
+    {
+      "instance": "m4n-hypermem-2",
+      "category": "memory",
+      "vcpu": 2,
+      "ram": 31,
+      "region": "us-east1",
+      "series": "m4n",
+      "arch": "x86",
+      "source": "derived",
+      "os": "RHEL",
+      "pricePerHourUSD": 0.347808
+    },
+    {
       "instance": "m4n-hypermem-32",
       "category": "memory",
       "vcpu": 32,
@@ -5464,6 +5608,42 @@
       "pricePerHourUSD": 5.564931
     },
     {
+      "instance": "m4n-hypermem-4",
+      "category": "memory",
+      "vcpu": 4,
+      "ram": 62,
+      "region": "us-east1",
+      "series": "m4n",
+      "arch": "x86",
+      "source": "composed",
+      "os": "Linux",
+      "pricePerHourUSD": 0.641616
+    },
+    {
+      "instance": "m4n-hypermem-4",
+      "category": "memory",
+      "vcpu": 4,
+      "ram": 62,
+      "region": "us-east1",
+      "series": "m4n",
+      "arch": "x86",
+      "source": "derived",
+      "os": "Windows",
+      "pricePerHourUSD": 0.833616
+    },
+    {
+      "instance": "m4n-hypermem-4",
+      "category": "memory",
+      "vcpu": 4,
+      "ram": 62,
+      "region": "us-east1",
+      "series": "m4n",
+      "arch": "x86",
+      "source": "derived",
+      "os": "RHEL",
+      "pricePerHourUSD": 0.695616
+    },
+    {
       "instance": "m4n-hypermem-64",
       "category": "memory",
       "vcpu": 64,
@@ -5498,6 +5678,42 @@
       "source": "derived",
       "os": "RHEL",
       "pricePerHourUSD": 11.129862
+    },
+    {
+      "instance": "m4n-hypermem-8",
+      "category": "memory",
+      "vcpu": 8,
+      "ram": 124,
+      "region": "us-east1",
+      "series": "m4n",
+      "arch": "x86",
+      "source": "composed",
+      "os": "Linux",
+      "pricePerHourUSD": 1.283233
+    },
+    {
+      "instance": "m4n-hypermem-8",
+      "category": "memory",
+      "vcpu": 8,
+      "ram": 124,
+      "region": "us-east1",
+      "series": "m4n",
+      "arch": "x86",
+      "source": "derived",
+      "os": "Windows",
+      "pricePerHourUSD": 1.667233
+    },
+    {
+      "instance": "m4n-hypermem-8",
+      "category": "memory",
+      "vcpu": 8,
+      "ram": 124,
+      "region": "us-east1",
+      "series": "m4n",
+      "arch": "x86",
+      "source": "derived",
+      "os": "RHEL",
+      "pricePerHourUSD": 1.391233
     },
     {
       "instance": "m4n-megamem-112",
